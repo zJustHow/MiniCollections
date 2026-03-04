@@ -83,14 +83,13 @@ public class GroupController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{groupId}/objects/search")
-    public ResponseEntity<List<UserObjectDto>> searchUserObjects(
+    @GetMapping("/{groupId}/objects")
+    public ResponseEntity<List<UserObjectDto>> getUserObjects(
             @AuthenticationPrincipal User user,
-            @PathVariable Long groupId,
-            @RequestParam String keyword
+            @PathVariable Long groupId
     ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        return ResponseEntity.ok(groupService.searchUserObjects(userEntity.id(), groupId, keyword));
+        return ResponseEntity.ok(groupService.getUserObjects(userEntity.id(), groupId));
     }
 
     @PostMapping("/{groupId}/objects")
@@ -111,6 +110,27 @@ public class GroupController {
                 userObjectBody.otherNotes()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(userObjectDto);
+    }
+
+    @PutMapping("/{groupId}/objects/{userObjectId}")
+    public ResponseEntity<UserObjectDto> updateUserObject(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long groupId,
+            @PathVariable Long userObjectId,
+            @RequestBody UserObjectBody userObjectBody
+    ) {
+        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
+        UserObjectDto dto = groupService.updateUserObject(
+                userEntity.id(),
+                userObjectId,
+                userObjectBody.brandObjectId(),
+                userObjectBody.name(),
+                userObjectBody.imageUrl(),
+                userObjectBody.purchaseDate(),
+                userObjectBody.purchasePrice(),
+                userObjectBody.otherNotes()
+        );
+        return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("/{groupId}/objects/{userObjectId}")

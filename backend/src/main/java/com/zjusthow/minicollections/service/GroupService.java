@@ -16,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class GroupService {
@@ -36,21 +34,10 @@ public class GroupService {
             key = "'groups_' + #userId"
     )
     public List<GroupDto> getGroups(Long userId) {
-        List<GroupEntity> groupEntities = groupRepository.findByUserId(userId)
-                .orElseThrow(() -> new GroupNotFoundException());
-        List<UserObjectEntity> userObjectEntities = userObjectRepository.findByUserId(userId)
-                .orElseThrow(() -> new UserObjectNotFoundException());
-        Map<Long, List<UserObjectEntity>> userObjectEntitiesMap = userObjectEntities.stream()
-                .collect(Collectors.groupingBy(UserObjectEntity::groupId));
-
-        return groupEntities.stream()
-                .map(groupEntity -> {
-                    List<UserObjectEntity> userObjectEntitiesList = userObjectEntitiesMap.getOrDefault(groupEntity.id(), Collections.emptyList());
-                    List<UserObjectDto> UserObjectDtos = userObjectEntitiesList.stream()
-                            .map(UserObjectDto::new)
-                            .toList();
-                    return new GroupDto(groupEntity, UserObjectDtos);
-                })
+        return groupRepository.findByUserId(userId)
+                .orElseThrow(() -> new GroupNotFoundException())
+                .stream()
+                .map(GroupDto::new)
                 .toList();
     }
 
@@ -96,7 +83,7 @@ public class GroupService {
 
         GroupEntity groupEntity = new GroupEntity(null, userId, name, imageUrl);
         GroupEntity savedGroupEntity = groupRepository.save(groupEntity);
-        return new GroupDto(savedGroupEntity, Collections.emptyList());
+        return new GroupDto(savedGroupEntity);
     }
 
     @CacheEvict(
@@ -116,17 +103,9 @@ public class GroupService {
             throw new NoPermissionException("No permission to update this group");
         }
 
-        GroupEntity updatedGroupEntity = new GroupEntity(groupId, userId, groupEntity.name(), imageUrl);
-
+        GroupEntity updatedGroupEntity = new GroupEntity(groupId, userId, name, imageUrl);
         GroupEntity savedGroupEntity = groupRepository.save(updatedGroupEntity);
-
-        List<UserObjectDto> userObjectDtos = userObjectRepository.findByGroupId(groupId)
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(UserObjectDto::new)
-                .collect(Collectors.toList());
-
-        return new GroupDto(groupId, savedGroupEntity.name(), savedGroupEntity.imageUrl(), userObjectDtos);
+        return new GroupDto(savedGroupEntity);
     }
 
     @CacheEvict(
@@ -147,27 +126,17 @@ public class GroupService {
 
     @Cacheable(
             value = "user_objects",
-            key = "'search' + #userId + '_' + #groupId + '_' + #keyword"
+            key = "'group_' + #userId + '_' + #groupId"
     )
-    public List<UserObjectDto> searchUserObjects(Long userId, Long groupId, String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-
+    public List<UserObjectDto> getUserObjects(Long userId, Long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException());
-
         if (!groupEntity.userId().equals(userId)) {
-            throw new NoPermissionException("No permission to delete this group");
+            throw new NoPermissionException("No permission to view this group");
         }
-
-        List<UserObjectEntity> userObjectEntities = userObjectRepository.findByGroupId(groupId)
-                .orElse(Collections.emptyList());
-
-        String lowerCaseKeyword = keyword.toLowerCase();
-
-        return userObjectEntities.stream()
-                .filter(userObjectEntity -> userObjectEntity.name().toLowerCase().contains(lowerCaseKeyword))
+        return userObjectRepository.findByGroupId(groupId)
+                .orElse(Collections.emptyList())
+                .stream()
                 .map(UserObjectDto::new)
                 .toList();
     }
@@ -211,6 +180,44 @@ public class GroupService {
         );
         UserObjectEntity savedUserObjectEntity = userObjectRepository.save(userObjectEntity);
         return new UserObjectDto(savedUserObjectEntity);
+    }
+
+    @CacheEvict(
+            value = {"groups", "user_objects"},
+            allEntries = true
+    )
+    @Transactional
+    public UserObjectDto updateUserObject(
+            Long userId,
+            Long userObjectId,
+            Long brandObjectId,
+            String name,
+            String imageUrl,
+            java.time.LocalDate purchaseDate,
+            java.math.BigDecimal purchasePrice,
+            String otherNotes
+    ) {
+        UserObjectEntity existing = userObjectRepository.findById(userObjectId)
+                .orElseThrow(() -> new UserObjectNotFoundException());
+        if (!existing.userId().equals(userId)) {
+            throw new NoPermissionException("No permission to update this user object");
+        }
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        UserObjectEntity updated = new UserObjectEntity(
+                userObjectId,
+                existing.userId(),
+                existing.groupId(),
+                brandObjectId != null ? brandObjectId : existing.brandObjectId(),
+                name,
+                imageUrl,
+                purchaseDate,
+                purchasePrice,
+                otherNotes
+        );
+        UserObjectEntity saved = userObjectRepository.save(updated);
+        return new UserObjectDto(saved);
     }
 
     @CacheEvict(

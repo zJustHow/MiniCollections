@@ -12,8 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class BrandService {
@@ -32,19 +30,8 @@ public class BrandService {
             key = "'all'"
     )
     public List<BrandDto> getBrands() {
-        List<BrandEntity> brandEntities = brandRepository.findAll();
-        List<BrandObjectEntity> brandObjectEntities = brandObjectRepository.findAll();
-        Map<Long, List<BrandObjectEntity>> brandObjectEntitiesMap = brandObjectEntities.stream()
-                .collect(Collectors.groupingBy(BrandObjectEntity::brandId));
-
-        return brandEntities.stream()
-                .map(brandEntity -> {
-                    List<BrandObjectEntity> brandObjectEntitiesList = brandObjectEntitiesMap.getOrDefault(brandEntity.id(), Collections.emptyList());
-                    List<BrandObjectDto> brandObjectDtos = brandObjectEntitiesList.stream()
-                            .map(BrandObjectDto::new)
-                            .toList();
-                    return new BrandDto(brandEntity, brandObjectDtos);
-                })
+        return brandRepository.findAll().stream()
+                .map(BrandDto::new)
                 .toList();
     }
 
@@ -98,5 +85,18 @@ public class BrandService {
         BrandObjectEntity entity = brandObjectRepository.findById(id)
                 .orElseThrow(BrandNotFoundException::new);
         return new BrandObjectDto(entity);
+    }
+
+    @Cacheable(
+            value = "brandObjects",
+            key = "'search_' + #keyword"
+    )
+    public List<BrandObjectDto> searchBrandObjects(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return brandObjectRepository.searchByName(keyword.trim()).stream()
+                .map(BrandObjectDto::new)
+                .toList();
     }
 }
