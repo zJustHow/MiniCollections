@@ -11,13 +11,18 @@ const handleResponse = async (response) => {
 };
 
 export const login = async (credentials) => {
-  const loginUrl = `/login?username=${credentials.username}&password=${credentials.password}`;
-  const response = await fetch(loginUrl, {
+  // Spring Security form login expects application/x-www-form-urlencoded
+  const body = new URLSearchParams({
+    username: credentials.username,
+    password: credentials.password,
+  }).toString();
+  const response = await fetch("/login", {
     method: "POST",
+    credentials: "include",
     headers: {
-      "Content-Type": "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: JSON.stringify(credentials),
+    body,
   });
 
   return handleResponse(response);
@@ -26,6 +31,7 @@ export const login = async (credentials) => {
 export const signup = async (data) => {
   const response = await fetch("/signup", {
     method: "POST",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
@@ -36,12 +42,15 @@ export const signup = async (data) => {
 };
 
 export const getBrands = async () => {
-  const response = await fetch("/brands");
+  const response = await fetch("/brands", { credentials: "include" });
   return handleResponse(response);
 };
 
 export const searchBrands = async (keyword) => {
-  const response = await fetch(`/brands/search?keyword=${encodeURIComponent(keyword)}`);
+  const response = await fetch(
+    `/brands/search?keyword=${encodeURIComponent(keyword)}`,
+    { credentials: "include" }
+  );
   return handleResponse(response);
 };
 
@@ -95,23 +104,30 @@ export const deleteGroup = async (groupId) => {
 };
 
 export const getBrandByBrandId = async (brandId) => {
-  const response = await fetch(`/brands/${brandId}`);
+  const response = await fetch(`/brands/${brandId}`, {
+    credentials: "include",
+  });
   return handleResponse(response);
 };
 
 export const getBrandObjectsByBrandId = async (brandId) => {
-  const response = await fetch(`/brands/${brandId}/objects`);
+  const response = await fetch(`/brands/${brandId}/objects`, {
+    credentials: "include",
+  });
   return handleResponse(response);
 };
 
 export const getBrandObjectById = async (id) => {
-  const response = await fetch(`/brand_objects/${id}`);
+  const response = await fetch(`/brand_objects/${id}`, {
+    credentials: "include",
+  });
   return handleResponse(response);
 };
 
 export const searchBrandObjects = async (keyword) => {
   const response = await fetch(
-    `/brand_objects/search?keyword=${encodeURIComponent(keyword)}`
+    `/brand_objects/search?keyword=${encodeURIComponent(keyword)}`,
+    { credentials: "include" }
   );
   return handleResponse(response);
 };

@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface UserRepository extends ListCrudRepository<UserEntity, Long> {
     Optional<List<UserEntity>> findByName(String userName);
     Optional<UserEntity> findByEmail(String email);
-    boolean existsByEmail(String emal);
+    boolean existsByEmail(String email);
 
     @Modifying
     @Query("UPDATE users SET name = :name WHERE email = :email")

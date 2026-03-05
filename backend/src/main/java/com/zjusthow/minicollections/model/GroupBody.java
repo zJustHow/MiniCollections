@@ -1,7 +1,9 @@
 package com.zjusthow.minicollections.model;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record GroupBody(
-        String name,
+        @NotBlank String name,
         String imageUrl
 ) {
 }

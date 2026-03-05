@@ -23,14 +23,14 @@ public class BrandController {
         return ResponseEntity.ok(brandService.getBrands());
     }
 
-    @GetMapping("/{brandId}")
-    public ResponseEntity<BrandDto> getBrandById(@PathVariable Long brandId) {
-        return ResponseEntity.ok(brandService.getBrandById(brandId));
-    }
-
     @GetMapping("/search")
     public ResponseEntity<List<BrandDto>> searchBrands(@RequestParam String keyword) {
         return ResponseEntity.ok(brandService.searchBrands(keyword));
+    }
+
+    @GetMapping("/{brandId}")
+    public ResponseEntity<BrandDto> getBrandById(@PathVariable Long brandId) {
+        return ResponseEntity.ok(brandService.getBrandById(brandId));
     }
 
     @GetMapping("/{brandId}/objects")

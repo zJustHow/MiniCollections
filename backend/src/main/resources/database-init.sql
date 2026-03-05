@@ -65,3 +65,20 @@ CREATE TABLE authorities
     CONSTRAINT authorities_pk PRIMARY KEY (email, authority),
     CONSTRAINT fk_customer FOREIGN KEY (email) REFERENCES users (email) ON DELETE CASCADE
 );
+
+-- MINI GT brand and products (images stored under backend/src/main/resources/static/images/minigt/)
+INSERT INTO brands (id, name, image_url) VALUES (1, 'MINI GT', '/images/minigt/logo.svg');
+
+-- MINI GT brand_objects: 1056 products loaded from minigt-brand-objects.sql
+
+SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
+SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
+
+-- Ensure brand logo uses local SVG (fixes existing DBs that had logo.png)
+UPDATE brands SET image_url = '/images/minigt/logo.svg' WHERE id = 1;
+
+-- LCD brand (1:64). brand_objects: 95 products in lcd-brand-objects.sql
+INSERT INTO brands (id, name, image_url) VALUES (2, 'LCD', '/images/lcd/logo.png');
+
+SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
+SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));

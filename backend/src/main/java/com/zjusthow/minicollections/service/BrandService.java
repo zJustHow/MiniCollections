@@ -40,11 +40,9 @@ public class BrandService {
             key = "#id"
     )
     public BrandDto getBrandById(long id) {
-        List<BrandDto> brandDtos = getBrands();
-        return brandDtos.stream()
-                .filter(brandDto -> brandDto.id().equals(id))
-                        .findFirst()
-                        .orElseThrow(() -> new BrandNotFoundException());
+        return brandRepository.findById(id)
+                .map(BrandDto::new)
+                .orElseThrow(BrandNotFoundException::new);
     }
 
     @Cacheable(

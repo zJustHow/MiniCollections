@@ -43,7 +43,7 @@ public class AppConfig {
                 .authorizeHttpRequests(auth ->
                         auth
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                                .requestMatchers(HttpMethod.GET, "/", "/index.html", "/*.json", "/*.png", "/static/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/", "/index.html", "/*.json", "/*.png", "/static/**", "/images/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/login", "/logout", "/signup").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/brands/**").permitAll()
                                 .anyRequest().authenticated()

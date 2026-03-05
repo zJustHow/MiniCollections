@@ -21,15 +21,15 @@ public class BrandObjectController {
         this.brandService = brandService;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<BrandObjectDto> getBrandObjectById(@PathVariable Long id) {
-        return ResponseEntity.ok(brandService.getBrandObjectById(id));
-    }
-
     @GetMapping("/search")
     public ResponseEntity<List<BrandObjectDto>> searchBrandObjects(
             @RequestParam String keyword) {
         return ResponseEntity.ok(brandService.searchBrandObjects(keyword));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<BrandObjectDto> getBrandObjectById(@PathVariable Long id) {
+        return ResponseEntity.ok(brandService.getBrandObjectById(id));
     }
 }
 

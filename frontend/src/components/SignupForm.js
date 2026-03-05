@@ -21,7 +21,7 @@ class SignupForm extends React.Component {
   };
 
   onFinish = (data) => {
-    signup(data)
+    signup({ ...data, name: data.username })
       .then(() => {
         this.setState({
           displayModal: false,
@@ -67,20 +67,12 @@ class SignupForm extends React.Component {
               <Input prefix={<LockOutlined />} placeholder="Password" />
             </Form.Item>
             <Form.Item
-              name="first_name"
+              name="username"
               rules={[
-                { required: true, message: "Please input your first name!" },
+                { required: true, message: "Please input your username!" },
               ]}
             >
-              <Input placeholder="firstname" />
-            </Form.Item>
-            <Form.Item
-              name="last_name"
-              rules={[
-                { required: true, message: "Please input your last name!" },
-              ]}
-            >
-              <Input placeholder="lastname" />
+              <Input prefix={<UserOutlined />} placeholder="Username" />
             </Form.Item>
 
             <Form.Item>

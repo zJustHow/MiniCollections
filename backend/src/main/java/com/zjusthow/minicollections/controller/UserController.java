@@ -2,6 +2,7 @@ package com.zjusthow.minicollections.controller;
 
 import com.zjusthow.minicollections.model.RegisterBody;
 import com.zjusthow.minicollections.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +21,7 @@ public class UserController {
 
     @PostMapping("/signup")
     @ResponseStatus(value = HttpStatus.CREATED)
-    public void signUp(@RequestBody RegisterBody body) {
+    public void signUp(@RequestBody @Valid RegisterBody body) {
         userService.signUp(body.email(), body.password(), body.name());
     }
 }

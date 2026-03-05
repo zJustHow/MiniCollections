@@ -7,6 +7,7 @@ import com.zjusthow.minicollections.model.UserObjectBody;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.service.GroupService;
 import com.zjusthow.minicollections.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -55,7 +56,7 @@ public class GroupController {
     @PostMapping
     public ResponseEntity<GroupDto> createGroup(
             @AuthenticationPrincipal User user,
-            @RequestBody GroupBody groupBody
+            @RequestBody @Valid GroupBody groupBody
     ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         GroupDto groupDto = groupService.createGroup(userEntity.id(), groupBody.name(), groupBody.imageUrl());
@@ -66,7 +67,7 @@ public class GroupController {
     public ResponseEntity<GroupDto> updateGroup(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
-            @RequestBody GroupBody groupBody
+            @RequestBody @Valid GroupBody groupBody
     ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         GroupDto groupDto = groupService.updateGroup(userEntity.id(), groupId, groupBody.name(), groupBody.imageUrl());
@@ -96,7 +97,7 @@ public class GroupController {
     public ResponseEntity<UserObjectDto> createUserObject(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
-            @RequestBody UserObjectBody userObjectBody
+            @RequestBody @Valid UserObjectBody userObjectBody
     ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         UserObjectDto userObjectDto = groupService.createUserObject(
@@ -117,7 +118,7 @@ public class GroupController {
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
             @PathVariable Long userObjectId,
-            @RequestBody UserObjectBody userObjectBody
+            @RequestBody @Valid UserObjectBody userObjectBody
     ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         UserObjectDto dto = groupService.updateUserObject(

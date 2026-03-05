@@ -1,0 +1,10 @@
+{
+  "name": "minicollections-scripts",
+  "private": true,
+  "scripts": {
+    "fetch-lcd": "node scripts/fetch-all-lcd-products.js"
+  },
+  "dependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}

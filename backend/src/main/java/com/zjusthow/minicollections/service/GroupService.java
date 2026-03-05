@@ -46,11 +46,12 @@ public class GroupService {
             key = "'groups_' + #userId + '_' + #id"
     )
     public GroupDto getGroupById(Long userId, Long id) {
-        List<GroupDto> GroupDtos = getGroups(userId);
-        return GroupDtos.stream()
-                .filter(groupDto -> groupDto.id().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new GroupNotFoundException());
+        GroupEntity group = groupRepository.findById(id)
+                .orElseThrow(GroupNotFoundException::new);
+        if (!group.userId().equals(userId)) {
+            throw new NoPermissionException("No permission to view this group");
+        }
+        return new GroupDto(group);
     }
 
     @Cacheable(
@@ -77,10 +78,6 @@ public class GroupService {
     )
     @Transactional
     public GroupDto createGroup(Long userId, String name, String imageUrl) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be null or empty");
-        }
-
         GroupEntity groupEntity = new GroupEntity(null, userId, name, imageUrl);
         GroupEntity savedGroupEntity = groupRepository.save(groupEntity);
         return new GroupDto(savedGroupEntity);
@@ -92,10 +89,6 @@ public class GroupService {
     )
     @Transactional
     public GroupDto updateGroup(Long userId, Long groupId, String name, String imageUrl) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be null or empty");
-        }
-
         GroupEntity groupEntity = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException());
 
@@ -156,10 +149,6 @@ public class GroupService {
             java.math.BigDecimal purchasePrice,
             String otherNotes
     ) {
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be null or empty");
-        }
-
         GroupEntity groupEntity = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException());
 
@@ -202,16 +191,15 @@ public class GroupService {
         if (!existing.userId().equals(userId)) {
             throw new NoPermissionException("No permission to update this user object");
         }
-        if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be null or empty");
-        }
+        // Preserve existing image when only changing brand association (do not overwrite with new brand's image)
+        String resolvedImageUrl = imageUrl != null ? imageUrl : existing.imageUrl();
         UserObjectEntity updated = new UserObjectEntity(
                 userObjectId,
                 existing.userId(),
                 existing.groupId(),
                 brandObjectId != null ? brandObjectId : existing.brandObjectId(),
                 name,
-                imageUrl,
+                resolvedImageUrl,
                 purchaseDate,
                 purchasePrice,
                 otherNotes
