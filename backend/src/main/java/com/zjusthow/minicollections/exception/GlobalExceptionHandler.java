@@ -15,43 +15,43 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BrandNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleBrandNotFoundException(BrandNotFoundException ex) {
-        return ex.getMessage();
+        return ex.getMessage() != null ? ex.getMessage() : "Not found";
     }
 
     @ExceptionHandler(BrandObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleBrandObjectNotFoundException(BrandObjectNotFoundException ex) {
-        return ex.getMessage();
+        return ex.getMessage() != null ? ex.getMessage() : "Not found";
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleUserNotFoundException(UserNotFoundException ex) {
-        return ex.getMessage();
+        return ex.getMessage() != null ? ex.getMessage() : "Not found";
     }
 
     @ExceptionHandler(GroupNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleGroupNotFoundException(GroupNotFoundException ex) {
-        return ex.getMessage();
+        return ex.getMessage() != null ? ex.getMessage() : "Not found";
     }
 
     @ExceptionHandler(UserObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleUserObjectNotFoundException(UserObjectNotFoundException ex) {
-        return ex.getMessage();
+        return ex.getMessage() != null ? ex.getMessage() : "Not found";
     }
 
     @ExceptionHandler(EmailExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public String handleEmailExistsException(EmailExistsException ex) {
-        return ex.getMessage();
+        return ex.getMessage() != null ? ex.getMessage() : "Conflict";
     }
 
     @ExceptionHandler(NoPermissionException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public String handleNoPermissionException(NoPermissionException ex) {
-        return ex.getMessage();
+        return ex.getMessage() != null ? ex.getMessage() : "Forbidden";
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

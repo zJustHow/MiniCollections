@@ -118,7 +118,7 @@ export const getBrandObjectsByBrandId = async (brandId) => {
 };
 
 export const getBrandObjectById = async (id) => {
-  const response = await fetch(`/brand_objects/${id}`, {
+  const response = await fetch(`/brands/objects/${id}`, {
     credentials: "include",
   });
   return handleResponse(response);
@@ -126,7 +126,7 @@ export const getBrandObjectById = async (id) => {
 
 export const searchBrandObjects = async (keyword) => {
   const response = await fetch(
-    `/brand_objects/search?keyword=${encodeURIComponent(keyword)}`,
+    `/brands/objects/search?keyword=${encodeURIComponent(keyword)}`,
     { credentials: "include" }
   );
   return handleResponse(response);

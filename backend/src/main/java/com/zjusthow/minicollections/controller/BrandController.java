@@ -37,4 +37,14 @@ public class BrandController {
     public ResponseEntity<List<BrandObjectDto>> getBrandObjectsByBrandId(@PathVariable Long brandId) {
         return ResponseEntity.ok(brandService.getBrandObjectsByBrandId(brandId));
     }
+
+    @GetMapping("/objects/search")
+    public ResponseEntity<List<BrandObjectDto>> searchBrandObjects(@RequestParam String keyword) {
+        return ResponseEntity.ok(brandService.searchBrandObjects(keyword));
+    }
+
+    @GetMapping("/objects/{id}")
+    public ResponseEntity<BrandObjectDto> getBrandObjectById(@PathVariable Long id) {
+        return ResponseEntity.ok(brandService.getBrandObjectById(id));
+    }
 }

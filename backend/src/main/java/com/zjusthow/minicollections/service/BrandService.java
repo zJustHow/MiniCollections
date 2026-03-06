@@ -37,7 +37,7 @@ public class BrandService {
 
     @Cacheable(
             value = "brands",
-            key = "#id"
+            key = "'id_' + #id"
     )
     public BrandDto getBrandById(long id) {
         return brandRepository.findById(id)
@@ -65,7 +65,7 @@ public class BrandService {
 
     @Cacheable(
             value = "brandObjects",
-            key = "#brandId"
+            key = "'brandId_' + #brandId"
     )
     public List<BrandObjectDto> getBrandObjectsByBrandId(long brandId) {
         return brandObjectRepository.findByBrandId(brandId)

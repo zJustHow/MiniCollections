@@ -96,7 +96,12 @@ public class GroupService {
             throw new NoPermissionException("No permission to update this group");
         }
 
-        GroupEntity updatedGroupEntity = new GroupEntity(groupId, userId, name, imageUrl);
+        GroupEntity updatedGroupEntity = new GroupEntity(
+                groupId,
+                userId,
+                name,
+                imageUrl
+                );
         GroupEntity savedGroupEntity = groupRepository.save(updatedGroupEntity);
         return new GroupDto(savedGroupEntity);
     }
@@ -191,15 +196,13 @@ public class GroupService {
         if (!existing.userId().equals(userId)) {
             throw new NoPermissionException("No permission to update this user object");
         }
-        // Preserve existing image when only changing brand association (do not overwrite with new brand's image)
-        String resolvedImageUrl = imageUrl != null ? imageUrl : existing.imageUrl();
         UserObjectEntity updated = new UserObjectEntity(
                 userObjectId,
                 existing.userId(),
                 existing.groupId(),
-                brandObjectId != null ? brandObjectId : existing.brandObjectId(),
+                brandObjectId,
                 name,
-                resolvedImageUrl,
+                imageUrl,
                 purchaseDate,
                 purchasePrice,
                 otherNotes

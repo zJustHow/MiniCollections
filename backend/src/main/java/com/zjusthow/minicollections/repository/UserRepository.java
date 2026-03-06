@@ -4,10 +4,12 @@ import com.zjusthow.minicollections.entity.UserEntity;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface UserRepository extends ListCrudRepository<UserEntity, Long> {
     Optional<List<UserEntity>> findByName(String userName);
     Optional<UserEntity> findByEmail(String email);

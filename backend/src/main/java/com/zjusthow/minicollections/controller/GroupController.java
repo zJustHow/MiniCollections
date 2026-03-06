@@ -22,15 +22,16 @@ public class GroupController {
     private final GroupService groupService;
     private final UserService userService;
 
-    public GroupController(GroupService groupService, UserService userService) {
+    public GroupController(
+        GroupService groupService,
+        UserService userService
+        ) {
         this.groupService = groupService;
         this.userService = userService;
     }
 
     @GetMapping
-    public ResponseEntity<List<GroupDto>> getGroups(
-            @AuthenticationPrincipal User user
-    ) {
+    public ResponseEntity<List<GroupDto>> getGroups(@AuthenticationPrincipal User user) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         return ResponseEntity.ok(groupService.getGroups(userEntity.id()));
     }
@@ -39,7 +40,7 @@ public class GroupController {
     public ResponseEntity<GroupDto> getGroupById(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         return ResponseEntity.ok(groupService.getGroupById(userEntity.id(), groupId));
     }
@@ -48,7 +49,7 @@ public class GroupController {
     public ResponseEntity<List<GroupDto>> searchGroups(
             @AuthenticationPrincipal User user,
             @RequestParam String keyword
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         return ResponseEntity.ok(groupService.searchGroups(userEntity.id(), keyword));
     }
@@ -57,7 +58,7 @@ public class GroupController {
     public ResponseEntity<GroupDto> createGroup(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid GroupBody groupBody
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         GroupDto groupDto = groupService.createGroup(userEntity.id(), groupBody.name(), groupBody.imageUrl());
         return ResponseEntity.status(HttpStatus.CREATED).body(groupDto);
@@ -68,7 +69,7 @@ public class GroupController {
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
             @RequestBody @Valid GroupBody groupBody
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         GroupDto groupDto = groupService.updateGroup(userEntity.id(), groupId, groupBody.name(), groupBody.imageUrl());
         return ResponseEntity.ok(groupDto);
@@ -78,7 +79,7 @@ public class GroupController {
     public ResponseEntity<Void> deleteGroupById(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         groupService.deleteGroupById(userEntity.id(), groupId);
         return ResponseEntity.noContent().build();
@@ -88,7 +89,7 @@ public class GroupController {
     public ResponseEntity<List<UserObjectDto>> getUserObjects(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         return ResponseEntity.ok(groupService.getUserObjects(userEntity.id(), groupId));
     }
@@ -98,7 +99,7 @@ public class GroupController {
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
             @RequestBody @Valid UserObjectBody userObjectBody
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         UserObjectDto userObjectDto = groupService.createUserObject(
                 userEntity.id(),
@@ -119,7 +120,7 @@ public class GroupController {
             @PathVariable Long groupId,
             @PathVariable Long userObjectId,
             @RequestBody @Valid UserObjectBody userObjectBody
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         UserObjectDto dto = groupService.updateUserObject(
                 userEntity.id(),
@@ -138,7 +139,7 @@ public class GroupController {
     public ResponseEntity<Void> deleteUserObjectById(
             @AuthenticationPrincipal User user,
             @PathVariable Long userObjectId
-    ) {
+        ) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         groupService.deleteUserObjectById(userEntity.id(), userObjectId);
         return ResponseEntity.noContent().build();
