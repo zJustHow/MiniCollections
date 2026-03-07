@@ -6,7 +6,7 @@ public record BrandDto(
         Long id,
         String name,
         String imageUrl
-) {
+    ) {
 
     public BrandDto(BrandEntity entity) {
         this(entity.id(), entity.name(), entity.imageUrl());

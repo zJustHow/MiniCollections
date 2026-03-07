@@ -8,7 +8,7 @@ public record BrandObjectDto(
         String imageUrl,
         java.math.BigDecimal releasePrice,
         java.time.LocalDate releaseDate
-) {
+    ) {
 
     public BrandObjectDto(BrandObjectEntity entity) {
         this(

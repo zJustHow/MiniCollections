@@ -10,7 +10,7 @@ public record UserObjectDto(
         java.time.LocalDate purchaseDate,
         java.math.BigDecimal purchasePrice,
         String otherNotes
-) {
+    ) {
 
     public UserObjectDto(UserObjectEntity entity) {
         this(

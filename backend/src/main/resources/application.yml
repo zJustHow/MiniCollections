@@ -22,7 +22,7 @@ logging:
   level:
     root: INFO
 ---
-# Development environment: enable SQL and request logs for debugging
+# Development: SQL and request logs for debugging
 spring:
   config:
     activate:
@@ -32,3 +32,15 @@ logging:
     org.apache.coyote.http11.Http11InputBuffer: TRACE
     org.springframework.jdbc.datasource.init: DEBUG
     org.springframework.jdbc.core: DEBUG
+---
+# Production: uses logback-spring.xml prod profile (rolling file, separate error file)
+# Start with -Dspring.profiles.active=prod, optional -DLOG_PATH=/var/log/app -DLOG_FILE=minicollections
+spring:
+  config:
+    activate:
+      on-profile: prod
+logging:
+  level:
+    root: INFO
+    org.springframework: WARN
+    org.hibernate: WARN

@@ -12,5 +12,5 @@ public record UserObjectBody(
         LocalDate purchaseDate,
         BigDecimal purchasePrice,
         String otherNotes
-) {
+        ) {
 }

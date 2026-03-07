@@ -88,12 +88,12 @@ public class DevRunner implements ApplicationRunner {
 
         userService.signUp("test@email.com", "test", "test");
         long u4 = userRepository.findByEmail("test@email.com").orElseThrow().id();
-        List<GroupEntity> user4Groups = groupRepository.saveAll(List.of(
+        List<GroupEntity> TestGroups = groupRepository.saveAll(List.of(
                 new GroupEntity(null, u4, "TestGroup1", null),
                 new GroupEntity(null, u4, "TestGroup2", null)
         ));
-        long g4a = user4Groups.get(0).id();
-        long g4b = user4Groups.get(1).id();
+        long g4a = TestGroups.get(0).id();
+        long g4b = TestGroups.get(1).id();
 
         userObjectRepository.saveAll(List.of(
                 new UserObjectEntity(null, u4, g4a, null, "TestGroup1Object1", null, null, null, null),

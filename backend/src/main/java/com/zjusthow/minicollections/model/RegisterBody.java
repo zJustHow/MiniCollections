@@ -7,5 +7,5 @@ public record RegisterBody(
         @NotBlank @Email String email,
         @NotBlank String password,
         @NotBlank String name
-) {
+        ) {
 }
