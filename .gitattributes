@@ -1,0 +1,4 @@
+# Gradle wrapper (backend)
+backend/gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
