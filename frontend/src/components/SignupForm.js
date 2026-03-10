@@ -1,31 +1,23 @@
 import { Button, Form, Input, message, Modal } from "antd";
-import React from "react";
+import { useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { signup } from "../utils";
 
-class SignupForm extends React.Component {
-  state = {
-    displayModal: false,
+function SignupForm() {
+  const [displayModal, setDisplayModal] = useState(false);
+
+  const handleCancel = () => {
+    setDisplayModal(false);
   };
 
-  handleCancel = () => {
-    this.setState({
-      displayModal: false,
-    });
+  const signupOnClick = () => {
+    setDisplayModal(true);
   };
 
-  signupOnClick = () => {
-    this.setState({
-      displayModal: true,
-    });
-  };
-
-  onFinish = (data) => {
-    signup({ ...data, name: data.username })
+  const onFinish = (data) => {
+    signup(data)
       .then(() => {
-        this.setState({
-          displayModal: false,
-        });
+        setDisplayModal(false);
         message.success(`Successfully signed up`);
       })
       .catch((err) => {
@@ -33,58 +25,56 @@ class SignupForm extends React.Component {
       });
   };
 
-  render = () => {
-    return (
-      <>
-        <Button shape="round" type="primary" onClick={this.signupOnClick}>
-          Register
-        </Button>
-        <Modal
-          title="Register"
-          open={this.state.displayModal}
-          onCancel={this.handleCancel}
-          footer={null}
-          destroyOnClose={true}
+  return (
+    <>
+      <Button shape="round" type="primary" onClick={signupOnClick}>
+        Register
+      </Button>
+      <Modal
+        title="Register"
+        open={displayModal}
+        onCancel={handleCancel}
+        footer={null}
+        destroyOnClose={true}
+      >
+        <Form
+          name="normal_register"
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          preserve={false}
         >
-          <Form
-            name="normal_register"
-            initialValues={{ remember: true }}
-            onFinish={this.onFinish}
-            preserve={false}
+          <Form.Item
+            name="email"
+            rules={[{ required: true, message: "Please input your email!" }]}
           >
-            <Form.Item
-              name="email"
-              rules={[{ required: true, message: "Please input your email!" }]}
-            >
-              <Input prefix={<UserOutlined />} placeholder="Email" />
-            </Form.Item>
-            <Form.Item
-              name="password"
-              rules={[
-                { required: true, message: "Please input your password!" },
-              ]}
-            >
-              <Input prefix={<LockOutlined />} placeholder="Password" />
-            </Form.Item>
-            <Form.Item
-              name="username"
-              rules={[
-                { required: true, message: "Please input your username!" },
-              ]}
-            >
-              <Input prefix={<UserOutlined />} placeholder="Username" />
-            </Form.Item>
+            <Input prefix={<UserOutlined />} placeholder="Email" />
+          </Form.Item>
+          <Form.Item
+            name="password"
+            rules={[
+              { required: true, message: "Please input your password!" },
+            ]}
+          >
+            <Input prefix={<LockOutlined />} placeholder="Password" />
+          </Form.Item>
+          <Form.Item
+            name="name"
+            rules={[
+              { required: true, message: "Please input your username!" },
+            ]}
+          >
+            <Input prefix={<UserOutlined />} placeholder="Username" />
+          </Form.Item>
 
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Register
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
-      </>
-    );
-  };
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Register
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
 }
 
 export default SignupForm;
