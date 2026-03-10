@@ -1,9 +1,9 @@
 import React from "react";
 
-const CardCover = ({ imageUrl, name }) => (
+const CardCover = ({ image_url, name }) => (
   <div style={{ position: "relative", paddingTop: "75%", overflow: "hidden" }}>
     <img
-      src={imageUrl}
+      src={image_url}
       alt={name}
       loading="lazy"
       style={{

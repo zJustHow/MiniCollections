@@ -43,7 +43,6 @@ export default function AddToGroupModal({
               <img
                 src={
                   customImageData ||
-                  selectedBrandObject?.imageUrl ||
                   selectedBrandObject?.image_url
                 }
                 alt="preview"

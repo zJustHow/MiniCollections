@@ -38,7 +38,7 @@ export default function BrandsTab({
             <Card
               hoverable
               style={{ borderRadius: 8, overflow: "hidden" }}
-              cover={<CardCover imageUrl={brand.imageUrl ?? brand.image_url} name={brand.name} />}
+              cover={<CardCover image_url={brand.image_url} name={brand.name} />}
               onClick={() => onBrandClick(brand)}
               bodyStyle={{ padding: 0 }}
             />

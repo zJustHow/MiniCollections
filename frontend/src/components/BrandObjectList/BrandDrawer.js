@@ -92,7 +92,7 @@ export default function BrandDrawer({
                       }}
                     >
                       <img
-                        src={item.imageUrl ?? item.image_url}
+                        src={item.image_url}
                         alt={item.name}
                         loading="lazy"
                         style={{

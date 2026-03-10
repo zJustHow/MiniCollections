@@ -42,7 +42,6 @@ export default function EditGroupModal({
               <img
                 src={
                   imageData ||
-                  selectedGroup?.imageUrl ||
                   selectedGroup?.image_url ||
                   "https://via.placeholder.com/120x80?text=Group"
                 }

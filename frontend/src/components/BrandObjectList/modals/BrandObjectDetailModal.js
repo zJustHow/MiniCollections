@@ -16,7 +16,7 @@ export default function BrandObjectDetailModal({
       zIndex={1100}
     >
       <img
-        src={detail.imageUrl ?? detail.image_url}
+        src={detail.image_url}
         alt={detail.name}
         loading="lazy"
         style={{

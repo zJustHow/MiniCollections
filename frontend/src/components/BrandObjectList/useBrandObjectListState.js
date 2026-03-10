@@ -138,7 +138,7 @@ export default function useBrandObjectListState() {
   const handleBrandObjectClick = (brandObject) => {
     setBrandObjectDetail({
       ...brandObject,
-      imageUrl: brandObject.imageUrl ?? brandObject.image_url,
+      image_url: brandObject.image_url,
     });
     setBrandObjectDetailVisible(true);
   };
@@ -183,9 +183,7 @@ export default function useBrandObjectListState() {
           brand_object_id: selectedBrandObject.id,
           name: values.name,
           image_url:
-            customImageData ||
-            selectedBrandObject.imageUrl ||
-            selectedBrandObject.image_url,
+            customImageData || selectedBrandObject.image_url,
           purchase_date: values.purchaseDate
             ? values.purchaseDate.format("YYYY-MM-DD")
             : null,
@@ -248,24 +246,23 @@ export default function useBrandObjectListState() {
       .validateFields()
       .then((values) => {
         setEditGroupLoading(true);
-        const imageUrl =
+        const image_url =
           editGroupImageData ??
-          selectedGroup.imageUrl ??
           selectedGroup.image_url;
-        const payload = { name: values.name, image_url: imageUrl || null };
+        const payload = { name: values.name, image_url: image_url || null };
         updateGroup(selectedGroup.id, payload)
           .then((data) => {
             message.success("Group updated");
             const updated = {
               ...data,
-              imageUrl: data.imageUrl ?? data.image_url,
+              image_url: data.image_url,
               userObjects: selectedGroup.userObjects ?? data.userObjects ?? [],
             };
             setSelectedGroup(updated);
             setGroups((prev) =>
               prev.map((g) =>
                 g.id === selectedGroup.id
-                  ? { ...g, name: updated.name, imageUrl: updated.imageUrl }
+                  ? { ...g, name: updated.name, image_url: updated.image_url }
                   : g
               )
             );
@@ -339,11 +336,9 @@ export default function useBrandObjectListState() {
             )) ||
           null;
         // Keep existing user object image when only changing brand association; use new image only if user picked one or object had none
-        const imageUrl =
+        const image_url =
           editUserObjectImageData ??
-          selectedUserObject.imageUrl ??
           selectedUserObject.image_url ??
-          selectedBo?.imageUrl ??
           selectedBo?.image_url;
         const payload = {
           brand_object_id:
@@ -351,7 +346,7 @@ export default function useBrandObjectListState() {
               ? Number(values.brandObjectId)
               : null,
           name: values.name,
-          image_url: imageUrl || null,
+          image_url: image_url || null,
           purchase_date: values.purchaseDate
             ? values.purchaseDate.format("YYYY-MM-DD")
             : null,
@@ -369,7 +364,7 @@ export default function useBrandObjectListState() {
             const updated = {
               ...data,
               name: data.name,
-              imageUrl: data.imageUrl ?? data.image_url,
+              image_url: data.image_url,
               purchasePrice: data.purchasePrice ?? data.purchase_price,
               purchaseDate: data.purchaseDate ?? data.purchase_date,
               otherNotes: data.otherNotes ?? data.other_notes,
@@ -401,7 +396,7 @@ export default function useBrandObjectListState() {
             ) {
               setUserObjectBrandDetail({
                 ...selectedBo,
-                imageUrl: selectedBo.imageUrl ?? selectedBo.image_url,
+                image_url: selectedBo.image_url,
               });
             } else {
               getBrandObjectById(newBrandObjectId)
@@ -481,15 +476,14 @@ export default function useBrandObjectListState() {
       .validateFields()
       .then((values) => {
         const brandObjectId = values.brandObjectId ?? null;
-        const imageUrl =
+        const image_url =
           addUserObjectInGroupImageData ??
-          selectedBrandObjectForAdd?.imageUrl ??
           selectedBrandObjectForAdd?.image_url ??
           null;
         const payload = {
           brand_object_id: brandObjectId,
           name: values.name,
-          image_url: imageUrl || null,
+          image_url: image_url || null,
           purchase_date: values.purchaseDate
             ? values.purchaseDate.format("YYYY-MM-DD")
             : null,
@@ -504,7 +498,7 @@ export default function useBrandObjectListState() {
             const item = {
               ...created,
               name: created.name,
-              imageUrl: created.imageUrl ?? created.image_url,
+              image_url: created.image_url,
               purchasePrice: created.purchasePrice ?? created.purchase_price,
               purchaseDate: created.purchaseDate ?? created.purchase_date,
               otherNotes: created.otherNotes ?? created.other_notes,
@@ -540,8 +534,7 @@ export default function useBrandObjectListState() {
     setUserObjectDetailVisible(false);
     setBrandObjectDetail({
       ...userObjectBrandDetail,
-      imageUrl:
-        userObjectBrandDetail.imageUrl ?? userObjectBrandDetail.image_url,
+      image_url: userObjectBrandDetail.image_url,
     });
     setBrandObjectDetailVisible(true);
   };

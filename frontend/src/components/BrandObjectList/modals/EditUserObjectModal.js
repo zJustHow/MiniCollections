@@ -85,7 +85,6 @@ export default function EditUserObjectModal({
               <img
                 src={
                   imageData ||
-                  selectedUserObject?.imageUrl ||
                   selectedUserObject?.image_url ||
                   "https://via.placeholder.com/120x80?text=Image"
                 }

@@ -60,7 +60,7 @@ export default function GroupsTab({
               style={{ borderRadius: 8, overflow: "hidden" }}
               cover={
                 <CardCover
-                  imageUrl={group.imageUrl ?? group.image_url}
+                  image_url={group.image_url}
                   name={group.name}
                 />
               }

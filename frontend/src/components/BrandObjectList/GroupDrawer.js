@@ -97,7 +97,7 @@ export default function GroupDrawer({
                   bodyStyle={{ height: 56, minHeight: 56, padding: "0 24px", overflow: "hidden", display: "flex", alignItems: "center" }}
                   cover={
                     <img
-                      src={item.imageUrl ?? item.image_url}
+                      src={item.image_url}
                       alt={item.name ?? ""}
                       loading="lazy"
                       style={{

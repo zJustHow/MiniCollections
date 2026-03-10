@@ -11,7 +11,7 @@ export default function UserObjectDetailModal({
   onBrandObjectClick,
 }) {
   if (!userObject) return null;
-  const imageUrl = userObject.imageUrl ?? userObject.image_url;
+  const image_url = userObject.image_url;
   const name = userObject.name ?? "—";
   const purchasePrice =
     userObject.purchasePrice ?? userObject.purchase_price;
@@ -48,7 +48,7 @@ export default function UserObjectDetailModal({
       width={600}
     >
       <img
-        src={imageUrl}
+        src={image_url}
         alt={name}
         loading="lazy"
         style={{
@@ -89,7 +89,7 @@ export default function UserObjectDetailModal({
             >
               <img
                 src={
-                  brandDetail.imageUrl ?? brandDetail.image_url
+                  brandDetail.image_url
                 }
                 alt={brandDetail.name}
                 style={{
