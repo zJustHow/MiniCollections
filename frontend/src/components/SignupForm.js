@@ -14,15 +14,14 @@ function SignupForm() {
     setDisplayModal(true);
   };
 
-  const onFinish = (data) => {
-    signup(data)
-      .then(() => {
-        setDisplayModal(false);
-        message.success(`Successfully signed up`);
-      })
-      .catch((err) => {
-        message.error(err.message);
-      });
+  const onFinish = async (data) => {
+    try {
+      await signup(data);
+      setDisplayModal(false);
+      message.success(`Successfully signed up`);
+    } catch (err) {
+      message.error(err.message);
+    }
   };
 
   return (

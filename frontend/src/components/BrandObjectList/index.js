@@ -171,20 +171,22 @@ export default function BrandObjectList() {
         form={addUserObjectInGroupForm}
         searchResults={addModelSearchResults}
         searchLoading={addModelSearchLoading}
-        onSearch={(value) => {
+        onSearch={async (value) => {
           const keyword = (value || "").trim();
           if (keyword === "") {
             setAddModelSearchResults([]);
             return;
           }
           setAddModelSearchLoading(true);
-          searchBrandObjects(keyword)
-            .then((data) => setAddModelSearchResults(Array.isArray(data) ? data : []))
-            .catch((err) => {
-              message.error(err?.message || "Search failed");
-              setAddModelSearchResults([]);
-            })
-            .finally(() => setAddModelSearchLoading(false));
+          try {
+            const data = await searchBrandObjects(keyword);
+            setAddModelSearchResults(Array.isArray(data) ? data : []);
+          } catch (err) {
+            message.error(err?.message || "Search failed");
+            setAddModelSearchResults([]);
+          } finally {
+            setAddModelSearchLoading(false);
+          }
         }}
         onSelectChange={(value) => {
           if (value == null) {
@@ -259,7 +261,7 @@ export default function BrandObjectList() {
         form={editUserObjectForm}
         searchResults={editModelSearchResults}
         searchLoading={editModelSearchLoading}
-        onSearch={(value) => {
+        onSearch={async (value) => {
           const keyword = (value || "").trim();
           if (keyword === "") {
             setEditModelSearchResults(
@@ -268,15 +270,15 @@ export default function BrandObjectList() {
             return;
           }
           setEditModelSearchLoading(true);
-          searchBrandObjects(keyword)
-            .then((data) =>
-              setEditModelSearchResults(Array.isArray(data) ? data : [])
-            )
-            .catch((err) => {
-              message.error(err?.message || "Search failed");
-              setEditModelSearchResults([]);
-            })
-            .finally(() => setEditModelSearchLoading(false));
+          try {
+            const data = await searchBrandObjects(keyword);
+            setEditModelSearchResults(Array.isArray(data) ? data : []);
+          } catch (err) {
+            message.error(err?.message || "Search failed");
+            setEditModelSearchResults([]);
+          } finally {
+            setEditModelSearchLoading(false);
+          }
         }}
         imageData={editUserObjectImageData}
         selectedUserObject={selectedUserObject}

@@ -84,50 +84,67 @@ export default function useBrandObjectListState() {
     useState(null);
 
   useEffect(() => {
-    setLoadingBrands(true);
-    getBrands()
-      .then((data) => setBrands(data))
-      .catch((err) => {
+    const fetchBrands = async () => {
+      setLoadingBrands(true);
+      try {
+        const data = await getBrands();
+        setBrands(data);
+      } catch (err) {
         message.error(err.message || "Failed to load brands");
-      })
-      .finally(() => setLoadingBrands(false));
+      } finally {
+        setLoadingBrands(false);
+      }
+    };
+    fetchBrands();
   }, []);
 
   useEffect(() => {
-    setLoadingGroups(true);
-    getGroups()
-      .then((data) => setGroups(data))
-      .catch((err) => {
+    const fetchGroups = async () => {
+      setLoadingGroups(true);
+      try {
+        const data = await getGroups();
+        setGroups(data);
+      } catch (err) {
         message.error(err.message || "Failed to load groups");
-      })
-      .finally(() => setLoadingGroups(false));
+      } finally {
+        setLoadingGroups(false);
+      }
+    };
+    fetchGroups();
   }, []);
 
   useEffect(() => {
-    if (!selectedGroup) {
-      setSelectedGroupUserObjects([]);
-      return;
-    }
-    setLoadingGroupUserObjects(true);
-    getUserObjects(selectedGroup.id)
-      .then((data) => setSelectedGroupUserObjects(normalizeList(data)))
-      .catch((err) => {
+    const fetchGroupUserObjects = async () => {
+      if (!selectedGroup) {
+        setSelectedGroupUserObjects([]);
+        return;
+      }
+      setLoadingGroupUserObjects(true);
+      try {
+        const data = await getUserObjects(selectedGroup.id);
+        setSelectedGroupUserObjects(normalizeList(data));
+      } catch (err) {
         message.error(err.message || "Failed to load group models");
         setSelectedGroupUserObjects([]);
-      })
-      .finally(() => setLoadingGroupUserObjects(false));
+      } finally {
+        setLoadingGroupUserObjects(false);
+      }
+    };
+    fetchGroupUserObjects();
   }, [selectedGroup]);
 
-  const handleBrandClick = (brand) => {
+  const handleBrandClick = async (brand) => {
     setSelectedBrand(brand);
     setBrandDrawerOpen(true);
     setLoadingBrandObjects(true);
-    getBrandObjectsByBrandId(brand.id)
-      .then((data) => setBrandObjects(data))
-      .catch((err) => {
-        message.error(err.message || "Failed to load models");
-      })
-      .finally(() => setLoadingBrandObjects(false));
+    try {
+      const data = await getBrandObjectsByBrandId(brand.id);
+      setBrandObjects(data);
+    } catch (err) {
+      message.error(err.message || "Failed to load models");
+    } finally {
+      setLoadingBrandObjects(false);
+    }
   };
 
   const handleGroupClick = (group) => {
@@ -143,19 +160,21 @@ export default function useBrandObjectListState() {
     setBrandObjectDetailVisible(true);
   };
 
-  const handleUserObjectClick = (userObject) => {
+  const handleUserObjectClick = async (userObject) => {
     setSelectedUserObject(userObject);
     setUserObjectDetailVisible(true);
     const brandObjectId =
       userObject.brandObjectId ?? userObject.brand_object_id;
     if (brandObjectId) {
       setLoadingUserObjectBrandDetail(true);
-      getBrandObjectById(brandObjectId)
-        .then((data) => setUserObjectBrandDetail(data))
-        .catch((err) => {
-          message.error(err.message || "Failed to load brand object detail");
-        })
-        .finally(() => setLoadingUserObjectBrandDetail(false));
+      try {
+        const data = await getBrandObjectById(brandObjectId);
+        setUserObjectBrandDetail(data);
+      } catch (err) {
+        message.error(err.message || "Failed to load brand object detail");
+      } finally {
+        setLoadingUserObjectBrandDetail(false);
+      }
     } else {
       setUserObjectBrandDetail(null);
     }
@@ -174,63 +193,64 @@ export default function useBrandObjectListState() {
     setCreateModalVisible(true);
   };
 
-  const handleCreateUserObject = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        if (!selectedBrandObject) return;
-        const payload = {
-          brand_object_id: selectedBrandObject.id,
-          name: values.name,
-          image_url:
-            customImageData || selectedBrandObject.image_url,
-          purchase_date: values.purchaseDate
-            ? values.purchaseDate.format("YYYY-MM-DD")
-            : null,
-          purchase_price:
-            values.purchasePrice !== undefined ? values.purchasePrice : null,
-          other_notes: values.otherNotes || null,
-        };
-        setCreateModalLoading(true);
-        const groupId = values.groupId;
-        createUserObject(groupId, payload)
-          .then((created) => {
-            message.success("Added to group successfully");
-            if (selectedGroup && selectedGroup.id === groupId) {
-              setSelectedGroupUserObjects((prev) => [...prev, created]);
-            }
-            setCreateModalVisible(false);
-          })
-          .catch((err) => {
-            message.error(err.message || "Failed to add model to group");
-          })
-          .finally(() => setCreateModalLoading(false));
-      })
-      .catch(() => {});
+  const handleCreateUserObject = async () => {
+    try {
+      const values = await form.validateFields();
+      if (!selectedBrandObject) return;
+      const payload = {
+        brand_object_id: selectedBrandObject.id,
+        name: values.name,
+        image_url: customImageData || selectedBrandObject.image_url,
+        purchase_date: values.purchaseDate
+          ? values.purchaseDate.format("YYYY-MM-DD")
+          : null,
+        purchase_price:
+          values.purchasePrice !== undefined ? values.purchasePrice : null,
+        other_notes: values.otherNotes || null,
+      };
+      setCreateModalLoading(true);
+      const groupId = values.groupId;
+      try {
+        const created = await createUserObject(groupId, payload);
+        message.success("Added to group successfully");
+        if (selectedGroup && selectedGroup.id === groupId) {
+          setSelectedGroupUserObjects((prev) => [...prev, created]);
+        }
+        setCreateModalVisible(false);
+      } catch (err) {
+        message.error(err.message || "Failed to add model to group");
+      } finally {
+        setCreateModalLoading(false);
+      }
+    } catch {
+      // validation failed, do nothing
+    }
   };
 
-  const handleBrandSearch = (value) => {
+  const handleBrandSearch = async (value) => {
     const keyword = value.trim();
     setLoadingBrands(true);
-    const fetcher = keyword ? searchBrands(keyword) : getBrands();
-    fetcher
-      .then((data) => setBrands(data))
-      .catch((err) => {
-        message.error(err.message || "Failed to search brands");
-      })
-      .finally(() => setLoadingBrands(false));
+    try {
+      const data = keyword ? await searchBrands(keyword) : await getBrands();
+      setBrands(data);
+    } catch (err) {
+      message.error(err.message || "Failed to search brands");
+    } finally {
+      setLoadingBrands(false);
+    }
   };
 
-  const handleGroupSearch = (value) => {
+  const handleGroupSearch = async (value) => {
     const keyword = value.trim();
     setLoadingGroups(true);
-    const fetcher = keyword ? searchGroups(keyword) : getGroups();
-    fetcher
-      .then((data) => setGroups(data))
-      .catch((err) => {
-        message.error(err.message || "Failed to search groups");
-      })
-      .finally(() => setLoadingGroups(false));
+    try {
+      const data = keyword ? await searchGroups(keyword) : await getGroups();
+      setGroups(data);
+    } catch (err) {
+      message.error(err.message || "Failed to search groups");
+    } finally {
+      setLoadingGroups(false);
+    }
   };
 
   const openEditGroupModal = () => {
@@ -240,40 +260,38 @@ export default function useBrandObjectListState() {
     setEditGroupModalVisible(true);
   };
 
-  const handleUpdateGroup = () => {
+  const handleUpdateGroup = async () => {
     if (!selectedGroup) return;
-    editGroupForm
-      .validateFields()
-      .then((values) => {
-        setEditGroupLoading(true);
-        const image_url =
-          editGroupImageData ??
-          selectedGroup.image_url;
-        const payload = { name: values.name, image_url: image_url || null };
-        updateGroup(selectedGroup.id, payload)
-          .then((data) => {
-            message.success("Group updated");
-            const updated = {
-              ...data,
-              image_url: data.image_url,
-              userObjects: selectedGroup.userObjects ?? data.userObjects ?? [],
-            };
-            setSelectedGroup(updated);
-            setGroups((prev) =>
-              prev.map((g) =>
-                g.id === selectedGroup.id
-                  ? { ...g, name: updated.name, image_url: updated.image_url }
-                  : g
-              )
-            );
-            setEditGroupModalVisible(false);
-          })
-          .catch((err) => {
-            message.error(err.message || "Failed to update group");
-          })
-          .finally(() => setEditGroupLoading(false));
-      })
-      .catch(() => {});
+    try {
+      const values = await editGroupForm.validateFields();
+      setEditGroupLoading(true);
+      const image_url = editGroupImageData ?? selectedGroup.image_url;
+      const payload = { name: values.name, image_url: image_url || null };
+      try {
+        const data = await updateGroup(selectedGroup.id, payload);
+        message.success("Group updated");
+        const updated = {
+          ...data,
+          image_url: data.image_url,
+          userObjects: selectedGroup.userObjects ?? data.userObjects ?? [],
+        };
+        setSelectedGroup(updated);
+        setGroups((prev) =>
+          prev.map((g) =>
+            g.id === selectedGroup.id
+              ? { ...g, name: updated.name, image_url: updated.image_url }
+              : g
+          )
+        );
+        setEditGroupModalVisible(false);
+      } catch (err) {
+        message.error(err.message || "Failed to update group");
+      } finally {
+        setEditGroupLoading(false);
+      }
+    } catch {
+      // validation failed, do nothing
+    }
   };
 
   const handleDeleteGroup = () => {
@@ -286,17 +304,17 @@ export default function useBrandObjectListState() {
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
-      onOk: () =>
-        deleteGroup(groupId)
-          .then(() => {
-            setGroupDrawerOpen(false);
-            setSelectedGroup(null);
-            setGroups((prev) => prev.filter((g) => g.id !== groupId));
-            message.success("Group deleted");
-          })
-          .catch((err) => {
-            message.error(err.message || "Failed to delete group");
-          }),
+      onOk: async () => {
+        try {
+          await deleteGroup(groupId);
+          setGroupDrawerOpen(false);
+          setSelectedGroup(null);
+          setGroups((prev) => prev.filter((g) => g.id !== groupId));
+          message.success("Group deleted");
+        } catch (err) {
+          message.error(err.message || "Failed to delete group");
+        }
+      },
     });
   };
 
@@ -322,95 +340,97 @@ export default function useBrandObjectListState() {
     setEditUserObjectModalVisible(true);
   };
 
-  const handleUpdateUserObject = () => {
+  const handleUpdateUserObject = async () => {
     if (!selectedUserObject || !selectedGroup) return;
-    editUserObjectForm
-      .validateFields()
-      .then((values) => {
-        setEditUserObjectLoading(true);
-        const selectedBo =
-          (values.brandObjectId != null &&
-            values.brandObjectId !== "" &&
-            editModelSearchResults.find(
-              (o) => Number(o.id) === Number(values.brandObjectId)
-            )) ||
-          null;
-        // Keep existing user object image when only changing brand association; use new image only if user picked one or object had none
-        const image_url =
-          editUserObjectImageData ??
-          selectedUserObject.image_url ??
-          selectedBo?.image_url;
-        const payload = {
-          brand_object_id:
-            values.brandObjectId != null && values.brandObjectId !== ""
-              ? Number(values.brandObjectId)
-              : null,
-          name: values.name,
-          image_url: image_url || null,
-          purchase_date: values.purchaseDate
-            ? values.purchaseDate.format("YYYY-MM-DD")
+    try {
+      const values = await editUserObjectForm.validateFields();
+      setEditUserObjectLoading(true);
+      const selectedBo =
+        (values.brandObjectId != null &&
+          values.brandObjectId !== "" &&
+          editModelSearchResults.find(
+            (o) => Number(o.id) === Number(values.brandObjectId)
+          )) ||
+        null;
+      // Keep existing user object image when only changing brand association; use new image only if user picked one or object had none
+      const image_url =
+        editUserObjectImageData ??
+        selectedUserObject.image_url ??
+        selectedBo?.image_url;
+      const payload = {
+        brand_object_id:
+          values.brandObjectId != null && values.brandObjectId !== ""
+            ? Number(values.brandObjectId)
             : null,
-          purchase_price:
-            values.purchasePrice !== undefined ? values.purchasePrice : null,
-          other_notes: values.otherNotes || null,
-        };
-        updateUserObject(
+        name: values.name,
+        image_url: image_url || null,
+        purchase_date: values.purchaseDate
+          ? values.purchaseDate.format("YYYY-MM-DD")
+          : null,
+        purchase_price:
+          values.purchasePrice !== undefined ? values.purchasePrice : null,
+        other_notes: values.otherNotes || null,
+      };
+      try {
+        const data = await updateUserObject(
           selectedGroup.id,
           selectedUserObject.id,
           payload
-        )
-          .then((data) => {
-            message.success("Model updated");
-            const updated = {
-              ...data,
-              name: data.name,
-              image_url: data.image_url,
-              purchasePrice: data.purchasePrice ?? data.purchase_price,
-              purchaseDate: data.purchaseDate ?? data.purchase_date,
-              otherNotes: data.otherNotes ?? data.other_notes,
-              brandObjectId: data.brandObjectId ?? data.brand_object_id,
-            };
-            setSelectedUserObject(updated);
-            setSelectedGroupUserObjects((prev) =>
-              prev.map((o) =>
-                o.id === selectedUserObject.id ? updated : o
-              )
-            );
-            setSelectedGroup((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    userObjects: (prev.userObjects || []).map((o) =>
-                      o.id === selectedUserObject.id ? updated : o
-                    ),
-                  }
-                : prev
-            );
-            // Refresh brand detail shown in user object detail modal when brand_object_id changed
-            const newBrandObjectId = updated.brandObjectId ?? updated.brand_object_id;
-            if (newBrandObjectId == null) {
-              setUserObjectBrandDetail(null);
-            } else if (
-              selectedBo &&
-              Number(selectedBo.id) === Number(newBrandObjectId)
-            ) {
-              setUserObjectBrandDetail({
-                ...selectedBo,
-                image_url: selectedBo.image_url,
-              });
-            } else {
-              getBrandObjectById(newBrandObjectId)
-                .then((brandData) => setUserObjectBrandDetail(brandData))
-                .catch(() => setUserObjectBrandDetail(null));
-            }
-            setEditUserObjectModalVisible(false);
-          })
-          .catch((err) => {
-            message.error(err.message || "Failed to update model");
-          })
-          .finally(() => setEditUserObjectLoading(false));
-      })
-      .catch(() => {});
+        );
+        message.success("Model updated");
+        const updated = {
+          ...data,
+          name: data.name,
+          image_url: data.image_url,
+          purchasePrice: data.purchasePrice ?? data.purchase_price,
+          purchaseDate: data.purchaseDate ?? data.purchase_date,
+          otherNotes: data.otherNotes ?? data.other_notes,
+          brandObjectId: data.brandObjectId ?? data.brand_object_id,
+        };
+        setSelectedUserObject(updated);
+        setSelectedGroupUserObjects((prev) =>
+          prev.map((o) => (o.id === selectedUserObject.id ? updated : o))
+        );
+        setSelectedGroup((prev) =>
+          prev
+            ? {
+                ...prev,
+                userObjects: (prev.userObjects || []).map((o) =>
+                  o.id === selectedUserObject.id ? updated : o
+                ),
+              }
+            : prev
+        );
+        // Refresh brand detail shown in user object detail modal when brand_object_id changed
+        const newBrandObjectId =
+          updated.brandObjectId ?? updated.brand_object_id;
+        if (newBrandObjectId == null) {
+          setUserObjectBrandDetail(null);
+        } else if (
+          selectedBo &&
+          Number(selectedBo.id) === Number(newBrandObjectId)
+        ) {
+          setUserObjectBrandDetail({
+            ...selectedBo,
+            image_url: selectedBo.image_url,
+          });
+        } else {
+          try {
+            const brandData = await getBrandObjectById(newBrandObjectId);
+            setUserObjectBrandDetail(brandData);
+          } catch {
+            setUserObjectBrandDetail(null);
+          }
+        }
+        setEditUserObjectModalVisible(false);
+      } catch (err) {
+        message.error(err.message || "Failed to update model");
+      } finally {
+        setEditUserObjectLoading(false);
+      }
+    } catch {
+      // validation failed, do nothing
+    }
   };
 
   const handleDeleteUserObject = () => {
@@ -424,41 +444,41 @@ export default function useBrandObjectListState() {
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
-      onOk: () =>
-        deleteUserObject(groupId, userObjectId)
-          .then(() => {
-            setUserObjectDetailVisible(false);
-            setSelectedUserObject(null);
-            setSelectedGroupUserObjects((prev) =>
-              prev.filter((o) => o.id !== userObjectId)
-            );
-            setSelectedGroup((prev) =>
-              prev
+      onOk: async () => {
+        try {
+          await deleteUserObject(groupId, userObjectId);
+          setUserObjectDetailVisible(false);
+          setSelectedUserObject(null);
+          setSelectedGroupUserObjects((prev) =>
+            prev.filter((o) => o.id !== userObjectId)
+          );
+          setSelectedGroup((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  userObjects: (prev.userObjects || []).filter(
+                    (o) => (o.id ?? o.id) !== userObjectId
+                  ),
+                }
+              : prev
+          );
+          setGroups((prev) =>
+            prev.map((g) =>
+              g.id === groupId
                 ? {
-                    ...prev,
-                    userObjects: (prev.userObjects || []).filter(
-                      (o) => (o.id ?? o.id) !== userObjectId
+                    ...g,
+                    userObjects: (g.userObjects || []).filter(
+                      (o) => o.id !== userObjectId
                     ),
                   }
-                : prev
-            );
-            setGroups((prev) =>
-              prev.map((g) =>
-                g.id === groupId
-                  ? {
-                      ...g,
-                      userObjects: (g.userObjects || []).filter(
-                        (o) => o.id !== userObjectId
-                      ),
-                    }
-                  : g
-              )
-            );
-            message.success("Model deleted");
-          })
-          .catch((err) => {
-            message.error(err.message || "Failed to delete model");
-          }),
+                : g
+            )
+          );
+          message.success("Model deleted");
+        } catch (err) {
+          message.error(err.message || "Failed to delete model");
+        }
+      },
     });
   };
 
@@ -470,64 +490,64 @@ export default function useBrandObjectListState() {
     setAddUserObjectInGroupModalVisible(true);
   };
 
-  const handleAddUserObjectInGroup = () => {
+  const handleAddUserObjectInGroup = async () => {
     if (!selectedGroup) return;
-    addUserObjectInGroupForm
-      .validateFields()
-      .then((values) => {
-        const brandObjectId = values.brandObjectId ?? null;
-        const image_url =
-          addUserObjectInGroupImageData ??
-          selectedBrandObjectForAdd?.image_url ??
-          null;
-        const payload = {
-          brand_object_id: brandObjectId,
-          name: values.name,
-          image_url: image_url || null,
-          purchase_date: values.purchaseDate
-            ? values.purchaseDate.format("YYYY-MM-DD")
-            : null,
-          purchase_price:
-            values.purchasePrice !== undefined ? values.purchasePrice : null,
-          other_notes: values.otherNotes || null,
+    try {
+      const values = await addUserObjectInGroupForm.validateFields();
+      const brandObjectId = values.brandObjectId ?? null;
+      const image_url =
+        addUserObjectInGroupImageData ??
+        selectedBrandObjectForAdd?.image_url ??
+        null;
+      const payload = {
+        brand_object_id: brandObjectId,
+        name: values.name,
+        image_url: image_url || null,
+        purchase_date: values.purchaseDate
+          ? values.purchaseDate.format("YYYY-MM-DD")
+          : null,
+        purchase_price:
+          values.purchasePrice !== undefined ? values.purchasePrice : null,
+        other_notes: values.otherNotes || null,
+      };
+      setAddUserObjectInGroupLoading(true);
+      try {
+        const created = await createUserObject(selectedGroup.id, payload);
+        message.success("Model added");
+        const item = {
+          ...created,
+          name: created.name,
+          image_url: created.image_url,
+          purchasePrice: created.purchasePrice ?? created.purchase_price,
+          purchaseDate: created.purchaseDate ?? created.purchase_date,
+          otherNotes: created.otherNotes ?? created.other_notes,
+          brandObjectId: created.brandObjectId ?? created.brand_object_id,
         };
-        setAddUserObjectInGroupLoading(true);
-        createUserObject(selectedGroup.id, payload)
-          .then((created) => {
-            message.success("Model added");
-            const item = {
-              ...created,
-              name: created.name,
-              image_url: created.image_url,
-              purchasePrice: created.purchasePrice ?? created.purchase_price,
-              purchaseDate: created.purchaseDate ?? created.purchase_date,
-              otherNotes: created.otherNotes ?? created.other_notes,
-              brandObjectId: created.brandObjectId ?? created.brand_object_id,
-            };
-            setSelectedGroupUserObjects((prev) => [...prev, item]);
-            setSelectedGroup((prev) =>
-              prev
-                ? { ...prev, userObjects: [...(prev.userObjects || []), item] }
-                : prev
-            );
-            setGroups((prev) =>
-              prev.map((g) =>
-                g.id === selectedGroup.id
-                  ? {
-                      ...g,
-                      userObjects: [...(g.userObjects || []), item],
-                    }
-                  : g
-              )
-            );
-            setAddUserObjectInGroupModalVisible(false);
-          })
-          .catch((err) => {
-            message.error(err.message || "Failed to add model");
-          })
-          .finally(() => setAddUserObjectInGroupLoading(false));
-      })
-      .catch(() => {});
+        setSelectedGroupUserObjects((prev) => [...prev, item]);
+        setSelectedGroup((prev) =>
+          prev
+            ? { ...prev, userObjects: [...(prev.userObjects || []), item] }
+            : prev
+        );
+        setGroups((prev) =>
+          prev.map((g) =>
+            g.id === selectedGroup.id
+              ? {
+                  ...g,
+                  userObjects: [...(g.userObjects || []), item],
+                }
+              : g
+          )
+        );
+        setAddUserObjectInGroupModalVisible(false);
+      } catch (err) {
+        message.error(err.message || "Failed to add model");
+      } finally {
+        setAddUserObjectInGroupLoading(false);
+      }
+    } catch {
+      // validation failed, do nothing
+    }
   };
 
   const setBrandObjectDetailFromUserObject = () => {
@@ -539,28 +559,28 @@ export default function useBrandObjectListState() {
     setBrandObjectDetailVisible(true);
   };
 
-  const handleCreateGroup = () => {
-    groupForm
-      .validateFields()
-      .then((values) => {
-        setCreateGroupLoading(true);
-        const payload = {
-          name: values.name,
-          image_url: groupImageData || null,
-        };
-        createGroup(payload)
-          .then((created) => {
-            message.success("Group created");
-            setGroups((prev) => [...prev, created]);
-            setCreateGroupModalVisible(false);
-            setGroupImageData(null);
-          })
-          .catch((err) => {
-            message.error(err.message || "Failed to create group");
-          })
-          .finally(() => setCreateGroupLoading(false));
-      })
-      .catch(() => {});
+  const handleCreateGroup = async () => {
+    try {
+      const values = await groupForm.validateFields();
+      setCreateGroupLoading(true);
+      const payload = {
+        name: values.name,
+        image_url: groupImageData || null,
+      };
+      try {
+        const created = await createGroup(payload);
+        message.success("Group created");
+        setGroups((prev) => [...prev, created]);
+        setCreateGroupModalVisible(false);
+        setGroupImageData(null);
+      } catch (err) {
+        message.error(err.message || "Failed to create group");
+      } finally {
+        setCreateGroupLoading(false);
+      }
+    } catch {
+      // validation failed, do nothing
+    }
   };
 
   return {

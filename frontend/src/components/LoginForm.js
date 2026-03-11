@@ -6,19 +6,17 @@ import { login } from "../utils";
 function LoginForm({ onSuccess }) {
   const [loading, setLoading] = useState(false);
 
-  const onFinish = (data) => {
+  const onFinish = async (data) => {
     setLoading(true);
-    login(data)
-      .then(() => {
-        message.success(`Login Successful`);
-        onSuccess();
-      })
-      .catch((err) => {
-        message.error(err.message);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      await login(data);
+      message.success(`Login Successful`);
+      onSuccess();
+    } catch (err) {
+      message.error(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
