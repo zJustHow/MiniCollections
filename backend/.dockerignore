@@ -1,0 +1,22 @@
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE & OS
+.idea/
+*.iml
+.vscode/
+*.swp
+.DS_Store
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Local / env
+*.log
+.env
+.env.*

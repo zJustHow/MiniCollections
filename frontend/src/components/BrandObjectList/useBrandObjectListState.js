@@ -634,6 +634,7 @@ export default function useBrandObjectListState() {
     editGroupLoading,
     editGroupForm,
     editGroupImageData,
+    setEditGroupImageData,
     editUserObjectModalVisible,
     setEditUserObjectModalVisible,
     editUserObjectLoading,
