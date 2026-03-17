@@ -7,6 +7,7 @@ import {
   Select,
   Upload,
 } from "antd";
+import { Z_INDEX } from "../constants";
 
 export default function EditUserObjectModal({
   visible,
@@ -23,6 +24,7 @@ export default function EditUserObjectModal({
 }) {
   return (
     <Modal
+      zIndex={Z_INDEX.MODAL_EDIT_USER_OBJECT}
       title="Edit Model"
       open={visible}
       onOk={onOk}

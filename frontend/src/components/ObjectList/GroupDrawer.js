@@ -1,6 +1,7 @@
 import { Button, Card, Drawer, Input, List } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
+import { useEffect, useState } from "react";
+import { LIST_GRID_DRAWER, DRAWER_WIDTH, Z_INDEX } from "./constants";
 
 const { Search } = Input;
 
@@ -20,7 +21,7 @@ const fabStyle = {
   justifyContent: "center",
   cursor: "pointer",
   boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-  zIndex: 1100,
+  zIndex: Z_INDEX.FAB_IN_DRAWER,
 };
 
 export default function GroupDrawer({
@@ -36,6 +37,14 @@ export default function GroupDrawer({
   onDeleteGroup,
   onAddModel,
 }) {
+  const [draftQuery, setDraftQuery] = useState("");
+
+  useEffect(() => {
+    if (!open || !selectedGroup) return;
+    setDraftQuery("");
+    onSearchChange("");
+  }, [open, selectedGroup?.id, onSearchChange]);
+
   const filteredObjects = searchKeyword.trim()
     ? userObjects.filter((item) =>
         (item.name ?? "")
@@ -43,6 +52,12 @@ export default function GroupDrawer({
           .includes(searchKeyword.trim().toLowerCase())
       )
     : userObjects;
+
+  const handleClose = () => {
+    setDraftQuery("");
+    onSearchChange("");
+    onClose();
+  };
 
   return (
     <Drawer
@@ -58,7 +73,7 @@ export default function GroupDrawer({
               paddingRight: 8,
             }}
           >
-            <span>{selectedGroup.name} Models</span>
+            <span>{selectedGroup.name}</span>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <Button size="small" onClick={onEditGroup}>
                 Edit
@@ -69,10 +84,13 @@ export default function GroupDrawer({
               <Search
                 placeholder="Search models"
                 allowClear
-                onSearch={onSearchChange}
+                value={draftQuery}
                 onChange={(e) => {
-                  if (e.target.value === "") onSearchChange("");
+                  const v = e.target.value;
+                  setDraftQuery(v);
+                  if (v === "") onSearchChange("");
                 }}
+                onSearch={(v) => onSearchChange((v ?? "").trim())}
                 style={{ width: 200 }}
               />
             </div>
@@ -80,7 +98,7 @@ export default function GroupDrawer({
         ) : null
       }
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       width={DRAWER_WIDTH}
     >
       {selectedGroup && (

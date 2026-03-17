@@ -1,4 +1,5 @@
 import { Modal } from "antd";
+import { Z_INDEX } from "../constants";
 
 export default function BrandObjectDetailModal({
   visible,
@@ -13,7 +14,7 @@ export default function BrandObjectDetailModal({
       onCancel={onCancel}
       footer={null}
       width={600}
-      zIndex={1100}
+      zIndex={Z_INDEX.MODAL_BRAND_OBJECT_DETAIL}
     >
       <img
         src={detail.image_url}

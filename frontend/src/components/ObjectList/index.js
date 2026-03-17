@@ -1,5 +1,5 @@
 import { Tabs } from "antd";
-import useBrandObjectListState from "./useBrandObjectListState";
+import useObjectListState from "./useObjectListState";
 import BrandsTab from "./BrandsTab";
 import GroupsTab from "./GroupsTab";
 import BrandDrawer from "./BrandDrawer";
@@ -14,8 +14,8 @@ import EditUserObjectModal from "./modals/EditUserObjectModal";
 
 const { TabPane } = Tabs;
 
-export default function BrandObjectList() {
-  const state = useBrandObjectListState();
+export default function ObjectList() {
+  const state = useObjectListState();
 
   const {
     brands,
@@ -133,10 +133,7 @@ export default function BrandObjectList() {
 
       <BrandDrawer
         open={brandDrawerOpen}
-        onClose={() => {
-          setBrandDrawerOpen(false);
-          setBrandObjectSearchKeyword("");
-        }}
+        onClose={() => setBrandDrawerOpen(false)}
         selectedBrand={selectedBrand}
         brandObjects={brandObjects}
         loading={loadingBrandObjects}
@@ -148,10 +145,7 @@ export default function BrandObjectList() {
 
       <GroupDrawer
         open={groupDrawerOpen}
-        onClose={() => {
-          setGroupDrawerOpen(false);
-          setGroupUserObjectSearchKeyword("");
-        }}
+        onClose={() => setGroupDrawerOpen(false)}
         selectedGroup={selectedGroup}
         userObjects={selectedGroupUserObjects}
         loading={loadingGroupUserObjects}

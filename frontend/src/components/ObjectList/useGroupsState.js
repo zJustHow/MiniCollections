@@ -1,10 +1,7 @@
+import { useEffect, useState } from "react";
 import { Form, message, Modal } from "antd";
 import moment from "moment";
-import { useEffect, useState } from "react";
 import {
-  getBrands,
-  searchBrands,
-  getBrandObjectsByBrandId,
   getGroups,
   searchGroups,
   getUserObjects,
@@ -15,30 +12,22 @@ import {
   deleteGroup,
   updateUserObject,
   deleteUserObject,
-  searchBrandObjects,
 } from "../../utils";
+import { Z_INDEX } from "./constants";
 
 const normalizeList = (data) =>
   Array.isArray(data) ? data : data?.content != null ? data.content : [];
 
-export default function useBrandObjectListState() {
-  const [brands, setBrands] = useState([]);
+export default function useGroupsState() {
   const [groups, setGroups] = useState([]);
-  const [loadingBrands, setLoadingBrands] = useState(false);
   const [loadingGroups, setLoadingGroups] = useState(false);
 
-  const [brandDrawerOpen, setBrandDrawerOpen] = useState(false);
   const [groupDrawerOpen, setGroupDrawerOpen] = useState(false);
-  const [selectedBrand, setSelectedBrand] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [selectedGroupUserObjects, setSelectedGroupUserObjects] = useState([]);
   const [loadingGroupUserObjects, setLoadingGroupUserObjects] = useState(false);
-  const [brandObjectSearchKeyword, setBrandObjectSearchKeyword] = useState("");
   const [groupUserObjectSearchKeyword, setGroupUserObjectSearchKeyword] =
     useState("");
-
-  const [brandObjects, setBrandObjects] = useState([]);
-  const [loadingBrandObjects, setLoadingBrandObjects] = useState(false);
 
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [createModalLoading, setCreateModalLoading] = useState(false);
@@ -84,21 +73,6 @@ export default function useBrandObjectListState() {
     useState(null);
 
   useEffect(() => {
-    const fetchBrands = async () => {
-      setLoadingBrands(true);
-      try {
-        const data = await getBrands();
-        setBrands(data);
-      } catch (err) {
-        message.error(err.message || "Failed to load brands");
-      } finally {
-        setLoadingBrands(false);
-      }
-    };
-    fetchBrands();
-  }, []);
-
-  useEffect(() => {
     const fetchGroups = async () => {
       setLoadingGroups(true);
       try {
@@ -132,20 +106,6 @@ export default function useBrandObjectListState() {
     };
     fetchGroupUserObjects();
   }, [selectedGroup]);
-
-  const handleBrandClick = async (brand) => {
-    setSelectedBrand(brand);
-    setBrandDrawerOpen(true);
-    setLoadingBrandObjects(true);
-    try {
-      const data = await getBrandObjectsByBrandId(brand.id);
-      setBrandObjects(data);
-    } catch (err) {
-      message.error(err.message || "Failed to load models");
-    } finally {
-      setLoadingBrandObjects(false);
-    }
-  };
 
   const handleGroupClick = (group) => {
     setSelectedGroup(group);
@@ -227,19 +187,6 @@ export default function useBrandObjectListState() {
     }
   };
 
-  const handleBrandSearch = async (value) => {
-    const keyword = value.trim();
-    setLoadingBrands(true);
-    try {
-      const data = keyword ? await searchBrands(keyword) : await getBrands();
-      setBrands(data);
-    } catch (err) {
-      message.error(err.message || "Failed to search brands");
-    } finally {
-      setLoadingBrands(false);
-    }
-  };
-
   const handleGroupSearch = async (value) => {
     const keyword = value.trim();
     setLoadingGroups(true);
@@ -304,6 +251,7 @@ export default function useBrandObjectListState() {
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
+      zIndex: Z_INDEX.MODAL_CONFIRM_DELETE_GROUP,
       onOk: async () => {
         try {
           await deleteGroup(groupId);
@@ -352,7 +300,6 @@ export default function useBrandObjectListState() {
             (o) => Number(o.id) === Number(values.brandObjectId)
           )) ||
         null;
-      // Keep existing user object image when only changing brand association; use new image only if user picked one or object had none
       const image_url =
         editUserObjectImageData ??
         selectedUserObject.image_url ??
@@ -401,7 +348,6 @@ export default function useBrandObjectListState() {
               }
             : prev
         );
-        // Refresh brand detail shown in user object detail modal when brand_object_id changed
         const newBrandObjectId =
           updated.brandObjectId ?? updated.brand_object_id;
         if (newBrandObjectId == null) {
@@ -444,6 +390,7 @@ export default function useBrandObjectListState() {
       okText: "Delete",
       okType: "danger",
       cancelText: "Cancel",
+      zIndex: Z_INDEX.MODAL_CONFIRM_DELETE_USER_OBJECT,
       onOk: async () => {
         try {
           await deleteUserObject(groupId, userObjectId);
@@ -584,28 +531,18 @@ export default function useBrandObjectListState() {
   };
 
   return {
-    brands,
-    setBrands,
     groups,
     setGroups,
-    loadingBrands,
     loadingGroups,
-    brandDrawerOpen,
-    setBrandDrawerOpen,
     groupDrawerOpen,
     setGroupDrawerOpen,
-    selectedBrand,
     selectedGroup,
     setSelectedGroup,
     selectedGroupUserObjects,
     setSelectedGroupUserObjects,
     loadingGroupUserObjects,
-    brandObjectSearchKeyword,
-    setBrandObjectSearchKeyword,
     groupUserObjectSearchKeyword,
     setGroupUserObjectSearchKeyword,
-    brandObjects,
-    loadingBrandObjects,
     createModalVisible,
     setCreateModalVisible,
     createModalLoading,
@@ -657,13 +594,11 @@ export default function useBrandObjectListState() {
     setAddModelSearchLoading,
     selectedBrandObjectForAdd,
     setSelectedBrandObjectForAdd,
-    handleBrandClick,
     handleGroupClick,
     handleBrandObjectClick,
     handleUserObjectClick,
     openCreateModal,
     handleCreateUserObject,
-    handleBrandSearch,
     handleGroupSearch,
     openEditGroupModal,
     handleUpdateGroup,
@@ -675,7 +610,6 @@ export default function useBrandObjectListState() {
     handleAddUserObjectInGroup,
     setBrandObjectDetailFromUserObject,
     handleCreateGroup,
-    searchBrandObjects,
-    message,
   };
 }
+

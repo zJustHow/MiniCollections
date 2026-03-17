@@ -1,5 +1,6 @@
 import { Card, Drawer, Input, List, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
 import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
 
 const { Search } = Input;
@@ -32,6 +33,14 @@ export default function BrandDrawer({
   onBrandObjectClick,
   onAddToGroup,
 }) {
+  const [draftQuery, setDraftQuery] = useState("");
+
+  useEffect(() => {
+    if (!open || !selectedBrand) return;
+    setDraftQuery("");
+    onSearchChange("");
+  }, [open, selectedBrand?.id, onSearchChange]);
+
   const filteredObjects = searchKeyword.trim()
     ? brandObjects.filter((bo) =>
         (bo.name || "")
@@ -39,6 +48,12 @@ export default function BrandDrawer({
           .includes(searchKeyword.trim().toLowerCase())
       )
     : brandObjects;
+
+  const handleClose = () => {
+    setDraftQuery("");
+    onSearchChange("");
+    onClose();
+  };
 
   return (
     <Drawer
@@ -54,21 +69,24 @@ export default function BrandDrawer({
               paddingRight: 8,
             }}
           >
-            <span>{selectedBrand.name} Models</span>
+            <span>{selectedBrand.name}</span>
             <Search
               placeholder="Search models"
               allowClear
-              onSearch={onSearchChange}
+              value={draftQuery}
               onChange={(e) => {
-                if (e.target.value === "") onSearchChange("");
+                const v = e.target.value;
+                setDraftQuery(v);
+                if (v === "") onSearchChange("");
               }}
+              onSearch={(v) => onSearchChange((v ?? "").trim())}
               style={{ width: 220 }}
             />
           </div>
         ) : null
       }
       open={open}
-      onClose={onClose}
+      onClose={handleClose}
       width={DRAWER_WIDTH}
     >
       {selectedBrand && (

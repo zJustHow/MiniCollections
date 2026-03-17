@@ -1,6 +1,6 @@
 import { Card, Input, List } from "antd";
 import CardCover from "./CardCover";
-import { LIST_GRID } from "./constants";
+import { LIST_GRID, Z_INDEX } from "./constants";
 
 const { Search } = Input;
 
@@ -20,7 +20,7 @@ const fabStyle = {
   justifyContent: "center",
   cursor: "pointer",
   boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-  zIndex: 1000,
+  zIndex: Z_INDEX.FAB_MAIN_LIST,
 };
 
 export default function GroupsTab({

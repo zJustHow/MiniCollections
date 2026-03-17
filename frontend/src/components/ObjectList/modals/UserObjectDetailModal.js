@@ -1,4 +1,5 @@
 import { Button, Modal, Spin } from "antd";
+import { Z_INDEX } from "../constants";
 
 export default function UserObjectDetailModal({
   visible,
@@ -20,6 +21,7 @@ export default function UserObjectDetailModal({
 
   return (
     <Modal
+      zIndex={Z_INDEX.MODAL_USER_OBJECT_DETAIL}
       title={
         <div
           style={{

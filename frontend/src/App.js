@@ -1,8 +1,7 @@
 import { Layout, Typography } from "antd";
 import { useState } from "react";
-import LoginForm from "./components/LoginForm";
-import SignupForm from "./components/SignupForm";
-import BrandObjectList from "./components/BrandObjectList";
+import { LoginForm, SignupForm } from "./components/auth";
+import ObjectList from "./components/ObjectList";
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -34,7 +33,7 @@ function App() {
         }}
       >
         {authed ? (
-          <BrandObjectList />
+          <ObjectList />
         ) : (
           <LoginForm onSuccess={() => setAuthed(true)} />
         )}
