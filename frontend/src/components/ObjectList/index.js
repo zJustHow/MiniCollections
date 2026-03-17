@@ -259,7 +259,7 @@ export default function ObjectList() {
           const keyword = (value || "").trim();
           if (keyword === "") {
             setEditModelSearchResults(
-              userObjectBrandDetail ? [userObjectBrandDetail] : []
+              userObjectBrandDetail ? [userObjectBrandDetail] : [],
             );
             return;
           }

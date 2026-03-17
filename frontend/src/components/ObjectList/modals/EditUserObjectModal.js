@@ -43,6 +43,7 @@ export default function EditUserObjectModal({
             onSearch={onSearch}
             onChange={(value) => form.setFieldsValue({ brandObjectId: value })}
             optionFilterProp="children"
+            dropdownStyle={{ zIndex: Z_INDEX.SELECT_DROPDOWN_IN_EDIT_MODAL }}
           >
             {searchResults.map((bo) => (
               <Select.Option key={bo.id} value={bo.id}>
