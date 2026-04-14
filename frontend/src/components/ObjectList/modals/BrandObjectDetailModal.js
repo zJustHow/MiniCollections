@@ -32,12 +32,24 @@ export default function BrandObjectDetailModal({
         {detail.name ?? "—"}
       </p>
       <p>
+        <strong>Category: </strong>
+        {detail.category ?? "—"}
+      </p>
+      <p>
+        <strong>Scale: </strong>
+        {detail.scale ?? "—"}
+      </p>
+      <p>
         <strong>Release Price: </strong>
-        {detail.releasePrice != null ? detail.releasePrice : "—"}
+        {detail.release_price != null
+          ? detail.release_price
+          : detail.releasePrice != null
+            ? detail.releasePrice
+            : "—"}
       </p>
       <p>
         <strong>Release Date: </strong>
-        {detail.releaseDate ?? "—"}
+        {detail.release_date ?? detail.releaseDate ?? "—"}
       </p>
     </Modal>
   );

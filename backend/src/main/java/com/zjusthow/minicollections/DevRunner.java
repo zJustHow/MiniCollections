@@ -51,9 +51,9 @@ public class DevRunner implements ApplicationRunner {
         long b2 = brands.get(1).id();
 
         brandObjectRepository.saveAll(List.of(
-                new BrandObjectEntity(null, b1, "Brand1Object1", null, null, null),
-                new BrandObjectEntity(null, b1, "Brand1Object2", null, null, null),
-                new BrandObjectEntity(null, b2, "Brand2Object1", null, null, null)
+                new BrandObjectEntity(null, b1, "Brand1Object1", null, null, null, null, null),
+                new BrandObjectEntity(null, b1, "Brand1Object2", null, null, null, null, null),
+                new BrandObjectEntity(null, b2, "Brand2Object1", null, null, null, null, null)
         ));
 
         List<UserEntity> users = userRepository.saveAll(List.of(

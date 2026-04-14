@@ -13,6 +13,8 @@ public record BrandObjectEntity(
         String name,
         String imageUrl,
         BigDecimal releasePrice,
-        LocalDate releaseDate
+        LocalDate releaseDate,
+        String category,
+        String scale
 ) {
 }

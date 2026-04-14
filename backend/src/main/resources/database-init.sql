@@ -39,6 +39,8 @@ CREATE TABLE brand_objects
     image_url TEXT,
     release_price DECIMAL(10, 2),
     release_date DATE,
+    category VARCHAR(255),
+    scale VARCHAR(64),
     CONSTRAINT fk_brand FOREIGN KEY (brand_id) REFERENCES brands (id)
 );
 

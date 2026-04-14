@@ -102,7 +102,16 @@ export default function UserObjectDetailModal({
                   marginRight: 12,
                 }}
               />
-              <span>{brandDetail.name}</span>
+              <span>
+                {brandDetail.name}
+                {(brandDetail.category || brandDetail.scale) && (
+                  <span style={{ color: "#888", marginLeft: 8 }}>
+                    {[brandDetail.category, brandDetail.scale]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                )}
+              </span>
             </div>
           ) : (
             <p style={{ marginTop: 8 }}>No related brand object found.</p>

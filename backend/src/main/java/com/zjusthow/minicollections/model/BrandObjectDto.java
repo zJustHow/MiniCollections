@@ -7,7 +7,9 @@ public record BrandObjectDto(
         String name,
         String imageUrl,
         java.math.BigDecimal releasePrice,
-        java.time.LocalDate releaseDate
+        java.time.LocalDate releaseDate,
+        String category,
+        String scale
     ) {
 
     public BrandObjectDto(BrandObjectEntity entity) {
@@ -16,7 +18,9 @@ public record BrandObjectDto(
                 entity.name(),
                 entity.imageUrl(),
                 entity.releasePrice(),
-                entity.releaseDate()
+                entity.releaseDate(),
+                entity.category(),
+                entity.scale()
         );
     }
 }
