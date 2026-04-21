@@ -94,4 +94,4 @@ INSERT INTO brand_objects (brand_id, name_en, name_zh, image_url, release_price_
 (2, '1-64 Land Rover Range Rover 2022 - Black', NULL, '/images/lcd/1-64-range-rover-2022-black.jpg', NULL, NULL, NULL, 'car', NULL, '1:64'),
 (2, '1-64 McLaren Speedtail- Black Carbon', NULL, '/images/lcd/1-64-mclaren-speedtail-blackcarbon.jpg', NULL, NULL, NULL, 'car', NULL, '1:64'),
 (2, '1-64 McLaren Speedtail- Gold', NULL, '/images/lcd/1-64-mclaren-speedtail-gold.jpg', NULL, NULL, NULL, 'car', NULL, '1:64'),
-(2, '1-64 McLaren Speedtail-Blue', '/images/lcd/1-64-mclaren-speedtail-blue.jpg', 'car', '1:64');
+(2, '1-64 McLaren Speedtail-Blue', NULL, '/images/lcd/1-64-mclaren-speedtail-blue.jpg', NULL, NULL, NULL, 'car', NULL, '1:64');

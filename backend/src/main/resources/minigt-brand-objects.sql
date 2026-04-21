@@ -1054,6 +1054,6 @@ INSERT INTO brand_objects (brand_id, name_en, name_zh, image_url, release_price_
 (1, 'Bugatti Vision Gran Turismo     Silver', NULL, '/images/minigt/367.JPG', NULL, NULL, NULL, 'car', NULL, '1:64'),
 (1, 'Bugatti Centodieci White', NULL, '/images/minigt/323.JPG', NULL, NULL, NULL, 'car', NULL, '1:64'),
 (1, 'Bugatti Vision Gran Turismo Yellow', NULL, '/images/minigt/299.JPG', NULL, NULL, NULL, 'car', NULL, '1:64'),
-(1, 'Bugatti Vision Gran Turismo  Light Blue', '/images/minigt/248.JPG', 'car', '1:64');
+(1, 'Bugatti Vision Gran Turismo  Light Blue', NULL, '/images/minigt/248.JPG', NULL, NULL, NULL, 'car', NULL, '1:64');
 
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));

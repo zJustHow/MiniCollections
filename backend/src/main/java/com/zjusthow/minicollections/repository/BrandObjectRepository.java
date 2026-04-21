@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEntity, Long> {
-    Optional<List<BrandObjectEntity>> findByName(String brandObjectName);
 
     Optional<List<BrandObjectEntity>> findByBrandId(Long brandId);
 
