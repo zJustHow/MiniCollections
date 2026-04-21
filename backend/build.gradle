@@ -22,9 +22,12 @@ dependencies {
     implementation 'com.github.ben-manes.caffeine:caffeine:3.+'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation platform('software.amazon.awssdk:bom:2.29.45')
+    implementation 'software.amazon.awssdk:s3'
     runtimeOnly 'org.postgresql:postgresql:42.7.7'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'

@@ -42,18 +42,18 @@ public class DevRunner implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         List<BrandEntity> brands = brandRepository.saveAll(List.of(
-                new BrandEntity(null, "Brand1", null),
-                new BrandEntity(null, "Brand2", null)
+                new BrandEntity(null, "Brand1", null, null),
+                new BrandEntity(null, "Brand2", null, null)
         ));
         long b1 = brands.get(0).id();
         long b2 = brands.get(1).id();
 
         brandObjectRepository.saveAll(List.of(
-                new BrandObjectEntity(null, b1, "Brand1Object1", null, null, null, null, null),
-                new BrandObjectEntity(null, b1, "Brand1Object2", null, null, null, null, null),
-                new BrandObjectEntity(null, b2, "Brand2Object1", null, null, null, null, null)
+                new BrandObjectEntity(null, b1, "Brand1Object1", null, null, null, null, null, null, null, null),
+                new BrandObjectEntity(null, b1, "Brand1Object2", null, null, null, null, null, null, null, null),
+                new BrandObjectEntity(null, b2, "Brand2Object1", null, null, null, null, null, null, null, null)
         ));
 
         List<UserEntity> users = userRepository.saveAll(List.of(
@@ -88,12 +88,12 @@ public class DevRunner implements ApplicationRunner {
 
         userService.signUp("test@email.com", "test", "test");
         long u4 = userRepository.findByEmail("test@email.com").orElseThrow().id();
-        List<GroupEntity> TestGroups = groupRepository.saveAll(List.of(
+        List<GroupEntity> testGroups = groupRepository.saveAll(List.of(
                 new GroupEntity(null, u4, "TestGroup1", null),
                 new GroupEntity(null, u4, "TestGroup2", null)
         ));
-        long g4a = TestGroups.get(0).id();
-        long g4b = TestGroups.get(1).id();
+        long g4a = testGroups.get(0).id();
+        long g4b = testGroups.get(1).id();
 
         userObjectRepository.saveAll(List.of(
                 new UserObjectEntity(null, u4, g4a, null, "TestGroup1Object1", null, null, null, null),

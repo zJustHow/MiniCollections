@@ -1,25 +1,45 @@
 package com.zjusthow.minicollections.model;
 
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
+import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 public record BrandObjectDto(
         Long id,
         String name,
+        String nameEn,
+        String nameZh,
         String imageUrl,
-        java.math.BigDecimal releasePrice,
-        java.time.LocalDate releaseDate,
+        BigDecimal releasePrice,
+        BigDecimal releasePriceCny,
+        BigDecimal releasePriceUsd,
+        LocalDate releaseDate,
         String category,
+        String categoryEn,
+        String categoryZh,
         String scale
-    ) {
+) {
 
-    public BrandObjectDto(BrandObjectEntity entity) {
-        this(
+    public static BrandObjectDto from(BrandObjectEntity entity, boolean preferZh, boolean preferCny) {
+        String name = DisplayLocaleResolver.pickName(entity.nameEn(), entity.nameZh(), preferZh);
+        String cat = DisplayLocaleResolver.pickCategory(entity.categoryEn(), entity.categoryZh(), preferZh);
+        BigDecimal price = DisplayLocaleResolver.pickPrice(
+                entity.releasePriceCny(), entity.releasePriceUsd(), preferCny);
+        return new BrandObjectDto(
                 entity.id(),
-                entity.name(),
+                name,
+                entity.nameEn(),
+                entity.nameZh(),
                 entity.imageUrl(),
-                entity.releasePrice(),
+                price,
+                entity.releasePriceCny(),
+                entity.releasePriceUsd(),
                 entity.releaseDate(),
-                entity.category(),
+                cat,
+                entity.categoryEn(),
+                entity.categoryZh(),
                 entity.scale()
         );
     }

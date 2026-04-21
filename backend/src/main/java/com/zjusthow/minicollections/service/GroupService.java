@@ -14,6 +14,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -35,7 +37,7 @@ public class GroupService {
     )
     public List<GroupDto> getGroups(Long userId) {
         return groupRepository.findByUserId(userId)
-                .orElseThrow(() -> new GroupNotFoundException())
+                .orElseThrow(GroupNotFoundException::new)
                 .stream()
                 .map(GroupDto::new)
                 .toList();
@@ -63,11 +65,11 @@ public class GroupService {
             return Collections.emptyList();
         }
 
-        List<GroupDto> GroupDtos = getGroups(userId);
+        List<GroupDto> groupDtos = getGroups(userId);
 
         String lowerCaseKeyword = keyword.toLowerCase();
 
-        return GroupDtos.stream()
+        return groupDtos.stream()
                 .filter(groupDto -> groupDto.name().toLowerCase().contains(lowerCaseKeyword))
                 .toList();
     }
@@ -101,7 +103,7 @@ public class GroupService {
                 userId,
                 name,
                 imageUrl
-                );
+        );
         GroupEntity savedGroupEntity = groupRepository.save(updatedGroupEntity);
         return new GroupDto(savedGroupEntity);
     }
@@ -150,8 +152,8 @@ public class GroupService {
             Long brandObjectId,
             String name,
             String imageUrl,
-            java.time.LocalDate purchaseDate,
-            java.math.BigDecimal purchasePrice,
+            LocalDate purchaseDate,
+            BigDecimal purchasePrice,
             String otherNotes
     ) {
         GroupEntity groupEntity = groupRepository.findById(groupId)
@@ -187,8 +189,8 @@ public class GroupService {
             Long brandObjectId,
             String name,
             String imageUrl,
-            java.time.LocalDate purchaseDate,
-            java.math.BigDecimal purchasePrice,
+            LocalDate purchaseDate,
+            BigDecimal purchasePrice,
             String otherNotes
     ) {
         UserObjectEntity existing = userObjectRepository.findById(userObjectId)

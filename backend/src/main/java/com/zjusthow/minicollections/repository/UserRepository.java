@@ -18,4 +18,8 @@ public interface UserRepository extends ListCrudRepository<UserEntity, Long> {
     @Modifying
     @Query("UPDATE users SET name = :name WHERE email = :email")
     void updateNameByEmail(String email, String name);
+
+    @Modifying
+    @Query("UPDATE users SET preferred_locale = :preferredLocale WHERE email = :email")
+    void updatePreferredLocaleByEmail(String email, String preferredLocale);
 }

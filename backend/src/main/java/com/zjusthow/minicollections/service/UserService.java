@@ -6,9 +6,11 @@ import com.zjusthow.minicollections.exception.EmailExistsException;
 import com.zjusthow.minicollections.exception.UserNotFoundException;
 import com.zjusthow.minicollections.repository.GroupRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
+import com.zjusthow.minicollections.model.UserProfileDto;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
@@ -62,6 +64,19 @@ public class UserService {
     public UserEntity getUserByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException());
+    }
+
+    public UserProfileDto getProfile(String email) {
+        UserEntity u = getUserByEmail(email);
+        return new UserProfileDto(u.id(), u.email(), u.name(), u.preferredLocale());
+    }
+
+    @Transactional
+    @CacheEvict(value = "users", key = "#email", beforeInvocation = true)
+    public UserProfileDto updatePreferredLocale(String email, String preferredLocale) {
+        String e = email.toLowerCase();
+        userRepository.updatePreferredLocaleByEmail(e, preferredLocale.strip());
+        return getProfile(e);
     }
 
 }

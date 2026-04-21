@@ -12,6 +12,8 @@ import {
   deleteGroup,
   updateUserObject,
   deleteUserObject,
+  purchasePriceFromFormValue,
+  displayPurchasePriceFromObject,
 } from "../../utils";
 import { Z_INDEX } from "./constants";
 
@@ -164,8 +166,7 @@ export default function useGroupsState() {
         purchase_date: values.purchaseDate
           ? values.purchaseDate.format("YYYY-MM-DD")
           : null,
-        purchase_price:
-          values.purchasePrice !== undefined ? values.purchasePrice : null,
+        ...purchasePriceFromFormValue(values.purchasePrice),
         other_notes: values.otherNotes || null,
       };
       setCreateModalLoading(true);
@@ -275,8 +276,7 @@ export default function useGroupsState() {
     editUserObjectForm.setFieldsValue({
       brandObjectId: brandObjectId ?? undefined,
       name: selectedUserObject.name ?? "",
-      purchasePrice:
-        selectedUserObject.purchasePrice ?? selectedUserObject.purchase_price,
+      purchasePrice: displayPurchasePriceFromObject(selectedUserObject),
       purchaseDate: pd ? moment(pd) : null,
       otherNotes:
         selectedUserObject.otherNotes ?? selectedUserObject.other_notes ?? "",
@@ -314,8 +314,7 @@ export default function useGroupsState() {
         purchase_date: values.purchaseDate
           ? values.purchaseDate.format("YYYY-MM-DD")
           : null,
-        purchase_price:
-          values.purchasePrice !== undefined ? values.purchasePrice : null,
+        ...purchasePriceFromFormValue(values.purchasePrice),
         other_notes: values.otherNotes || null,
       };
       try {
@@ -453,8 +452,7 @@ export default function useGroupsState() {
         purchase_date: values.purchaseDate
           ? values.purchaseDate.format("YYYY-MM-DD")
           : null,
-        purchase_price:
-          values.purchasePrice !== undefined ? values.purchasePrice : null,
+        ...purchasePriceFromFormValue(values.purchasePrice),
         other_notes: values.otherNotes || null,
       };
       setAddUserObjectInGroupLoading(true);

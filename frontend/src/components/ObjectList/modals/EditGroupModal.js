@@ -1,4 +1,5 @@
-import { Form, Input, Modal, Upload } from "antd";
+import { Form, Input, message, Modal, Upload } from "antd";
+import { uploadImage } from "../../../utils";
 
 export default function EditGroupModal({
   visible,
@@ -31,10 +32,13 @@ export default function EditGroupModal({
           <Upload
             listType="picture-card"
             showUploadList={false}
-            beforeUpload={(file) => {
-              const reader = new FileReader();
-              reader.onload = (e) => onImageChange(e.target.result);
-              reader.readAsDataURL(file);
+            beforeUpload={async (file) => {
+              try {
+                const url = await uploadImage(file);
+                onImageChange(url);
+              } catch (e) {
+                message.error(e.message || "Upload failed");
+              }
               return false;
             }}
           >

@@ -12,7 +12,8 @@ CREATE TABLE users
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     enabled BOOLEAN DEFAULT TRUE NOT NULL,
-    name VARCHAR(255)
+    name VARCHAR(255),
+    preferred_locale VARCHAR(16) NOT NULL DEFAULT 'en-US'
 );
 
 CREATE TABLE groups
@@ -27,7 +28,8 @@ CREATE TABLE groups
 CREATE TABLE brands
 (
     id SERIAL PRIMARY KEY NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    name_en VARCHAR(512) NOT NULL,
+    name_zh VARCHAR(512),
     image_url TEXT
 );
 
@@ -35,11 +37,14 @@ CREATE TABLE brand_objects
 (
     id SERIAL PRIMARY KEY NOT NULL,
     brand_id INTEGER,
-    name VARCHAR(255) NOT NULL,
+    name_en VARCHAR(1024) NOT NULL,
+    name_zh VARCHAR(1024),
     image_url TEXT,
-    release_price DECIMAL(10, 2),
+    release_price_cny DECIMAL(10, 2),
+    release_price_usd DECIMAL(10, 2),
     release_date DATE,
-    category VARCHAR(255),
+    category_en VARCHAR(255),
+    category_zh VARCHAR(255),
     scale VARCHAR(64),
     CONSTRAINT fk_brand FOREIGN KEY (brand_id) REFERENCES brands (id)
 );
@@ -69,7 +74,7 @@ CREATE TABLE authorities
 );
 
 -- MINI GT brand and products (images stored under backend/src/main/resources/static/images/minigt/)
-INSERT INTO brands (id, name, image_url) VALUES (1, 'MINI GT', '/images/minigt/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (1, 'MINI GT', NULL, '/images/minigt/logo.svg');
 
 -- MINI GT brand_objects: 1056 products loaded from minigt-brand-objects.sql
 
@@ -80,7 +85,7 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 UPDATE brands SET image_url = '/images/minigt/logo.svg' WHERE id = 1;
 
 -- LCD brand (1:64). brand_objects: 95 products in lcd-brand-objects.sql
-INSERT INTO brands (id, name, image_url) VALUES (2, 'LCD', '/images/lcd/logo.png');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (2, 'LCD', NULL, '/images/lcd/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));

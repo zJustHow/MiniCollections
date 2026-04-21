@@ -6,7 +6,8 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("brands")
 public record BrandEntity(
         @Id Long id,
-        String name,
+        String nameEn,
+        String nameZh,
         String imageUrl
 ) {
 }

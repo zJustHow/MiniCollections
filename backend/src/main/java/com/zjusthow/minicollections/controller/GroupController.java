@@ -23,9 +23,8 @@ public class GroupController {
     private final UserService userService;
 
     public GroupController(
-        GroupService groupService,
-        UserService userService
-        ) {
+            GroupService groupService,
+            UserService userService) {
         this.groupService = groupService;
         this.userService = userService;
     }
@@ -39,8 +38,7 @@ public class GroupController {
     @GetMapping("/{groupId}")
     public ResponseEntity<GroupDto> getGroupById(
             @AuthenticationPrincipal User user,
-            @PathVariable Long groupId
-        ) {
+            @PathVariable Long groupId) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         return ResponseEntity.ok(groupService.getGroupById(userEntity.id(), groupId));
     }
@@ -48,8 +46,7 @@ public class GroupController {
     @GetMapping("/search")
     public ResponseEntity<List<GroupDto>> searchGroups(
             @AuthenticationPrincipal User user,
-            @RequestParam String keyword
-        ) {
+            @RequestParam String keyword) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         return ResponseEntity.ok(groupService.searchGroups(userEntity.id(), keyword));
     }
@@ -57,8 +54,7 @@ public class GroupController {
     @PostMapping
     public ResponseEntity<GroupDto> createGroup(
             @AuthenticationPrincipal User user,
-            @RequestBody @Valid GroupBody groupBody
-        ) {
+            @RequestBody @Valid GroupBody groupBody) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         GroupDto groupDto = groupService.createGroup(userEntity.id(), groupBody.name(), groupBody.imageUrl());
         return ResponseEntity.status(HttpStatus.CREATED).body(groupDto);
@@ -68,8 +64,7 @@ public class GroupController {
     public ResponseEntity<GroupDto> updateGroup(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
-            @RequestBody @Valid GroupBody groupBody
-        ) {
+            @RequestBody @Valid GroupBody groupBody) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         GroupDto groupDto = groupService.updateGroup(userEntity.id(), groupId, groupBody.name(), groupBody.imageUrl());
         return ResponseEntity.ok(groupDto);
@@ -78,8 +73,7 @@ public class GroupController {
     @DeleteMapping("/{groupId}")
     public ResponseEntity<Void> deleteGroupById(
             @AuthenticationPrincipal User user,
-            @PathVariable Long groupId
-        ) {
+            @PathVariable Long groupId) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         groupService.deleteGroupById(userEntity.id(), groupId);
         return ResponseEntity.noContent().build();
@@ -88,8 +82,7 @@ public class GroupController {
     @GetMapping("/{groupId}/objects")
     public ResponseEntity<List<UserObjectDto>> getUserObjects(
             @AuthenticationPrincipal User user,
-            @PathVariable Long groupId
-        ) {
+            @PathVariable Long groupId) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         return ResponseEntity.ok(groupService.getUserObjects(userEntity.id(), groupId));
     }
@@ -98,8 +91,7 @@ public class GroupController {
     public ResponseEntity<UserObjectDto> createUserObject(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
-            @RequestBody @Valid UserObjectBody userObjectBody
-        ) {
+            @RequestBody @Valid UserObjectBody userObjectBody) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         UserObjectDto userObjectDto = groupService.createUserObject(
                 userEntity.id(),
@@ -109,8 +101,7 @@ public class GroupController {
                 userObjectBody.imageUrl(),
                 userObjectBody.purchaseDate(),
                 userObjectBody.purchasePrice(),
-                userObjectBody.otherNotes()
-        );
+                userObjectBody.otherNotes());
         return ResponseEntity.status(HttpStatus.CREATED).body(userObjectDto);
     }
 
@@ -119,8 +110,7 @@ public class GroupController {
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
             @PathVariable Long userObjectId,
-            @RequestBody @Valid UserObjectBody userObjectBody
-        ) {
+            @RequestBody @Valid UserObjectBody userObjectBody) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         UserObjectDto dto = groupService.updateUserObject(
                 userEntity.id(),
@@ -130,16 +120,14 @@ public class GroupController {
                 userObjectBody.imageUrl(),
                 userObjectBody.purchaseDate(),
                 userObjectBody.purchasePrice(),
-                userObjectBody.otherNotes()
-        );
+                userObjectBody.otherNotes());
         return ResponseEntity.ok(dto);
     }
 
     @DeleteMapping("/{groupId}/objects/{userObjectId}")
     public ResponseEntity<Void> deleteUserObjectById(
             @AuthenticationPrincipal User user,
-            @PathVariable Long userObjectId
-        ) {
+            @PathVariable Long userObjectId) {
         UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         groupService.deleteUserObjectById(userEntity.id(), userObjectId);
         return ResponseEntity.noContent().build();

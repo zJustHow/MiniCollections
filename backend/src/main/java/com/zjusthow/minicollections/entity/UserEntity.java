@@ -9,6 +9,10 @@ public record UserEntity(
         String email,
         String password,
         boolean enabled,
-        String name
+        String name,
+        String preferredLocale
 ) {
+    public UserEntity(Long id, String email, String password, boolean enabled, String name) {
+        this(id, email, password, enabled, name, "en-US");
+    }
 }

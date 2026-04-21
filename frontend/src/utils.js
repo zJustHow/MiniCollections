@@ -174,3 +174,35 @@ export const deleteUserObject = async (groupId, userObjectId) => {
     throw new Error(errorText || "Request failed");
   }
 };
+
+export const uploadImage = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch("/uploads/image", {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Upload failed");
+  }
+  const data = await response.json();
+  return data.url;
+};
+
+export const purchasePriceFromFormValue = (value) => {
+  if (value === undefined || value === null || value === "") {
+    return { purchase_price: null };
+  }
+  const n = typeof value === "string" ? parseFloat(value, 10) : value;
+  if (Number.isNaN(n)) {
+    return { purchase_price: null };
+  }
+  return { purchase_price: n };
+};
+
+export const displayPurchasePriceFromObject = (obj) => {
+  if (!obj) return undefined;
+  return obj.purchase_price ?? obj.purchasePrice;
+};

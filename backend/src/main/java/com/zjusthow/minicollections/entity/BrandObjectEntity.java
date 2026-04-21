@@ -10,11 +10,14 @@ import org.springframework.data.relational.core.mapping.Table;
 public record BrandObjectEntity(
         @Id Long id,
         Long brandId,
-        String name,
+        String nameEn,
+        String nameZh,
         String imageUrl,
-        BigDecimal releasePrice,
+        BigDecimal releasePriceCny,
+        BigDecimal releasePriceUsd,
         LocalDate releaseDate,
-        String category,
+        String categoryEn,
+        String categoryZh,
         String scale
 ) {
 }

@@ -1,4 +1,5 @@
-import { DatePicker, Form, Input, InputNumber, Modal, Select, Upload } from "antd";
+import { DatePicker, Form, Input, InputNumber, message, Modal, Select, Upload } from "antd";
+import { uploadImage } from "../../../utils";
 
 export default function AddToGroupModal({
   visible,
@@ -32,10 +33,13 @@ export default function AddToGroupModal({
           <Upload
             listType="picture-card"
             showUploadList={false}
-            beforeUpload={(file) => {
-              const reader = new FileReader();
-              reader.onload = (e) => onImageChange(e.target.result);
-              reader.readAsDataURL(file);
+            beforeUpload={async (file) => {
+              try {
+                const url = await uploadImage(file);
+                onImageChange(url);
+              } catch (e) {
+                message.error(e.message || "Upload failed");
+              }
               return false;
             }}
           >
