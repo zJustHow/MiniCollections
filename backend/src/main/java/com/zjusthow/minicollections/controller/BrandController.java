@@ -31,63 +31,57 @@ public class BrandController {
         this.userService = userService;
     }
 
-    private String effectiveLocale(String locale, String acceptLanguage, User user) {
+    private String effectiveLocale(String acceptLanguage, User user) {
         UserEntity ue = user != null ? userService.getUserByEmail(user.getUsername()) : null;
-        return displayLocaleResolver.resolveEffectiveLocale(locale, acceptLanguage, ue);
+        return displayLocaleResolver.resolveEffectiveLocale(acceptLanguage, ue);
     }
 
     @GetMapping
     public ResponseEntity<List<BrandDto>> getBrands(
-            @RequestParam(required = false) String locale,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.getBrands(effectiveLocale(locale, acceptLanguage, user)));
+        return ResponseEntity.ok(brandService.getBrands(effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<BrandDto>> searchBrands(
             @RequestParam String keyword,
-            @RequestParam(required = false) String locale,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.searchBrands(keyword, effectiveLocale(locale, acceptLanguage, user)));
+        return ResponseEntity.ok(brandService.searchBrands(keyword, effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/{brandId}")
     public ResponseEntity<BrandDto> getBrandById(
             @PathVariable Long brandId,
-            @RequestParam(required = false) String locale,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.getBrandById(brandId, effectiveLocale(locale, acceptLanguage, user)));
+        return ResponseEntity.ok(brandService.getBrandById(brandId, effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/{brandId}/objects")
     public ResponseEntity<List<BrandObjectDto>> getBrandObjectsByBrandId(
             @PathVariable Long brandId,
-            @RequestParam(required = false) String locale,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.getBrandObjectsByBrandId(
-                brandId, effectiveLocale(locale, acceptLanguage, user)));
+                brandId, effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/objects/search")
     public ResponseEntity<List<BrandObjectDto>> searchBrandObjects(
             @RequestParam String keyword,
-            @RequestParam(required = false) String locale,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.searchBrandObjects(
-                keyword, effectiveLocale(locale, acceptLanguage, user)));
+                keyword, effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/objects/{id}")
     public ResponseEntity<BrandObjectDto> getBrandObjectById(
             @PathVariable Long id,
-            @RequestParam(required = false) String locale,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.getBrandObjectById(id, effectiveLocale(locale, acceptLanguage, user)));
+        return ResponseEntity.ok(brandService.getBrandObjectById(id, effectiveLocale(acceptLanguage, user)));
     }
 }

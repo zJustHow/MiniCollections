@@ -9,10 +9,7 @@ import java.util.Locale;
 @Component
 public class DisplayLocaleResolver {
 
-    public String resolveEffectiveLocale(String explicitLocale, String acceptLanguage, UserEntity user) {
-        if (explicitLocale != null && !explicitLocale.isBlank()) {
-            return explicitLocale.strip();
-        }
+    public String resolveEffectiveLocale(String acceptLanguage, UserEntity user) {
         if (user != null && user.preferredLocale() != null && !user.preferredLocale().isBlank()) {
             return user.preferredLocale().strip();
         }
