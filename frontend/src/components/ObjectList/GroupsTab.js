@@ -8,18 +8,14 @@ const fabStyle = {
   position: "fixed",
   right: 40,
   bottom: 40,
-  width: 48,
-  height: 48,
+  width: 52,
+  height: 52,
   borderRadius: "50%",
-  border: "none",
-  backgroundColor: "#1890ff",
-  color: "#fff",
-  fontSize: 24,
+  fontSize: 26,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   cursor: "pointer",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
   zIndex: Z_INDEX.FAB_MAIN_LIST,
 };
 
@@ -70,7 +66,7 @@ export default function GroupsTab({
           </List.Item>
         )}
       />
-      <button type="button" onClick={onCreateGroup} style={fabStyle}>
+      <button type="button" onClick={onCreateGroup} style={fabStyle} className="neu-fab">
         +
       </button>
     </div>

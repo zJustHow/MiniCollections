@@ -1,4 +1,5 @@
 @import "antd/dist/antd.css";
+@import "./styles/skeuomorphic.css";
 
 body {
   margin: 0;

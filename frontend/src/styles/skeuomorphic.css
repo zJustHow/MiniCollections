@@ -1,0 +1,607 @@
+/* ============================================================
+   NEUMORPHISM THEME — MiniCollections
+   Soft UI / New Skeuomorphism
+   BG: #fcfbf8  Accent: #5592cc
+   ============================================================ */
+
+:root {
+  /* ── Color palette ── */
+  --neu-bg:           #fcfbf8;              /* warm near-white              */
+  --neu-sd:           rgba(184, 182, 176, 0.55); /* warm-neutral dark shadow  */
+  --neu-sl:           rgba(255, 255, 255, 0.95); /* bright white highlight   */
+
+  --neu-accent:       #5592cc;              /* cooler medium blue           */
+  --neu-accent-dark:  #3d78b8;              /* pressed / darker accent      */
+  --neu-accent-light: #6aa8dc;              /* hover / lighter accent       */
+
+  --neu-danger:       #e05d5d;
+  --neu-danger-dark:  #c44040;
+
+  --neu-text:         #3c4f68;              /* dark navy-gray text         */
+  --neu-text-2:       #8a9db8;              /* secondary / placeholder     */
+  --neu-border-r:     14px;
+
+  /* raised (convex) — element floats above surface */
+  --raised:    8px 8px 20px var(--neu-sd), -8px -8px 20px var(--neu-sl);
+  --raised-sm: 5px 5px 12px var(--neu-sd), -5px -5px 12px var(--neu-sl);
+
+  /* inset (concave) — element pressed into surface */
+  --inset:    inset 5px 5px 12px var(--neu-sd), inset -5px -5px 12px var(--neu-sl);
+  --inset-sm: inset 3px 3px 8px  var(--neu-sd), inset -3px -3px 8px  var(--neu-sl);
+}
+
+/* ── GLOBAL ───────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--neu-bg) !important;
+  color: var(--neu-text) !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LAYOUT ───────────────────────────────────────────────── */
+.ant-layout {
+  background: var(--neu-bg) !important;
+}
+
+.ant-layout-content {
+  background: var(--neu-bg) !important;
+}
+
+/* ── HEADER ───────────────────────────────────────────────── */
+.ant-layout-header {
+  background: var(--neu-bg) !important;
+  box-shadow: 0 6px 20px rgba(184, 182, 176, 0.5),
+              0 2px 6px rgba(184, 182, 176, 0.3) !important;
+  border-bottom: none !important;
+  position: relative;
+  z-index: 10;
+}
+
+/* ── HEADER TAB BUTTONS ───────────────────────────────────── */
+.neu-tab-btn {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 8px;
+  padding: 4px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--neu-text-2);
+  box-shadow: var(--raised-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  letter-spacing: 0.3px;
+}
+
+.neu-tab-btn:hover {
+  color: var(--neu-text);
+}
+
+.neu-tab-btn.active {
+  box-shadow: var(--inset-sm);
+  color: var(--neu-accent);
+}
+
+/* ── TABS (antd — kept for compatibility) ─────────────────── */
+.ant-tabs-nav::before {
+  border-bottom: none !important;
+}
+
+.ant-tabs-nav {
+  margin-bottom: 0 !important;
+  padding: 0 4px !important;
+}
+
+.ant-tabs-tab {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 12px 12px 0 0 !important;
+  padding: 10px 24px !important;
+  margin-right: 6px !important;
+  color: var(--neu-text-2) !important;
+  font-weight: 600 !important;
+  box-shadow: var(--raised-sm) !important;
+  transition: all 0.18s ease !important;
+  position: relative;
+}
+
+.ant-tabs-tab:hover:not(.ant-tabs-tab-active) {
+  color: var(--neu-text) !important;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active {
+  box-shadow: var(--inset-sm) !important;
+  background: var(--neu-bg) !important;
+}
+
+.ant-tabs-tab-btn {
+  color: inherit !important;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--neu-accent) !important;
+  text-shadow: none !important;
+}
+
+.ant-tabs-ink-bar {
+  background: var(--neu-accent) !important;
+  height: 3px !important;
+  border-radius: 2px !important;
+  bottom: 0 !important;
+}
+
+/* tab content area */
+.ant-tabs-content-holder {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 0 14px 14px 14px !important;
+  padding: 24px !important;
+  box-shadow: var(--inset) !important;
+}
+
+/* ── CARDS ────────────────────────────────────────────────── */
+.ant-card {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: var(--neu-border-r) !important;
+  box-shadow: var(--raised) !important;
+  transition: box-shadow 0.2s ease, transform 0.2s ease !important;
+  overflow: hidden !important;
+}
+
+.ant-card-hoverable:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 10px 10px 22px var(--neu-sd), -6px -6px 16px var(--neu-sl) !important;
+}
+
+.ant-card-hoverable:active {
+  transform: translateY(0) !important;
+  box-shadow: var(--inset-sm) !important;
+}
+
+.ant-card-body {
+  background: var(--neu-bg) !important;
+  border-top: 1px solid rgba(184, 182, 176, 0.3) !important;
+  color: var(--neu-text) !important;
+}
+
+/* ── BUTTONS ──────────────────────────────────────────────── */
+.ant-btn {
+  border: none !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+  background: var(--neu-bg) !important;
+  color: var(--neu-text) !important;
+  box-shadow: var(--raised-sm) !important;
+  transition: all 0.15s ease !important;
+}
+
+.ant-btn:hover:not([disabled]) {
+  color: var(--neu-accent) !important;
+  box-shadow: 5px 5px 12px var(--neu-sd), -5px -5px 12px var(--neu-sl) !important;
+}
+
+.ant-btn:active:not([disabled]) {
+  box-shadow: var(--inset-sm) !important;
+  transform: translateY(1px) !important;
+}
+
+/* primary — accent blue flat */
+.ant-btn-primary {
+  background: var(--neu-accent) !important;
+  color: #fff !important;
+  box-shadow: 4px 4px 10px rgba(61, 120, 184, 0.38),
+              -2px -2px 6px rgba(255, 255, 255, 0.7) !important;
+}
+
+.ant-btn-primary:hover:not([disabled]) {
+  background: var(--neu-accent-light) !important;
+  color: #fff !important;
+  box-shadow: 5px 5px 14px rgba(61, 120, 184, 0.42),
+              -2px -2px 7px rgba(255, 255, 255, 0.75) !important;
+}
+
+.ant-btn-primary:active:not([disabled]) {
+  background: var(--neu-accent-dark) !important;
+  box-shadow: inset 3px 3px 8px rgba(30, 70, 140, 0.38),
+              inset -2px -2px 5px rgba(120, 180, 255, 0.25) !important;
+}
+
+/* danger button — flat */
+.ant-btn-dangerous {
+  background: var(--neu-danger) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 4px 4px 10px rgba(200, 64, 64, 0.32),
+              -2px -2px 6px rgba(255, 255, 255, 0.7) !important;
+}
+
+.ant-btn-dangerous:hover:not([disabled]) {
+  background: #ea7070 !important;
+  color: #fff !important;
+}
+
+.ant-btn-dangerous:active:not([disabled]) {
+  background: var(--neu-danger-dark) !important;
+  box-shadow: inset 3px 3px 8px rgba(150, 30, 30, 0.38) !important;
+}
+
+/* ── INPUTS ───────────────────────────────────────────────── */
+.ant-input,
+.ant-input-number-input {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  color: var(--neu-text) !important;
+  box-shadow: var(--inset-sm) !important;
+}
+
+.ant-input::placeholder,
+.ant-input-number-input::placeholder {
+  color: var(--neu-text-2) !important;
+}
+
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-picker {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: var(--inset-sm) !important;
+}
+
+.ant-input-affix-wrapper .ant-input {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused,
+.ant-input:focus,
+.ant-input-number-focused {
+  border: none !important;
+  box-shadow: var(--inset-sm),
+              0 0 0 2px rgba(91, 155, 213, 0.2) !important;
+  outline: none !important;
+}
+
+.ant-input-prefix,
+.ant-input-suffix {
+  color: var(--neu-text-2) !important;
+}
+
+/* search button */
+.ant-input-group-addon,
+.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  padding-left: 6px !important;
+}
+
+.ant-input-group-addon .ant-btn,
+.ant-input-search-button {
+  background: var(--neu-accent) !important;
+  border: none !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  box-shadow: 3px 3px 8px rgba(61, 120, 184, 0.35),
+              -2px -2px 5px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* textarea */
+textarea.ant-input {
+  border-radius: 10px !important;
+}
+
+/* ── SELECT ───────────────────────────────────────────────── */
+.ant-select:not(.ant-select-customize-input) .ant-select-selector {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: var(--inset-sm) !important;
+  color: var(--neu-text) !important;
+}
+
+.ant-select-arrow {
+  color: var(--neu-text-2) !important;
+}
+
+.ant-select-dropdown {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(140, 138, 132, 0.22) !important;
+  padding: 6px !important;
+}
+
+.ant-select-item {
+  color: var(--neu-text) !important;
+  border-radius: 8px !important;
+}
+
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background: rgba(91, 155, 213, 0.1) !important;
+}
+
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
+  background: rgba(91, 155, 213, 0.18) !important;
+  color: var(--neu-accent-dark) !important;
+  font-weight: 600 !important;
+}
+
+/* ── DATE PICKER ──────────────────────────────────────────── */
+.ant-picker-input > input {
+  color: var(--neu-text) !important;
+}
+
+.ant-picker-suffix {
+  color: var(--neu-text-2) !important;
+}
+
+.ant-picker-panel-container {
+  background: var(--neu-bg) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 6px 24px rgba(140, 138, 132, 0.25) !important;
+  border: none !important;
+}
+
+/* ── DRAWER ───────────────────────────────────────────────── */
+.ant-drawer-content {
+  background: var(--neu-bg) !important;
+}
+
+.ant-drawer-header {
+  background: var(--neu-bg) !important;
+  border-bottom: none !important;
+  box-shadow: 0 4px 12px rgba(184, 182, 176, 0.4) !important;
+  padding: 16px 24px !important;
+}
+
+.ant-drawer-title {
+  color: var(--neu-text) !important;
+  font-weight: 700 !important;
+  font-size: 17px !important;
+}
+
+.ant-drawer-close {
+  color: var(--neu-text-2) !important;
+}
+
+.ant-drawer-body {
+  background: var(--neu-bg) !important;
+}
+
+/* ── MODAL ────────────────────────────────────────────────── */
+.ant-modal-content {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(140, 138, 132, 0.28) !important;
+  overflow: hidden !important;
+}
+
+.ant-modal-header {
+  background: var(--neu-bg) !important;
+  border-bottom: 1px solid rgba(184, 182, 176, 0.3) !important;
+  border-radius: 20px 20px 0 0 !important;
+  padding: 18px 24px !important;
+}
+
+.ant-modal-title {
+  color: var(--neu-text) !important;
+  font-weight: 700 !important;
+  font-size: 17px !important;
+}
+
+.ant-modal-close-x {
+  color: var(--neu-text-2) !important;
+}
+
+.ant-modal-body {
+  background: var(--neu-bg) !important;
+}
+
+.ant-modal-footer {
+  background: var(--neu-bg) !important;
+  border-top: 1px solid rgba(184, 182, 176, 0.3) !important;
+}
+
+/* ── FORM ─────────────────────────────────────────────────── */
+.ant-form-item-label > label {
+  color: var(--neu-text) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: 0.3px !important;
+}
+
+.ant-form-item-explain-error {
+  color: var(--neu-danger) !important;
+  font-size: 12px !important;
+}
+
+/* ── UPLOAD ───────────────────────────────────────────────── */
+.ant-upload.ant-upload-select-picture-card {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: var(--inset-sm) !important;
+}
+
+/* ── SPIN ─────────────────────────────────────────────────── */
+.ant-spin-dot-item {
+  background-color: var(--neu-accent) !important;
+}
+
+/* ── MESSAGE TOAST ────────────────────────────────────────── */
+.ant-message-notice-content {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(140, 138, 132, 0.22) !important;
+  color: var(--neu-text) !important;
+}
+
+.ant-message-success .anticon {
+  color: var(--neu-accent) !important;
+}
+
+.ant-message-error .anticon {
+  color: var(--neu-danger) !important;
+}
+
+/* ── POPOVER — Glassmorphism ──────────────────────────────── */
+.ant-popover-inner {
+  background: rgba(252, 251, 248, 0.68) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.6) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10) !important;
+}
+
+.ant-popover-inner-content {
+  padding: 0 !important;
+}
+
+.ant-popover-arrow {
+  display: none !important;
+}
+
+/* ── LIST ─────────────────────────────────────────────────── */
+.ant-list-item {
+  border-bottom: none !important;
+}
+
+/* ── INPUT NUMBER ─────────────────────────────────────────── */
+.ant-input-number-handler-wrap {
+  background: var(--neu-bg) !important;
+  border-left: 1px solid rgba(184, 182, 176, 0.3) !important;
+}
+
+.ant-input-number-handler {
+  border-bottom: 1px solid rgba(184, 182, 176, 0.3) !important;
+  color: var(--neu-text-2) !important;
+}
+
+/* ── SCROLLBAR ────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--neu-bg);
+  border-radius: 6px;
+  box-shadow: var(--inset-sm);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b0bdd0, #9aaec4);
+  border-radius: 6px;
+  border: 2px solid var(--neu-bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a0adc0, #8a9eb4);
+}
+
+/* ── FAB (Floating Action Button) — flat ─────────────────── */
+.neu-fab {
+  background: var(--neu-accent) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 5px 5px 14px rgba(61, 120, 184, 0.42),
+              -3px -3px 8px rgba(255, 255, 255, 0.75) !important;
+  transition: all 0.16s ease !important;
+}
+
+.neu-fab:hover {
+  background: var(--neu-accent-light) !important;
+  box-shadow: 7px 7px 18px rgba(61, 120, 184, 0.46),
+              -3px -3px 10px rgba(255, 255, 255, 0.8) !important;
+  transform: translateY(-2px) !important;
+}
+
+.neu-fab:active {
+  background: var(--neu-accent-dark) !important;
+  box-shadow: inset 4px 4px 10px rgba(30, 70, 140, 0.4),
+              inset -2px -2px 6px rgba(120, 180, 255, 0.25) !important;
+  transform: translateY(0) !important;
+}
+
+/* ── CARD ADD BUTTON (image overlay) — flat ──────────────── */
+.neu-add-btn {
+  background: var(--neu-accent) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 3px 3px 8px rgba(61, 120, 184, 0.38),
+              -1px -1px 4px rgba(255, 255, 255, 0.6) !important;
+  transition: all 0.14s ease !important;
+}
+
+.neu-add-btn:hover {
+  background: var(--neu-accent-light) !important;
+  transform: scale(1.12) !important;
+  box-shadow: 4px 4px 10px rgba(61, 120, 184, 0.42) !important;
+}
+
+.neu-add-btn:active {
+  background: var(--neu-accent-dark) !important;
+  transform: scale(0.96) !important;
+  box-shadow: inset 3px 3px 7px rgba(30, 70, 140, 0.38) !important;
+}
+
+/* ── LOGIN PANEL ──────────────────────────────────────────── */
+.neu-login-panel {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 24px;
+  padding: 48px 44px;
+  box-shadow: 14px 14px 32px rgba(184, 182, 176, 0.65),
+              -10px -10px 24px rgba(255, 255, 255, 0.85);
+  max-width: 360px;
+  margin: 60px auto 0;
+}
+
+.neu-login-title {
+  text-align: center;
+  color: var(--neu-text);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.neu-login-title span {
+  color: var(--neu-accent);
+}
+
+/* ── CARD COVER nameplate ─────────────────────────────────── */
+.neu-nameplate {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 10px 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(252, 251, 248, 0) 0%,
+    rgba(252, 251, 248, 0.92) 100%
+  );
+  color: var(--neu-text);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+}
+
+/* ── DIVIDER ──────────────────────────────────────────────── */
+.ant-divider {
+  border-color: rgba(184, 182, 176, 0.4) !important;
+}
