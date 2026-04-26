@@ -2,6 +2,7 @@ package com.zjusthow.minicollections.controller;
 
 import com.zjusthow.minicollections.service.ImageStorageService;
 import com.zjusthow.minicollections.service.UserService;
+import com.zjusthow.minicollections.model.UserProfileDto;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,5 +36,16 @@ public class ImageUploadController {
         long userId = userService.getUserByEmail(user.getUsername()).id();
         String url = imageStorageService.uploadUserImage(userId, file);
         return ResponseEntity.ok(Map.of("url", url));
+    }
+
+    @PostMapping("/users/me/avatar")
+    public ResponseEntity<UserProfileDto> uploadAvatar(
+            @AuthenticationPrincipal User user,
+            @RequestParam("file") MultipartFile file) throws IOException {
+        String email = user.getUsername();
+        long userId = userService.getUserByEmail(email).id();
+        String url = imageStorageService.uploadUserImage(userId, file);
+        UserProfileDto profile = userService.updateAvatarUrl(email, url);
+        return ResponseEntity.ok(profile);
     }
 }

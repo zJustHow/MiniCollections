@@ -13,7 +13,8 @@ CREATE TABLE users
     password VARCHAR(255) NOT NULL,
     enabled BOOLEAN DEFAULT TRUE NOT NULL,
     name VARCHAR(255),
-    preferred_locale VARCHAR(16) NOT NULL DEFAULT 'en-US'
+    preferred_locale VARCHAR(16) NOT NULL DEFAULT 'en-US',
+    avatar_url TEXT
 );
 
 CREATE TABLE groups

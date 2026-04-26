@@ -68,7 +68,7 @@ public class UserService {
 
     public UserProfileDto getProfile(String email) {
         UserEntity u = getUserByEmail(email);
-        return new UserProfileDto(u.id(), u.email(), u.name(), u.preferredLocale());
+        return new UserProfileDto(u.id(), u.email(), u.name(), u.preferredLocale(), u.avatarUrl());
     }
 
     @Transactional
@@ -76,6 +76,14 @@ public class UserService {
     public UserProfileDto updatePreferredLocale(String email, String preferredLocale) {
         String e = email.toLowerCase();
         userRepository.updatePreferredLocaleByEmail(e, preferredLocale.strip());
+        return getProfile(e);
+    }
+
+    @Transactional
+    @CacheEvict(value = "users", key = "#email", beforeInvocation = true)
+    public UserProfileDto updateAvatarUrl(String email, String avatarUrl) {
+        String e = email.toLowerCase();
+        userRepository.updateAvatarUrlByEmail(e, avatarUrl);
         return getProfile(e);
     }
 

@@ -22,4 +22,8 @@ public interface UserRepository extends ListCrudRepository<UserEntity, Long> {
     @Modifying
     @Query("UPDATE users SET preferred_locale = :preferredLocale WHERE email = :email")
     void updatePreferredLocaleByEmail(String email, String preferredLocale);
+
+    @Modifying
+    @Query("UPDATE users SET avatar_url = :avatarUrl WHERE email = :email")
+    void updateAvatarUrlByEmail(String email, String avatarUrl);
 }
