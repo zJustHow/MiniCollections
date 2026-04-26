@@ -1,4 +1,3 @@
-import { Tabs } from "antd";
 import useObjectListState from "./useObjectListState";
 import BrandsTab from "./BrandsTab";
 import GroupsTab from "./GroupsTab";
@@ -12,9 +11,7 @@ import BrandObjectDetailModal from "./modals/BrandObjectDetailModal";
 import UserObjectDetailModal from "./modals/UserObjectDetailModal";
 import EditUserObjectModal from "./modals/EditUserObjectModal";
 
-const { TabPane } = Tabs;
-
-export default function ObjectList() {
+export default function ObjectList({ activeTab }) {
   const state = useObjectListState();
 
   const {
@@ -49,6 +46,7 @@ export default function ObjectList() {
     userObjectDetailVisible,
     setUserObjectDetailVisible,
     selectedUserObject,
+    setSelectedUserObject,
     userObjectBrandDetail,
     loadingUserObjectBrandDetail,
     createGroupModalVisible,
@@ -108,28 +106,25 @@ export default function ObjectList() {
 
   return (
     <>
-      <Tabs defaultActiveKey="brands">
-        <TabPane tab="Brands" key="brands">
-          <BrandsTab
-            brands={brands}
-            loading={loadingBrands}
-            onSearch={handleBrandSearch}
-            onBrandClick={handleBrandClick}
-          />
-        </TabPane>
-        <TabPane tab="My Groups" key="groups">
-          <GroupsTab
-            groups={groups}
-            loading={loadingGroups}
-            onSearch={handleGroupSearch}
-            onGroupClick={handleGroupClick}
-            onCreateGroup={() => {
-              groupForm.resetFields();
-              setCreateGroupModalVisible(true);
-            }}
-          />
-        </TabPane>
-      </Tabs>
+      {activeTab === "brands" ? (
+        <BrandsTab
+          brands={brands}
+          loading={loadingBrands}
+          onSearch={handleBrandSearch}
+          onBrandClick={handleBrandClick}
+        />
+      ) : (
+        <GroupsTab
+          groups={groups}
+          loading={loadingGroups}
+          onSearch={handleGroupSearch}
+          onGroupClick={handleGroupClick}
+          onCreateGroup={() => {
+            groupForm.resetFields();
+            setCreateGroupModalVisible(true);
+          }}
+        />
+      )}
 
       <BrandDrawer
         open={brandDrawerOpen}
@@ -139,13 +134,12 @@ export default function ObjectList() {
         loading={loadingBrandObjects}
         searchKeyword={brandObjectSearchKeyword}
         onSearchChange={setBrandObjectSearchKeyword}
-        onBrandObjectClick={handleBrandObjectClick}
         onAddToGroup={openCreateModal}
       />
 
       <GroupDrawer
         open={groupDrawerOpen}
-        onClose={() => setGroupDrawerOpen(false)}
+        onClose={() => { setGroupDrawerOpen(false); setSelectedUserObject(null); }}
         selectedGroup={selectedGroup}
         userObjects={selectedGroupUserObjects}
         loading={loadingGroupUserObjects}
@@ -155,6 +149,12 @@ export default function ObjectList() {
         onEditGroup={openEditGroupModal}
         onDeleteGroup={handleDeleteGroup}
         onAddModel={openAddUserObjectInGroupModal}
+        detailUserObject={selectedUserObject}
+        onDetailClose={() => setSelectedUserObject(null)}
+        brandDetail={userObjectBrandDetail}
+        loadingBrandDetail={loadingUserObjectBrandDetail}
+        onEditUserObject={openEditUserObjectModal}
+        onDeleteUserObject={handleDeleteUserObject}
       />
 
       <AddUserObjectInGroupModal

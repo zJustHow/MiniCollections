@@ -124,7 +124,6 @@ export default function useGroupsState() {
 
   const handleUserObjectClick = async (userObject) => {
     setSelectedUserObject(userObject);
-    setUserObjectDetailVisible(true);
     const brandObjectId =
       userObject.brandObjectId ?? userObject.brand_object_id;
     if (brandObjectId) {
@@ -393,7 +392,6 @@ export default function useGroupsState() {
       onOk: async () => {
         try {
           await deleteUserObject(groupId, userObjectId);
-          setUserObjectDetailVisible(false);
           setSelectedUserObject(null);
           setSelectedGroupUserObjects((prev) =>
             prev.filter((o) => o.id !== userObjectId)
@@ -496,7 +494,6 @@ export default function useGroupsState() {
   };
 
   const setBrandObjectDetailFromUserObject = () => {
-    setUserObjectDetailVisible(false);
     setBrandObjectDetail({
       ...userObjectBrandDetail,
       image_url: userObjectBrandDetail.image_url,
