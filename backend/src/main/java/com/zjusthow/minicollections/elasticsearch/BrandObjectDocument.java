@@ -1,5 +1,6 @@
 package com.zjusthow.minicollections.elasticsearch;
 
+import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -20,6 +21,13 @@ public record BrandObjectDocument(
         @Field(name = "release_date", type = FieldType.Date) LocalDate releaseDate,
         @Field(name = "category_en", type = FieldType.Text) String categoryEn,
         @Field(name = "category_zh", type = FieldType.Text) String categoryZh,
-        @Field(type = FieldType.Keyword) String scale
+        @Field(name = "scale", type = FieldType.Keyword) String scale
 ) {
+    public static BrandObjectDocument from(BrandObjectEntity e) {
+        return new BrandObjectDocument(
+                e.id(), e.brandId(), e.nameEn(), e.nameZh(), e.imageUrl(),
+                e.releasePriceCny(), e.releasePriceUsd(), e.releaseDate(),
+                e.categoryEn(), e.categoryZh(), e.scale()
+        );
+    }
 }

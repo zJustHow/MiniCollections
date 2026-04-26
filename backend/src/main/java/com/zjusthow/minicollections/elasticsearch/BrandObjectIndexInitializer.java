@@ -38,18 +38,6 @@ public class BrandObjectIndexInitializer {
     }
 
     private BrandObjectDocument toDoc(BrandObjectEntity e) {
-        return new BrandObjectDocument(
-                e.id(),
-                e.brandId(),
-                e.nameEn(),
-                e.nameZh(),
-                e.imageUrl(),
-                e.releasePriceCny(),
-                e.releasePriceUsd(),
-                e.releaseDate(),
-                e.categoryEn(),
-                e.categoryZh(),
-                e.scale()
-        );
+        return BrandObjectDocument.from(e);
     }
 }

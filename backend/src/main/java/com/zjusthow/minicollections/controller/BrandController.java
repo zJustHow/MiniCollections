@@ -4,9 +4,11 @@ import com.zjusthow.minicollections.entity.UserEntity;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
+import com.zjusthow.minicollections.model.BrandObjectBody;
 import com.zjusthow.minicollections.service.BrandService;
 import com.zjusthow.minicollections.service.UserService;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
@@ -83,5 +85,30 @@ public class BrandController {
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.getBrandObjectById(id, effectiveLocale(acceptLanguage, user)));
+    }
+
+    @PostMapping("/{brandId}/objects")
+    public ResponseEntity<BrandObjectDto> createBrandObject(
+            @PathVariable Long brandId,
+            @RequestBody BrandObjectBody request,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(brandService.createBrandObject(brandId, request, effectiveLocale(acceptLanguage, user)));
+    }
+
+    @PutMapping("/objects/{id}")
+    public ResponseEntity<BrandObjectDto> updateBrandObject(
+            @PathVariable Long id,
+            @RequestBody BrandObjectBody request,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(brandService.updateBrandObject(id, request, effectiveLocale(acceptLanguage, user)));
+    }
+
+    @DeleteMapping("/objects/{id}")
+    public ResponseEntity<Void> deleteBrandObject(@PathVariable Long id) {
+        brandService.deleteBrandObject(id);
+        return ResponseEntity.noContent().build();
     }
 }

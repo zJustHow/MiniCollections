@@ -1,18 +1,22 @@
 package com.zjusthow.minicollections.service;
 
+import com.zjusthow.minicollections.elasticsearch.BrandObjectDocument;
 import com.zjusthow.minicollections.elasticsearch.BrandObjectElasticsearchQueryService;
-import com.zjusthow.minicollections.entity.BrandEntity;
+import com.zjusthow.minicollections.elasticsearch.BrandObjectSearchRepository;
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.exception.BrandNotFoundException;
+import com.zjusthow.minicollections.exception.BrandObjectNotFoundException;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
+import com.zjusthow.minicollections.model.BrandObjectBody;
 import com.zjusthow.minicollections.repository.BrandObjectRepository;
 import com.zjusthow.minicollections.repository.BrandRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +34,7 @@ public class BrandService {
     private final BrandObjectRepository brandObjectRepository;
     private final DisplayLocaleResolver displayLocaleResolver;
     private final BrandObjectElasticsearchQueryService elasticsearchQueryService;
+    private final BrandObjectSearchRepository brandObjectSearchRepository;
 
     @Value("${app.elasticsearch.enabled:true}")
     private boolean elasticsearchEnabled;
@@ -38,11 +43,13 @@ public class BrandService {
             BrandRepository brandRepository,
             BrandObjectRepository brandObjectRepository,
             DisplayLocaleResolver displayLocaleResolver,
-            @Autowired(required = false) BrandObjectElasticsearchQueryService elasticsearchQueryService) {
+            @Autowired(required = false) BrandObjectElasticsearchQueryService elasticsearchQueryService,
+            @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository) {
         this.brandRepository = brandRepository;
         this.brandObjectRepository = brandObjectRepository;
         this.displayLocaleResolver = displayLocaleResolver;
         this.elasticsearchQueryService = elasticsearchQueryService;
+        this.brandObjectSearchRepository = brandObjectSearchRepository;
     }
 
     private boolean esEnabled() {
@@ -146,5 +153,50 @@ public class BrandService {
         return entities.stream()
                 .map(e -> BrandObjectDto.from(e, preferZh, preferCny))
                 .toList();
+    }
+
+    @CacheEvict(value = "brandObjects", allEntries = true)
+    public BrandObjectDto createBrandObject(long brandId, BrandObjectBody req, String effectiveLocale) {
+        BrandObjectEntity entity = new BrandObjectEntity(
+                null, brandId, req.nameEn(), req.nameZh(), req.imageUrl(),
+                req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
+                req.categoryEn(), req.categoryZh(), req.scale()
+        );
+        BrandObjectEntity saved = brandObjectRepository.save(entity);
+        if (esEnabled()) {
+            brandObjectSearchRepository.save(BrandObjectDocument.from(saved));
+        }
+        boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
+        return BrandObjectDto.from(saved, preferZh, preferCny);
+    }
+
+    @CacheEvict(value = "brandObjects", allEntries = true)
+    public BrandObjectDto updateBrandObject(long id, BrandObjectBody req, String effectiveLocale) {
+        BrandObjectEntity existing = brandObjectRepository.findById(id)
+                .orElseThrow(BrandObjectNotFoundException::new);
+        BrandObjectEntity updated = new BrandObjectEntity(
+                existing.id(), existing.brandId(), req.nameEn(), req.nameZh(), req.imageUrl(),
+                req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
+                req.categoryEn(), req.categoryZh(), req.scale()
+        );
+        BrandObjectEntity saved = brandObjectRepository.save(updated);
+        if (esEnabled()) {
+            brandObjectSearchRepository.save(BrandObjectDocument.from(saved));
+        }
+        boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
+        return BrandObjectDto.from(saved, preferZh, preferCny);
+    }
+
+    @CacheEvict(value = "brandObjects", allEntries = true)
+    public void deleteBrandObject(long id) {
+        if (!brandObjectRepository.existsById(id)) {
+            throw new BrandObjectNotFoundException();
+        }
+        brandObjectRepository.deleteById(id);
+        if (esEnabled()) {
+            brandObjectSearchRepository.deleteById(id);
+        }
     }
 }
