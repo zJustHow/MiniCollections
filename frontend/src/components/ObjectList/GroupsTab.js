@@ -1,6 +1,7 @@
 import { Card, Input, List } from "antd";
 import CardCover from "./CardCover";
 import { LIST_GRID, Z_INDEX } from "./constants";
+import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
 
@@ -26,6 +27,7 @@ export default function GroupsTab({
   onGroupClick,
   onCreateGroup,
 }) {
+  const { t } = useLocale();
   return (
     <div style={{ position: "relative", minHeight: 200 }}>
       <div
@@ -36,7 +38,7 @@ export default function GroupsTab({
         }}
       >
         <Search
-          placeholder="Search groups"
+          placeholder={t("searchGroups")}
           allowClear
           onSearch={onSearch}
           onChange={(e) => {

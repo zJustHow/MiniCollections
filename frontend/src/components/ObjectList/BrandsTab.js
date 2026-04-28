@@ -1,6 +1,7 @@
 import { Card, Input, List } from "antd";
 import CardCover from "./CardCover";
 import { LIST_GRID } from "./constants";
+import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
 
@@ -10,6 +11,7 @@ export default function BrandsTab({
   onSearch,
   onBrandClick,
 }) {
+  const { t } = useLocale();
   return (
     <>
       <div
@@ -20,7 +22,7 @@ export default function BrandsTab({
         }}
       >
         <Search
-          placeholder="Search brands"
+          placeholder={t("searchBrands")}
           allowClear
           onSearch={onSearch}
           onChange={(e) => {

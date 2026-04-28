@@ -226,6 +226,16 @@ export const updateIdentifier = async (payload) => {
   return handleResponse(response);
 };
 
+export const updateLocale = async (preferredLocale) => {
+  const response = await fetch("/users/me/locale", {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ preferred_locale: preferredLocale }),
+  });
+  return handleResponse(response);
+};
+
 export const uploadAvatar = async (file) => {
   const formData = new FormData();
   formData.append("file", file);

@@ -16,11 +16,13 @@ import {
   displayPurchasePriceFromObject,
 } from "../../utils";
 import { Z_INDEX } from "./constants";
+import { useLocale } from "../../LocaleContext";
 
 const normalizeList = (data) =>
   Array.isArray(data) ? data : data?.content != null ? data.content : [];
 
 export default function useGroupsState() {
+  const { t } = useLocale();
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
 
@@ -81,13 +83,13 @@ export default function useGroupsState() {
         const data = await getGroups();
         setGroups(data);
       } catch (err) {
-        message.error(err.message || "Failed to load groups");
+        message.error(err.message || t("failedToLoadGroups"));
       } finally {
         setLoadingGroups(false);
       }
     };
     fetchGroups();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     const fetchGroupUserObjects = async () => {
@@ -100,14 +102,14 @@ export default function useGroupsState() {
         const data = await getUserObjects(selectedGroup.id);
         setSelectedGroupUserObjects(normalizeList(data));
       } catch (err) {
-        message.error(err.message || "Failed to load group models");
+        message.error(err.message || t("failedToLoadGroupModels"));
         setSelectedGroupUserObjects([]);
       } finally {
         setLoadingGroupUserObjects(false);
       }
     };
     fetchGroupUserObjects();
-  }, [selectedGroup]);
+  }, [selectedGroup]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleGroupClick = (group) => {
     setSelectedGroup(group);
@@ -132,7 +134,7 @@ export default function useGroupsState() {
         const data = await getBrandObjectById(brandObjectId);
         setUserObjectBrandDetail(data);
       } catch (err) {
-        message.error(err.message || "Failed to load brand object detail");
+        message.error(err.message || t("failedToLoadBrandObjectDetail"));
       } finally {
         setLoadingUserObjectBrandDetail(false);
       }
@@ -172,13 +174,13 @@ export default function useGroupsState() {
       const groupId = values.groupId;
       try {
         const created = await createUserObject(groupId, payload);
-        message.success("Added to group successfully");
+        message.success(t("addedToGroupSuccessfully"));
         if (selectedGroup && selectedGroup.id === groupId) {
           setSelectedGroupUserObjects((prev) => [...prev, created]);
         }
         setCreateModalVisible(false);
       } catch (err) {
-        message.error(err.message || "Failed to add model to group");
+        message.error(err.message || t("failedToAddModelToGroup"));
       } finally {
         setCreateModalLoading(false);
       }
@@ -194,7 +196,7 @@ export default function useGroupsState() {
       const data = keyword ? await searchGroups(keyword) : await getGroups();
       setGroups(data);
     } catch (err) {
-      message.error(err.message || "Failed to search groups");
+      message.error(err.message || t("failedToSearchGroups"));
     } finally {
       setLoadingGroups(false);
     }
@@ -216,7 +218,7 @@ export default function useGroupsState() {
       const payload = { name: values.name, image_url: image_url || null };
       try {
         const data = await updateGroup(selectedGroup.id, payload);
-        message.success("Group updated");
+        message.success(t("groupUpdated"));
         const updated = {
           ...data,
           image_url: data.image_url,
@@ -232,7 +234,7 @@ export default function useGroupsState() {
         );
         setEditGroupModalVisible(false);
       } catch (err) {
-        message.error(err.message || "Failed to update group");
+        message.error(err.message || t("failedToUpdateGroup"));
       } finally {
         setEditGroupLoading(false);
       }
@@ -246,11 +248,11 @@ export default function useGroupsState() {
     const groupId = selectedGroup.id;
     const groupName = selectedGroup.name;
     Modal.confirm({
-      title: "Delete group",
-      content: `Are you sure you want to delete "${groupName}"? This cannot be undone.`,
-      okText: "Delete",
+      title: t("deleteGroupTitle"),
+      content: t("deleteGroupContent", { name: groupName }),
+      okText: t("delete"),
       okType: "danger",
-      cancelText: "Cancel",
+      cancelText: t("cancel"),
       zIndex: Z_INDEX.MODAL_CONFIRM_DELETE_GROUP,
       onOk: async () => {
         try {
@@ -258,9 +260,9 @@ export default function useGroupsState() {
           setGroupDrawerOpen(false);
           setSelectedGroup(null);
           setGroups((prev) => prev.filter((g) => g.id !== groupId));
-          message.success("Group deleted");
+          message.success(t("groupDeleted"));
         } catch (err) {
-          message.error(err.message || "Failed to delete group");
+          message.error(err.message || t("failedToDeleteGroup"));
         }
       },
     });
@@ -322,7 +324,7 @@ export default function useGroupsState() {
           selectedUserObject.id,
           payload
         );
-        message.success("Model updated");
+        message.success(t("modelUpdated"));
         const updated = {
           ...data,
           name: data.name,
@@ -368,7 +370,7 @@ export default function useGroupsState() {
         }
         setEditUserObjectModalVisible(false);
       } catch (err) {
-        message.error(err.message || "Failed to update model");
+        message.error(err.message || t("failedToUpdateModel"));
       } finally {
         setEditUserObjectLoading(false);
       }
@@ -383,11 +385,11 @@ export default function useGroupsState() {
     const userObjectId = selectedUserObject.id;
     const itemName = selectedUserObject.name ?? "—";
     Modal.confirm({
-      title: "Delete model",
-      content: `Are you sure you want to delete "${itemName}"? This cannot be undone.`,
-      okText: "Delete",
+      title: t("deleteModelTitle"),
+      content: t("deleteModelContent", { name: itemName }),
+      okText: t("delete"),
       okType: "danger",
-      cancelText: "Cancel",
+      cancelText: t("cancel"),
       zIndex: Z_INDEX.MODAL_CONFIRM_DELETE_USER_OBJECT,
       onOk: async () => {
         try {
@@ -418,9 +420,9 @@ export default function useGroupsState() {
                 : g
             )
           );
-          message.success("Model deleted");
+          message.success(t("modelDeleted"));
         } catch (err) {
-          message.error(err.message || "Failed to delete model");
+          message.error(err.message || t("failedToDeleteModel"));
         }
       },
     });
@@ -456,7 +458,7 @@ export default function useGroupsState() {
       setAddUserObjectInGroupLoading(true);
       try {
         const created = await createUserObject(selectedGroup.id, payload);
-        message.success("Model added");
+        message.success(t("modelAdded"));
         const item = {
           ...created,
           name: created.name,
@@ -484,7 +486,7 @@ export default function useGroupsState() {
         );
         setAddUserObjectInGroupModalVisible(false);
       } catch (err) {
-        message.error(err.message || "Failed to add model");
+        message.error(err.message || t("failedToAddModel"));
       } finally {
         setAddUserObjectInGroupLoading(false);
       }
@@ -511,12 +513,12 @@ export default function useGroupsState() {
       };
       try {
         const created = await createGroup(payload);
-        message.success("Group created");
+        message.success(t("groupCreated"));
         setGroups((prev) => [...prev, created]);
         setCreateGroupModalVisible(false);
         setGroupImageData(null);
       } catch (err) {
-        message.error(err.message || "Failed to create group");
+        message.error(err.message || t("failedToCreateGroup"));
       } finally {
         setCreateGroupLoading(false);
       }
@@ -607,4 +609,3 @@ export default function useGroupsState() {
     handleCreateGroup,
   };
 }
-

@@ -40,15 +40,16 @@ public class UserService {
     }
 
     @Transactional
-    public Long signUp(String email, String password, String name) {
+    public Long signUp(String email, String password, String name, String preferredLocale) {
         email = email.toLowerCase();
 
         if (identifierRepository.existsByTypeAndIdentifier("email", email)) {
             throw new IdentifierExistsException("Email already registered");
         }
 
+        String locale = (preferredLocale != null && !preferredLocale.isBlank()) ? preferredLocale.strip() : "en-US";
         UserEntity user = userRepository.save(
-                new UserEntity(null, name, passwordEncoder.encode(password), true, "en-US", null));
+                new UserEntity(null, name, passwordEncoder.encode(password), true, locale, null));
 
         identifierRepository.save(new UserIdentifierEntity(null, user.id(), "email", email));
         jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", user.id(), "ROLE_USER");

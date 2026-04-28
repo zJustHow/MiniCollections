@@ -1,24 +1,24 @@
-import { Button, Form, Input, message, Modal } from "antd";
+import { Button, Form, Input, message, Modal, Radio } from "antd";
 import { useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { signup } from "../../utils";
+import { useLocale } from "../../LocaleContext";
+import { detectBrowserLocale } from "../../i18n";
 
 function SignupForm() {
   const [displayModal, setDisplayModal] = useState(false);
+  const { t, setLocale } = useLocale();
 
   const handleCancel = () => {
     setDisplayModal(false);
   };
 
-  const signupOnClick = () => {
-    setDisplayModal(true);
-  };
-
   const onFinish = async (data) => {
     try {
       await signup(data);
+      if (data.preferred_locale) setLocale(data.preferred_locale);
       setDisplayModal(false);
-      message.success(`Successfully signed up`);
+      message.success(t("registerSuccess"));
     } catch (err) {
       message.error(err.message);
     }
@@ -26,11 +26,11 @@ function SignupForm() {
 
   return (
     <>
-      <Button shape="round" type="primary" onClick={signupOnClick}>
-        Register
+      <Button shape="round" type="primary" onClick={() => setDisplayModal(true)}>
+        {t("register")}
       </Button>
       <Modal
-        title="Register"
+        title={t("register")}
         open={displayModal}
         onCancel={handleCancel}
         footer={null}
@@ -38,36 +38,37 @@ function SignupForm() {
       >
         <Form
           name="normal_register"
-          initialValues={{ remember: true }}
+          initialValues={{ preferred_locale: detectBrowserLocale() }}
           onFinish={onFinish}
           preserve={false}
         >
           <Form.Item
             name="email"
-            rules={[{ required: true, message: "Please input your email!" }]}
+            rules={[{ required: true, message: t("emailRequired") }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Email" />
+            <Input prefix={<UserOutlined />} placeholder={t("email")} />
           </Form.Item>
           <Form.Item
             name="password"
-            rules={[
-              { required: true, message: "Please input your password!" },
-            ]}
+            rules={[{ required: true, message: t("passwordRequired") }]}
           >
-            <Input prefix={<LockOutlined />} placeholder="Password" />
+            <Input.Password prefix={<LockOutlined />} placeholder={t("password")} />
           </Form.Item>
           <Form.Item
             name="name"
-            rules={[
-              { required: true, message: "Please input your username!" },
-            ]}
+            rules={[{ required: true, message: t("signupNameRequired") }]}
           >
-            <Input prefix={<UserOutlined />} placeholder="Username" />
+            <Input prefix={<UserOutlined />} placeholder={t("username")} />
           </Form.Item>
-
+          <Form.Item name="preferred_locale" label={t("language")}>
+            <Radio.Group>
+              <Radio value="en-US">English</Radio>
+              <Radio value="zh-CN">中文</Radio>
+            </Radio.Group>
+          </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Register
+              {t("register")}
             </Button>
           </Form.Item>
         </Form>

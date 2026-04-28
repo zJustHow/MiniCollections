@@ -2,6 +2,7 @@ import { Button, Card, Drawer, Input, List, Spin } from "antd";
 import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { LIST_GRID_DRAWER, DRAWER_WIDTH, Z_INDEX } from "./constants";
+import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
 
@@ -34,8 +35,6 @@ function DetailRow({ label, value }) {
   );
 }
 
-// view: "list" | "userObject" | "brandObject"
-
 export default function GroupDrawer({
   open,
   onClose,
@@ -55,10 +54,10 @@ export default function GroupDrawer({
   onEditUserObject,
   onDeleteUserObject,
 }) {
+  const { t } = useLocale();
   const [draftQuery, setDraftQuery] = useState("");
   const [showBrandDetail, setShowBrandDetail] = useState(false);
 
-  // Reset brand detail view when user object selection changes
   useEffect(() => {
     setShowBrandDetail(false);
   }, [detailUserObject]);
@@ -107,7 +106,7 @@ export default function GroupDrawer({
           <ArrowLeftOutlined style={{ fontSize: 16 }} />
         </button>
         <span style={{ fontSize: 14, fontWeight: 500, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {brandDetail?.name ?? "Brand Model"}
+          {brandDetail?.name ?? t("brandModelLabel")}
         </span>
       </div>
     );
@@ -127,8 +126,8 @@ export default function GroupDrawer({
           </span>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          <Button size="small" onClick={onEditUserObject}>Edit</Button>
-          <Button size="small" danger onClick={onDeleteUserObject}>Delete</Button>
+          <Button size="small" onClick={onEditUserObject}>{t("edit")}</Button>
+          <Button size="small" danger onClick={onDeleteUserObject}>{t("delete")}</Button>
         </div>
       </div>
     );
@@ -137,10 +136,10 @@ export default function GroupDrawer({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, width: "100%", paddingRight: 8 }}>
         <span>{selectedGroup.name}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Button size="small" onClick={onEditGroup}>Edit</Button>
-          <Button size="small" danger onClick={onDeleteGroup}>Delete</Button>
+          <Button size="small" onClick={onEditGroup}>{t("edit")}</Button>
+          <Button size="small" danger onClick={onDeleteGroup}>{t("delete")}</Button>
           <Search
-            placeholder="Search models"
+            placeholder={t("searchModels")}
             allowClear
             value={draftQuery}
             onChange={(e) => {
@@ -169,14 +168,14 @@ export default function GroupDrawer({
               loading="lazy"
               style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
             />
-            <DetailRow label="Category" value={brandDetail.category} />
-            <DetailRow label="Scale" value={brandDetail.scale} />
+            <DetailRow label={t("category")} value={brandDetail.category} />
+            <DetailRow label={t("scale")} value={brandDetail.scale} />
             <DetailRow
-              label="Release Price"
+              label={t("releasePrice")}
               value={brandDetail.release_price ?? brandDetail.releasePrice}
             />
             <DetailRow
-              label="Release Date"
+              label={t("releaseDate")}
               value={brandDetail.release_date ?? brandDetail.releaseDate}
             />
           </div>
@@ -188,12 +187,12 @@ export default function GroupDrawer({
               loading="lazy"
               style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
             />
-            <DetailRow label="Purchase Price" value={purchasePrice != null ? purchasePrice : null} />
-            <DetailRow label="Purchase Date" value={purchaseDate} />
-            <DetailRow label="Notes" value={otherNotes} />
+            <DetailRow label={t("purchasePrice")} value={purchasePrice != null ? purchasePrice : null} />
+            <DetailRow label={t("purchaseDate")} value={purchaseDate} />
+            <DetailRow label={t("notes")} value={otherNotes} />
 
             <div style={{ marginTop: 16 }}>
-              <div style={{ color: "var(--neu-text-2)", fontSize: 13, marginBottom: 8 }}>Brand Model</div>
+              <div style={{ color: "var(--neu-text-2)", fontSize: 13, marginBottom: 8 }}>{t("brandModelLabel")}</div>
               <Spin spinning={loadingBrandDetail}>
                 {brandDetail ? (
                   <div
@@ -215,7 +214,7 @@ export default function GroupDrawer({
                     </div>
                   </div>
                 ) : (
-                  <div style={{ color: "var(--neu-text-2)", fontSize: 13 }}>No related brand model found.</div>
+                  <div style={{ color: "var(--neu-text-2)", fontSize: 13 }}>{t("noRelatedBrandModel")}</div>
                 )}
               </Spin>
             </div>
@@ -226,7 +225,7 @@ export default function GroupDrawer({
               loading={loading}
               grid={LIST_GRID_DRAWER}
               dataSource={filteredObjects}
-              locale={{ emptyText: "No models in this group yet" }}
+              locale={{ emptyText: t("noModelsInGroup") }}
               renderItem={(item) => (
                 <List.Item key={item.id}>
                   <Card

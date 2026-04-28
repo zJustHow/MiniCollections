@@ -2,10 +2,12 @@ import { Button, Form, Input } from "antd";
 import { useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { login } from "../../utils";
+import { useLocale } from "../../LocaleContext";
 
 function LoginForm({ onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { t } = useLocale();
 
   const onFinish = async (data) => {
     setLoading(true);
@@ -29,21 +31,21 @@ function LoginForm({ onSuccess }) {
       <Form name="normal_login" onFinish={onFinish}>
         <Form.Item
           name="username"
-          rules={[{ required: true, message: "Please input your Username!" }]}
+          rules={[{ required: true, message: t("usernameRequired") }]}
         >
           <Input
             prefix={<UserOutlined />}
-            placeholder="Username"
+            placeholder={t("username")}
             size="large"
           />
         </Form.Item>
         <Form.Item
           name="password"
-          rules={[{ required: true, message: "Please input your Password!" }]}
+          rules={[{ required: true, message: t("passwordRequired") }]}
         >
           <Input.Password
             prefix={<LockOutlined />}
-            placeholder="Password"
+            placeholder={t("password")}
             size="large"
           />
         </Form.Item>
@@ -72,7 +74,7 @@ function LoginForm({ onSuccess }) {
             size="large"
             style={{ width: "100%", borderRadius: 12 }}
           >
-            Sign In
+            {t("signIn")}
           </Button>
         </Form.Item>
       </Form>

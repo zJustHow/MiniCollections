@@ -9,6 +9,7 @@ import {
   Upload,
 } from "antd";
 import { uploadImage } from "../../../utils";
+import { useLocale } from "../../../LocaleContext";
 
 export default function AddUserObjectInGroupModal({
   visible,
@@ -23,9 +24,10 @@ export default function AddUserObjectInGroupModal({
   imageData,
   onImageChange,
 }) {
+  const { t } = useLocale();
   return (
     <Modal
-      title="Add Model"
+      title={t("addModel")}
       open={visible}
       onOk={onOk}
       confirmLoading={confirmLoading}
@@ -33,9 +35,9 @@ export default function AddUserObjectInGroupModal({
       destroyOnClose
     >
       <Form layout="vertical" form={form}>
-        <Form.Item label="Model" name="brandObjectId">
+        <Form.Item label={t("model")} name="brandObjectId">
           <Select
-            placeholder="Search by keyword (optional)"
+            placeholder={t("modelSearchPlaceholder")}
             allowClear
             showSearch
             loading={searchLoading}
@@ -51,27 +53,22 @@ export default function AddUserObjectInGroupModal({
           </Select>
         </Form.Item>
         <Form.Item
-          label="Name"
+          label={t("name")}
           name="name"
-          rules={[{ required: true, message: "Please enter a name" }]}
+          rules={[{ required: true, message: t("nameRequired") }]}
         >
           <Input />
         </Form.Item>
-        <Form.Item label="Purchase Price" name="purchasePrice">
-          <InputNumber
-            style={{ width: "100%" }}
-            min={0}
-            step={0.01}
-            stringMode
-          />
+        <Form.Item label={t("purchasePrice")} name="purchasePrice">
+          <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
         </Form.Item>
-        <Form.Item label="Purchase Date" name="purchaseDate">
+        <Form.Item label={t("purchaseDate")} name="purchaseDate">
           <DatePicker style={{ width: "100%" }} />
         </Form.Item>
-        <Form.Item label="Other Note" name="otherNotes">
+        <Form.Item label={t("otherNote")} name="otherNotes">
           <Input.TextArea rows={3} />
         </Form.Item>
-        <Form.Item label="Image">
+        <Form.Item label={t("image")}>
           <Upload
             listType="picture-card"
             showUploadList={false}
@@ -80,16 +77,14 @@ export default function AddUserObjectInGroupModal({
                 const url = await uploadImage(file);
                 onImageChange(url);
               } catch (e) {
-                message.error(e.message || "Upload failed");
+                message.error(e.message || t("uploadFailed"));
               }
               return false;
             }}
           >
             <div style={{ width: 120 }}>
               <img
-                src={
-                  imageData || "https://via.placeholder.com/120x80?text=Image"
-                }
+                src={imageData || "https://via.placeholder.com/120x80?text=Image"}
                 alt="preview"
                 style={{
                   width: "100%",
@@ -99,7 +94,7 @@ export default function AddUserObjectInGroupModal({
                   marginBottom: 8,
                 }}
               />
-              <div style={{ fontSize: 12 }}>Select image</div>
+              <div style={{ fontSize: 12 }}>{t("selectImage")}</div>
             </div>
           </Upload>
         </Form.Item>

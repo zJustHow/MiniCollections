@@ -5,8 +5,10 @@ import {
   searchBrands,
   getBrandObjectsByBrandId,
 } from "../../utils";
+import { useLocale } from "../../LocaleContext";
 
 export default function useBrandsState() {
+  const { t } = useLocale();
   const [brands, setBrands] = useState([]);
   const [loadingBrands, setLoadingBrands] = useState(false);
 
@@ -17,8 +19,6 @@ export default function useBrandsState() {
   const [brandObjectSearchKeyword, setBrandObjectSearchKeyword] =
     useState("");
 
-  // Reserved: if brand-related forms are added later, centralize Form management here.
-  // Not exposed externally yet; omit export if unused.
   // eslint-disable-next-line no-unused-vars
   const [brandForm] = Form.useForm();
 
@@ -29,13 +29,13 @@ export default function useBrandsState() {
         const data = await getBrands();
         setBrands(data);
       } catch (err) {
-        message.error(err.message || "Failed to load brands");
+        message.error(err.message || t("failedToLoadBrands"));
       } finally {
         setLoadingBrands(false);
       }
     };
     fetchBrands();
-  }, []);
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBrandClick = async (brand) => {
     setSelectedBrand(brand);
@@ -45,7 +45,7 @@ export default function useBrandsState() {
       const data = await getBrandObjectsByBrandId(brand.id);
       setBrandObjects(data);
     } catch (err) {
-      message.error(err.message || "Failed to load models");
+      message.error(err.message || t("failedToLoadModels"));
     } finally {
       setLoadingBrandObjects(false);
     }
@@ -58,7 +58,7 @@ export default function useBrandsState() {
       const data = keyword ? await searchBrands(keyword) : await getBrands();
       setBrands(data);
     } catch (err) {
-      message.error(err.message || "Failed to search brands");
+      message.error(err.message || t("failedToSearchBrands"));
     } finally {
       setLoadingBrands(false);
     }
@@ -79,4 +79,3 @@ export default function useBrandsState() {
     handleBrandSearch,
   };
 }
-

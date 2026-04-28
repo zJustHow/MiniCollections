@@ -1,5 +1,6 @@
 import { Form, Input, message, Modal, Upload } from "antd";
 import { uploadImage } from "../../../utils";
+import { useLocale } from "../../../LocaleContext";
 
 export default function EditGroupModal({
   visible,
@@ -11,9 +12,10 @@ export default function EditGroupModal({
   imageData,
   onImageChange,
 }) {
+  const { t } = useLocale();
   return (
     <Modal
-      title="Edit Group"
+      title={t("editGroup")}
       open={visible}
       onOk={onOk}
       confirmLoading={confirmLoading}
@@ -22,13 +24,13 @@ export default function EditGroupModal({
     >
       <Form layout="vertical" form={form}>
         <Form.Item
-          label="Name"
+          label={t("name")}
           name="name"
-          rules={[{ required: true, message: "Please enter group name" }]}
+          rules={[{ required: true, message: t("groupNameRequired") }]}
         >
           <Input />
         </Form.Item>
-        <Form.Item label="Image">
+        <Form.Item label={t("image")}>
           <Upload
             listType="picture-card"
             showUploadList={false}
@@ -37,7 +39,7 @@ export default function EditGroupModal({
                 const url = await uploadImage(file);
                 onImageChange(url);
               } catch (e) {
-                message.error(e.message || "Upload failed");
+                message.error(e.message || t("uploadFailed"));
               }
               return false;
             }}
@@ -58,7 +60,7 @@ export default function EditGroupModal({
                   marginBottom: 8,
                 }}
               />
-              <div style={{ fontSize: 12 }}>Select image</div>
+              <div style={{ fontSize: 12 }}>{t("selectImage")}</div>
             </div>
           </Upload>
         </Form.Item>

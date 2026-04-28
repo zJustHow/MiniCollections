@@ -1,5 +1,6 @@
 import { Button, Modal, Spin } from "antd";
 import { Z_INDEX } from "../constants";
+import { useLocale } from "../../../LocaleContext";
 
 export default function UserObjectDetailModal({
   visible,
@@ -11,6 +12,7 @@ export default function UserObjectDetailModal({
   onDelete,
   onBrandObjectClick,
 }) {
+  const { t } = useLocale();
   if (!userObject) return null;
   const image_url = userObject.image_url;
   const name = userObject.name ?? "—";
@@ -36,10 +38,10 @@ export default function UserObjectDetailModal({
           <span>{name}</span>
           <div style={{ display: "flex", gap: 8 }}>
             <Button size="small" onClick={onEdit}>
-              Edit
+              {t("edit")}
             </Button>
             <Button size="small" danger onClick={onDelete}>
-              Delete
+              {t("delete")}
             </Button>
           </div>
         </div>
@@ -61,23 +63,23 @@ export default function UserObjectDetailModal({
         }}
       />
       <p>
-        <strong>Name: </strong>
+        <strong>{t("name")}: </strong>
         {name}
       </p>
       <p>
-        <strong>Purchase Price: </strong>
+        <strong>{t("purchasePrice")}: </strong>
         {purchasePrice != null ? purchasePrice : "—"}
       </p>
       <p>
-        <strong>Purchase Date: </strong>
+        <strong>{t("purchaseDate")}: </strong>
         {purchaseDate ?? "—"}
       </p>
       <p>
-        <strong>Other Note: </strong>
+        <strong>{t("otherNote")}: </strong>
         {otherNotes}
       </p>
       <div style={{ marginTop: 16 }}>
-        <strong>Brand Object:</strong>
+        <strong>{t("brandModelLabel")}:</strong>
         <Spin spinning={loadingBrandDetail}>
           {brandDetail ? (
             <div
@@ -90,9 +92,7 @@ export default function UserObjectDetailModal({
               onClick={onBrandObjectClick}
             >
               <img
-                src={
-                  brandDetail.image_url
-                }
+                src={brandDetail.image_url}
                 alt={brandDetail.name}
                 style={{
                   width: 60,
@@ -114,7 +114,7 @@ export default function UserObjectDetailModal({
               </span>
             </div>
           ) : (
-            <p style={{ marginTop: 8 }}>No related brand object found.</p>
+            <p style={{ marginTop: 8 }}>{t("noRelatedBrandObjectFound")}</p>
           )}
         </Spin>
       </div>

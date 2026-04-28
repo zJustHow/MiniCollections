@@ -8,6 +8,7 @@ import {
   message,
   Divider,
   Upload,
+  Radio,
 } from "antd";
 import {
   UserOutlined,
@@ -20,8 +21,10 @@ import {
   updateProfile,
   updatePassword,
   updateIdentifier,
+  updateLocale,
   uploadAvatar,
 } from "../../utils";
+import { useLocale } from "../../LocaleContext";
 
 function Section({ title }) {
   return (
@@ -42,25 +45,28 @@ function Section({ title }) {
 }
 
 function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
+  const { t, locale } = useLocale();
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [nameLoading, setNameLoading] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [phoneLoading, setPhoneLoading] = useState(false);
+  const [localeLoading, setLocaleLoading] = useState(false);
 
   const [nameForm] = Form.useForm();
   const [pwForm] = Form.useForm();
   const [emailForm] = Form.useForm();
   const [phoneForm] = Form.useForm();
+  const [localeForm] = Form.useForm();
 
   const handleAvatarUpload = async ({ file }) => {
     setAvatarLoading(true);
     try {
       const updated = await uploadAvatar(file);
       onProfileChange(updated);
-      message.success("头像已更新");
+      message.success(t("avatarUpdated"));
     } catch (err) {
-      message.error(err.message || "头像上传失败");
+      message.error(err.message || t("avatarUploadFailed"));
     } finally {
       setAvatarLoading(false);
     }
@@ -72,9 +78,9 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
     try {
       const updated = await updateProfile({ displayName: values.displayName });
       onProfileChange(updated);
-      message.success("用户名已更新");
+      message.success(t("displayNameUpdated"));
     } catch (err) {
-      message.error(err.message || "更新失败");
+      message.error(err.message || t("updateFailed"));
     } finally {
       setNameLoading(false);
     }
@@ -88,9 +94,9 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
         newPassword: values.newPassword,
       });
       pwForm.resetFields();
-      message.success("密码已更新");
+      message.success(t("passwordUpdated"));
     } catch (err) {
-      message.error(err.message || "密码更新失败");
+      message.error(err.message || t("passwordUpdateFailed"));
     } finally {
       setPwLoading(false);
     }
@@ -101,9 +107,9 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
     try {
       const updated = await updateIdentifier({ type: "email", identifier: values.email });
       onProfileChange(updated);
-      message.success("邮箱已更新");
+      message.success(t("emailUpdated"));
     } catch (err) {
-      message.error(err.message || "邮箱更新失败");
+      message.error(err.message || t("emailUpdateFailed"));
     } finally {
       setEmailLoading(false);
     }
@@ -114,11 +120,24 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
     try {
       const updated = await updateIdentifier({ type: "phone", identifier: values.phone });
       onProfileChange(updated);
-      message.success("手机号已更新");
+      message.success(t("phoneUpdated"));
     } catch (err) {
-      message.error(err.message || "手机号更新失败");
+      message.error(err.message || t("phoneUpdateFailed"));
     } finally {
       setPhoneLoading(false);
+    }
+  };
+
+  const handleLocaleSave = async (values) => {
+    setLocaleLoading(true);
+    try {
+      const updated = await updateLocale(values.preferredLocale);
+      onProfileChange(updated);
+      message.success(t("languageUpdated"));
+    } catch (err) {
+      message.error(err.message || t("updateFailed"));
+    } finally {
+      setLocaleLoading(false);
     }
   };
 
@@ -126,7 +145,7 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
 
   return (
     <Drawer
-      title="个人资料"
+      title={t("profileTitle")}
       placement="right"
       width={380}
       open={open}
@@ -188,7 +207,7 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
       <Divider style={{ margin: "0 0 20px" }} />
 
       {/* Display Name */}
-      <Section title="用户名" />
+      <Section title={t("displayName")} />
       <Form
         form={nameForm}
         onFinish={handleNameSave}
@@ -198,24 +217,25 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
       >
         <Form.Item
           name="displayName"
-          rules={[{ required: true, message: "请输入用户名" }, { max: 64, message: "最多 64 个字符" }]}
+          rules={[
+            { required: true, message: t("displayNameRequired") },
+            { max: 64, message: t("displayNameMax") },
+          ]}
           style={{ marginBottom: 10 }}
         >
-          <Input prefix={<UserOutlined />} placeholder="用户名" />
+          <Input prefix={<UserOutlined />} placeholder={t("displayName")} />
         </Form.Item>
         <Form.Item style={{ marginBottom: 0 }}>
           <Button type="primary" htmlType="submit" loading={nameLoading} style={{ width: "100%" }}>
-            保存用户名
+            {t("saveDisplayName")}
           </Button>
         </Form.Item>
       </Form>
 
       <Divider style={{ margin: "0 0 20px" }} />
 
-      {/* Avatar URL (fallback text input when no upload service) */}
-
       {/* Password */}
-      <Section title="修改密码" />
+      <Section title={t("changePassword")} />
       <Form
         form={pwForm}
         onFinish={handlePasswordSave}
@@ -224,37 +244,40 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
       >
         <Form.Item
           name="currentPassword"
-          rules={[{ required: true, message: "请输入当前密码" }]}
+          rules={[{ required: true, message: t("currentPasswordRequired") }]}
           style={{ marginBottom: 10 }}
         >
-          <Input.Password prefix={<LockOutlined />} placeholder="当前密码" />
+          <Input.Password prefix={<LockOutlined />} placeholder={t("currentPassword")} />
         </Form.Item>
         <Form.Item
           name="newPassword"
-          rules={[{ required: true, message: "请输入新密码" }, { min: 6, message: "至少 6 个字符" }]}
+          rules={[
+            { required: true, message: t("newPasswordRequired") },
+            { min: 6, message: t("newPasswordMin") },
+          ]}
           style={{ marginBottom: 10 }}
         >
-          <Input.Password prefix={<LockOutlined />} placeholder="新密码" />
+          <Input.Password prefix={<LockOutlined />} placeholder={t("newPassword")} />
         </Form.Item>
         <Form.Item
           name="confirmPassword"
           dependencies={["newPassword"]}
           rules={[
-            { required: true, message: "请确认新密码" },
+            { required: true, message: t("confirmPasswordRequired") },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue("newPassword") === value) return Promise.resolve();
-                return Promise.reject(new Error("两次输入的密码不一致"));
+                return Promise.reject(new Error(t("passwordMismatch")));
               },
             }),
           ]}
           style={{ marginBottom: 10 }}
         >
-          <Input.Password prefix={<LockOutlined />} placeholder="确认新密码" />
+          <Input.Password prefix={<LockOutlined />} placeholder={t("confirmPassword")} />
         </Form.Item>
         <Form.Item style={{ marginBottom: 0 }}>
           <Button type="primary" htmlType="submit" loading={pwLoading} style={{ width: "100%" }}>
-            更新密码
+            {t("updatePassword")}
           </Button>
         </Form.Item>
       </Form>
@@ -262,7 +285,7 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
       <Divider style={{ margin: "0 0 20px" }} />
 
       {/* Email */}
-      <Section title="登录邮箱" />
+      <Section title={t("loginEmail")} />
       <Form
         form={emailForm}
         onFinish={handleEmailSave}
@@ -273,16 +296,16 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
         <Form.Item
           name="email"
           rules={[
-            { required: true, message: "请输入邮箱" },
-            { type: "email", message: "邮箱格式不正确" },
+            { required: true, message: t("emailRequired") },
+            { type: "email", message: t("emailInvalid") },
           ]}
           style={{ marginBottom: 10 }}
         >
-          <Input prefix={<MailOutlined />} placeholder="邮箱地址" />
+          <Input prefix={<MailOutlined />} placeholder={t("emailAddress")} />
         </Form.Item>
         <Form.Item style={{ marginBottom: 0 }}>
           <Button type="primary" htmlType="submit" loading={emailLoading} style={{ width: "100%" }}>
-            更新邮箱
+            {t("updateEmail")}
           </Button>
         </Form.Item>
       </Form>
@@ -290,24 +313,49 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
       <Divider style={{ margin: "0 0 20px" }} />
 
       {/* Phone */}
-      <Section title="手机号码" />
+      <Section title={t("phoneNumber")} />
       <Form
         form={phoneForm}
         onFinish={handlePhoneSave}
         initialValues={{ phone: profile.phone }}
         key={profile.phone}
         layout="vertical"
+        style={{ marginBottom: 24 }}
       >
         <Form.Item
           name="phone"
-          rules={[{ required: true, message: "请输入手机号" }]}
+          rules={[{ required: true, message: t("phoneRequired") }]}
           style={{ marginBottom: 10 }}
         >
-          <Input prefix={<PhoneOutlined />} placeholder="手机号码" />
+          <Input prefix={<PhoneOutlined />} placeholder={t("phoneNumber")} />
         </Form.Item>
         <Form.Item style={{ marginBottom: 0 }}>
           <Button type="primary" htmlType="submit" loading={phoneLoading} style={{ width: "100%" }}>
-            {profile.phone ? "更新手机号" : "绑定手机号"}
+            {profile.phone ? t("updatePhone") : t("bindPhone")}
+          </Button>
+        </Form.Item>
+      </Form>
+
+      <Divider style={{ margin: "0 0 20px" }} />
+
+      {/* Preferred Language */}
+      <Section title={t("preferredLanguage")} />
+      <Form
+        form={localeForm}
+        onFinish={handleLocaleSave}
+        initialValues={{ preferredLocale: profile.preferred_locale || locale }}
+        key={profile.preferred_locale}
+        layout="vertical"
+      >
+        <Form.Item name="preferredLocale" style={{ marginBottom: 10 }}>
+          <Radio.Group>
+            <Radio value="en-US">English</Radio>
+            <Radio value="zh-CN">中文</Radio>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item style={{ marginBottom: 0 }}>
+          <Button type="primary" htmlType="submit" loading={localeLoading} style={{ width: "100%" }}>
+            {t("saveLanguage")}
           </Button>
         </Form.Item>
       </Form>

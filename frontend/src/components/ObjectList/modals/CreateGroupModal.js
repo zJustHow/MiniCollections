@@ -1,5 +1,6 @@
 import { Form, Input, message, Modal, Upload } from "antd";
 import { uploadImage } from "../../../utils";
+import { useLocale } from "../../../LocaleContext";
 
 export default function CreateGroupModal({
   visible,
@@ -10,9 +11,10 @@ export default function CreateGroupModal({
   imageData,
   onImageChange,
 }) {
+  const { t } = useLocale();
   return (
     <Modal
-      title="Create Group"
+      title={t("createGroup")}
       open={visible}
       onOk={onOk}
       confirmLoading={confirmLoading}
@@ -21,13 +23,13 @@ export default function CreateGroupModal({
     >
       <Form layout="vertical" form={form}>
         <Form.Item
-          label="Name"
+          label={t("name")}
           name="name"
-          rules={[{ required: true, message: "Please enter group name" }]}
+          rules={[{ required: true, message: t("groupNameRequired") }]}
         >
           <Input />
         </Form.Item>
-        <Form.Item label="Image">
+        <Form.Item label={t("image")}>
           <Upload
             listType="picture-card"
             showUploadList={false}
@@ -36,17 +38,14 @@ export default function CreateGroupModal({
                 const url = await uploadImage(file);
                 onImageChange(url);
               } catch (e) {
-                message.error(e.message || "Upload failed");
+                message.error(e.message || t("uploadFailed"));
               }
               return false;
             }}
           >
             <div style={{ width: 120 }}>
               <img
-                src={
-                  imageData ||
-                  "https://via.placeholder.com/120x80?text=Group"
-                }
+                src={imageData || "https://via.placeholder.com/120x80?text=Group"}
                 alt="group-preview"
                 style={{
                   width: "100%",
@@ -56,7 +55,7 @@ export default function CreateGroupModal({
                   marginBottom: 8,
                 }}
               />
-              <div style={{ fontSize: 12 }}>Select image</div>
+              <div style={{ fontSize: 12 }}>{t("selectImage")}</div>
             </div>
           </Upload>
         </Form.Item>

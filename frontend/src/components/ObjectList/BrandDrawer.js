@@ -2,6 +2,7 @@ import { Card, Drawer, Input, List, Spin } from "antd";
 import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
+import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
 
@@ -42,6 +43,7 @@ export default function BrandDrawer({
   onSearchChange,
   onAddToGroup,
 }) {
+  const { t } = useLocale();
   const [draftQuery, setDraftQuery] = useState("");
   const [detailItem, setDetailItem] = useState(null);
 
@@ -84,7 +86,7 @@ export default function BrandDrawer({
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, width: "100%", paddingRight: 8 }}>
       <span>{selectedBrand.name}</span>
       <Search
-        placeholder="Search models"
+        placeholder={t("searchModels")}
         allowClear
         value={draftQuery}
         onChange={(e) => {
@@ -114,14 +116,14 @@ export default function BrandDrawer({
               loading="lazy"
               style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
             />
-            <DetailRow label="Category" value={detailItem.category} />
-            <DetailRow label="Scale" value={detailItem.scale} />
+            <DetailRow label={t("category")} value={detailItem.category} />
+            <DetailRow label={t("scale")} value={detailItem.scale} />
             <DetailRow
-              label="Release Price"
+              label={t("releasePrice")}
               value={detailItem.release_price ?? detailItem.releasePrice}
             />
             <DetailRow
-              label="Release Date"
+              label={t("releaseDate")}
               value={detailItem.release_date ?? detailItem.releaseDate}
             />
             <div style={{ marginTop: 24 }}>
@@ -131,7 +133,7 @@ export default function BrandDrawer({
                 className="neu-add-btn"
                 style={{ width: "100%", height: 38, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13 }}
               >
-                <PlusOutlined /> Add to Group
+                <PlusOutlined /> {t("addToGroup")}
               </button>
             </div>
           </div>

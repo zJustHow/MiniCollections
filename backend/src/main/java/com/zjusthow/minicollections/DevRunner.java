@@ -53,9 +53,9 @@ public class DevRunner implements ApplicationRunner {
                 new BrandObjectEntity(null, b2, "Brand2Object1", null, null, null, null, null, null, null, null)
         ));
 
-        long u1 = userService.signUp("user1@email.com", "secret1", "User1");
-        long u2 = userService.signUp("user2@email.com", "secret2", "User2");
-        long u3 = userService.signUp("user3@email.com", "secret3", "User3");
+        long u1 = userService.signUp("user1@email.com", "secret1", "User1", null);
+        long u2 = userService.signUp("user2@email.com", "secret2", "User2", null);
+        long u3 = userService.signUp("user3@email.com", "secret3", "User3", null);
 
         List<GroupEntity> groups = groupRepository.saveAll(List.of(
                 new GroupEntity(null, u1, "User1Group1", null),
@@ -78,7 +78,7 @@ public class DevRunner implements ApplicationRunner {
                 new UserObjectEntity(null, u2, g3, null, "User2Group1Object2", null, null, null, null)
         ));
 
-        long u4 = userService.signUp("test@email.com", "test", "test");
+        long u4 = userService.signUp("test@email.com", "test", "test", null);
         List<GroupEntity> testGroups = groupRepository.saveAll(List.of(
                 new GroupEntity(null, u4, "TestGroup1", null),
                 new GroupEntity(null, u4, "TestGroup2", null)

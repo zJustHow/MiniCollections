@@ -22,6 +22,6 @@ public class UserController {
     @PostMapping("/signup")
     @ResponseStatus(value = HttpStatus.CREATED)
     public void signUp(@RequestBody @Valid RegisterBody body) {
-        userService.signUp(body.email(), body.password(), body.name());
+        userService.signUp(body.email(), body.password(), body.name(), body.preferredLocale());
     }
 }

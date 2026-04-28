@@ -1,15 +1,17 @@
 import { Modal } from "antd";
 import { Z_INDEX } from "../constants";
+import { useLocale } from "../../../LocaleContext";
 
 export default function BrandObjectDetailModal({
   visible,
   onCancel,
   detail,
 }) {
+  const { t } = useLocale();
   if (!detail) return null;
   return (
     <Modal
-      title={`Brand Object: ${detail.name}`}
+      title={t("brandObjectModalTitle", { name: detail.name })}
       open={visible}
       onCancel={onCancel}
       footer={null}
@@ -28,19 +30,19 @@ export default function BrandObjectDetailModal({
         }}
       />
       <p>
-        <strong>Name: </strong>
+        <strong>{t("name")}: </strong>
         {detail.name ?? "—"}
       </p>
       <p>
-        <strong>Category: </strong>
+        <strong>{t("category")}: </strong>
         {detail.category ?? "—"}
       </p>
       <p>
-        <strong>Scale: </strong>
+        <strong>{t("scale")}: </strong>
         {detail.scale ?? "—"}
       </p>
       <p>
-        <strong>Release Price: </strong>
+        <strong>{t("releasePrice")}: </strong>
         {detail.release_price != null
           ? detail.release_price
           : detail.releasePrice != null
@@ -48,7 +50,7 @@ export default function BrandObjectDetailModal({
             : "—"}
       </p>
       <p>
-        <strong>Release Date: </strong>
+        <strong>{t("releaseDate")}: </strong>
         {detail.release_date ?? detail.releaseDate ?? "—"}
       </p>
     </Modal>

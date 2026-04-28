@@ -5,6 +5,7 @@ import { LoginForm, SignupForm } from "./components/auth";
 import UserProfileDrawer from "./components/auth/UserProfileDrawer";
 import ObjectList from "./components/ObjectList";
 import { getMe } from "./utils";
+import { useLocale } from "./LocaleContext";
 
 const { Header, Content } = Layout;
 
@@ -13,15 +14,22 @@ function App() {
   const [activeTab, setActiveTab] = useState("brands");
   const [profile, setProfile] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { t, setLocale } = useLocale();
 
   const handleLoginSuccess = async () => {
     try {
       const me = await getMe();
       setProfile(me);
+      if (me.preferred_locale) setLocale(me.preferred_locale);
     } catch {
       // proceed even if profile fetch fails
     }
     setAuthed(true);
+  };
+
+  const handleProfileChange = (updated) => {
+    setProfile(updated);
+    if (updated.preferred_locale) setLocale(updated.preferred_locale);
   };
 
   return (
@@ -57,13 +65,13 @@ function App() {
               className={`neu-tab-btn${activeTab === "brands" ? " active" : ""}`}
               onClick={() => setActiveTab("brands")}
             >
-              Brands
+              {t("brands")}
             </button>
             <button
               className={`neu-tab-btn${activeTab === "groups" ? " active" : ""}`}
               onClick={() => setActiveTab("groups")}
             >
-              My Groups
+              {t("myGroups")}
             </button>
           </div>
         )}
@@ -71,7 +79,7 @@ function App() {
         {/* Right slot */}
         <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12 }}>
           {authed ? (
-            <Tooltip title={profile?.display_name || "个人资料"} placement="bottomRight">
+            <Tooltip title={profile?.display_name || t("profile")} placement="bottomRight">
               <Avatar
                 src={profile?.avatar_url}
                 icon={!profile?.avatar_url && <UserOutlined />}
@@ -110,7 +118,7 @@ function App() {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         profile={profile}
-        onProfileChange={setProfile}
+        onProfileChange={handleProfileChange}
       />
     </Layout>
   );

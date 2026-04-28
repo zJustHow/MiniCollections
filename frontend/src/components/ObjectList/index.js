@@ -10,8 +10,10 @@ import EditGroupModal from "./modals/EditGroupModal";
 import BrandObjectDetailModal from "./modals/BrandObjectDetailModal";
 import UserObjectDetailModal from "./modals/UserObjectDetailModal";
 import EditUserObjectModal from "./modals/EditUserObjectModal";
+import { useLocale } from "../../LocaleContext";
 
 export default function ObjectList({ activeTab }) {
+  const { t } = useLocale();
   const state = useObjectListState();
 
   const {
@@ -176,7 +178,7 @@ export default function ObjectList({ activeTab }) {
             const data = await searchBrandObjects(keyword);
             setAddModelSearchResults(Array.isArray(data) ? data : []);
           } catch (err) {
-            message.error(err?.message || "Search failed");
+            message.error(err?.message || t("searchFailed"));
             setAddModelSearchResults([]);
           } finally {
             setAddModelSearchLoading(false);
@@ -268,7 +270,7 @@ export default function ObjectList({ activeTab }) {
             const data = await searchBrandObjects(keyword);
             setEditModelSearchResults(Array.isArray(data) ? data : []);
           } catch (err) {
-            message.error(err?.message || "Search failed");
+            message.error(err?.message || t("searchFailed"));
             setEditModelSearchResults([]);
           } finally {
             setEditModelSearchLoading(false);
