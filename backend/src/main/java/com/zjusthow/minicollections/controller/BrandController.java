@@ -34,7 +34,7 @@ public class BrandController {
     }
 
     private String effectiveLocale(String acceptLanguage, User user) {
-        UserEntity ue = user != null ? userService.getUserByEmail(user.getUsername()) : null;
+        UserEntity ue = user != null ? userService.getUserById(Long.parseLong(user.getUsername())) : null;
         return displayLocaleResolver.resolveEffectiveLocale(acceptLanguage, ue);
     }
 

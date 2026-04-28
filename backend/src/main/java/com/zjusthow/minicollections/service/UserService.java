@@ -2,17 +2,17 @@ package com.zjusthow.minicollections.service;
 
 import com.zjusthow.minicollections.entity.GroupEntity;
 import com.zjusthow.minicollections.entity.UserEntity;
-import com.zjusthow.minicollections.exception.EmailExistsException;
+import com.zjusthow.minicollections.entity.UserIdentifierEntity;
+import com.zjusthow.minicollections.exception.IdentifierExistsException;
 import com.zjusthow.minicollections.exception.UserNotFoundException;
 import com.zjusthow.minicollections.repository.GroupRepository;
+import com.zjusthow.minicollections.repository.UserIdentifierRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
 import com.zjusthow.minicollections.model.UserProfileDto;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.provisioning.UserDetailsManager;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,70 +21,65 @@ public class UserService {
 
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
+    private final UserIdentifierRepository identifierRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserDetailsManager userDetailsManager;
-
+    private final JdbcTemplate jdbc;
 
     public UserService(
             GroupRepository groupRepository,
             UserRepository userRepository,
+            UserIdentifierRepository identifierRepository,
             PasswordEncoder passwordEncoder,
-            UserDetailsManager userDetailsManager) {
+            JdbcTemplate jdbc) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
+        this.identifierRepository = identifierRepository;
         this.passwordEncoder = passwordEncoder;
-        this.userDetailsManager = userDetailsManager;
+        this.jdbc = jdbc;
     }
 
-
     @Transactional
-    public void signUp(String email, String password, String name) {
+    public Long signUp(String email, String password, String name) {
         email = email.toLowerCase();
 
-        if (userRepository.existsByEmail(email)) {
-            throw new EmailExistsException("Email already registered");
+        if (identifierRepository.existsByTypeAndIdentifier("email", email)) {
+            throw new IdentifierExistsException("Email already registered");
         }
 
-        UserDetails user = User.builder()
-                .username(email)
-                .password(passwordEncoder.encode(password))
-                .roles("USER")
-                .build();
-        userDetailsManager.createUser(user);
-        userRepository.updateNameByEmail(email, name);
+        UserEntity user = userRepository.save(
+                new UserEntity(null, name, passwordEncoder.encode(password), true, "en-US", null));
 
-        UserEntity savedUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException());
-        GroupEntity group = new GroupEntity(null, savedUser.id(), "default", null);
-        groupRepository.save(group);
+        identifierRepository.save(new UserIdentifierEntity(null, user.id(), "email", email));
+        jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", user.id(), "ROLE_USER");
+        groupRepository.save(new GroupEntity(null, user.id(), "default", null));
+
+        return user.id();
     }
 
-
-    @Cacheable(value = "users", key = "#email")
-    public UserEntity getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException());
+    @Cacheable(value = "users", key = "#id")
+    public UserEntity getUserById(Long id) {
+        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
-    public UserProfileDto getProfile(String email) {
-        UserEntity u = getUserByEmail(email);
-        return new UserProfileDto(u.id(), u.email(), u.name(), u.preferredLocale(), u.avatarUrl());
+    public UserProfileDto getProfile(Long userId) {
+        UserEntity u = getUserById(userId);
+        String email = identifierRepository.findByUserIdAndType(userId, "email")
+                .map(UserIdentifierEntity::identifier)
+                .orElse(null);
+        return new UserProfileDto(u.id(), email, u.displayName(), u.preferredLocale(), u.avatarUrl());
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#email", beforeInvocation = true)
-    public UserProfileDto updatePreferredLocale(String email, String preferredLocale) {
-        String e = email.toLowerCase();
-        userRepository.updatePreferredLocaleByEmail(e, preferredLocale.strip());
-        return getProfile(e);
+    @CacheEvict(value = "users", key = "#userId", beforeInvocation = true)
+    public UserProfileDto updatePreferredLocale(Long userId, String preferredLocale) {
+        userRepository.updatePreferredLocaleById(userId, preferredLocale.strip());
+        return getProfile(userId);
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#email", beforeInvocation = true)
-    public UserProfileDto updateAvatarUrl(String email, String avatarUrl) {
-        String e = email.toLowerCase();
-        userRepository.updateAvatarUrlByEmail(e, avatarUrl);
-        return getProfile(e);
+    @CacheEvict(value = "users", key = "#userId", beforeInvocation = true)
+    public UserProfileDto updateAvatarUrl(Long userId, String avatarUrl) {
+        userRepository.updateAvatarUrlById(userId, avatarUrl);
+        return getProfile(userId);
     }
-
 }

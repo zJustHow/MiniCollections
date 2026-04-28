@@ -22,7 +22,6 @@ public class DevRunner implements ApplicationRunner {
     private final BrandRepository brandRepository;
     private final GroupRepository groupRepository;
     private final UserObjectRepository userObjectRepository;
-    private final UserRepository userRepository;
     private final UserService userService;
 
     public DevRunner(
@@ -30,14 +29,12 @@ public class DevRunner implements ApplicationRunner {
             BrandRepository brandRepository,
             GroupRepository groupRepository,
             UserObjectRepository userObjectRepository,
-            UserRepository userRepository,
             UserService userService
     ) {
         this.brandObjectRepository = brandObjectRepository;
         this.brandRepository = brandRepository;
         this.groupRepository = groupRepository;
         this.userObjectRepository = userObjectRepository;
-        this.userRepository = userRepository;
         this.userService = userService;
     }
 
@@ -56,14 +53,9 @@ public class DevRunner implements ApplicationRunner {
                 new BrandObjectEntity(null, b2, "Brand2Object1", null, null, null, null, null, null, null, null)
         ));
 
-        List<UserEntity> users = userRepository.saveAll(List.of(
-                new UserEntity(null, "user1@email.com", "secret1", true, "User1"),
-                new UserEntity(null, "user2@email.com", "secret2", true, "User2"),
-                new UserEntity(null, "user3@email.com", "secret3", true, "User3")
-        ));
-        long u1 = users.get(0).id();
-        long u2 = users.get(1).id();
-        long u3 = users.get(2).id();
+        long u1 = userService.signUp("user1@email.com", "secret1", "User1");
+        long u2 = userService.signUp("user2@email.com", "secret2", "User2");
+        long u3 = userService.signUp("user3@email.com", "secret3", "User3");
 
         List<GroupEntity> groups = groupRepository.saveAll(List.of(
                 new GroupEntity(null, u1, "User1Group1", null),
@@ -86,8 +78,7 @@ public class DevRunner implements ApplicationRunner {
                 new UserObjectEntity(null, u2, g3, null, "User2Group1Object2", null, null, null, null)
         ));
 
-        userService.signUp("test@email.com", "test", "test");
-        long u4 = userRepository.findByEmail("test@email.com").orElseThrow().id();
+        long u4 = userService.signUp("test@email.com", "test", "test");
         List<GroupEntity> testGroups = groupRepository.saveAll(List.of(
                 new GroupEntity(null, u4, "TestGroup1", null),
                 new GroupEntity(null, u4, "TestGroup2", null)

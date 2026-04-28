@@ -6,24 +6,14 @@ import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public interface UserRepository extends ListCrudRepository<UserEntity, Long> {
-    Optional<List<UserEntity>> findByName(String userName);
-    Optional<UserEntity> findByEmail(String email);
-    boolean existsByEmail(String email);
 
     @Modifying
-    @Query("UPDATE users SET name = :name WHERE email = :email")
-    void updateNameByEmail(String email, String name);
+    @Query("UPDATE users SET preferred_locale = :preferredLocale WHERE id = :id")
+    void updatePreferredLocaleById(Long id, String preferredLocale);
 
     @Modifying
-    @Query("UPDATE users SET preferred_locale = :preferredLocale WHERE email = :email")
-    void updatePreferredLocaleByEmail(String email, String preferredLocale);
-
-    @Modifying
-    @Query("UPDATE users SET avatar_url = :avatarUrl WHERE email = :email")
-    void updateAvatarUrlByEmail(String email, String avatarUrl);
+    @Query("UPDATE users SET avatar_url = :avatarUrl WHERE id = :id")
+    void updateAvatarUrlById(Long id, String avatarUrl);
 }

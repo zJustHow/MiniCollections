@@ -3,12 +3,10 @@ package com.zjusthow.minicollections.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table("users")
-public record UserEntity(
+@Table("user_identifiers")
+public record UserIdentifierEntity(
         @Id Long id,
-        String displayName,
-        String password,
-        boolean enabled,
-        String preferredLocale,
-        String avatarUrl
+        Long userId,
+        String type,
+        String identifier
 ) {}

@@ -1,12 +1,10 @@
 package com.zjusthow.minicollections.controller;
 
-import com.zjusthow.minicollections.entity.UserEntity;
 import com.zjusthow.minicollections.model.GroupBody;
 import com.zjusthow.minicollections.model.GroupDto;
 import com.zjusthow.minicollections.model.UserObjectBody;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.service.GroupService;
-import com.zjusthow.minicollections.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,43 +18,39 @@ import java.util.List;
 @RequestMapping("/groups")
 public class GroupController {
     private final GroupService groupService;
-    private final UserService userService;
 
-    public GroupController(
-            GroupService groupService,
-            UserService userService) {
+    public GroupController(GroupService groupService) {
         this.groupService = groupService;
-        this.userService = userService;
+    }
+
+    private Long userId(User user) {
+        return Long.parseLong(user.getUsername());
     }
 
     @GetMapping
     public ResponseEntity<List<GroupDto>> getGroups(@AuthenticationPrincipal User user) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        return ResponseEntity.ok(groupService.getGroups(userEntity.id()));
+        return ResponseEntity.ok(groupService.getGroups(userId(user)));
     }
 
     @GetMapping("/{groupId}")
     public ResponseEntity<GroupDto> getGroupById(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        return ResponseEntity.ok(groupService.getGroupById(userEntity.id(), groupId));
+        return ResponseEntity.ok(groupService.getGroupById(userId(user), groupId));
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<GroupDto>> searchGroups(
             @AuthenticationPrincipal User user,
             @RequestParam String keyword) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        return ResponseEntity.ok(groupService.searchGroups(userEntity.id(), keyword));
+        return ResponseEntity.ok(groupService.searchGroups(userId(user), keyword));
     }
 
     @PostMapping
     public ResponseEntity<GroupDto> createGroup(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid GroupBody groupBody) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        GroupDto groupDto = groupService.createGroup(userEntity.id(), groupBody.name(), groupBody.imageUrl());
+        GroupDto groupDto = groupService.createGroup(userId(user), groupBody.name(), groupBody.imageUrl());
         return ResponseEntity.status(HttpStatus.CREATED).body(groupDto);
     }
 
@@ -65,8 +59,7 @@ public class GroupController {
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
             @RequestBody @Valid GroupBody groupBody) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        GroupDto groupDto = groupService.updateGroup(userEntity.id(), groupId, groupBody.name(), groupBody.imageUrl());
+        GroupDto groupDto = groupService.updateGroup(userId(user), groupId, groupBody.name(), groupBody.imageUrl());
         return ResponseEntity.ok(groupDto);
     }
 
@@ -74,8 +67,7 @@ public class GroupController {
     public ResponseEntity<Void> deleteGroupById(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        groupService.deleteGroupById(userEntity.id(), groupId);
+        groupService.deleteGroupById(userId(user), groupId);
         return ResponseEntity.noContent().build();
     }
 
@@ -83,8 +75,7 @@ public class GroupController {
     public ResponseEntity<List<UserObjectDto>> getUserObjects(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        return ResponseEntity.ok(groupService.getUserObjects(userEntity.id(), groupId));
+        return ResponseEntity.ok(groupService.getUserObjects(userId(user), groupId));
     }
 
     @PostMapping("/{groupId}/objects")
@@ -92,9 +83,8 @@ public class GroupController {
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
             @RequestBody @Valid UserObjectBody userObjectBody) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         UserObjectDto userObjectDto = groupService.createUserObject(
-                userEntity.id(),
+                userId(user),
                 groupId,
                 userObjectBody.brandObjectId(),
                 userObjectBody.name(),
@@ -111,9 +101,8 @@ public class GroupController {
             @PathVariable Long groupId,
             @PathVariable Long userObjectId,
             @RequestBody @Valid UserObjectBody userObjectBody) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
         UserObjectDto dto = groupService.updateUserObject(
-                userEntity.id(),
+                userId(user),
                 userObjectId,
                 userObjectBody.brandObjectId(),
                 userObjectBody.name(),
@@ -128,9 +117,7 @@ public class GroupController {
     public ResponseEntity<Void> deleteUserObjectById(
             @AuthenticationPrincipal User user,
             @PathVariable Long userObjectId) {
-        UserEntity userEntity = userService.getUserByEmail(user.getUsername());
-        groupService.deleteUserObjectById(userEntity.id(), userObjectId);
+        groupService.deleteUserObjectById(userId(user), userObjectId);
         return ResponseEntity.noContent().build();
     }
-
 }

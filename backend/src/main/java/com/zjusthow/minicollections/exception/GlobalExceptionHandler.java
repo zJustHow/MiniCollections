@@ -51,10 +51,10 @@ public class GlobalExceptionHandler {
         return ex.getMessage() != null ? ex.getMessage() : "Not found";
     }
 
-    @ExceptionHandler(EmailExistsException.class)
+    @ExceptionHandler(IdentifierExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    public String handleEmailExistsException(EmailExistsException ex) {
-        log.warn("Registration conflict (email exists): {}", ex.getMessage());
+    public String handleIdentifierExistsException(IdentifierExistsException ex) {
+        log.warn("Registration conflict (identifier exists): {}", ex.getMessage());
         return ex.getMessage() != null ? ex.getMessage() : "Conflict";
     }
 

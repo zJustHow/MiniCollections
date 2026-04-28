@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS authorities;
 DROP TABLE IF EXISTS user_objects;
 DROP TABLE IF EXISTS groups;
+DROP TABLE IF EXISTS user_identifiers;
 DROP TABLE IF EXISTS brand_objects;
 DROP TABLE IF EXISTS brands;
 DROP TABLE IF EXISTS users;
@@ -8,13 +9,22 @@ DROP TABLE IF EXISTS users;
 
 CREATE TABLE users
 (
-    id SERIAL PRIMARY KEY NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    enabled BOOLEAN DEFAULT TRUE NOT NULL,
-    name VARCHAR(255),
-    preferred_locale VARCHAR(16) NOT NULL DEFAULT 'en-US',
-    avatar_url TEXT
+    id               SERIAL PRIMARY KEY NOT NULL,
+    display_name     VARCHAR(255)       NOT NULL,
+    password         VARCHAR(255),
+    enabled          BOOLEAN            NOT NULL DEFAULT TRUE,
+    preferred_locale VARCHAR(16)        NOT NULL DEFAULT 'en-US',
+    avatar_url       TEXT
+);
+
+CREATE TABLE user_identifiers
+(
+    id         SERIAL PRIMARY KEY NOT NULL,
+    user_id    INTEGER            NOT NULL,
+    type       VARCHAR(32)        NOT NULL,
+    identifier VARCHAR(255)       NOT NULL,
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT uq_type_identifier UNIQUE (type, identifier)
 );
 
 CREATE TABLE groups
@@ -68,10 +78,10 @@ CREATE TABLE user_objects
 
 CREATE TABLE authorities
 (
-    email     VARCHAR(255)       NOT NULL,
-    authority VARCHAR(255)       NOT NULL,
-    CONSTRAINT authorities_pk PRIMARY KEY (email, authority),
-    CONSTRAINT fk_customer FOREIGN KEY (email) REFERENCES users (email) ON DELETE CASCADE
+    user_id   INTEGER      NOT NULL,
+    authority VARCHAR(255) NOT NULL,
+    CONSTRAINT authorities_pk PRIMARY KEY (user_id, authority),
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 -- MINI GT brand and products (images stored under backend/src/main/resources/static/images/minigt/)

@@ -21,13 +21,15 @@ public class UserSettingsController {
 
     @GetMapping("/me")
     public ResponseEntity<UserProfileDto> getMe(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(userService.getProfile(user.getUsername()));
+        Long userId = Long.parseLong(user.getUsername());
+        return ResponseEntity.ok(userService.getProfile(userId));
     }
 
     @PatchMapping("/me/locale")
     public ResponseEntity<UserProfileDto> updateLocale(
             @AuthenticationPrincipal User user,
             @RequestBody @Valid UserLocaleBody body) {
-        return ResponseEntity.ok(userService.updatePreferredLocale(user.getUsername(), body.preferredLocale()));
+        Long userId = Long.parseLong(user.getUsername());
+        return ResponseEntity.ok(userService.updatePreferredLocale(userId, body.preferredLocale()));
     }
 }

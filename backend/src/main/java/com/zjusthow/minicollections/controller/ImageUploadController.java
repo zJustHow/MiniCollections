@@ -33,7 +33,7 @@ public class ImageUploadController {
     public ResponseEntity<Map<String, String>> uploadImage(
             @AuthenticationPrincipal User user,
             @RequestParam("file") MultipartFile file) throws IOException {
-        long userId = userService.getUserByEmail(user.getUsername()).id();
+        long userId = Long.parseLong(user.getUsername());
         String url = imageStorageService.uploadUserImage(userId, file);
         return ResponseEntity.ok(Map.of("url", url));
     }
@@ -42,10 +42,9 @@ public class ImageUploadController {
     public ResponseEntity<UserProfileDto> uploadAvatar(
             @AuthenticationPrincipal User user,
             @RequestParam("file") MultipartFile file) throws IOException {
-        String email = user.getUsername();
-        long userId = userService.getUserByEmail(email).id();
+        long userId = Long.parseLong(user.getUsername());
         String url = imageStorageService.uploadUserImage(userId, file);
-        UserProfileDto profile = userService.updateAvatarUrl(email, url);
+        UserProfileDto profile = userService.updateAvatarUrl(userId, url);
         return ResponseEntity.ok(profile);
     }
 }
