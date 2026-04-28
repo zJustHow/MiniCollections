@@ -191,6 +191,52 @@ export const uploadImage = async (file) => {
   return data.url;
 };
 
+export const getMe = async () => {
+  const response = await fetch("/users/me", { credentials: "include" });
+  return handleResponse(response);
+};
+
+export const updateProfile = async ({ displayName }) => {
+  const response = await fetch("/users/me", {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ display_name: displayName }),
+  });
+  return handleResponse(response);
+};
+
+export const updatePassword = async ({ currentPassword, newPassword }) => {
+  const response = await fetch("/users/me/password", {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
+  });
+  return handleResponse(response);
+};
+
+export const updateIdentifier = async (payload) => {
+  const response = await fetch("/users/me/identifier", {
+    method: "PATCH",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+};
+
+export const uploadAvatar = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch("/uploads/users/me/avatar", {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+  return handleResponse(response);
+};
+
 export const purchasePriceFromFormValue = (value) => {
   if (value === undefined || value === null || value === "") {
     return { purchase_price: null };

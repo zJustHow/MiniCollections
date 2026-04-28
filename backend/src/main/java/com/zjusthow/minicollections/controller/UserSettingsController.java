@@ -1,7 +1,6 @@
 package com.zjusthow.minicollections.controller;
 
-import com.zjusthow.minicollections.model.UserLocaleBody;
-import com.zjusthow.minicollections.model.UserProfileDto;
+import com.zjusthow.minicollections.model.*;
 import com.zjusthow.minicollections.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +22,30 @@ public class UserSettingsController {
     public ResponseEntity<UserProfileDto> getMe(@AuthenticationPrincipal User user) {
         Long userId = Long.parseLong(user.getUsername());
         return ResponseEntity.ok(userService.getProfile(userId));
+    }
+
+    @PatchMapping("/me")
+    public ResponseEntity<UserProfileDto> updateProfile(
+            @AuthenticationPrincipal User user,
+            @RequestBody @Valid UserProfileUpdateBody body) {
+        Long userId = Long.parseLong(user.getUsername());
+        return ResponseEntity.ok(userService.updateDisplayName(userId, body.displayName()));
+    }
+
+    @PatchMapping("/me/password")
+    public ResponseEntity<UserProfileDto> updatePassword(
+            @AuthenticationPrincipal User user,
+            @RequestBody @Valid PasswordUpdateBody body) {
+        Long userId = Long.parseLong(user.getUsername());
+        return ResponseEntity.ok(userService.updatePassword(userId, body.currentPassword(), body.newPassword()));
+    }
+
+    @PatchMapping("/me/identifier")
+    public ResponseEntity<UserProfileDto> updateIdentifier(
+            @AuthenticationPrincipal User user,
+            @RequestBody @Valid IdentifierUpdateBody body) {
+        Long userId = Long.parseLong(user.getUsername());
+        return ResponseEntity.ok(userService.updateIdentifier(userId, body.type(), body.identifier()));
     }
 
     @PatchMapping("/me/locale")

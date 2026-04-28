@@ -1,13 +1,28 @@
-import { Layout } from "antd";
+import { Layout, Avatar, Tooltip } from "antd";
 import { useState } from "react";
+import { UserOutlined } from "@ant-design/icons";
 import { LoginForm, SignupForm } from "./components/auth";
+import UserProfileDrawer from "./components/auth/UserProfileDrawer";
 import ObjectList from "./components/ObjectList";
+import { getMe } from "./utils";
 
 const { Header, Content } = Layout;
 
 function App() {
   const [authed, setAuthed] = useState(false);
   const [activeTab, setActiveTab] = useState("brands");
+  const [profile, setProfile] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const handleLoginSuccess = async () => {
+    try {
+      const me = await getMe();
+      setProfile(me);
+    } catch {
+      // proceed even if profile fetch fails
+    }
+    setAuthed(true);
+  };
 
   return (
     <Layout style={{ height: "100vh" }}>
@@ -54,8 +69,26 @@ function App() {
         )}
 
         {/* Right slot */}
-        <div style={{ flexShrink: 0 }}>
-          {authed ? null : <SignupForm />}
+        <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12 }}>
+          {authed ? (
+            <Tooltip title={profile?.display_name || "个人资料"} placement="bottomRight">
+              <Avatar
+                src={profile?.avatar_url}
+                icon={!profile?.avatar_url && <UserOutlined />}
+                size={36}
+                onClick={() => setDrawerOpen(true)}
+                style={{
+                  cursor: "pointer",
+                  boxShadow: "var(--raised-sm)",
+                  background: profile?.avatar_url ? "transparent" : "var(--neu-accent)",
+                  flexShrink: 0,
+                  transition: "box-shadow 0.15s ease",
+                }}
+              />
+            </Tooltip>
+          ) : (
+            <SignupForm />
+          )}
         </div>
       </Header>
 
@@ -69,9 +102,16 @@ function App() {
         {authed ? (
           <ObjectList activeTab={activeTab} />
         ) : (
-          <LoginForm onSuccess={() => setAuthed(true)} />
+          <LoginForm onSuccess={handleLoginSuccess} />
         )}
       </Content>
+
+      <UserProfileDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        profile={profile}
+        onProfileChange={setProfile}
+      />
     </Layout>
   );
 }

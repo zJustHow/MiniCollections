@@ -16,4 +16,12 @@ public interface UserRepository extends ListCrudRepository<UserEntity, Long> {
     @Modifying
     @Query("UPDATE users SET avatar_url = :avatarUrl WHERE id = :id")
     void updateAvatarUrlById(Long id, String avatarUrl);
+
+    @Modifying
+    @Query("UPDATE users SET display_name = :displayName WHERE id = :id")
+    void updateDisplayNameById(Long id, String displayName);
+
+    @Modifying
+    @Query("UPDATE users SET password = :password WHERE id = :id")
+    void updatePasswordById(Long id, String password);
 }

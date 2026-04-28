@@ -12,6 +12,7 @@ import com.zjusthow.minicollections.model.UserProfileDto;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,7 +67,10 @@ public class UserService {
         String email = identifierRepository.findByUserIdAndType(userId, "email")
                 .map(UserIdentifierEntity::identifier)
                 .orElse(null);
-        return new UserProfileDto(u.id(), email, u.displayName(), u.preferredLocale(), u.avatarUrl());
+        String phone = identifierRepository.findByUserIdAndType(userId, "phone")
+                .map(UserIdentifierEntity::identifier)
+                .orElse(null);
+        return new UserProfileDto(u.id(), email, phone, u.displayName(), u.preferredLocale(), u.avatarUrl());
     }
 
     @Transactional
@@ -80,6 +84,40 @@ public class UserService {
     @CacheEvict(value = "users", key = "#userId", beforeInvocation = true)
     public UserProfileDto updateAvatarUrl(Long userId, String avatarUrl) {
         userRepository.updateAvatarUrlById(userId, avatarUrl);
+        return getProfile(userId);
+    }
+
+    @Transactional
+    @CacheEvict(value = "users", key = "#userId", beforeInvocation = true)
+    public UserProfileDto updateDisplayName(Long userId, String displayName) {
+        userRepository.updateDisplayNameById(userId, displayName.strip());
+        return getProfile(userId);
+    }
+
+    @Transactional
+    @CacheEvict(value = "users", key = "#userId", beforeInvocation = true)
+    public UserProfileDto updatePassword(Long userId, String currentPassword, String newPassword) {
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        if (!passwordEncoder.matches(currentPassword, user.password())) {
+            throw new BadCredentialsException("Current password is incorrect");
+        }
+        userRepository.updatePasswordById(userId, passwordEncoder.encode(newPassword));
+        return getProfile(userId);
+    }
+
+    @Transactional
+    public UserProfileDto updateIdentifier(Long userId, String type, String identifier) {
+        final String normalized = identifier.strip().toLowerCase();
+        if (identifierRepository.existsByTypeAndIdentifier(type, normalized)) {
+            throw new IdentifierExistsException(type + " already in use");
+        }
+        identifierRepository.findByUserIdAndType(userId, type)
+                .ifPresentOrElse(
+                        existing -> identifierRepository.save(
+                                new UserIdentifierEntity(existing.id(), userId, type, normalized)),
+                        () -> identifierRepository.save(
+                                new UserIdentifierEntity(null, userId, type, normalized))
+                );
         return getProfile(userId);
     }
 }
