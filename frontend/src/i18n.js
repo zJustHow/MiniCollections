@@ -6,6 +6,7 @@ const en = {
 
   // Auth
   signIn: "Sign In",
+  signUp: "Sign up",
   register: "Register",
   username: "Username",
   email: "Email",
@@ -132,6 +133,7 @@ const zh = {
 
   // Auth
   signIn: "登录",
+  signUp: "注册",
   register: "注册",
   username: "用户名",
   email: "邮箱",

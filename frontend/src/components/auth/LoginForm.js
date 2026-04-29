@@ -1,6 +1,7 @@
 import { Button, Form, Input } from "antd";
 import { useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { login } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 
@@ -8,6 +9,7 @@ function LoginForm({ onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { t } = useLocale();
+  const navigate = useNavigate();
 
   const onFinish = async (data) => {
     setLoading(true);
@@ -78,6 +80,16 @@ function LoginForm({ onSuccess }) {
           </Button>
         </Form.Item>
       </Form>
+
+      <div style={{ textAlign: "center", marginTop: 16, color: "var(--neu-text-2)", fontSize: 13 }}>
+        or{" "}
+        <span
+          onClick={() => navigate("/register")}
+          style={{ cursor: "pointer", color: "var(--neu-accent)", textDecoration: "underline" }}
+        >
+          {t("signUp")}
+        </span>
+      </div>
     </div>
   );
 }

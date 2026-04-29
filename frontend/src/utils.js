@@ -1,3 +1,5 @@
+const TOKEN_KEY = "auth_token";
+
 const handleResponse = async (response) => {
   if (!response.ok) {
     const errorText = await response.text();
@@ -10,59 +12,63 @@ const handleResponse = async (response) => {
   }
 };
 
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function authHeaders(extra = {}) {
+  const token = getToken();
+  const headers = { ...extra };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+  return headers;
+}
+
 export const login = async (credentials) => {
-  // Spring Security form login expects application/x-www-form-urlencoded
-  const body = new URLSearchParams({
-    username: credentials.username,
-    password: credentials.password,
-  }).toString();
   const response = await fetch("/login", {
     method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: credentials.username, password: credentials.password }),
   });
+  const data = await handleResponse(response);
+  localStorage.setItem(TOKEN_KEY, data.token);
+  return data;
+};
 
-  return handleResponse(response);
+export const logout = () => {
+  localStorage.removeItem(TOKEN_KEY);
 };
 
 export const signup = async (data) => {
   const response = await fetch("/signup", {
     method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data),
   });
-
   return handleResponse(response);
 };
 
 export const getBrands = async () => {
-  const response = await fetch("/brands", { credentials: "include" });
+  const response = await fetch("/brands", { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const searchBrands = async (keyword) => {
   const response = await fetch(
     `/brands/search?keyword=${encodeURIComponent(keyword)}`,
-    { credentials: "include" }
+    { headers: authHeaders() }
   );
   return handleResponse(response);
 };
 
 export const getGroups = async () => {
-  const response = await fetch("/groups", { credentials: "include" });
+  const response = await fetch("/groups", { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const searchGroups = async (keyword) => {
   const response = await fetch(
     `/groups/search?keyword=${encodeURIComponent(keyword)}`,
-    { credentials: "include" }
+    { headers: authHeaders() }
   );
   return handleResponse(response);
 };
@@ -70,10 +76,7 @@ export const searchGroups = async (keyword) => {
 export const createGroup = async (payload) => {
   const response = await fetch("/groups", {
     method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
   return handleResponse(response);
@@ -82,10 +85,7 @@ export const createGroup = async (payload) => {
 export const updateGroup = async (groupId, payload) => {
   const response = await fetch(`/groups/${groupId}`, {
     method: "PUT",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
   return handleResponse(response);
@@ -94,7 +94,7 @@ export const updateGroup = async (groupId, payload) => {
 export const deleteGroup = async (groupId) => {
   const response = await fetch(`/groups/${groupId}`, {
     method: "DELETE",
-    credentials: "include",
+    headers: authHeaders(),
   });
   if (response.status === 204) return;
   if (!response.ok) {
@@ -104,48 +104,37 @@ export const deleteGroup = async (groupId) => {
 };
 
 export const getBrandByBrandId = async (brandId) => {
-  const response = await fetch(`/brands/${brandId}`, {
-    credentials: "include",
-  });
+  const response = await fetch(`/brands/${brandId}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const getBrandObjectsByBrandId = async (brandId) => {
-  const response = await fetch(`/brands/${brandId}/objects`, {
-    credentials: "include",
-  });
+  const response = await fetch(`/brands/${brandId}/objects`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const getBrandObjectById = async (id) => {
-  const response = await fetch(`/brands/objects/${id}`, {
-    credentials: "include",
-  });
+  const response = await fetch(`/brands/objects/${id}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const searchBrandObjects = async (keyword) => {
   const response = await fetch(
     `/brands/objects/search?keyword=${encodeURIComponent(keyword)}`,
-    { credentials: "include" }
+    { headers: authHeaders() }
   );
   return handleResponse(response);
 };
 
 export const getUserObjects = async (groupId) => {
-  const response = await fetch(`/groups/${groupId}/objects`, {
-    credentials: "include",
-  });
+  const response = await fetch(`/groups/${groupId}/objects`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const createUserObject = async (groupId, payload) => {
   const response = await fetch(`/groups/${groupId}/objects`, {
     method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
   return handleResponse(response);
@@ -154,10 +143,7 @@ export const createUserObject = async (groupId, payload) => {
 export const updateUserObject = async (groupId, userObjectId, payload) => {
   const response = await fetch(`/groups/${groupId}/objects/${userObjectId}`, {
     method: "PUT",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
   return handleResponse(response);
@@ -166,7 +152,7 @@ export const updateUserObject = async (groupId, userObjectId, payload) => {
 export const deleteUserObject = async (groupId, userObjectId) => {
   const response = await fetch(
     `/groups/${groupId}/objects/${userObjectId}`,
-    { method: "DELETE", credentials: "include" }
+    { method: "DELETE", headers: authHeaders() }
   );
   if (response.status === 204) return;
   if (!response.ok) {
@@ -180,7 +166,7 @@ export const uploadImage = async (file) => {
   formData.append("file", file);
   const response = await fetch("/uploads/image", {
     method: "POST",
-    credentials: "include",
+    headers: authHeaders(),
     body: formData,
   });
   if (!response.ok) {
@@ -192,15 +178,14 @@ export const uploadImage = async (file) => {
 };
 
 export const getMe = async () => {
-  const response = await fetch("/users/me", { credentials: "include" });
+  const response = await fetch("/users/me", { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const updateProfile = async ({ displayName }) => {
   const response = await fetch("/users/me", {
     method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ display_name: displayName }),
   });
   return handleResponse(response);
@@ -209,8 +194,7 @@ export const updateProfile = async ({ displayName }) => {
 export const updatePassword = async ({ currentPassword, newPassword }) => {
   const response = await fetch("/users/me/password", {
     method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ current_password: currentPassword, new_password: newPassword }),
   });
   return handleResponse(response);
@@ -219,8 +203,7 @@ export const updatePassword = async ({ currentPassword, newPassword }) => {
 export const updateIdentifier = async (payload) => {
   const response = await fetch("/users/me/identifier", {
     method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(payload),
   });
   return handleResponse(response);
@@ -229,8 +212,7 @@ export const updateIdentifier = async (payload) => {
 export const updateLocale = async (preferredLocale) => {
   const response = await fetch("/users/me/locale", {
     method: "PATCH",
-    credentials: "include",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ preferred_locale: preferredLocale }),
   });
   return handleResponse(response);
@@ -241,7 +223,7 @@ export const uploadAvatar = async (file) => {
   formData.append("file", file);
   const response = await fetch("/uploads/users/me/avatar", {
     method: "POST",
-    credentials: "include",
+    headers: authHeaders(),
     body: formData,
   });
   return handleResponse(response);

@@ -5,7 +5,7 @@ import { signup } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import { detectBrowserLocale } from "../../i18n";
 
-function SignupForm() {
+function SignupForm({ linkMode = false }) {
   const [displayModal, setDisplayModal] = useState(false);
   const { t, setLocale } = useLocale();
 
@@ -26,8 +26,13 @@ function SignupForm() {
 
   return (
     <>
-      <Button shape="round" type="primary" onClick={() => setDisplayModal(true)}>
-        {t("register")}
+      <Button
+        type={linkMode ? "link" : "primary"}
+        shape={linkMode ? undefined : "round"}
+        onClick={() => setDisplayModal(true)}
+        style={linkMode ? { padding: 0, height: "auto", fontSize: 13 } : undefined}
+      >
+        {linkMode ? t("register") : t("register")}
       </Button>
       <Modal
         title={t("register")}

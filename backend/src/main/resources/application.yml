@@ -29,6 +29,10 @@ spring:
     caffeine:
       spec: expireAfterWrite=60s,maximumSize=500
 
+jwt:
+  secret: ${JWT_SECRET}
+  expiration-ms: ${JWT_EXPIRATION_MS:604800000}
+
 app:
   elasticsearch:
     enabled: ${ELASTICSEARCH_ENABLED:true}
