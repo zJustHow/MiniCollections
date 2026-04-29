@@ -8,6 +8,7 @@ import {
   Select,
   Upload,
 } from "antd";
+import { PictureOutlined } from "@ant-design/icons";
 import { uploadImage } from "../../../utils";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
@@ -87,21 +88,15 @@ export default function EditUserObjectModal({
             }}
           >
             <div style={{ width: 120 }}>
-              <img
-                src={
-                  imageData ||
-                  selectedUserObject?.image_url ||
-                  "https://via.placeholder.com/120x80?text=Image"
-                }
-                alt="preview"
-                style={{
-                  width: "100%",
-                  maxHeight: 120,
-                  objectFit: "contain",
-                  display: "block",
-                  marginBottom: 8,
-                }}
-              />
+              {imageData || selectedUserObject?.image_url ? (
+                <img
+                  src={imageData || selectedUserObject?.image_url}
+                  alt="preview"
+                  style={{ width: "100%", maxHeight: 120, objectFit: "contain", display: "block", marginBottom: 8 }}
+                />
+              ) : (
+                <PictureOutlined style={{ fontSize: 32, color: "var(--neu-text-2)", marginBottom: 8, display: "block" }} />
+              )}
               <div style={{ fontSize: 12 }}>{t("selectImage")}</div>
             </div>
           </Upload>

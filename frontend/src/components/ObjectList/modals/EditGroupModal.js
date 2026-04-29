@@ -1,4 +1,5 @@
 import { Form, Input, message, Modal, Upload } from "antd";
+import { PictureOutlined } from "@ant-design/icons";
 import { uploadImage } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
 
@@ -45,21 +46,15 @@ export default function EditGroupModal({
             }}
           >
             <div style={{ width: 120 }}>
-              <img
-                src={
-                  imageData ||
-                  selectedGroup?.image_url ||
-                  "https://via.placeholder.com/120x80?text=Group"
-                }
-                alt="group-preview"
-                style={{
-                  width: "100%",
-                  maxHeight: 120,
-                  objectFit: "contain",
-                  display: "block",
-                  marginBottom: 8,
-                }}
-              />
+              {imageData || selectedGroup?.image_url ? (
+                <img
+                  src={imageData || selectedGroup?.image_url}
+                  alt="group-preview"
+                  style={{ width: "100%", maxHeight: 120, objectFit: "contain", display: "block", marginBottom: 8 }}
+                />
+              ) : (
+                <PictureOutlined style={{ fontSize: 32, color: "var(--neu-text-2)", marginBottom: 8, display: "block" }} />
+              )}
               <div style={{ fontSize: 12 }}>{t("selectImage")}</div>
             </div>
           </Upload>
