@@ -9,13 +9,13 @@ import {
   Divider,
   Upload,
   Radio,
+  Select,
 } from "antd";
 import {
   UserOutlined,
   CameraOutlined,
   LockOutlined,
   MailOutlined,
-  PhoneOutlined,
 } from "@ant-design/icons";
 import {
   updateProfile,
@@ -23,6 +23,8 @@ import {
   updateIdentifier,
   updateLocale,
   uploadAvatar,
+  COUNTRIES,
+  parsePhone,
 } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 
@@ -118,7 +120,10 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
   const handlePhoneSave = async (values) => {
     setPhoneLoading(true);
     try {
-      const updated = await updateIdentifier({ type: "phone", identifier: values.phone });
+      const updated = await updateIdentifier({
+        type: "phone",
+        identifier: values.countryCode + values.phoneNumber,
+      });
       onProfileChange(updated);
       message.success(t("phoneUpdated"));
     } catch (err) {
@@ -317,17 +322,36 @@ function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
       <Form
         form={phoneForm}
         onFinish={handlePhoneSave}
-        initialValues={{ phone: profile.phone }}
+        initialValues={parsePhone(profile.phone)}
         key={profile.phone}
         layout="vertical"
         style={{ marginBottom: 24 }}
       >
-        <Form.Item
-          name="phone"
-          rules={[{ required: true, message: t("phoneRequired") }]}
-          style={{ marginBottom: 10 }}
-        >
-          <Input prefix={<PhoneOutlined />} placeholder={t("phoneNumber")} />
+        <Form.Item style={{ marginBottom: 10 }}>
+          <Input.Group compact>
+            <Form.Item name="countryCode" noStyle>
+              <Select style={{ width: 110 }} optionLabelProp="label">
+                {COUNTRIES.map((c) => (
+                  <Select.Option key={c.code} value={c.code} label={c.code}>
+                    {locale === "zh-CN" ? c.zh : c.en} {c.code}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item
+              name="phoneNumber"
+              noStyle
+              rules={[
+                { required: true, message: t("phoneRequired") },
+                { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
+              ]}
+            >
+              <Input
+                style={{ width: "calc(100% - 110px)" }}
+                placeholder={t("phoneNumber")}
+              />
+            </Form.Item>
+          </Input.Group>
         </Form.Item>
         <Form.Item style={{ marginBottom: 0 }}>
           <Button type="primary" htmlType="submit" loading={phoneLoading} style={{ width: "100%" }}>

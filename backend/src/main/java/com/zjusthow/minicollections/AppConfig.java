@@ -55,7 +55,7 @@ public class AppConfig {
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/", "/index.html", "/*.json", "/*.png", "/static/**", "/images/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/login", "/signup").permitAll()
-                                .requestMatchers(HttpMethod.GET, "/brands/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/brands", "/brands/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

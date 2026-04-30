@@ -1,8 +1,8 @@
-import { Button, Form, Input, Radio, message, Layout } from "antd";
+import { Button, Form, Input, Radio, Select, message, Layout } from "antd";
 import { useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { signup } from "../utils";
+import { signup, COUNTRIES } from "../utils";
 import { useLocale } from "../LocaleContext";
 import { detectBrowserLocale } from "../i18n";
 
@@ -11,15 +11,32 @@ const { Header, Content } = Layout;
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { t, setLocale } = useLocale();
+  const [registerType, setRegisterType] = useState("email");
+  const [form] = Form.useForm();
+  const { t, setLocale, locale } = useLocale();
   const navigate = useNavigate();
 
-  const onFinish = async (data) => {
+  const handleTypeChange = (e) => {
+    setRegisterType(e.target.value);
+    setError(null);
+  };
+
+  const onFinish = async (values) => {
     setLoading(true);
     setError(null);
     try {
-      await signup(data);
-      if (data.preferred_locale) setLocale(data.preferred_locale);
+      const payload = {
+        password: values.password,
+        name: values.name,
+        preferred_locale: values.preferred_locale,
+      };
+      if (registerType === "email") {
+        payload.email = values.email;
+      } else {
+        payload.phone = values.countryCode + values.phoneNumber;
+      }
+      await signup(payload);
+      if (values.preferred_locale) setLocale(values.preferred_locale);
       message.success(t("registerSuccess"));
       navigate("/login");
     } catch (err) {
@@ -64,20 +81,71 @@ export default function RegisterPage() {
             {t("register")}
           </div>
 
+          <div style={{ marginBottom: 20, textAlign: "center" }}>
+            <Radio.Group
+              value={registerType}
+              onChange={handleTypeChange}
+              buttonStyle="solid"
+              size="middle"
+            >
+              <Radio.Button value="email">{t("registerWithEmail")}</Radio.Button>
+              <Radio.Button value="phone">{t("registerWithPhone")}</Radio.Button>
+            </Radio.Group>
+          </div>
+
           <Form
+            form={form}
             name="register"
-            initialValues={{ preferred_locale: detectBrowserLocale() }}
+            initialValues={{ preferred_locale: detectBrowserLocale(), countryCode: "+86" }}
             onFinish={onFinish}
           >
             <Form.Item
               name="email"
-              rules={[{ required: true, message: t("emailRequired") }]}
+              style={{ display: registerType === "email" ? "block" : "none" }}
+              rules={registerType === "email" ? [
+                { required: true, message: t("emailRequired") },
+                { type: "email", message: t("emailInvalid") },
+              ] : []}
             >
               <Input prefix={<UserOutlined />} placeholder={t("email")} size="large" />
             </Form.Item>
+
+            <Form.Item
+              style={{ display: registerType === "phone" ? "block" : "none", marginBottom: 24 }}
+            >
+              <Input.Group compact>
+                <Form.Item name="countryCode" noStyle>
+                  <Select style={{ width: 110 }} optionLabelProp="label" size="large">
+                    {COUNTRIES.map((c) => (
+                      <Select.Option key={c.code} value={c.code} label={c.code}>
+                        {locale === "zh-CN" ? c.zh : c.en} {c.code}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item
+                  name="phoneNumber"
+                  noStyle
+                  rules={registerType === "phone" ? [
+                    { required: true, message: t("phoneRequired") },
+                    { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
+                  ] : []}
+                >
+                  <Input
+                    style={{ width: "calc(100% - 110px)" }}
+                    placeholder={t("phoneNumber")}
+                    size="large"
+                  />
+                </Form.Item>
+              </Input.Group>
+            </Form.Item>
+
             <Form.Item
               name="password"
-              rules={[{ required: true, message: t("passwordRequired") }]}
+              rules={[
+                { required: true, message: t("passwordRequired") },
+                { min: 6, message: t("newPasswordMin") },
+              ]}
             >
               <Input.Password prefix={<LockOutlined />} placeholder={t("password")} size="large" />
             </Form.Item>

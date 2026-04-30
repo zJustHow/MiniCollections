@@ -3,7 +3,8 @@ package com.zjusthow.minicollections.model;
 import jakarta.validation.constraints.NotBlank;
 
 public record RegisterBody(
-        @NotBlank String email,
+        String email,
+        String phone,
         @NotBlank String password,
         @NotBlank String name,
         String preferredLocale

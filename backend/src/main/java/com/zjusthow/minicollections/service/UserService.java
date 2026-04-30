@@ -40,18 +40,37 @@ public class UserService {
     }
 
     @Transactional
-    public Long signUp(String email, String password, String name, String preferredLocale) {
-        email = email.toLowerCase();
+    public Long signUp(String email, String phone, String password, String name, String preferredLocale) {
+        final String normalizedEmail = (email != null && !email.isBlank()) ? email.toLowerCase().strip() : null;
+        final String normalizedPhone = (phone != null && !phone.isBlank()) ? phone.strip() : null;
 
-        if (identifierRepository.existsByTypeAndIdentifier("email", email)) {
-            throw new IdentifierExistsException("Email already registered");
+        if (normalizedEmail == null && normalizedPhone == null) {
+            throw new IllegalArgumentException("Email or phone is required");
+        }
+
+        if (normalizedEmail != null) {
+            if (identifierRepository.existsByTypeAndIdentifier("email", normalizedEmail)) {
+                throw new IdentifierExistsException("Email already registered");
+            }
+        }
+
+        if (normalizedPhone != null) {
+            if (identifierRepository.existsByTypeAndIdentifier("phone", normalizedPhone)) {
+                throw new IdentifierExistsException("Phone already registered");
+            }
         }
 
         String locale = (preferredLocale != null && !preferredLocale.isBlank()) ? preferredLocale.strip() : "en-US";
         UserEntity user = userRepository.save(
                 new UserEntity(null, name, passwordEncoder.encode(password), true, locale, null));
 
-        identifierRepository.save(new UserIdentifierEntity(null, user.id(), "email", email));
+        if (normalizedEmail != null) {
+            identifierRepository.save(new UserIdentifierEntity(null, user.id(), "email", normalizedEmail));
+        }
+        if (normalizedPhone != null) {
+            identifierRepository.save(new UserIdentifierEntity(null, user.id(), "phone", normalizedPhone));
+        }
+
         jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", user.id(), "ROLE_USER");
         groupRepository.save(new GroupEntity(null, user.id(), "default", null));
 

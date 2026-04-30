@@ -16,6 +16,8 @@ const en = {
   emailRequired: "Please input your email!",
   signupNameRequired: "Please input your username!",
   registerSuccess: "Successfully signed up",
+  registerWithEmail: "Email",
+  registerWithPhone: "Phone",
   language: "Language",
 
   // Profile Drawer
@@ -45,6 +47,7 @@ const en = {
   emailUpdateFailed: "Failed to update email",
   phoneNumber: "Phone Number",
   phoneRequired: "Please enter phone number",
+  phoneInvalid: "Please enter a valid phone number (digits only)",
   updatePhone: "Update Phone",
   bindPhone: "Bind Phone",
   phoneUpdated: "Phone updated",
@@ -143,6 +146,8 @@ const zh = {
   emailRequired: "请输入邮箱！",
   signupNameRequired: "请输入用户名！",
   registerSuccess: "注册成功",
+  registerWithEmail: "邮箱",
+  registerWithPhone: "手机号",
   language: "语言",
 
   // Profile Drawer
@@ -172,6 +177,7 @@ const zh = {
   emailUpdateFailed: "邮箱更新失败",
   phoneNumber: "手机号码",
   phoneRequired: "请输入手机号",
+  phoneInvalid: "请输入有效的手机号（仅数字）",
   updatePhone: "更新手机号",
   bindPhone: "绑定手机号",
   phoneUpdated: "手机号已更新",
