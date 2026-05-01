@@ -28,12 +28,43 @@ spring:
     type: caffeine
     caffeine:
       spec: expireAfterWrite=60s,maximumSize=500
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
 
 jwt:
   secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS:604800000}
 
+aliyun:
+  sms:
+    access-key-id: ${ALIYUN_SMS_ACCESS_KEY_ID:}
+    access-key-secret: ${ALIYUN_SMS_ACCESS_KEY_SECRET:}
+    sign-name: ${ALIYUN_SMS_SIGN_NAME:MiniCollections}
+    template-code: ${ALIYUN_SMS_TEMPLATE_CODE:}
+
+twilio:
+  sms:
+    account-sid: ${TWILIO_ACCOUNT_SID:}
+    auth-token: ${TWILIO_AUTH_TOKEN:}
+    from-number: ${TWILIO_FROM_NUMBER:}
+
 app:
+  verification:
+    otp-ttl-seconds: 300
+    resend-cooldown-seconds: 60
   elasticsearch:
     enabled: ${ELASTICSEARCH_ENABLED:true}
   s3:

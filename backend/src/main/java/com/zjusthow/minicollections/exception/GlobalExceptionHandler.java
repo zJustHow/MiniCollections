@@ -3,6 +3,7 @@ package com.zjusthow.minicollections.exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -73,6 +74,26 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(err ->
                 errors.put(err.getField(), err.getDefaultMessage() != null ? err.getDefaultMessage() : "invalid"));
         return errors;
+    }
+
+    @ExceptionHandler(InvalidCodeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleInvalidCodeException(InvalidCodeException ex) {
+        log.debug("Invalid verification code: {}", ex.getMessage());
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(TooManyRequestsException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public String handleTooManyRequestsException(TooManyRequestsException ex) {
+        log.debug("Rate limited: {}", ex.getMessage());
+        return ex.getMessage();
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public String handleBadCredentialsException(BadCredentialsException ex) {
+        return "Bad credentials";
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

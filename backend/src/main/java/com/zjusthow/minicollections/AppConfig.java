@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -37,8 +37,8 @@ public class AppConfig {
     }
 
     @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
+    AuthenticationManager authenticationManager(DaoAuthenticationProvider authProvider) {
+        return new ProviderManager(authProvider);
     }
 
     @Bean
@@ -54,7 +54,7 @@ public class AppConfig {
                         auth
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/", "/index.html", "/*.json", "/*.png", "/static/**", "/images/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/login", "/signup").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/login", "/signup", "/send-code").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/brands", "/brands/**").permitAll()
                                 .anyRequest().authenticated()
                 )

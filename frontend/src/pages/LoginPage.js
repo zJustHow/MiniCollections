@@ -5,7 +5,7 @@ const { Header, Content } = Layout;
 
 export default function LoginPage({ onSuccess }) {
   return (
-    <Layout style={{ height: "100vh" }}>
+    <Layout style={{ minHeight: "100vh" }}>
       <Header
         style={{
           display: "flex",
@@ -32,6 +32,7 @@ export default function LoginPage({ onSuccess }) {
           alignItems: "center",
           justifyContent: "center",
           background: "var(--neu-bg)",
+          padding: "40px 16px",
         }}
       >
         <LoginForm onSuccess={onSuccess} />

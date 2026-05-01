@@ -75,9 +75,6 @@ export default function GroupDrawer({
     : userObjects;
 
   const handleClose = () => {
-    setDraftQuery("");
-    setShowBrandDetail(false);
-    onSearchChange("");
     onClose();
   };
 
@@ -158,7 +155,19 @@ export default function GroupDrawer({
   }
 
   return (
-    <Drawer title={drawerTitle} open={open} onClose={handleClose} width={DRAWER_WIDTH}>
+    <Drawer
+      title={drawerTitle}
+      open={open}
+      onClose={handleClose}
+      width={DRAWER_WIDTH}
+      afterOpenChange={(isOpen) => {
+        if (!isOpen) {
+          setDraftQuery("");
+          setShowBrandDetail(false);
+          onSearchChange("");
+        }
+      }}
+    >
       {selectedGroup && (
         isBrandDetail ? (
           <div>

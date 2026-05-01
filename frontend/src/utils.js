@@ -48,11 +48,13 @@ function authHeaders(extra = {}) {
   return headers;
 }
 
-export const login = async (credentials) => {
+export const login = async ({ identifier, password, loginType }) => {
+  const body = { password };
+  body[loginType === "phone" ? "phone" : "email"] = identifier;
   const response = await fetch("/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email: credentials.username, password: credentials.password }),
+    body: JSON.stringify(body),
   });
   const data = await handleResponse(response);
   localStorage.setItem(TOKEN_KEY, data.token);
@@ -61,6 +63,15 @@ export const login = async (credentials) => {
 
 export const logout = () => {
   localStorage.removeItem(TOKEN_KEY);
+};
+
+export const sendCode = async (target, type) => {
+  const response = await fetch("/send-code", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ target, type }),
+  });
+  return handleResponse(response);
 };
 
 export const signup = async (data) => {

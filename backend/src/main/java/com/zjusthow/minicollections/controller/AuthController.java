@@ -23,12 +23,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
+        String rawEmail = body.get("email");
+        String rawPhone = body.get("phone");
+        String identifier = (rawPhone != null && !rawPhone.isBlank())
+                ? rawPhone.strip()
+                : (rawEmail != null ? rawEmail.toLowerCase().strip() : null);
         String password = body.get("password");
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(email, password)
+                new UsernamePasswordAuthenticationToken(identifier, password)
         );
-        String token = jwtService.generate(email);
+        String token = jwtService.generate(identifier);
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

@@ -19,6 +19,10 @@ const en = {
   registerWithEmail: "Email",
   registerWithPhone: "Phone",
   language: "Language",
+  verificationCode: "Verification Code",
+  codeRequired: "Please enter verification code",
+  sendCode: "Send Code",
+  codeSent: "Code sent",
 
   // Profile Drawer
   profileTitle: "Profile",
@@ -98,8 +102,8 @@ const en = {
   purchasePrice: "Purchase Price",
   purchaseDate: "Purchase Date",
   notes: "Notes",
-  brandModelLabel: "Brand Model",
-  noRelatedBrandModel: "No related brand model found.",
+  brandModelLabel: "Related Model",
+  noRelatedBrandModel: "No related model found.",
   noModelsInGroup: "No models in this group yet",
   addToGroup: "Add to Group",
 
@@ -149,6 +153,10 @@ const zh = {
   registerWithEmail: "邮箱",
   registerWithPhone: "手机号",
   language: "语言",
+  verificationCode: "验证码",
+  codeRequired: "请输入验证码",
+  sendCode: "发送验证码",
+  codeSent: "验证码已发送",
 
   // Profile Drawer
   profileTitle: "个人资料",
@@ -228,8 +236,8 @@ const zh = {
   purchasePrice: "购入价格",
   purchaseDate: "购入日期",
   notes: "备注",
-  brandModelLabel: "品牌型号",
-  noRelatedBrandModel: "未找到相关品牌型号。",
+  brandModelLabel: "关联模型",
+  noRelatedBrandModel: "未找到关联模型。",
   noModelsInGroup: "该分组暂无型号",
   addToGroup: "添加到分组",
 

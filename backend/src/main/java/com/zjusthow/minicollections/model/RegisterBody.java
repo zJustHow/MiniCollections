@@ -7,5 +7,6 @@ public record RegisterBody(
         String phone,
         @NotBlank String password,
         @NotBlank String name,
-        String preferredLocale
+        String preferredLocale,
+        @NotBlank String code
 ) {}

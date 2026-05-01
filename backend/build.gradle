@@ -18,6 +18,13 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation('com.aliyun:dysmsapi20170525:2.0.24') {
+        exclude group: 'xpp3', module: 'xpp3'
+        exclude group: 'pull-parser', module: 'pull-parser'
+    }
+    implementation 'com.twilio.sdk:twilio:10.1.0'
     implementation 'org.jsoup:jsoup:1.18.1'
     implementation 'com.github.ben-manes.caffeine:caffeine:3.+'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
@@ -41,6 +48,7 @@ tasks.named('test') {
 }
 
 tasks.named('bootRun') {
+    systemProperty 'spring.profiles.active', 'dev'
     def envFile = file('.env')
     if (envFile.exists()) {
         envFile.readLines().each { line ->
