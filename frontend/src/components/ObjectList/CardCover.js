@@ -6,7 +6,7 @@ const CardCover = ({ image_url, name }) => (
       position: "relative",
       paddingTop: "75%",
       overflow: "hidden",
-      borderRadius: "14px 14px 0 0",
+      borderRadius: "32px 32px 0 0",
     }}
   >
     <img

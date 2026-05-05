@@ -1,28 +1,29 @@
 import {
-  Badge,
   Button,
   DatePicker,
   Drawer,
   Form,
   Input,
   InputNumber,
-  Layout,
   message,
   Modal,
   Select,
   Space,
   Table,
-  Tabs,
   Tag,
 } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  CloseCircleOutlined,
+  UnorderedListOutlined,
+} from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { approveSubmission, getAdminSubmissions, getBrands, rejectSubmission } from "../utils";
 import { useLocale } from "../LocaleContext";
-
-const { Header, Content } = Layout;
 
 const STATUS_COLOR = {
   PENDING: "orange",
@@ -45,7 +46,6 @@ function useTypeLabel(t) {
   };
 }
 
-// Modal for MISSING_MODEL: approve & create brand object
 function ApproveModal({ open, submission, brands, onClose, onSuccess }) {
   const { t } = useLocale();
   const [form] = Form.useForm();
@@ -110,19 +110,14 @@ function ApproveModal({ open, submission, brands, onClose, onSuccess }) {
       cancelText={t("cancel")}
       confirmLoading={loading}
       width={600}
+      centered
       destroyOnClose
     >
       <Form layout="vertical" form={form}>
-        <Form.Item
-          label={t("brand")}
-          name="brandId"
-          rules={[{ required: true, message: t("brandRequired") }]}
-        >
+        <Form.Item label={t("brand")} name="brandId" rules={[{ required: true, message: t("brandRequired") }]}>
           <Select showSearch optionFilterProp="children">
             {brands.map((b) => (
-              <Select.Option key={b.id} value={b.id}>
-                {b.name}
-              </Select.Option>
+              <Select.Option key={b.id} value={b.id}>{b.name}</Select.Option>
             ))}
           </Select>
         </Form.Item>
@@ -158,7 +153,6 @@ function ApproveModal({ open, submission, brands, onClose, onSuccess }) {
   );
 }
 
-// Modal for BUG_REPORT / DATA_CORRECTION: resolve with optional note
 function ResolveModal({ open, submission, onClose, onSuccess }) {
   const { t } = useLocale();
   const [adminNote, setAdminNote] = useState("");
@@ -168,16 +162,9 @@ function ResolveModal({ open, submission, onClose, onSuccess }) {
     setLoading(true);
     try {
       await approveSubmission(submission.id, {
-        brand_id: null,
-        name_en: null,
-        name_zh: null,
-        image_url: null,
-        release_price_cny: null,
-        release_price_usd: null,
-        release_date: null,
-        category_en: null,
-        category_zh: null,
-        scale: null,
+        brand_id: null, name_en: null, name_zh: null, image_url: null,
+        release_price_cny: null, release_price_usd: null, release_date: null,
+        category_en: null, category_zh: null, scale: null,
         admin_note: adminNote || null,
       });
       message.success(t("submissionResolved"));
@@ -200,15 +187,12 @@ function ResolveModal({ open, submission, onClose, onSuccess }) {
       okText={t("resolveSubmission")}
       cancelText={t("cancel")}
       confirmLoading={loading}
+      centered
       destroyOnClose
     >
       <Form layout="vertical">
         <Form.Item label={t("adminNote")}>
-          <Input.TextArea
-            rows={3}
-            value={adminNote}
-            onChange={(e) => setAdminNote(e.target.value)}
-          />
+          <Input.TextArea rows={3} value={adminNote} onChange={(e) => setAdminNote(e.target.value)} />
         </Form.Item>
       </Form>
     </Modal>
@@ -247,15 +231,12 @@ function RejectModal({ open, submission, onClose, onSuccess }) {
       okButtonProps={{ danger: true }}
       cancelText={t("cancel")}
       confirmLoading={loading}
+      centered
       destroyOnClose
     >
       <Form layout="vertical">
         <Form.Item label={isMissingModel ? t("rejectReason") : t("closeReason")}>
-          <Input.TextArea
-            rows={3}
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-          />
+          <Input.TextArea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
         </Form.Item>
       </Form>
     </Modal>
@@ -305,13 +286,9 @@ function DetailDrawer({ submission, brands, onClose, onApprove, onResolve, onRej
         submission.status === "PENDING" ? (
           <Space>
             {isMissingModel ? (
-              <Button type="primary" onClick={onApprove}>
-                {t("approveSubmission")}
-              </Button>
+              <Button type="primary" onClick={onApprove}>{t("approveSubmission")}</Button>
             ) : (
-              <Button type="primary" onClick={onResolve}>
-                {t("resolveSubmission")}
-              </Button>
+              <Button type="primary" onClick={onResolve}>{t("resolveSubmission")}</Button>
             )}
             <Button danger onClick={onReject}>
               {isMissingModel ? t("rejectSubmission") : t("closeSubmission")}
@@ -324,18 +301,21 @@ function DetailDrawer({ submission, brands, onClose, onApprove, onResolve, onRej
         <img
           src={submission.image_url}
           alt={submission.name_en}
-          style={{ width: "100%", maxHeight: 240, objectFit: "contain", marginBottom: 16, borderRadius: 8 }}
+          style={{ width: "100%", maxHeight: 240, objectFit: "contain", marginBottom: 16, borderRadius: 12, boxShadow: "var(--raised-sm)" }}
         />
       )}
-      <div style={{ marginBottom: 12 }}>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         <Tag color={STATUS_COLOR[submission.status]}>{submission.status}</Tag>
         <Tag color={TYPE_COLOR[submission.submission_type]}>{getTypeLabel(submission.submission_type)}</Tag>
       </div>
       {rows.map(({ label, value }) =>
         value != null && value !== "" ? (
-          <div key={label} style={{ display: "flex", gap: 12, padding: "8px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
+          <div
+            key={label}
+            style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}
+          >
             <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 120, flexShrink: 0 }}>{label}</span>
-            <span style={{ color: "var(--neu-text)", fontSize: 13, whiteSpace: "pre-wrap" }}>{String(value)}</span>
+            <span style={{ color: "var(--neu-text)", fontSize: 13, whiteSpace: "pre-wrap", fontWeight: 500 }}>{String(value)}</span>
           </div>
         ) : null
       )}
@@ -385,23 +365,28 @@ export default function AdminPage() {
 
   const pendingCount = submissions.filter((s) => s.status === "PENDING").length;
 
+  const statusOptions = [
+    { key: "PENDING",  label: t("submissionsPending"),  icon: <ClockCircleOutlined /> },
+    { key: "APPROVED", label: t("submissionsApproved"), icon: <CheckCircleOutlined /> },
+    { key: "REJECTED", label: t("submissionsRejected"), icon: <CloseCircleOutlined /> },
+    { key: "ALL",      label: t("submissionsAll"),      icon: <UnorderedListOutlined /> },
+  ];
+
   const columns = [
     { title: "#", dataIndex: "id", width: 60 },
     { title: t("submitter"), dataIndex: "submitter_name", width: 120 },
     {
       title: t("submissionType"),
       dataIndex: "submission_type",
-      width: 120,
-      render: (type) => (
-        <Tag color={TYPE_COLOR[type]}>{getTypeLabel(type)}</Tag>
-      ),
+      width: 140,
+      render: (type) => <Tag color={TYPE_COLOR[type]}>{getTypeLabel(type)}</Tag>,
     },
     { title: t("brand"), dataIndex: "brand_name", width: 100 },
     { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },
     {
       title: t("submissionStatus"),
       dataIndex: "status",
-      width: 100,
+      width: 110,
       render: (status) => <Tag color={STATUS_COLOR[status]}>{status}</Tag>,
     },
     {
@@ -412,47 +397,129 @@ export default function AdminPage() {
     },
   ];
 
-  const tabItems = [
-    { key: "PENDING", label: <Badge count={activeStatus !== "PENDING" ? 0 : pendingCount} offset={[8, 0]}>{t("submissionsPending")}</Badge> },
-    { key: "APPROVED", label: t("submissionsApproved") },
-    { key: "REJECTED", label: t("submissionsRejected") },
-    { key: "ALL", label: t("submissionsAll") },
-  ];
+  const tableNode = (
+    <Table
+      rowKey="id"
+      dataSource={submissions}
+      columns={columns}
+      loading={loading}
+      size="middle"
+      onRow={(record) => ({ onClick: () => setSelectedSubmission(record), style: { cursor: "pointer" } })}
+      pagination={{ pageSize: 20, showSizeChanger: false }}
+    />
+  );
 
   return (
-    <Layout style={{ minHeight: "100vh" }}>
-      <Header
+    <div style={{ minHeight: "100vh", background: "var(--neu-bg)" }}>
+      {/* Header */}
+      <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: 16,
-          paddingLeft: 32,
-          paddingRight: 32,
+          padding: "0 48px",
+          height: 64,
+          background: "var(--neu-bg)",
+          boxShadow: "0 6px 20px rgba(184,182,176,0.5), 0 2px 6px rgba(184,182,176,0.3)",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
         }}
       >
         <button
           type="button"
           onClick={() => navigate("/")}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "var(--neu-text-2)", display: "flex", alignItems: "center", gap: 6, fontSize: 14 }}
+          style={{
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            color: "var(--neu-text-2)",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            fontSize: 14,
+            padding: "6px 10px",
+            borderRadius: 8,
+            transition: "color 0.2s",
+          }}
         >
           <ArrowLeftOutlined /> {t("brands")}
         </button>
-        <span style={{ fontSize: 16, fontWeight: 600, color: "var(--neu-text)" }}>
+        <span style={{ fontSize: 16, fontWeight: 700, color: "var(--neu-text)", letterSpacing: "0.3px" }}>
           {t("adminPanel")}
         </span>
-      </Header>
+      </div>
 
-      <Content style={{ padding: "32px 48px" }}>
-        <Tabs activeKey={activeStatus} onChange={handleTabChange} items={tabItems} />
-        <Table
-          rowKey="id"
-          dataSource={submissions}
-          columns={columns}
-          loading={loading}
-          size="small"
-          onRow={(record) => ({ onClick: () => setSelectedSubmission(record), style: { cursor: "pointer" } })}
-        />
-      </Content>
+      {/* Content */}
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "40px 48px", display: "flex", gap: 24, alignItems: "flex-start" }}>
+
+        {/* Left sidebar */}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+            borderRadius: 14,
+            padding: 5,
+            boxShadow: "var(--inset-sm)",
+            width: 160,
+            flexShrink: 0,
+          }}
+        >
+          {statusOptions.map(({ key, label, icon }) => (
+            <button
+              key={key}
+              type="button"
+              className={`neu-tab-btn${activeStatus === key ? " active" : ""}`}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+                fontSize: 13,
+              }}
+              onClick={() => handleTabChange(key)}
+            >
+              <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {icon}
+                {label}
+              </span>
+              {key === "PENDING" && pendingCount > 0 && (
+                <span
+                  style={{
+                    background: "var(--neu-accent)",
+                    color: "#fff",
+                    borderRadius: 10,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: "1px 7px",
+                    lineHeight: "18px",
+                    minWidth: 20,
+                    textAlign: "center",
+                  }}
+                >
+                  {pendingCount}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Right content panel */}
+        <div
+          style={{
+            flex: 1,
+            borderRadius: 14,
+            padding: 24,
+            boxShadow: "var(--inset)",
+          }}
+        >
+          {tableNode}
+        </div>
+      </div>
 
       <DetailDrawer
         submission={selectedSubmission}
@@ -462,7 +529,6 @@ export default function AdminPage() {
         onResolve={() => setResolveModalOpen(true)}
         onReject={() => setRejectModalOpen(true)}
       />
-
       <ApproveModal
         open={approveModalOpen}
         submission={selectedSubmission}
@@ -470,20 +536,18 @@ export default function AdminPage() {
         onClose={() => setApproveModalOpen(false)}
         onSuccess={handleSuccess}
       />
-
       <ResolveModal
         open={resolveModalOpen}
         submission={selectedSubmission}
         onClose={() => setResolveModalOpen(false)}
         onSuccess={handleSuccess}
       />
-
       <RejectModal
         open={rejectModalOpen}
         submission={selectedSubmission}
         onClose={() => setRejectModalOpen(false)}
         onSuccess={handleSuccess}
       />
-    </Layout>
+    </div>
   );
 }

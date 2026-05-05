@@ -1,4 +1,5 @@
-import { Button, Modal, Spin } from "antd";
+import { Button, Modal, Spin, Tooltip } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
 
@@ -37,12 +38,8 @@ export default function UserObjectDetailModal({
         >
           <span>{name}</span>
           <div style={{ display: "flex", gap: 8 }}>
-            <Button size="small" onClick={onEdit}>
-              {t("edit")}
-            </Button>
-            <Button size="small" danger onClick={onDelete}>
-              {t("delete")}
-            </Button>
+            <Button size="small" icon={<EditOutlined />} onClick={onEdit} />
+            <Button size="small" danger icon={<DeleteOutlined />} onClick={onDelete} />
           </div>
         </div>
       }

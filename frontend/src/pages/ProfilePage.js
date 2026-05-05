@@ -1,0 +1,441 @@
+import {
+  Avatar,
+  Button,
+  Divider,
+  Form,
+  Input,
+  Layout,
+  message,
+  Radio,
+  Select,
+  Upload,
+} from "antd";
+import {
+  ArrowLeftOutlined,
+  CameraOutlined,
+  LockOutlined,
+  LogoutOutlined,
+  MailOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  COUNTRIES,
+  parsePhone,
+  updateIdentifier,
+  updateLocale,
+  updatePassword,
+  updateProfile,
+  uploadAvatar,
+} from "../utils";
+import { useLocale } from "../LocaleContext";
+
+const { Header, Content } = Layout;
+
+function SectionLabel({ title }) {
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: 1.4,
+        textTransform: "uppercase",
+        color: "var(--neu-text-2)",
+        marginBottom: 14,
+      }}
+    >
+      {title}
+    </div>
+  );
+}
+
+function SectionCard({ children }) {
+  return (
+    <div
+      style={{
+        background: "var(--neu-bg)",
+        borderRadius: 16,
+        padding: "22px 24px",
+        boxShadow: "var(--raised-sm)",
+        marginBottom: 16,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+export default function ProfilePage({ profile, onProfileChange, onLogout }) {
+  const { t, locale } = useLocale();
+  const navigate = useNavigate();
+
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [nameLoading, setNameLoading] = useState(false);
+  const [pwLoading, setPwLoading] = useState(false);
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [phoneLoading, setPhoneLoading] = useState(false);
+  const [localeLoading, setLocaleLoading] = useState(false);
+
+  const [nameForm] = Form.useForm();
+  const [pwForm] = Form.useForm();
+  const [emailForm] = Form.useForm();
+  const [phoneForm] = Form.useForm();
+  const [localeForm] = Form.useForm();
+
+  const handleAvatarUpload = async ({ file }) => {
+    setAvatarLoading(true);
+    try {
+      const updated = await uploadAvatar(file);
+      onProfileChange(updated);
+      message.success(t("avatarUpdated"));
+    } catch (err) {
+      message.error(err.message || t("avatarUploadFailed"));
+    } finally {
+      setAvatarLoading(false);
+    }
+    return false;
+  };
+
+  const handleNameSave = async (values) => {
+    setNameLoading(true);
+    try {
+      const updated = await updateProfile({ displayName: values.displayName });
+      onProfileChange(updated);
+      message.success(t("displayNameUpdated"));
+    } catch (err) {
+      message.error(err.message || t("updateFailed"));
+    } finally {
+      setNameLoading(false);
+    }
+  };
+
+  const handlePasswordSave = async (values) => {
+    setPwLoading(true);
+    try {
+      await updatePassword({ currentPassword: values.currentPassword, newPassword: values.newPassword });
+      pwForm.resetFields();
+      message.success(t("passwordUpdated"));
+    } catch (err) {
+      message.error(err.message || t("passwordUpdateFailed"));
+    } finally {
+      setPwLoading(false);
+    }
+  };
+
+  const handleEmailSave = async (values) => {
+    setEmailLoading(true);
+    try {
+      const updated = await updateIdentifier({ type: "email", identifier: values.email });
+      onProfileChange(updated);
+      message.success(t("emailUpdated"));
+    } catch (err) {
+      message.error(err.message || t("emailUpdateFailed"));
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+
+  const handlePhoneSave = async (values) => {
+    setPhoneLoading(true);
+    try {
+      const updated = await updateIdentifier({
+        type: "phone",
+        identifier: values.countryCode + values.phoneNumber,
+      });
+      onProfileChange(updated);
+      message.success(t("phoneUpdated"));
+    } catch (err) {
+      message.error(err.message || t("phoneUpdateFailed"));
+    } finally {
+      setPhoneLoading(false);
+    }
+  };
+
+  const handleLocaleSave = async (values) => {
+    setLocaleLoading(true);
+    try {
+      const updated = await updateLocale(values.preferredLocale);
+      onProfileChange(updated);
+      message.success(t("languageUpdated"));
+    } catch (err) {
+      message.error(err.message || t("updateFailed"));
+    } finally {
+      setLocaleLoading(false);
+    }
+  };
+
+  if (!profile) return null;
+
+  return (
+    <Layout style={{ height: "100vh" }}>
+      <Header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingLeft: 24,
+          paddingRight: 24,
+          gap: 16,
+        }}
+      >
+        <Button
+          icon={<ArrowLeftOutlined />}
+          onClick={() => navigate(-1)}
+          style={{ flexShrink: 0 }}
+        />
+        <span
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            letterSpacing: 1,
+            color: "var(--neu-text)",
+          }}
+        >
+          {t("profileTitle")}
+        </span>
+        <Button
+          danger
+          icon={<LogoutOutlined />}
+          onClick={onLogout}
+          style={{ flexShrink: 0 }}
+        >
+          {t("logout")}
+        </Button>
+      </Header>
+
+      <Content
+        style={{
+          overflowY: "auto",
+          padding: "32px 24px 48px",
+        }}
+      >
+        <div style={{ maxWidth: 480, margin: "0 auto" }}>
+
+          {/* Avatar + name card */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              marginBottom: 28,
+              paddingBottom: 28,
+            }}
+          >
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <Avatar
+                size={96}
+                src={profile.avatar_url}
+                icon={!profile.avatar_url && <UserOutlined />}
+                style={{
+                  boxShadow: "var(--raised)",
+                  background: profile.avatar_url ? "transparent" : "var(--neu-accent)",
+                }}
+              />
+              <Upload
+                accept="image/*"
+                showUploadList={false}
+                beforeUpload={() => false}
+                onChange={({ file }) => handleAvatarUpload({ file })}
+              >
+                <Button
+                  size="small"
+                  icon={<CameraOutlined />}
+                  loading={avatarLoading}
+                  style={{
+                    position: "absolute",
+                    bottom: 0,
+                    right: 0,
+                    borderRadius: "50%",
+                    width: 30,
+                    height: 30,
+                    padding: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 13,
+                  }}
+                />
+              </Upload>
+            </div>
+            <div style={{ marginTop: 12, fontWeight: 700, fontSize: 18, color: "var(--neu-text)" }}>
+              {profile.display_name}
+            </div>
+            {profile.email && (
+              <div style={{ fontSize: 13, color: "var(--neu-text-2)", marginTop: 3 }}>
+                {profile.email}
+              </div>
+            )}
+          </div>
+
+          <Divider style={{ margin: "0 0 24px" }} />
+
+          {/* Display Name */}
+          <SectionCard>
+            <SectionLabel title={t("displayName")} />
+            <Form
+              form={nameForm}
+              onFinish={handleNameSave}
+              initialValues={{ displayName: profile.display_name }}
+              layout="vertical"
+            >
+              <Form.Item
+                name="displayName"
+                rules={[
+                  { required: true, message: t("displayNameRequired") },
+                  { max: 64, message: t("displayNameMax") },
+                ]}
+                style={{ marginBottom: 12 }}
+              >
+                <Input prefix={<UserOutlined />} placeholder={t("displayName")} />
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button type="primary" htmlType="submit" loading={nameLoading} style={{ width: "100%" }}>
+                  {t("saveDisplayName")}
+                </Button>
+              </Form.Item>
+            </Form>
+          </SectionCard>
+
+          {/* Password */}
+          <SectionCard>
+            <SectionLabel title={t("changePassword")} />
+            <Form form={pwForm} onFinish={handlePasswordSave} layout="vertical">
+              <Form.Item
+                name="currentPassword"
+                rules={[{ required: true, message: t("currentPasswordRequired") }]}
+                style={{ marginBottom: 10 }}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder={t("currentPassword")} />
+              </Form.Item>
+              <Form.Item
+                name="newPassword"
+                rules={[
+                  { required: true, message: t("newPasswordRequired") },
+                  { min: 6, message: t("newPasswordMin") },
+                ]}
+                style={{ marginBottom: 10 }}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder={t("newPassword")} />
+              </Form.Item>
+              <Form.Item
+                name="confirmPassword"
+                dependencies={["newPassword"]}
+                rules={[
+                  { required: true, message: t("confirmPasswordRequired") },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue("newPassword") === value) return Promise.resolve();
+                      return Promise.reject(new Error(t("passwordMismatch")));
+                    },
+                  }),
+                ]}
+                style={{ marginBottom: 12 }}
+              >
+                <Input.Password prefix={<LockOutlined />} placeholder={t("confirmPassword")} />
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button type="primary" htmlType="submit" loading={pwLoading} style={{ width: "100%" }}>
+                  {t("updatePassword")}
+                </Button>
+              </Form.Item>
+            </Form>
+          </SectionCard>
+
+          {/* Email */}
+          <SectionCard>
+            <SectionLabel title={t("loginEmail")} />
+            <Form
+              form={emailForm}
+              onFinish={handleEmailSave}
+              initialValues={{ email: profile.email }}
+              layout="vertical"
+            >
+              <Form.Item
+                name="email"
+                rules={[
+                  { required: true, message: t("emailRequired") },
+                  { type: "email", message: t("emailInvalid") },
+                ]}
+                style={{ marginBottom: 12 }}
+              >
+                <Input prefix={<MailOutlined />} placeholder={t("emailAddress")} />
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button type="primary" htmlType="submit" loading={emailLoading} style={{ width: "100%" }}>
+                  {t("updateEmail")}
+                </Button>
+              </Form.Item>
+            </Form>
+          </SectionCard>
+
+          {/* Phone */}
+          <SectionCard>
+            <SectionLabel title={t("phoneNumber")} />
+            <Form
+              form={phoneForm}
+              onFinish={handlePhoneSave}
+              initialValues={parsePhone(profile.phone)}
+              key={profile.phone}
+              layout="vertical"
+            >
+              <Form.Item style={{ marginBottom: 12 }}>
+                <Input.Group compact>
+                  <Form.Item name="countryCode" noStyle>
+                    <Select style={{ width: 110 }} optionLabelProp="label">
+                      {COUNTRIES.map((c) => (
+                        <Select.Option key={c.code} value={c.code} label={c.code}>
+                          {locale === "zh-CN" ? c.zh : c.en} {c.code}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                  <Form.Item
+                    name="phoneNumber"
+                    noStyle
+                    rules={[
+                      { required: true, message: t("phoneRequired") },
+                      { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
+                    ]}
+                  >
+                    <Input style={{ width: "calc(100% - 110px)" }} placeholder={t("phoneNumber")} />
+                  </Form.Item>
+                </Input.Group>
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button type="primary" htmlType="submit" loading={phoneLoading} style={{ width: "100%" }}>
+                  {profile.phone ? t("updatePhone") : t("bindPhone")}
+                </Button>
+              </Form.Item>
+            </Form>
+          </SectionCard>
+
+          {/* Language */}
+          <SectionCard>
+            <SectionLabel title={t("preferredLanguage")} />
+            <Form
+              form={localeForm}
+              onFinish={handleLocaleSave}
+              initialValues={{ preferredLocale: profile.preferred_locale || locale }}
+              key={profile.preferred_locale}
+              layout="vertical"
+            >
+              <Form.Item name="preferredLocale" style={{ marginBottom: 12 }}>
+                <Radio.Group>
+                  <Radio value="en-US">English</Radio>
+                  <Radio value="zh-CN">中文</Radio>
+                </Radio.Group>
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 0 }}>
+                <Button type="primary" htmlType="submit" loading={localeLoading} style={{ width: "100%" }}>
+                  {t("saveLanguage")}
+                </Button>
+              </Form.Item>
+            </Form>
+          </SectionCard>
+
+        </div>
+      </Content>
+    </Layout>
+  );
+}

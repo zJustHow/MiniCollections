@@ -39,7 +39,7 @@ export default function BrandsTab({
           <List.Item key={brand.id}>
             <Card
               hoverable
-              style={{ borderRadius: 8, overflow: "hidden" }}
+              className="neu-model-card"
               cover={<CardCover image_url={brand.image_url} name={brand.name} />}
               onClick={() => onBrandClick(brand)}
               bodyStyle={{ padding: 0 }}

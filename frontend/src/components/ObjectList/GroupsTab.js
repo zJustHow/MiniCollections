@@ -1,24 +1,10 @@
 import { Card, Input, List } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 import CardCover from "./CardCover";
-import { LIST_GRID, Z_INDEX } from "./constants";
+import { LIST_GRID } from "./constants";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
-
-const fabStyle = {
-  position: "fixed",
-  right: 40,
-  bottom: 40,
-  width: 52,
-  height: 52,
-  borderRadius: "50%",
-  fontSize: 26,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-  zIndex: Z_INDEX.FAB_MAIN_LIST,
-};
 
 export default function GroupsTab({
   groups,
@@ -50,27 +36,59 @@ export default function GroupsTab({
       <List
         loading={loading}
         grid={LIST_GRID}
-        dataSource={groups}
+        dataSource={[{ id: "__add__" }, ...groups]}
         renderItem={(group) => (
           <List.Item key={group.id}>
-            <Card
-              hoverable
-              style={{ borderRadius: 8, overflow: "hidden" }}
-              cover={
-                <CardCover
-                  image_url={group.image_url}
-                  name={group.name}
-                />
-              }
-              onClick={() => onGroupClick(group)}
-              bodyStyle={{ padding: 0 }}
-            />
+            {group.id === "__add__" ? (
+              <Card
+                hoverable
+                className="neu-model-card"
+                cover={
+                  <div
+                    style={{
+                      position: "relative",
+                      paddingTop: "75%",
+                      overflow: "hidden",
+                      borderRadius: "32px 32px 0 0",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+                    </div>
+                    <div className="neu-nameplate">{t("createGroup")}</div>
+                  </div>
+                }
+                onClick={onCreateGroup}
+                bodyStyle={{ padding: 0 }}
+              />
+            ) : (
+              <Card
+                hoverable
+                className="neu-model-card"
+                cover={
+                  <CardCover
+                    image_url={group.image_url}
+                    name={group.name}
+                  />
+                }
+                onClick={() => onGroupClick(group)}
+                bodyStyle={{ padding: 0 }}
+              />
+            )}
           </List.Item>
         )}
       />
-      <button type="button" onClick={onCreateGroup} style={fabStyle} className="neu-fab">
-        +
-      </button>
     </div>
   );
 }

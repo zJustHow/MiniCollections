@@ -2,32 +2,27 @@ import { Layout, Avatar, Tooltip } from "antd";
 import { useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
-import UserProfileDrawer from "./components/auth/UserProfileDrawer";
 import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminPage from "./pages/AdminPage";
-import { getMe } from "./utils";
+import FeedbackPage from "./pages/FeedbackPage";
+import ProfilePage from "./pages/ProfilePage";
+import { getMe, logout } from "./utils";
 import { useLocale } from "./LocaleContext";
 
 const { Header, Content } = Layout;
 
-function MainLayout({ authed, setAuthed, profile, setProfile, isAdmin }) {
+function MainLayout({ authed, profile, isAdmin }) {
   const [activeTab, setActiveTab] = useState("brands");
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
-  const { t, setLocale } = useLocale();
-
-  const handleProfileChange = (updated) => {
-    setProfile(updated);
-    if (updated.preferred_locale) setLocale(updated.preferred_locale);
-  };
+  const { t } = useLocale();
 
   const goToLogin = () => navigate("/login");
 
   const handleTabChange = (tab) => {
-    if (!authed && tab === "groups") {
+    if (!authed && (tab === "groups" || tab === "feedback")) {
       goToLogin();
       return;
     }
@@ -74,6 +69,12 @@ function MainLayout({ authed, setAuthed, profile, setProfile, isAdmin }) {
           >
             {t("myGroups")}
           </button>
+          <button
+            className={`neu-tab-btn${activeTab === "feedback" ? " active" : ""}`}
+            onClick={() => handleTabChange("feedback")}
+          >
+            {t("myFeedback")}
+          </button>
           {isAdmin && (
             <button
               className="neu-tab-btn"
@@ -92,7 +93,7 @@ function MainLayout({ authed, setAuthed, profile, setProfile, isAdmin }) {
                 src={profile?.avatar_url}
                 icon={!profile?.avatar_url && <UserOutlined />}
                 size={36}
-                onClick={() => setDrawerOpen(true)}
+                onClick={() => navigate("/profile")}
                 style={{
                   cursor: "pointer",
                   boxShadow: "var(--raised-sm)",
@@ -111,7 +112,7 @@ function MainLayout({ authed, setAuthed, profile, setProfile, isAdmin }) {
                 style={{
                   cursor: "pointer",
                   boxShadow: "var(--raised-sm)",
-                  background: "var(--neu-surface)",
+                  background: "var(--neu-bg)",
                   color: "var(--neu-text-2)",
                   flexShrink: 0,
                   transition: "box-shadow 0.15s ease",
@@ -130,18 +131,16 @@ function MainLayout({ authed, setAuthed, profile, setProfile, isAdmin }) {
         }}
       >
         {authed ? (
-          <ObjectList activeTab={activeTab} />
+          activeTab === "feedback" ? (
+            <FeedbackPage />
+          ) : (
+            <ObjectList activeTab={activeTab} />
+          )
         ) : (
           <GuestBrandsView onAuthRequired={goToLogin} />
         )}
       </Content>
 
-      <UserProfileDrawer
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        profile={profile}
-        onProfileChange={handleProfileChange}
-      />
     </Layout>
   );
 }
@@ -153,6 +152,18 @@ export default function App() {
   const { setLocale } = useLocale();
 
   const isAdmin = profile?.admin === true;
+
+  const handleProfileChange = (updated) => {
+    setProfile(updated);
+    if (updated.preferred_locale) setLocale(updated.preferred_locale);
+  };
+
+  const handleLogout = () => {
+    logout();
+    setAuthed(false);
+    setProfile(null);
+    navigate("/");
+  };
 
   const handleLoginSuccess = async () => {
     try {
@@ -181,6 +192,17 @@ export default function App() {
         }
       />
       <Route
+        path="/profile"
+        element={
+          !authed ? <Navigate to="/login" replace /> :
+          <ProfilePage
+            profile={profile}
+            onProfileChange={handleProfileChange}
+            onLogout={handleLogout}
+          />
+        }
+      />
+      <Route
         path="/admin"
         element={
           !authed ? <Navigate to="/login" replace /> :
@@ -193,9 +215,7 @@ export default function App() {
         element={
           <MainLayout
             authed={authed}
-            setAuthed={setAuthed}
             profile={profile}
-            setProfile={setProfile}
             isAdmin={isAdmin}
           />
         }

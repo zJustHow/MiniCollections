@@ -254,6 +254,11 @@ export const updateLocale = async (preferredLocale) => {
   return handleResponse(response);
 };
 
+export const getMySubmissions = async () => {
+  const response = await fetch("/submissions/mine", { headers: authHeaders() });
+  return handleResponse(response);
+};
+
 export const submitFeedback = async (body) => {
   const response = await fetch("/submissions", {
     method: "POST",

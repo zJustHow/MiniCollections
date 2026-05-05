@@ -1,25 +1,11 @@
 import { Button, Card, Drawer, Input, List, Spin } from "antd";
-import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { LIST_GRID_DRAWER, DRAWER_WIDTH, Z_INDEX } from "./constants";
+import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
 
-const fabStyle = {
-  position: "fixed",
-  right: 40,
-  bottom: 40,
-  width: 52,
-  height: 52,
-  borderRadius: "50%",
-  fontSize: 26,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-  zIndex: Z_INDEX.FAB_IN_DRAWER,
-};
 
 function DetailRow({ label, value }) {
   if (value == null || value === "" || value === "—") return null;
@@ -123,18 +109,18 @@ export default function GroupDrawer({
           </span>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          <Button size="small" onClick={onEditUserObject}>{t("edit")}</Button>
-          <Button size="small" danger onClick={onDeleteUserObject}>{t("delete")}</Button>
+          <Button size="small" icon={<EditOutlined />} onClick={onEditUserObject} />
+          <Button size="small" danger icon={<DeleteOutlined />} onClick={onDeleteUserObject} />
         </div>
       </div>
     );
   } else if (selectedGroup) {
     drawerTitle = (
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, width: "100%", paddingRight: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, width: "100%", paddingRight: 40 }}>
         <span>{selectedGroup.name}</span>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Button size="small" onClick={onEditGroup}>{t("edit")}</Button>
-          <Button size="small" danger onClick={onDeleteGroup}>{t("delete")}</Button>
+          <Button size="small" icon={<EditOutlined />} onClick={onEditGroup} />
+          <Button size="small" danger icon={<DeleteOutlined />} onClick={onDeleteGroup} />
           <Search
             placeholder={t("searchModels")}
             allowClear
@@ -229,37 +215,59 @@ export default function GroupDrawer({
             </div>
           </div>
         ) : (
-          <div style={{ position: "relative", minHeight: 200 }}>
+          <div style={{ minHeight: 200 }}>
             <List
               loading={loading}
               grid={LIST_GRID_DRAWER}
-              dataSource={filteredObjects}
-              locale={{ emptyText: t("noModelsInGroup") }}
+              dataSource={[{ id: "__add__" }, ...filteredObjects]}
+              locale={{ emptyText: null }}
               renderItem={(item) => (
                 <List.Item key={item.id}>
-                  <Card
-                    hoverable
-                    bodyStyle={{ height: 56, minHeight: 56, padding: "0 24px", overflow: "hidden", display: "flex", alignItems: "center" }}
-                    cover={
-                      <img
-                        src={item.image_url}
-                        alt={item.name ?? ""}
-                        loading="lazy"
-                        style={{ width: "100%", height: 200, objectFit: "cover" }}
-                      />
-                    }
-                    onClick={() => onUserObjectClick(item)}
-                  >
-                    <div style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
-                      {item.name ?? "—"}
-                    </div>
-                  </Card>
+                  {item.id === "__add__" ? (
+                    <Card
+                      hoverable
+                      bodyStyle={{ height: 56, minHeight: 56, padding: "0 24px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}
+                      cover={
+                        <div
+                          style={{
+                            width: "100%",
+                            height: 200,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+                        </div>
+                      }
+                      onClick={onAddModel}
+                    >
+                      <div style={{ color: "var(--neu-text-2)", textAlign: "center" }}>
+                        {t("addModel")}
+                      </div>
+                    </Card>
+                  ) : (
+                    <Card
+                      hoverable
+                      bodyStyle={{ height: 56, minHeight: 56, padding: "0 24px", overflow: "hidden", display: "flex", alignItems: "center" }}
+                      cover={
+                        <img
+                          src={item.image_url}
+                          alt={item.name ?? ""}
+                          loading="lazy"
+                          style={{ width: "100%", height: 200, objectFit: "cover" }}
+                        />
+                      }
+                      onClick={() => onUserObjectClick(item)}
+                    >
+                      <div style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {item.name ?? "—"}
+                      </div>
+                    </Card>
+                  )}
                 </List.Item>
               )}
             />
-            <button type="button" onClick={onAddModel} style={fabStyle} className="neu-fab">
-              <PlusOutlined />
-            </button>
           </div>
         )
       )}

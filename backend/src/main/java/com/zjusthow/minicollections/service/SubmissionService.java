@@ -59,6 +59,11 @@ public class SubmissionService {
         return toDto(submissionRepository.save(entity));
     }
 
+    public List<ObjectSubmissionDto> listByUser(Long userId) {
+        return submissionRepository.findBySubmittedByUserId(userId)
+                .stream().map(this::toDto).toList();
+    }
+
     public List<ObjectSubmissionDto> listByStatus(String status) {
         List<ObjectSubmissionEntity> entities = status != null
                 ? submissionRepository.findByStatus(status)

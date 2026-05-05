@@ -1,4 +1,5 @@
-import { DatePicker, Form, Input, InputNumber, message, Modal, Select, Segmented } from "antd";
+import { DatePicker, Form, Input, InputNumber, message, Modal, Select } from "antd";
+import { BugOutlined, EditOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { useLocale } from "../../../LocaleContext";
 import { submitFeedback } from "../../../utils";
 import { useState } from "react";
@@ -151,16 +152,11 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
   const [submissionType, setSubmissionType] = useState("MISSING_MODEL");
   const [brandValue, setBrandValue] = useState(null);
 
-  const segmentedOptions = TYPES.map((type) => ({
-    value: type,
-    label: t(
-      type === "MISSING_MODEL"
-        ? "feedbackTypeMissingModel"
-        : type === "BUG_REPORT"
-        ? "feedbackTypeBugReport"
-        : "feedbackTypeDataCorrection"
-    ),
-  }));
+  const typeOptions = [
+    { value: "MISSING_MODEL", icon: <PlusCircleOutlined />, labelKey: "feedbackTypeMissingModel" },
+    { value: "BUG_REPORT", icon: <BugOutlined />, labelKey: "feedbackTypeBugReport" },
+    { value: "DATA_CORRECTION", icon: <EditOutlined />, labelKey: "feedbackTypeDataCorrection" },
+  ];
 
   const handleTypeChange = (val) => {
     setSubmissionType(val);
@@ -226,14 +222,30 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
       cancelText={t("cancel")}
       confirmLoading={loading}
       destroyOnClose
+      centered
     >
-      <div style={{ marginBottom: 20 }}>
-        <Segmented
-          block
-          value={submissionType}
-          onChange={handleTypeChange}
-          options={segmentedOptions}
-        />
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          borderRadius: 14,
+          padding: 5,
+          boxShadow: "var(--inset-sm)",
+          marginBottom: 20,
+        }}
+      >
+        {typeOptions.map(({ value, icon, labelKey }) => (
+          <button
+            key={value}
+            type="button"
+            className={`neu-tab-btn${submissionType === value ? " active" : ""}`}
+            style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
+            onClick={() => handleTypeChange(value)}
+          >
+            <span style={{ marginRight: 6 }}>{icon}</span>
+            {t(labelKey)}
+          </button>
+        ))}
       </div>
 
       <Form

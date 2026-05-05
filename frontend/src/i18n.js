@@ -2,7 +2,9 @@ const en = {
   // Header / Nav
   brands: "Brands",
   myGroups: "My Groups",
+  myFeedback: "Feedback",
   profile: "Profile",
+  logout: "Log Out",
 
   // Auth
   signIn: "Sign In",
@@ -189,13 +191,28 @@ const en = {
   brandRequired: "Please select a brand",
   brandOther: "Other",
   brandOtherName: "Brand Name",
+
+  // Feedback page
+  myFeedbackTitle: "My Feedback",
+  newFeedback: "Submit New Feedback",
+  myFeedbackEmpty: "No submissions yet",
+  statusPending: "Pending",
+  statusApproved: "Approved",
+  statusRejected: "Rejected",
+  statusResolved: "Resolved",
+  statusClosed: "Closed",
+  adminReply: "Admin Reply",
+  rejectionReason: "Rejection Reason",
+  failedToLoadMySubmissions: "Failed to load your submissions",
 };
 
 const zh = {
   // Header / Nav
   brands: "品牌",
   myGroups: "我的分组",
+  myFeedback: "反馈",
   profile: "个人资料",
+  logout: "退出登录",
 
   // Auth
   signIn: "登录",
@@ -382,6 +399,19 @@ const zh = {
   brandRequired: "请选择品牌",
   brandOther: "其他",
   brandOtherName: "品牌名称",
+
+  // Feedback page
+  myFeedbackTitle: "我的反馈",
+  newFeedback: "提交新反馈",
+  myFeedbackEmpty: "暂无提交记录",
+  statusPending: "待处理",
+  statusApproved: "已通过",
+  statusRejected: "已拒绝",
+  statusResolved: "已处理",
+  statusClosed: "已关闭",
+  adminReply: "管理员回复",
+  rejectionReason: "拒绝原因",
+  failedToLoadMySubmissions: "加载反馈记录失败",
 };
 
 export const translations = { "en-US": en, "zh-CN": zh };
