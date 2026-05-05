@@ -42,6 +42,7 @@ export default function BrandDrawer({
   searchKeyword,
   onSearchChange,
   onAddToGroup,
+  onSubmitMissing,
 }) {
   const { t } = useLocale();
   const [draftQuery, setDraftQuery] = useState("");
@@ -152,6 +153,17 @@ export default function BrandDrawer({
               />
             </Spin>
           </div>
+          {onSubmitMissing && !isDetail && (
+            <div style={{ textAlign: "center", marginTop: 16, paddingTop: 12, borderTop: "1px solid rgba(184,182,176,0.2)" }}>
+              <button
+                type="button"
+                onClick={onSubmitMissing}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "var(--neu-text-2)", fontSize: 13, textDecoration: "underline", padding: 0 }}
+              >
+                {t("reportFeedback")}
+              </button>
+            </div>
+          )}
           {detailItem && (
             <div style={{ display: isDetail ? "block" : "none" }}>
               <img

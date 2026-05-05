@@ -6,5 +6,6 @@ public record UserProfileDto(
         String phone,
         String displayName,
         String preferredLocale,
-        String avatarUrl
+        String avatarUrl,
+        boolean admin
 ) {}

@@ -90,7 +90,10 @@ public class UserService {
         String phone = identifierRepository.findByUserIdAndType(userId, "phone")
                 .map(UserIdentifierEntity::identifier)
                 .orElse(null);
-        return new UserProfileDto(u.id(), email, phone, u.displayName(), u.preferredLocale(), u.avatarUrl());
+        boolean isAdmin = Boolean.TRUE.equals(jdbc.queryForObject(
+                "SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
+                Boolean.class, userId));
+        return new UserProfileDto(u.id(), email, phone, u.displayName(), u.preferredLocale(), u.avatarUrl(), isAdmin);
     }
 
     @Transactional
@@ -123,6 +126,11 @@ public class UserService {
         }
         userRepository.updatePasswordById(userId, passwordEncoder.encode(newPassword));
         return getProfile(userId);
+    }
+
+    @Transactional
+    public void grantAdminRole(Long userId) {
+        jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", userId, "ROLE_ADMIN");
     }
 
     @Transactional

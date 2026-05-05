@@ -56,6 +56,7 @@ public class AppConfig {
                                 .requestMatchers(HttpMethod.GET, "/", "/index.html", "/*.json", "/*.png", "/static/**", "/images/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/login", "/signup", "/send-code").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/brands", "/brands/**").permitAll()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception

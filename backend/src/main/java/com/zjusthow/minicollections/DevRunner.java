@@ -40,20 +40,10 @@ public class DevRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        long t = userService.signUp("test@email.com", null, "secret", "test", null);
-        List<GroupEntity> testGroups = groupRepository.saveAll(List.of(
-                new GroupEntity(null, t, "TestGroup1", null),
-                new GroupEntity(null, t, "TestGroup2", null)
-        ));
-        long g4a = testGroups.get(0).id();
-        long g4b = testGroups.get(1).id();
+        Long testUserId = userService.signUp("admin@email.com", null, "secret", "admin", null);
+        userService.grantAdminRole(testUserId);
 
-        userObjectRepository.saveAll(List.of(
-                new UserObjectEntity(null, t, g4a, null, "TestGroup1Object1", null, null, null, null),
-                new UserObjectEntity(null, t, g4a, null, "TestGroup1Object2", null, null, null, null),
-                new UserObjectEntity(null, t, g4b, null, "TestGroup2Object1", null, null, null, null),
-                new UserObjectEntity(null, t, g4b, null, "TestGroup2Object2", null, null, null, null)
-        ));
+        userService.signUp("user@email.com", null, "secret", "user", null);
 
         logger.info("Dev seed data loaded.");
     }

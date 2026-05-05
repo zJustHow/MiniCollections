@@ -7,12 +7,13 @@ import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import AdminPage from "./pages/AdminPage";
 import { getMe } from "./utils";
 import { useLocale } from "./LocaleContext";
 
 const { Header, Content } = Layout;
 
-function MainLayout({ authed, setAuthed, profile, setProfile }) {
+function MainLayout({ authed, setAuthed, profile, setProfile, isAdmin }) {
   const [activeTab, setActiveTab] = useState("brands");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const navigate = useNavigate();
@@ -73,6 +74,14 @@ function MainLayout({ authed, setAuthed, profile, setProfile }) {
           >
             {t("myGroups")}
           </button>
+          {isAdmin && (
+            <button
+              className="neu-tab-btn"
+              onClick={() => navigate("/admin")}
+            >
+              {t("adminPanel")}
+            </button>
+          )}
         </div>
 
         {/* Right slot */}
@@ -143,6 +152,8 @@ export default function App() {
   const navigate = useNavigate();
   const { setLocale } = useLocale();
 
+  const isAdmin = profile?.admin === true;
+
   const handleLoginSuccess = async () => {
     try {
       const me = await getMe();
@@ -170,6 +181,14 @@ export default function App() {
         }
       />
       <Route
+        path="/admin"
+        element={
+          !authed ? <Navigate to="/login" replace /> :
+          !isAdmin ? <Navigate to="/" replace /> :
+          <AdminPage />
+        }
+      />
+      <Route
         path="/*"
         element={
           <MainLayout
@@ -177,6 +196,7 @@ export default function App() {
             setAuthed={setAuthed}
             profile={profile}
             setProfile={setProfile}
+            isAdmin={isAdmin}
           />
         }
       />

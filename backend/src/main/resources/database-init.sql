@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS object_submissions;
 DROP TABLE IF EXISTS authorities;
 DROP TABLE IF EXISTS user_objects;
 DROP TABLE IF EXISTS groups;
@@ -82,6 +83,34 @@ CREATE TABLE authorities
     authority VARCHAR(255) NOT NULL,
     CONSTRAINT authorities_pk PRIMARY KEY (user_id, authority),
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE object_submissions
+(
+    id                   SERIAL PRIMARY KEY  NOT NULL,
+    submitted_by_user_id INTEGER             NOT NULL,
+    submission_type      VARCHAR(32)         NOT NULL DEFAULT 'MISSING_MODEL',
+    brand_id             INTEGER,
+    custom_brand_name    VARCHAR(512),
+    name_en              VARCHAR(1024),
+    name_zh              VARCHAR(1024),
+    image_url            TEXT,
+    release_price_cny    DECIMAL(10, 2),
+    release_price_usd    DECIMAL(10, 2),
+    release_date         DATE,
+    category_en          VARCHAR(255),
+    category_zh          VARCHAR(255),
+    scale                VARCHAR(64),
+    notes                TEXT,
+    status               VARCHAR(32)         NOT NULL DEFAULT 'PENDING',
+    submitted_at         TIMESTAMPTZ         NOT NULL DEFAULT NOW(),
+    reviewed_by_user_id  INTEGER,
+    reviewed_at          TIMESTAMPTZ,
+    reject_reason        TEXT,
+    admin_note           TEXT,
+    CONSTRAINT fk_submitter FOREIGN KEY (submitted_by_user_id) REFERENCES users (id) ON DELETE CASCADE,
+    CONSTRAINT fk_reviewer FOREIGN KEY (reviewed_by_user_id) REFERENCES users (id),
+    CONSTRAINT fk_submission_brand FOREIGN KEY (brand_id) REFERENCES brands (id)
 );
 
 -- MINI GT brand and products (images stored under backend/src/main/resources/static/images/minigt/)

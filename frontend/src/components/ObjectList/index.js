@@ -10,11 +10,14 @@ import EditGroupModal from "./modals/EditGroupModal";
 import BrandObjectDetailModal from "./modals/BrandObjectDetailModal";
 import UserObjectDetailModal from "./modals/UserObjectDetailModal";
 import EditUserObjectModal from "./modals/EditUserObjectModal";
+import SubmitObjectModal from "./modals/SubmitObjectModal";
+import { useState } from "react";
 import { useLocale } from "../../LocaleContext";
 
-export default function ObjectList({ activeTab }) {
+export default function ObjectList({ activeTab, brands: brandsProp }) {
   const { t } = useLocale();
   const state = useObjectListState();
+  const [submitModalVisible, setSubmitModalVisible] = useState(false);
 
   const {
     brands,
@@ -137,6 +140,7 @@ export default function ObjectList({ activeTab }) {
         searchKeyword={brandObjectSearchKeyword}
         onSearchChange={setBrandObjectSearchKeyword}
         onAddToGroup={openCreateModal}
+        onSubmitMissing={() => setSubmitModalVisible(true)}
       />
 
       <GroupDrawer
@@ -247,6 +251,13 @@ export default function ObjectList({ activeTab }) {
         onEdit={openEditUserObjectModal}
         onDelete={handleDeleteUserObject}
         onBrandObjectClick={setBrandObjectDetailFromUserObject}
+      />
+
+      <SubmitObjectModal
+        visible={submitModalVisible}
+        onCancel={() => setSubmitModalVisible(false)}
+        selectedBrand={selectedBrand}
+        brands={brands}
       />
 
       <EditUserObjectModal

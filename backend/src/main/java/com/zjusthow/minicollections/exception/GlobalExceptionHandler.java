@@ -103,6 +103,20 @@ public class GlobalExceptionHandler {
         return ex.getMessage() != null ? ex.getMessage() : "Bad request";
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String handleIllegalStateException(IllegalStateException ex) {
+        log.warn("Conflict: {}", ex.getMessage());
+        return ex.getMessage() != null ? ex.getMessage() : "Conflict";
+    }
+
+    @ExceptionHandler(java.util.NoSuchElementException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleNoSuchElementException(java.util.NoSuchElementException ex) {
+        log.debug("Not found: {}", ex.getMessage());
+        return ex.getMessage() != null ? ex.getMessage() : "Not found";
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleAllExceptions(Exception ex) {

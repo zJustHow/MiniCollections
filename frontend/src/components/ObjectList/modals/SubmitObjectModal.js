@@ -1,0 +1,264 @@
+import { DatePicker, Form, Input, InputNumber, message, Modal, Select, Segmented } from "antd";
+import { useLocale } from "../../../LocaleContext";
+import { submitFeedback } from "../../../utils";
+import { useState } from "react";
+
+const OTHER_BRAND = "__OTHER__";
+
+const TYPES = ["MISSING_MODEL", "BUG_REPORT", "DATA_CORRECTION"];
+
+function MissingModelForm({ form, brands, brandValue, onBrandChange }) {
+  const { t } = useLocale();
+  return (
+    <>
+      <Form.Item label={t("brand")} name="brandId">
+        <Select
+          showSearch
+          optionFilterProp="children"
+          placeholder={t("brand")}
+          onChange={(v) => {
+            onBrandChange(v);
+            if (v !== OTHER_BRAND) form.setFieldValue("customBrandName", undefined);
+          }}
+        >
+          {(brands || []).map((b) => (
+            <Select.Option key={b.id} value={b.id}>
+              {b.name}
+            </Select.Option>
+          ))}
+          <Select.Option key={OTHER_BRAND} value={OTHER_BRAND}>
+            {t("brandOther")}
+          </Select.Option>
+        </Select>
+      </Form.Item>
+
+      {brandValue === OTHER_BRAND && (
+        <Form.Item label={t("brandOtherName")} name="customBrandName">
+          <Input />
+        </Form.Item>
+      )}
+
+      <Form.Item label={t("nameEn")} name="nameEn">
+        <Input />
+      </Form.Item>
+
+      <Form.Item label={t("nameZh")} name="nameZh">
+        <Input />
+      </Form.Item>
+
+      <Form.Item label={t("scale")} name="scale">
+        <Input placeholder="e.g. 1:64" />
+      </Form.Item>
+
+      <Form.Item label={t("category")} name="categoryEn">
+        <Input />
+      </Form.Item>
+
+      <Form.Item label={t("releaseDate")} name="releaseDate">
+        <DatePicker style={{ width: "100%" }} />
+      </Form.Item>
+
+      <Form.Item label={t("priceCNY")} name="releasePriceCny">
+        <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+      </Form.Item>
+
+      <Form.Item label={t("priceUSD")} name="releasePriceUsd">
+        <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+      </Form.Item>
+
+      <Form.Item label={t("additionalNotes")} name="notes">
+        <Input.TextArea rows={3} />
+      </Form.Item>
+    </>
+  );
+}
+
+function BugReportForm() {
+  const { t } = useLocale();
+  return (
+    <>
+      <Form.Item
+        label={t("bugSubject")}
+        name="nameEn"
+        rules={[{ required: true, message: t("bugSubjectRequired") }]}
+      >
+        <Input placeholder={t("bugSubjectPlaceholder")} />
+      </Form.Item>
+      <Form.Item label={t("bugDescription")} name="notes">
+        <Input.TextArea rows={5} placeholder={t("bugDescriptionPlaceholder")} />
+      </Form.Item>
+    </>
+  );
+}
+
+function DataCorrectionForm({ form, brands, brandValue, onBrandChange }) {
+  const { t } = useLocale();
+  return (
+    <>
+      <Form.Item label={t("brand")} name="brandId">
+        <Select
+          showSearch
+          optionFilterProp="children"
+          placeholder={t("brand")}
+          onChange={(v) => {
+            onBrandChange(v);
+            if (v !== OTHER_BRAND) form.setFieldValue("customBrandName", undefined);
+          }}
+          allowClear
+        >
+          {(brands || []).map((b) => (
+            <Select.Option key={b.id} value={b.id}>
+              {b.name}
+            </Select.Option>
+          ))}
+          <Select.Option key={OTHER_BRAND} value={OTHER_BRAND}>
+            {t("brandOther")}
+          </Select.Option>
+        </Select>
+      </Form.Item>
+
+      {brandValue === OTHER_BRAND && (
+        <Form.Item label={t("brandOtherName")} name="customBrandName">
+          <Input />
+        </Form.Item>
+      )}
+
+      <Form.Item label={t("correctionModelName")} name="nameEn">
+        <Input placeholder={t("correctionModelNamePlaceholder")} />
+      </Form.Item>
+
+      <Form.Item
+        label={t("correctionDescription")}
+        name="notes"
+        rules={[{ required: true, message: t("bugSubjectRequired") }]}
+      >
+        <Input.TextArea rows={4} placeholder={t("correctionDescriptionPlaceholder")} />
+      </Form.Item>
+    </>
+  );
+}
+
+const MODAL_TITLE_KEY = {
+  MISSING_MODEL: "reportModalTitleMissingModel",
+  BUG_REPORT: "reportModalTitleBugReport",
+  DATA_CORRECTION: "reportModalTitleDataCorrection",
+};
+
+export default function SubmitObjectModal({ visible, onCancel, selectedBrand, brands }) {
+  const { t } = useLocale();
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [submissionType, setSubmissionType] = useState("MISSING_MODEL");
+  const [brandValue, setBrandValue] = useState(null);
+
+  const segmentedOptions = TYPES.map((type) => ({
+    value: type,
+    label: t(
+      type === "MISSING_MODEL"
+        ? "feedbackTypeMissingModel"
+        : type === "BUG_REPORT"
+        ? "feedbackTypeBugReport"
+        : "feedbackTypeDataCorrection"
+    ),
+  }));
+
+  const handleTypeChange = (val) => {
+    setSubmissionType(val);
+    form.resetFields();
+    setBrandValue(null);
+    if (val === "MISSING_MODEL" && selectedBrand?.id) {
+      form.setFieldValue("brandId", selectedBrand.id);
+    }
+  };
+
+  const handleOk = async () => {
+    let values;
+    try {
+      values = await form.validateFields();
+    } catch {
+      return;
+    }
+    setLoading(true);
+    try {
+      const isOther = values.brandId === OTHER_BRAND;
+      const body = {
+        submission_type: submissionType,
+        brand_id: isOther ? null : (values.brandId ?? null),
+        custom_brand_name: isOther ? (values.customBrandName || null) : null,
+        name_en: values.nameEn || null,
+        name_zh: values.nameZh || null,
+        image_url: values.imageUrl || null,
+        release_price_cny: values.releasePriceCny ?? null,
+        release_price_usd: values.releasePriceUsd ?? null,
+        release_date: values.releaseDate ? values.releaseDate.format("YYYY-MM-DD") : null,
+        category_en: values.categoryEn || null,
+        category_zh: values.categoryZh || null,
+        scale: values.scale || null,
+        notes: values.notes || null,
+      };
+      await submitFeedback(body);
+      message.success(t("submissionSubmitted"));
+      form.resetFields();
+      setBrandValue(null);
+      setSubmissionType("MISSING_MODEL");
+      onCancel();
+    } catch (err) {
+      message.error(err?.message || t("failedToSubmit"));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setBrandValue(null);
+    setSubmissionType("MISSING_MODEL");
+    onCancel();
+  };
+
+  return (
+    <Modal
+      title={t(MODAL_TITLE_KEY[submissionType])}
+      open={visible}
+      onOk={handleOk}
+      onCancel={handleCancel}
+      okText={t("submitReport")}
+      cancelText={t("cancel")}
+      confirmLoading={loading}
+      destroyOnClose
+    >
+      <div style={{ marginBottom: 20 }}>
+        <Segmented
+          block
+          value={submissionType}
+          onChange={handleTypeChange}
+          options={segmentedOptions}
+        />
+      </div>
+
+      <Form
+        layout="vertical"
+        form={form}
+        initialValues={{ brandId: submissionType === "MISSING_MODEL" ? selectedBrand?.id : undefined }}
+      >
+        {submissionType === "MISSING_MODEL" && (
+          <MissingModelForm
+            form={form}
+            brands={brands}
+            brandValue={brandValue}
+            onBrandChange={setBrandValue}
+          />
+        )}
+        {submissionType === "BUG_REPORT" && <BugReportForm />}
+        {submissionType === "DATA_CORRECTION" && (
+          <DataCorrectionForm
+            form={form}
+            brands={brands}
+            brandValue={brandValue}
+            onBrandChange={setBrandValue}
+          />
+        )}
+      </Form>
+    </Modal>
+  );
+}
