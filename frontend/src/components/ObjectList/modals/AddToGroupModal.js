@@ -1,9 +1,9 @@
-import { DatePicker, Form, Input, InputNumber, message, Modal, Select, Upload } from "antd";
+import {
+  App, DatePicker, Form, Input, InputNumber, Modal, Select, Upload } from "antd";
 import { uploadImage } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
 
-export default function AddToGroupModal({
-  visible,
+export default function AddToGroupModal({ visible,
   onOk,
   onCancel,
   confirmLoading,
@@ -13,6 +13,7 @@ export default function AddToGroupModal({
   customImageData,
   onImageChange,
 }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   return (
     <Modal

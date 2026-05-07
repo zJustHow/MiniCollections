@@ -1,4 +1,5 @@
-import { Button, Drawer, Empty, message, Spin, Tag, Typography } from "antd";
+import {
+  App, Button, Drawer, Empty, Spin, Tag, Typography } from "antd";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useLocale } from "../LocaleContext";
@@ -168,7 +169,7 @@ function SubmissionDrawer({ item, onClose, t }) {
 }
 
 export default function FeedbackPage() {
-  const { t } = useLocale();
+  const { message } = App.useApp(); const { t } = useLocale();
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [brands, setBrands] = useState([]);

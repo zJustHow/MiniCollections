@@ -1,10 +1,11 @@
-import { message } from "antd";
+import { App } from "antd";
 import { searchBrandObjects } from "../../utils";
 import useBrandsState from "./useBrandsState";
 import useGroupsState from "./useGroupsState";
 
 /** Combines brand- and group-related state for ObjectList. */
 export default function useObjectListState() {
+  const { message } = App.useApp();
   const brandsSection = useBrandsState();
   const groupsSection = useGroupsState();
 

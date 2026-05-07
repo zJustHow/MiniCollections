@@ -1,4 +1,5 @@
-import { DatePicker, Form, Input, InputNumber, message, Modal, Upload } from "antd";
+import {
+  App, DatePicker, Form, Input, InputNumber, Modal, Upload } from "antd";
 import { PictureOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
@@ -6,6 +7,7 @@ import { adminCreateBrandObject, adminUpdateBrandObject, uploadImage } from "../
 import { useLocale } from "../../../LocaleContext";
 
 export default function BrandObjectModal({ open, brandObject, brandId, onClose, onSuccess }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);

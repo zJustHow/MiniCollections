@@ -1,5 +1,5 @@
 import { Button, Card, Drawer, Input, List, Spin } from "antd";
-import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
 import { useLocale } from "../../LocaleContext";
@@ -157,12 +157,18 @@ export default function GroupDrawer({
       {selectedGroup && (
         isBrandDetail ? (
           <div>
-            <img
-              src={brandDetail.image_url}
-              alt={brandDetail.name}
-              loading="lazy"
-              style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
-            />
+            {brandDetail.image_url ? (
+              <img
+                src={brandDetail.image_url}
+                alt={brandDetail.name}
+                loading="lazy"
+                style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
+              />
+            ) : (
+              <div style={{ width: "100%", aspectRatio: "4/3", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <PictureOutlined style={{ fontSize: 48, color: "var(--neu-text-2)" }} />
+              </div>
+            )}
             <DetailRow label={t("category")} value={brandDetail.category} />
             <DetailRow label={t("scale")} value={brandDetail.scale} />
             <DetailRow
@@ -176,12 +182,18 @@ export default function GroupDrawer({
           </div>
         ) : isUserObjectDetail ? (
           <div>
-            <img
-              src={detailUserObject.image_url}
-              alt={detailUserObject.name ?? ""}
-              loading="lazy"
-              style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
-            />
+            {detailUserObject.image_url ? (
+              <img
+                src={detailUserObject.image_url}
+                alt={detailUserObject.name ?? ""}
+                loading="lazy"
+                style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
+              />
+            ) : (
+              <div style={{ width: "100%", aspectRatio: "4/3", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <PictureOutlined style={{ fontSize: 48, color: "var(--neu-text-2)" }} />
+              </div>
+            )}
             <DetailRow label={t("purchasePrice")} value={purchasePrice != null ? purchasePrice : null} />
             <DetailRow label={t("purchaseDate")} value={purchaseDate} />
             <DetailRow label={t("notes")} value={otherNotes} />
@@ -196,11 +208,17 @@ export default function GroupDrawer({
                     className="neu-clickable"
                     style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10 }}
                   >
-                    <img
-                      src={brandDetail.image_url}
-                      alt={brandDetail.name}
-                      style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
-                    />
+                    {brandDetail.image_url ? (
+                      <img
+                        src={brandDetail.image_url}
+                        alt={brandDetail.name}
+                        style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0 }}
+                      />
+                    ) : (
+                      <div style={{ width: 56, height: 56, borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <PictureOutlined style={{ fontSize: 20, color: "var(--neu-text-2)" }} />
+                      </div>
+                    )}
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 500, color: "var(--neu-text)" }}>{brandDetail.name}</div>
                       {(brandDetail.category || brandDetail.scale) && (
@@ -253,12 +271,18 @@ export default function GroupDrawer({
                       hoverable
                       bodyStyle={{ height: 56, minHeight: 56, padding: "0 24px", overflow: "hidden", display: "flex", alignItems: "center" }}
                       cover={
-                        <img
-                          src={item.image_url}
-                          alt={item.name ?? ""}
-                          loading="lazy"
-                          style={{ width: "100%", height: 200, objectFit: "cover" }}
-                        />
+                        item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.name ?? ""}
+                            loading="lazy"
+                            style={{ width: "100%", height: 200, objectFit: "cover" }}
+                          />
+                        ) : (
+                          <div style={{ width: "100%", height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <PictureOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+                          </div>
+                        )
                       }
                       onClick={() => onUserObjectClick(item)}
                     >

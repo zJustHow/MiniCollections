@@ -1,11 +1,11 @@
 import {
+  App,
   Button,
   DatePicker,
   Drawer,
   Form,
   Input,
   InputNumber,
-  message,
   Modal,
   Popconfirm,
   Select,
@@ -77,7 +77,9 @@ function useTypeLabel(t) {
 
 // ── Submission modals ────────────────────────────────────────────────────────
 
-function ApproveModal({ open, submission, brands, onClose, onSuccess }) {
+function ApproveModal({
+  open, submission, brands, onClose, onSuccess }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -184,7 +186,9 @@ function ApproveModal({ open, submission, brands, onClose, onSuccess }) {
   );
 }
 
-function ResolveModal({ open, submission, onClose, onSuccess }) {
+function ResolveModal({
+  open, submission, onClose, onSuccess }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [adminNote, setAdminNote] = useState("");
   const [loading, setLoading] = useState(false);
@@ -230,7 +234,9 @@ function ResolveModal({ open, submission, onClose, onSuccess }) {
   );
 }
 
-function RejectModal({ open, submission, onClose, onSuccess }) {
+function RejectModal({
+  open, submission, onClose, onSuccess }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
@@ -398,7 +404,9 @@ function DetailDrawer({ submission, brands, onClose, onApprove, onResolve, onRej
 
 // ── Brand management components ──────────────────────────────────────────────
 
-function BrandModal({ open, brand, onClose, onSuccess }) {
+function BrandModal({
+  open, brand, onClose, onSuccess }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -497,7 +505,9 @@ function BrandModal({ open, brand, onClose, onSuccess }) {
   );
 }
 
-function BrandObjectModal({ open, brandObject, brandId, onClose, onSuccess }) {
+function BrandObjectModal({
+  open, brandObject, brandId, onClose, onSuccess }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
@@ -631,7 +641,9 @@ function BrandObjectModal({ open, brandObject, brandId, onClose, onSuccess }) {
   );
 }
 
-function BrandObjectsDrawer({ brand, onClose, onBrandObjectsChanged }) {
+function BrandObjectsDrawer({
+  brand, onClose, onBrandObjectsChanged }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [objects, setObjects] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -737,7 +749,9 @@ function BrandObjectsDrawer({ brand, onClose, onBrandObjectsChanged }) {
   );
 }
 
-function BrandsPanel({ brands, onBrandsChanged }) {
+function BrandsPanel({
+  brands, onBrandsChanged }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [brandModalOpen, setBrandModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
@@ -834,6 +848,7 @@ function BrandsPanel({ brands, onBrandsChanged }) {
 // ── Main AdminPage ────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const getTypeLabel = useTypeLabel(t);
   const getStatusLabel = useStatusLabel(t);

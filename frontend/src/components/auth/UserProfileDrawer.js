@@ -1,11 +1,11 @@
 import { useState } from "react";
 import {
+  App,
   Drawer,
   Avatar,
   Form,
   Input,
   Button,
-  message,
   Divider,
   Upload,
   Radio,
@@ -47,6 +47,7 @@ function Section({ title }) {
 }
 
 function UserProfileDrawer({ open, onClose, profile, onProfileChange }) {
+  const { message } = App.useApp();
   const { t, locale } = useLocale();
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [nameLoading, setNameLoading] = useState(false);

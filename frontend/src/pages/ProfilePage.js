@@ -1,11 +1,11 @@
 import {
+  App,
   Avatar,
   Button,
   Divider,
   Form,
   Input,
   Layout,
-  message,
   Radio,
   Select,
   Upload,
@@ -67,6 +67,7 @@ function SectionCard({ children }) {
 }
 
 export default function ProfilePage({ profile, onProfileChange, onLogout }) {
+  const { message } = App.useApp();
   const { t, locale } = useLocale();
   const navigate = useNavigate();
 

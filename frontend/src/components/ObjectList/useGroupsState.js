@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Form, message, Modal } from "antd";
-import moment from "moment";
+import {
+  App, Form } from "antd";
+import dayjs from "dayjs";
 import {
   getGroups,
   searchGroups,
@@ -22,6 +23,7 @@ const normalizeList = (data) =>
   Array.isArray(data) ? data : data?.content != null ? data.content : [];
 
 export default function useGroupsState() {
+  const { message, modal } = App.useApp();
   const { t } = useLocale();
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
@@ -247,7 +249,7 @@ export default function useGroupsState() {
     if (!selectedGroup) return;
     const groupId = selectedGroup.id;
     const groupName = selectedGroup.name;
-    Modal.confirm({
+    modal.confirm({
       title: t("deleteGroupTitle"),
       content: t("deleteGroupContent", { name: groupName }),
       okText: t("delete"),
@@ -278,7 +280,7 @@ export default function useGroupsState() {
       brandObjectId: brandObjectId ?? undefined,
       name: selectedUserObject.name ?? "",
       purchasePrice: displayPurchasePriceFromObject(selectedUserObject),
-      purchaseDate: pd ? moment(pd) : null,
+      purchaseDate: pd ? dayjs(pd) : null,
       otherNotes:
         selectedUserObject.otherNotes ?? selectedUserObject.other_notes ?? "",
     });
@@ -384,7 +386,7 @@ export default function useGroupsState() {
     const groupId = selectedGroup.id;
     const userObjectId = selectedUserObject.id;
     const itemName = selectedUserObject.name ?? "—";
-    Modal.confirm({
+    modal.confirm({
       title: t("deleteModelTitle"),
       content: t("deleteModelContent", { name: itemName }),
       okText: t("delete"),

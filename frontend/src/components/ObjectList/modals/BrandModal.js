@@ -1,10 +1,12 @@
-import { Form, Input, message, Modal, Upload } from "antd";
+import {
+  App, Form, Input, Modal, Upload } from "antd";
 import { PictureOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { adminCreateBrand, adminUpdateBrand, uploadImage } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
 
 export default function BrandModal({ open, brand, onClose, onSuccess }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);

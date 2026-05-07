@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Form, message } from "antd";
+import {
+  App, Form } from "antd";
 import {
   adminDeleteBrand,
   adminDeleteBrandObject,
@@ -10,7 +11,7 @@ import {
 import { useLocale } from "../../LocaleContext";
 
 export default function useBrandsState() {
-  const { t } = useLocale();
+  const { message } = App.useApp(); const { t } = useLocale();
   const [brands, setBrands] = useState([]);
   const [loadingBrands, setLoadingBrands] = useState(false);
 

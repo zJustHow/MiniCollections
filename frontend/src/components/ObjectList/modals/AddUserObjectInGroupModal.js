@@ -1,9 +1,9 @@
 import {
+  App,
   DatePicker,
   Form,
   Input,
   InputNumber,
-  message,
   Modal,
   Select,
   Upload,
@@ -12,8 +12,7 @@ import { PictureOutlined } from "@ant-design/icons";
 import { uploadImage } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
 
-export default function AddUserObjectInGroupModal({
-  visible,
+export default function AddUserObjectInGroupModal({ visible,
   onOk,
   onCancel,
   confirmLoading,
@@ -25,6 +24,7 @@ export default function AddUserObjectInGroupModal({
   imageData,
   onImageChange,
 }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   return (
     <Modal

@@ -1,4 +1,5 @@
-import { DatePicker, Form, Input, InputNumber, message, Modal, Select, Upload } from "antd";
+import {
+  App, DatePicker, Form, Input, InputNumber, Modal, Select, Upload } from "antd";
 import { BugOutlined, EditOutlined, LoadingOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { useLocale } from "../../../LocaleContext";
 import { submitFeedback, uploadImage } from "../../../utils";
@@ -7,6 +8,7 @@ import { useState } from "react";
 const OTHER_BRAND = "__OTHER__";
 
 function ImageUploadField({ form }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -195,6 +197,7 @@ const MODAL_TITLE_KEY = {
 };
 
 export default function SubmitObjectModal({ visible, onCancel, selectedBrand, brands }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);

@@ -1,5 +1,5 @@
 import { Button, Card, Drawer, Input, List, Popconfirm, Spin } from "antd";
-import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
 import { useLocale } from "../../LocaleContext";
@@ -188,12 +188,18 @@ export default function BrandDrawer({
                         onClick={() => setDetailItem(item)}
                         bodyStyle={{ height: 56, minHeight: 56, padding: "0 16px", overflow: "hidden", display: "flex", alignItems: "center" }}
                         cover={
-                          <img
-                            src={item.image_url}
-                            alt={item.name}
-                            loading="lazy"
-                            style={{ width: "100%", height: 200, objectFit: "cover" }}
-                          />
+                          item.image_url ? (
+                            <img
+                              src={item.image_url}
+                              alt={item.name}
+                              loading="lazy"
+                              style={{ width: "100%", height: 200, objectFit: "cover" }}
+                            />
+                          ) : (
+                            <div style={{ width: "100%", height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <PictureOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+                            </div>
+                          )
                         }
                       >
                         <div style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", fontSize: 13 }}>
@@ -219,12 +225,18 @@ export default function BrandDrawer({
           )}
           {detailItem && (
             <div style={{ display: isDetail ? "block" : "none" }}>
-              <img
-                src={detailItem.image_url}
-                alt={detailItem.name}
-                loading="lazy"
-                style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
-              />
+              {detailItem.image_url ? (
+                <img
+                  src={detailItem.image_url}
+                  alt={detailItem.name}
+                  loading="lazy"
+                  style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)" }}
+                />
+              ) : (
+                <div style={{ width: "100%", aspectRatio: "4/3", borderRadius: 12, marginBottom: 20, boxShadow: "var(--raised-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <PictureOutlined style={{ fontSize: 48, color: "var(--neu-text-2)" }} />
+                </div>
+              )}
               <DetailRow label={t("category")} value={detailItem.category} />
               <DetailRow label={t("scale")} value={detailItem.scale} />
               <DetailRow label={t("releasePrice")} value={detailItem.release_price ?? detailItem.releasePrice} />

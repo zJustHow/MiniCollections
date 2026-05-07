@@ -1,4 +1,5 @@
-import { Button, Form, Input, Radio, Select, message, Modal } from "antd";
+import {
+  App, Button, Form, Input, Radio, Select, Modal } from "antd";
 import { useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { signup, COUNTRIES } from "../../utils";
@@ -6,6 +7,7 @@ import { useLocale } from "../../LocaleContext";
 import { detectBrowserLocale } from "../../i18n";
 
 function SignupForm({ linkMode = false }) {
+  const { message } = App.useApp();
   const [displayModal, setDisplayModal] = useState(false);
   const [registerType, setRegisterType] = useState("email");
   const [form] = Form.useForm();

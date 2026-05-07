@@ -1,9 +1,9 @@
 import {
+  App,
   DatePicker,
   Form,
   Input,
   InputNumber,
-  message,
   Modal,
   Select,
   Upload,
@@ -13,8 +13,7 @@ import { uploadImage } from "../../../utils";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
 
-export default function EditUserObjectModal({
-  visible,
+export default function EditUserObjectModal({ visible,
   onOk,
   onCancel,
   confirmLoading,
@@ -26,6 +25,7 @@ export default function EditUserObjectModal({
   selectedUserObject,
   onImageChange,
 }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   return (
     <Modal

@@ -1,10 +1,10 @@
-import { Form, Input, message, Modal, Upload } from "antd";
+import {
+  App, Form, Input, Modal, Upload } from "antd";
 import { PictureOutlined } from "@ant-design/icons";
 import { uploadImage } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
 
-export default function EditGroupModal({
-  visible,
+export default function EditGroupModal({ visible,
   onOk,
   onCancel,
   confirmLoading,
@@ -13,6 +13,7 @@ export default function EditGroupModal({
   imageData,
   onImageChange,
 }) {
+  const { message } = App.useApp();
   const { t } = useLocale();
   return (
     <Modal

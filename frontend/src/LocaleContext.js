@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useState } from "react";
-import { ConfigProvider } from "antd";
-import zhCN from "antd/lib/locale/zh_CN";
-import enUS from "antd/lib/locale/en_US";
+import { App, ConfigProvider } from "antd";
+import zhCN from "antd/locale/zh_CN";
+import enUS from "antd/locale/en_US";
 import { detectBrowserLocale, translations } from "./i18n";
 
 const antdLocaleMap = { "zh-CN": zhCN, "en-US": enUS };
@@ -23,8 +23,23 @@ export function LocaleProvider({ children }) {
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale, t }}>
-      <ConfigProvider locale={antdLocaleMap[locale] ?? enUS}>
-        {children}
+      <ConfigProvider
+        locale={antdLocaleMap[locale] ?? enUS}
+        theme={{
+          token: {
+            colorBgContainer: "#fcfbf8",
+            colorBgElevated:  "#fcfbf8",
+            colorBgLayout:    "#fcfbf8",
+            borderRadius:     10,
+            borderRadiusSM:   10,
+            borderRadiusLG:   14,
+            borderRadiusXS:   6,
+          },
+        }}
+      >
+        <App>
+          {children}
+        </App>
       </ConfigProvider>
     </LocaleContext.Provider>
   );

@@ -1,4 +1,5 @@
-import { Button, Form, Input, Select, message, Layout } from "antd";
+import {
+  App, Button, Form, Input, Select, Layout } from "antd";
 import { useRef, useState } from "react";
 import { LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +10,7 @@ import { detectBrowserLocale } from "../i18n";
 const { Header, Content } = Layout;
 
 export default function RegisterPage() {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
