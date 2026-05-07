@@ -15,7 +15,7 @@ export default function CreateGroupModal({
   const { t } = useLocale();
   return (
     <Modal
-      title={t("createGroup")}
+      title={t("addGroup")}
       open={visible}
       onOk={onOk}
       confirmLoading={confirmLoading}

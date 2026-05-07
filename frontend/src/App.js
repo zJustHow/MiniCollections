@@ -1,6 +1,6 @@
 import { Layout, Avatar, Tooltip } from "antd";
-import { useState } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Routes, Route, Navigate, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { UserOutlined } from "@ant-design/icons";
 import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
@@ -15,9 +15,18 @@ import { useLocale } from "./LocaleContext";
 const { Header, Content } = Layout;
 
 function MainLayout({ authed, profile, isAdmin }) {
-  const [activeTab, setActiveTab] = useState("brands");
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useLocale();
+
+  const activeTab =
+    location.pathname === "/groups"
+      ? "groups"
+      : location.pathname === "/feedback"
+      ? "feedback"
+      : location.pathname === "/admin"
+      ? "admin"
+      : "brands";
 
   const goToLogin = () => navigate("/login");
 
@@ -26,7 +35,9 @@ function MainLayout({ authed, profile, isAdmin }) {
       goToLogin();
       return;
     }
-    setActiveTab(tab);
+    if (tab === "brands") navigate("/");
+    else if (tab === "groups") navigate("/groups");
+    else if (tab === "feedback") navigate("/feedback");
   };
 
   return (
@@ -35,7 +46,6 @@ function MainLayout({ authed, profile, isAdmin }) {
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
           paddingLeft: 32,
           paddingRight: 32,
           gap: 24,
@@ -56,7 +66,7 @@ function MainLayout({ authed, profile, isAdmin }) {
         </span>
 
         {/* Tab buttons */}
-        <div style={{ display: "flex", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, flex: 1 }}>
           <button
             className={`neu-tab-btn${activeTab === "brands" ? " active" : ""}`}
             onClick={() => handleTabChange("brands")}
@@ -77,7 +87,7 @@ function MainLayout({ authed, profile, isAdmin }) {
           </button>
           {isAdmin && (
             <button
-              className="neu-tab-btn"
+              className={`neu-tab-btn${activeTab === "admin" ? " active" : ""}`}
               onClick={() => navigate("/admin")}
             >
               {t("adminPanel")}
@@ -130,17 +140,8 @@ function MainLayout({ authed, profile, isAdmin }) {
           overflowY: "auto",
         }}
       >
-        {authed ? (
-          activeTab === "feedback" ? (
-            <FeedbackPage />
-          ) : (
-            <ObjectList activeTab={activeTab} />
-          )
-        ) : (
-          <GuestBrandsView onAuthRequired={goToLogin} />
-        )}
+        <Outlet />
       </Content>
-
     </Layout>
   );
 }
@@ -148,10 +149,29 @@ function MainLayout({ authed, profile, isAdmin }) {
 export default function App() {
   const [authed, setAuthed] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { setLocale } = useLocale();
 
   const isAdmin = profile?.admin === true;
+
+  useEffect(() => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    getMe()
+      .then((me) => {
+        setProfile(me);
+        if (me.preferred_locale) setLocale(me.preferred_locale);
+        setAuthed(true);
+      })
+      .catch(() => {
+        localStorage.removeItem("auth_token");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleProfileChange = (updated) => {
     setProfile(updated);
@@ -176,6 +196,8 @@ export default function App() {
     setAuthed(true);
     navigate("/");
   };
+
+  if (loading) return null;
 
   return (
     <Routes>
@@ -202,24 +224,28 @@ export default function App() {
           />
         }
       />
-      <Route
-        path="/admin"
-        element={
-          !authed ? <Navigate to="/login" replace /> :
-          !isAdmin ? <Navigate to="/" replace /> :
-          <AdminPage />
-        }
-      />
-      <Route
-        path="/*"
-        element={
-          <MainLayout
-            authed={authed}
-            profile={profile}
-            isAdmin={isAdmin}
-          />
-        }
-      />
+      <Route element={<MainLayout authed={authed} profile={profile} isAdmin={isAdmin} />}>
+        <Route
+          index
+          element={authed ? <ObjectList activeTab="brands" isAdmin={isAdmin} /> : <GuestBrandsView />}
+        />
+        <Route
+          path="groups"
+          element={authed ? <ObjectList activeTab="groups" isAdmin={isAdmin} /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="feedback"
+          element={authed ? <FeedbackPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="admin"
+          element={
+            !authed ? <Navigate to="/login" replace /> :
+            !isAdmin ? <Navigate to="/" replace /> :
+            <AdminPage />
+          }
+        />
+      </Route>
     </Routes>
   );
 }

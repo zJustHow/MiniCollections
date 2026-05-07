@@ -1,10 +1,56 @@
-import { DatePicker, Form, Input, InputNumber, message, Modal, Select } from "antd";
-import { BugOutlined, EditOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import { DatePicker, Form, Input, InputNumber, message, Modal, Select, Upload } from "antd";
+import { BugOutlined, EditOutlined, LoadingOutlined, PlusCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { useLocale } from "../../../LocaleContext";
-import { submitFeedback } from "../../../utils";
+import { submitFeedback, uploadImage } from "../../../utils";
 import { useState } from "react";
 
 const OTHER_BRAND = "__OTHER__";
+
+function ImageUploadField({ form }) {
+  const { t } = useLocale();
+  const [fileList, setFileList] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
+  const handleCustomRequest = async ({ file, onSuccess, onError }) => {
+    setUploading(true);
+    try {
+      const url = await uploadImage(file);
+      form.setFieldValue("imageUrl", url);
+      onSuccess({ url });
+    } catch (err) {
+      onError(err);
+      message.error(t("imageUploadFailed"));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRemove = () => {
+    form.setFieldValue("imageUrl", null);
+    return true;
+  };
+
+  return (
+    <Form.Item label={t("image")}>
+      <Upload
+        listType="picture-card"
+        fileList={fileList}
+        customRequest={handleCustomRequest}
+        onChange={({ fileList: newList }) => setFileList(newList.slice(-1))}
+        onRemove={handleRemove}
+        accept="image/*"
+        maxCount={1}
+      >
+        {fileList.length === 0 && (
+          <div>
+            {uploading ? <LoadingOutlined /> : <PlusOutlined />}
+            <div style={{ marginTop: 8, fontSize: 12 }}>{uploading ? "..." : "Upload"}</div>
+          </div>
+        )}
+      </Upload>
+    </Form.Item>
+  );
+}
 
 const TYPES = ["MISSING_MODEL", "BUG_REPORT", "DATA_CORRECTION"];
 
@@ -70,11 +116,12 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange }) {
       <Form.Item label={t("additionalNotes")} name="notes">
         <Input.TextArea rows={3} />
       </Form.Item>
+      <ImageUploadField form={form} />
     </>
   );
 }
 
-function BugReportForm() {
+function BugReportForm({ form }) {
   const { t } = useLocale();
   return (
     <>
@@ -88,6 +135,7 @@ function BugReportForm() {
       <Form.Item label={t("bugDescription")} name="notes">
         <Input.TextArea rows={5} placeholder={t("bugDescriptionPlaceholder")} />
       </Form.Item>
+      <ImageUploadField form={form} />
     </>
   );
 }
@@ -135,6 +183,7 @@ function DataCorrectionForm({ form, brands, brandValue, onBrandChange }) {
       >
         <Input.TextArea rows={4} placeholder={t("correctionDescriptionPlaceholder")} />
       </Form.Item>
+      <ImageUploadField form={form} />
     </>
   );
 }
@@ -183,7 +232,7 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
         custom_brand_name: isOther ? (values.customBrandName || null) : null,
         name_en: values.nameEn || null,
         name_zh: values.nameZh || null,
-        image_url: values.imageUrl || null,
+        image_url: form.getFieldValue("imageUrl") || null,
         release_price_cny: values.releasePriceCny ?? null,
         release_price_usd: values.releasePriceUsd ?? null,
         release_date: values.releaseDate ? values.releaseDate.format("YYYY-MM-DD") : null,
@@ -261,7 +310,7 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
             onBrandChange={setBrandValue}
           />
         )}
-        {submissionType === "BUG_REPORT" && <BugReportForm />}
+        {submissionType === "BUG_REPORT" && <BugReportForm form={form} />}
         {submissionType === "DATA_CORRECTION" && (
           <DataCorrectionForm
             form={form}

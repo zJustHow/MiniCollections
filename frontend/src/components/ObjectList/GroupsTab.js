@@ -66,7 +66,7 @@ export default function GroupsTab({
                     >
                       <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
                     </div>
-                    <div className="neu-nameplate">{t("createGroup")}</div>
+                    <div className="neu-nameplate">{t("addGroup")}</div>
                   </div>
                 }
                 onClick={onCreateGroup}

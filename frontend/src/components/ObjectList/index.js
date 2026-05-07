@@ -5,6 +5,8 @@ import BrandDrawer from "./BrandDrawer";
 import GroupDrawer from "./GroupDrawer";
 import AddToGroupModal from "./modals/AddToGroupModal";
 import AddUserObjectInGroupModal from "./modals/AddUserObjectInGroupModal";
+import BrandModal from "./modals/BrandModal";
+import BrandObjectModal from "./modals/BrandObjectModal";
 import CreateGroupModal from "./modals/CreateGroupModal";
 import EditGroupModal from "./modals/EditGroupModal";
 import BrandObjectDetailModal from "./modals/BrandObjectDetailModal";
@@ -14,7 +16,7 @@ import SubmitObjectModal from "./modals/SubmitObjectModal";
 import { useState } from "react";
 import { useLocale } from "../../LocaleContext";
 
-export default function ObjectList({ activeTab, brands: brandsProp }) {
+export default function ObjectList({ activeTab, brands: brandsProp, isAdmin }) {
   const { t } = useLocale();
   const state = useObjectListState();
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
@@ -107,6 +109,21 @@ export default function ObjectList({ activeTab, brands: brandsProp }) {
     handleCreateGroup,
     searchBrandObjects,
     message,
+    // Admin brand state
+    brandModalOpen,
+    setBrandModalOpen,
+    editingBrand,
+    brandObjectModalOpen,
+    setBrandObjectModalOpen,
+    editingBrandObject,
+    openCreateBrandModal,
+    openEditBrandModal,
+    handleAdminDeleteBrand,
+    openCreateBrandObjectModal,
+    openEditBrandObjectModal,
+    handleAdminDeleteBrandObject,
+    refreshBrands,
+    refreshBrandObjects,
   } = state;
 
   return (
@@ -117,6 +134,8 @@ export default function ObjectList({ activeTab, brands: brandsProp }) {
           loading={loadingBrands}
           onSearch={handleBrandSearch}
           onBrandClick={handleBrandClick}
+          isAdmin={isAdmin}
+          onCreateBrand={openCreateBrandModal}
         />
       ) : (
         <GroupsTab
@@ -141,6 +160,12 @@ export default function ObjectList({ activeTab, brands: brandsProp }) {
         onSearchChange={setBrandObjectSearchKeyword}
         onAddToGroup={openCreateModal}
         onSubmitMissing={() => setSubmitModalVisible(true)}
+        isAdmin={isAdmin}
+        onCreateBrandObject={openCreateBrandObjectModal}
+        onEditBrandObject={openEditBrandObjectModal}
+        onDeleteBrandObject={handleAdminDeleteBrandObject}
+        onEditBrand={openEditBrandModal}
+        onDeleteBrand={handleAdminDeleteBrand}
       />
 
       <GroupDrawer
@@ -258,6 +283,21 @@ export default function ObjectList({ activeTab, brands: brandsProp }) {
         onCancel={() => setSubmitModalVisible(false)}
         selectedBrand={selectedBrand}
         brands={brands}
+      />
+
+      <BrandModal
+        open={brandModalOpen}
+        brand={editingBrand}
+        onClose={() => setBrandModalOpen(false)}
+        onSuccess={refreshBrands}
+      />
+
+      <BrandObjectModal
+        open={brandObjectModalOpen}
+        brandObject={editingBrandObject}
+        brandId={selectedBrand?.id}
+        onClose={() => setBrandObjectModalOpen(false)}
+        onSuccess={() => refreshBrandObjects(selectedBrand?.id)}
       />
 
       <EditUserObjectModal

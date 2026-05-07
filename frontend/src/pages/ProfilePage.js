@@ -12,7 +12,7 @@ import {
 } from "antd";
 import {
   ArrowLeftOutlined,
-  CameraOutlined,
+  LoadingOutlined,
   LockOutlined,
   LogoutOutlined,
   MailOutlined,
@@ -222,42 +222,38 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               paddingBottom: 28,
             }}
           >
-            <div style={{ position: "relative", display: "inline-block" }}>
-              <Avatar
-                size={96}
-                src={profile.avatar_url}
-                icon={!profile.avatar_url && <UserOutlined />}
-                style={{
-                  boxShadow: "var(--raised)",
-                  background: profile.avatar_url ? "transparent" : "var(--neu-accent)",
-                }}
-              />
-              <Upload
-                accept="image/*"
-                showUploadList={false}
-                beforeUpload={() => false}
-                onChange={({ file }) => handleAvatarUpload({ file })}
-              >
-                <Button
-                  size="small"
-                  icon={<CameraOutlined />}
-                  loading={avatarLoading}
+            <Upload
+              accept="image/*"
+              showUploadList={false}
+              beforeUpload={() => false}
+              onChange={({ file }) => handleAvatarUpload({ file })}
+            >
+              <div className="avatar-upload-trigger" style={{ position: "relative", display: "inline-block", cursor: "pointer" }}>
+                <Avatar
+                  size={96}
+                  src={profile.avatar_url}
+                  icon={!profile.avatar_url && <UserOutlined />}
                   style={{
+                    background: profile.avatar_url ? "transparent" : "var(--neu-accent)",
+                  }}
+                />
+                {avatarLoading && (
+                  <div style={{
                     position: "absolute",
-                    bottom: 0,
-                    right: 0,
+                    inset: 0,
                     borderRadius: "50%",
-                    width: 30,
-                    height: 30,
-                    padding: 0,
+                    background: "rgba(0,0,0,0.35)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: 13,
-                  }}
-                />
-              </Upload>
-            </div>
+                    color: "#fff",
+                    fontSize: 20,
+                  }}>
+                    <LoadingOutlined />
+                  </div>
+                )}
+              </div>
+            </Upload>
             <div style={{ marginTop: 12, fontWeight: 700, fontSize: 18, color: "var(--neu-text)" }}>
               {profile.display_name}
             </div>

@@ -1,23 +1,10 @@
-import { Card, Drawer, Input, List, Spin } from "antd";
-import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
+import { Button, Card, Drawer, Input, List, Popconfirm, Spin } from "antd";
+import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
-
-const addButtonStyle = {
-  position: "absolute",
-  right: 10,
-  bottom: 10,
-  width: 32,
-  height: 32,
-  borderRadius: "50%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-};
 
 function DetailRow({ label, value }) {
   if (value == null || value === "") return null;
@@ -43,6 +30,12 @@ export default function BrandDrawer({
   onSearchChange,
   onAddToGroup,
   onSubmitMissing,
+  isAdmin,
+  onCreateBrandObject,
+  onEditBrandObject,
+  onDeleteBrandObject,
+  onEditBrand,
+  onDeleteBrand,
 }) {
   const { t } = useLocale();
   const [draftQuery, setDraftQuery] = useState("");
@@ -55,11 +48,20 @@ export default function BrandDrawer({
     onSearchChange("");
   }, [open, selectedBrand?.id, onSearchChange]);
 
+  // Sync detailItem when brandObjects refreshes (after edit or delete)
+  useEffect(() => {
+    if (!detailItem) return;
+    const updated = brandObjects.find((o) => o.id === detailItem.id);
+    setDetailItem(updated ?? null);
+  }, [brandObjects]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const filteredObjects = searchKeyword.trim()
     ? brandObjects.filter((bo) =>
         (bo.name || "").toLowerCase().includes(searchKeyword.trim().toLowerCase())
       )
     : brandObjects;
+
+  const listData = isAdmin ? [{ id: "__add__" }, ...filteredObjects] : filteredObjects;
 
   const handleClose = () => {
     onClose();
@@ -68,21 +70,59 @@ export default function BrandDrawer({
   const isDetail = detailItem !== null;
 
   const drawerTitle = isDetail ? (
-    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <button
-        type="button"
-        onClick={() => setDetailItem(null)}
-        style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 4px", color: "var(--neu-text-2)", display: "flex", alignItems: "center" }}
-      >
-        <ArrowLeftOutlined style={{ fontSize: 16 }} />
-      </button>
-      <span style={{ fontSize: 14, fontWeight: 500, color: "var(--neu-text)" }}>
-        {detailItem.name}
-      </span>
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", paddingRight: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+        <button
+          type="button"
+          onClick={() => setDetailItem(null)}
+          style={{ background: "none", border: "none", cursor: "pointer", padding: "2px 4px", color: "var(--neu-text-2)", display: "flex", alignItems: "center", flexShrink: 0 }}
+        >
+          <ArrowLeftOutlined style={{ fontSize: 16 }} />
+        </button>
+        <span style={{ fontSize: 14, fontWeight: 500, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {detailItem.name}
+        </span>
+      </div>
+      {isAdmin && (
+        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          <Button size="small" icon={<EditOutlined />} onClick={() => onEditBrandObject?.(detailItem)} />
+          <Popconfirm
+            title={t("deleteBrandObjectTitle")}
+            description={t("deleteBrandObjectContent").replace("{name}", detailItem.name)}
+            onConfirm={async () => { await onDeleteBrandObject?.(detailItem); }}
+            okText={t("delete")}
+            okButtonProps={{ danger: true }}
+            cancelText={t("cancel")}
+          >
+            <Button size="small" danger icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </div>
+      )}
     </div>
   ) : selectedBrand ? (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, width: "100%", paddingRight: 8 }}>
-      <span>{selectedBrand.name}</span>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, width: "100%", paddingRight: 40 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+        <span>{selectedBrand.name}</span>
+        {isAdmin && (
+          <>
+            <Button
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => onEditBrand?.(selectedBrand)}
+            />
+            <Popconfirm
+              title={t("deleteBrandTitle")}
+              description={t("deleteBrandContent").replace("{name}", selectedBrand.name)}
+              onConfirm={() => onDeleteBrand?.(selectedBrand)}
+              okText={t("delete")}
+              okButtonProps={{ danger: true }}
+              cancelText={t("cancel")}
+            >
+              <Button size="small" danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </>
+        )}
+      </div>
       <Search
         placeholder={t("searchModels")}
         allowClear
@@ -118,36 +158,49 @@ export default function BrandDrawer({
             <Spin spinning={loading}>
               <List
                 grid={LIST_GRID_DRAWER}
-                dataSource={filteredObjects}
+                dataSource={listData}
                 renderItem={(item) => (
                   <List.Item key={item.id}>
-                    <Card
-                      hoverable
-                      onClick={() => setDetailItem(item)}
-                      bodyStyle={{ height: 56, minHeight: 56, padding: "0 16px", overflow: "hidden", display: "flex", alignItems: "center" }}
-                      cover={
-                        <div style={{ position: "relative", width: "100%", height: 200, overflow: "hidden" }}>
+                    {item.id === "__add__" ? (
+                      <Card
+                        hoverable
+                        onClick={() => onCreateBrandObject?.()}
+                        bodyStyle={{ height: 56, minHeight: 56, padding: "0 16px", overflow: "hidden", display: "flex", alignItems: "center" }}
+                        cover={
+                          <div
+                            style={{
+                              height: 200,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              background: "var(--neu-bg-2, rgba(180,180,180,0.08))",
+                            }}
+                          >
+                            <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+                          </div>
+                        }
+                      >
+                        <span style={{ fontSize: 13, color: "var(--neu-text-2)" }}>{t("addBrandObject")}</span>
+                      </Card>
+                    ) : (
+                      <Card
+                        hoverable
+                        onClick={() => setDetailItem(item)}
+                        bodyStyle={{ height: 56, minHeight: 56, padding: "0 16px", overflow: "hidden", display: "flex", alignItems: "center" }}
+                        cover={
                           <img
                             src={item.image_url}
                             alt={item.name}
                             loading="lazy"
-                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                            style={{ width: "100%", height: 200, objectFit: "cover" }}
                           />
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); onAddToGroup(item); }}
-                            style={addButtonStyle}
-                            className="neu-add-btn"
-                          >
-                            <PlusOutlined />
-                          </button>
+                        }
+                      >
+                        <div style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", fontSize: 13 }}>
+                          {item.name}
                         </div>
-                      }
-                    >
-                      <div style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", fontSize: 13 }}>
-                        {item.name}
-                      </div>
-                    </Card>
+                      </Card>
+                    )}
                   </List.Item>
                 )}
               />
@@ -174,23 +227,17 @@ export default function BrandDrawer({
               />
               <DetailRow label={t("category")} value={detailItem.category} />
               <DetailRow label={t("scale")} value={detailItem.scale} />
-              <DetailRow
-                label={t("releasePrice")}
-                value={detailItem.release_price ?? detailItem.releasePrice}
-              />
-              <DetailRow
-                label={t("releaseDate")}
-                value={detailItem.release_date ?? detailItem.releaseDate}
-              />
+              <DetailRow label={t("releasePrice")} value={detailItem.release_price ?? detailItem.releasePrice} />
+              <DetailRow label={t("releaseDate")} value={detailItem.release_date ?? detailItem.releaseDate} />
               <div style={{ marginTop: 24 }}>
-                <button
-                  type="button"
+                <Button
+                  type="primary"
+                  block
+                  icon={<PlusOutlined />}
                   onClick={() => onAddToGroup(detailItem)}
-                  className="neu-add-btn"
-                  style={{ width: "100%", height: 38, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 13 }}
                 >
-                  <PlusOutlined /> {t("addToGroup")}
-                </button>
+                  {t("addToGroup")}
+                </Button>
               </div>
             </div>
           )}

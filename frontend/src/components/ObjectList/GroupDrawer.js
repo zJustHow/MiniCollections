@@ -190,9 +190,11 @@ export default function GroupDrawer({
               <div style={{ color: "var(--neu-text-2)", fontSize: 13, marginBottom: 8 }}>{t("brandModelLabel")}</div>
               <Spin spinning={loadingBrandDetail}>
                 {brandDetail ? (
-                  <div
+                  <button
+                    type="button"
                     onClick={() => setShowBrandDetail(true)}
-                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10, cursor: "pointer", boxShadow: "var(--raised-sm)" }}
+                    className="neu-clickable"
+                    style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10 }}
                   >
                     <img
                       src={brandDetail.image_url}
@@ -207,7 +209,7 @@ export default function GroupDrawer({
                         </div>
                       )}
                     </div>
-                  </div>
+                  </button>
                 ) : (
                   <div style={{ color: "var(--neu-text-2)", fontSize: 13 }}>{t("noRelatedBrandModel")}</div>
                 )}
