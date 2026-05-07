@@ -8,6 +8,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
+import software.amazon.awssdk.services.s3.model.PutBucketPolicyRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
 
@@ -33,13 +34,18 @@ public class ImageStorageService {
     }
 
     private void ensureBucket() {
+        String bucket = s3Properties.bucket();
         try {
-            s3Client.headBucket(HeadBucketRequest.builder().bucket(s3Properties.bucket()).build());
+            s3Client.headBucket(HeadBucketRequest.builder().bucket(bucket).build());
         } catch (S3Exception e) {
             if (e.statusCode() == 404) {
-                s3Client.createBucket(CreateBucketRequest.builder().bucket(s3Properties.bucket()).build());
+                s3Client.createBucket(CreateBucketRequest.builder().bucket(bucket).build());
             }
         }
+        String policy = """
+                {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::%s/*"]}]}
+                """.formatted(bucket).strip();
+        s3Client.putBucketPolicy(PutBucketPolicyRequest.builder().bucket(bucket).policy(policy).build());
     }
 
     public String uploadUserImage(long userId, MultipartFile file) throws IOException {

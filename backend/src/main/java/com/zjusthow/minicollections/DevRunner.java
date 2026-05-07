@@ -1,6 +1,5 @@
 package com.zjusthow.minicollections;
 
-import com.zjusthow.minicollections.entity.*;
 import com.zjusthow.minicollections.repository.*;
 import com.zjusthow.minicollections.service.UserService;
 import org.slf4j.Logger;
@@ -10,18 +9,12 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 @Component
 @Profile("dev")
 public class DevRunner implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DevRunner.class);
 
-    private final BrandObjectRepository brandObjectRepository;
-    private final BrandRepository brandRepository;
-    private final GroupRepository groupRepository;
-    private final UserObjectRepository userObjectRepository;
     private final UserService userService;
 
     public DevRunner(
@@ -31,10 +24,6 @@ public class DevRunner implements ApplicationRunner {
             UserObjectRepository userObjectRepository,
             UserService userService
     ) {
-        this.brandObjectRepository = brandObjectRepository;
-        this.brandRepository = brandRepository;
-        this.groupRepository = groupRepository;
-        this.userObjectRepository = userObjectRepository;
         this.userService = userService;
     }
 

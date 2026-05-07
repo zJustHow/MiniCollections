@@ -7,6 +7,7 @@ import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.exception.BrandNotFoundException;
 import com.zjusthow.minicollections.exception.BrandObjectNotFoundException;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
+import com.zjusthow.minicollections.model.BrandBody;
 import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
 import com.zjusthow.minicollections.model.BrandObjectBody;
@@ -153,6 +154,29 @@ public class BrandService {
         return entities.stream()
                 .map(e -> BrandObjectDto.from(e, preferZh, preferCny))
                 .toList();
+    }
+
+    @CacheEvict(value = "brands", allEntries = true)
+    public BrandDto createBrand(BrandBody req, String effectiveLocale) {
+        var entity = new com.zjusthow.minicollections.entity.BrandEntity(null, req.nameEn(), req.nameZh(), req.imageUrl());
+        var saved = brandRepository.save(entity);
+        return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
+    }
+
+    @CacheEvict(value = "brands", allEntries = true)
+    public BrandDto updateBrand(long id, BrandBody req, String effectiveLocale) {
+        brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
+        var updated = new com.zjusthow.minicollections.entity.BrandEntity(id, req.nameEn(), req.nameZh(), req.imageUrl());
+        var saved = brandRepository.save(updated);
+        return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
+    }
+
+    @CacheEvict(value = {"brands", "brandObjects"}, allEntries = true)
+    public void deleteBrand(long id) {
+        if (!brandRepository.existsById(id)) {
+            throw new BrandNotFoundException();
+        }
+        brandRepository.deleteById(id);
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)
