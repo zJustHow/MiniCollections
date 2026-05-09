@@ -56,9 +56,12 @@ export default function BrandDrawer({
   }, [brandObjects]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const filteredObjects = searchKeyword.trim()
-    ? brandObjects.filter((bo) =>
-        (bo.name || "").toLowerCase().includes(searchKeyword.trim().toLowerCase())
-      )
+    ? brandObjects.filter((bo) => {
+        const kw = searchKeyword.trim().toLowerCase();
+        return (bo.name || "").toLowerCase().includes(kw) ||
+          (bo.name_en || "").toLowerCase().includes(kw) ||
+          (bo.name_zh || "").toLowerCase().includes(kw);
+      })
     : brandObjects;
 
   const listData = isAdmin ? [{ id: "__add__" }, ...filteredObjects] : filteredObjects;
@@ -79,13 +82,13 @@ export default function BrandDrawer({
         >
           <ArrowLeftOutlined style={{ fontSize: 16 }} />
         </button>
-        <span style={{ fontSize: 14, fontWeight: 500, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: 14, fontWeight: 500, color: "var(--neu-text)", wordBreak: "break-word" }}>
           {detailItem.name}
         </span>
       </div>
       {isAdmin && (
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          <Button size="small" icon={<EditOutlined />} onClick={() => onEditBrandObject?.(detailItem)} />
+          <Button icon={<EditOutlined />} onClick={() => onEditBrandObject?.(detailItem)} />
           <Popconfirm
             title={t("deleteBrandObjectTitle")}
             description={t("deleteBrandObjectContent").replace("{name}", detailItem.name)}
@@ -94,19 +97,18 @@ export default function BrandDrawer({
             okButtonProps={{ danger: true }}
             cancelText={t("cancel")}
           >
-            <Button size="small" danger icon={<DeleteOutlined />} />
+            <Button danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </div>
       )}
     </div>
   ) : selectedBrand ? (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, width: "100%", paddingRight: 40 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-        <span>{selectedBrand.name}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
+        <span style={{ wordBreak: "break-word", flex: 1, minWidth: 0 }}>{selectedBrand.name}</span>
         {isAdmin && (
-          <>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             <Button
-              size="small"
               icon={<EditOutlined />}
               onClick={() => onEditBrand?.(selectedBrand)}
             />
@@ -118,9 +120,9 @@ export default function BrandDrawer({
               okButtonProps={{ danger: true }}
               cancelText={t("cancel")}
             >
-              <Button size="small" danger icon={<DeleteOutlined />} />
+              <Button danger icon={<DeleteOutlined />} />
             </Popconfirm>
-          </>
+          </div>
         )}
       </div>
       <Search
@@ -133,7 +135,7 @@ export default function BrandDrawer({
           if (v === "") onSearchChange("");
         }}
         onSearch={(v) => onSearchChange((v ?? "").trim())}
-        style={{ width: 220 }}
+        style={{ width: 220, flexShrink: 0 }}
       />
     </div>
   ) : null;

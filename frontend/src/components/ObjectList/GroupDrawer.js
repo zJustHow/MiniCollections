@@ -104,23 +104,23 @@ export default function GroupDrawer({
           >
             <ArrowLeftOutlined style={{ fontSize: 16 }} />
           </button>
-          <span style={{ fontSize: 14, fontWeight: 500, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <span style={{ fontSize: 14, fontWeight: 500, color: "var(--neu-text)", wordBreak: "break-word" }}>
             {detailUserObject.name ?? "—"}
           </span>
         </div>
         <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-          <Button size="small" icon={<EditOutlined />} onClick={onEditUserObject} />
-          <Button size="small" danger icon={<DeleteOutlined />} onClick={onDeleteUserObject} />
+          <Button icon={<EditOutlined />} onClick={onEditUserObject} />
+          <Button danger icon={<DeleteOutlined />} onClick={onDeleteUserObject} />
         </div>
       </div>
     );
   } else if (selectedGroup) {
     drawerTitle = (
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 16, width: "100%", paddingRight: 40 }}>
-        <span>{selectedGroup.name}</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <Button size="small" icon={<EditOutlined />} onClick={onEditGroup} />
-          <Button size="small" danger icon={<DeleteOutlined />} onClick={onDeleteGroup} />
+        <span style={{ wordBreak: "break-word", minWidth: 0, flex: 1 }}>{selectedGroup.name}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+          <Button icon={<EditOutlined />} onClick={onEditGroup} />
+          <Button danger icon={<DeleteOutlined />} onClick={onDeleteGroup} />
           <Search
             placeholder={t("searchModels")}
             allowClear

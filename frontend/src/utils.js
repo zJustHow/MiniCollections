@@ -41,9 +41,12 @@ function getToken() {
   return localStorage.getItem(TOKEN_KEY);
 }
 
+let _locale = "en-US";
+export function setCurrentLocale(locale) { _locale = locale; }
+
 function authHeaders(extra = {}) {
   const token = getToken();
-  const headers = { ...extra };
+  const headers = { "Accept-Language": _locale, ...extra };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
 }

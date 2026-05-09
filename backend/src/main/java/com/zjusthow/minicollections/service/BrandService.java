@@ -90,7 +90,10 @@ public class BrandService {
         List<BrandDto> brandDtos = getBrands(effectiveLocale);
         String lowerCaseKeyword = keyword.toLowerCase();
         return brandDtos.stream()
-                .filter(brandDto -> brandDto.name().toLowerCase().contains(lowerCaseKeyword))
+                .filter(brandDto ->
+                        brandDto.name().toLowerCase().contains(lowerCaseKeyword) ||
+                        brandDto.nameEn().toLowerCase().contains(lowerCaseKeyword) ||
+                        (brandDto.nameZh() != null && brandDto.nameZh().toLowerCase().contains(lowerCaseKeyword)))
                 .toList();
     }
 

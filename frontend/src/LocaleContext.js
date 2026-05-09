@@ -3,13 +3,18 @@ import { App, ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import enUS from "antd/locale/en_US";
 import { detectBrowserLocale, translations } from "./i18n";
+import { setCurrentLocale } from "./utils";
 
 const antdLocaleMap = { "zh-CN": zhCN, "en-US": enUS };
 
 const LocaleContext = createContext(null);
 
 export function LocaleProvider({ children }) {
-  const [locale, setLocale] = useState(detectBrowserLocale);
+  const [locale, setLocale] = useState(() => {
+    const initial = detectBrowserLocale();
+    setCurrentLocale(initial);
+    return initial;
+  });
 
   const t = useCallback(
     (key, params) => {
@@ -27,13 +32,16 @@ export function LocaleProvider({ children }) {
         locale={antdLocaleMap[locale] ?? enUS}
         theme={{
           token: {
-            colorBgContainer: "#fcfbf8",
-            colorBgElevated:  "#fcfbf8",
-            colorBgLayout:    "#fcfbf8",
-            borderRadius:     10,
-            borderRadiusSM:   10,
-            borderRadiusLG:   14,
-            borderRadiusXS:   6,
+            colorPrimary:       "#5592cc",
+            colorPrimaryHover:  "#6aa8dc",
+            colorPrimaryActive: "#3d78b8",
+            colorBgContainer:   "#fcfbf8",
+            colorBgElevated:    "#fcfbf8",
+            colorBgLayout:      "#fcfbf8",
+            borderRadius:       10,
+            borderRadiusSM:     10,
+            borderRadiusLG:     14,
+            borderRadiusXS:     6,
           },
         }}
       >
