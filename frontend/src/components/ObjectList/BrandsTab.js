@@ -1,10 +1,10 @@
-import { Card, Input, List } from "antd";
+import { Card, Grid, Input, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import CardCover from "./CardCover";
-import { LIST_GRID } from "./constants";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
+const { useBreakpoint } = Grid;
 
 export default function BrandsTab({
   brands,
@@ -15,6 +15,8 @@ export default function BrandsTab({
   onCreateBrand,
 }) {
   const { t } = useLocale();
+  const screens = useBreakpoint();
+  const cols = screens.lg ? 4 : screens.md ? 3 : 2;
 
   const dataSource = isAdmin ? [{ id: "__add__" }, ...brands] : brands;
 
@@ -22,7 +24,7 @@ export default function BrandsTab({
     <>
       <div
         style={{
-          display: "flex",
+          display: screens.md ? "flex" : "block",
           justifyContent: "flex-end",
           marginBottom: 16,
         }}
@@ -34,17 +36,21 @@ export default function BrandsTab({
           onChange={(e) => {
             if (e.target.value === "") onSearch("");
           }}
-          style={{ width: 260 }}
+          style={{ width: screens.md ? 260 : "100%" }}
         />
       </div>
-      <List
-        loading={loading}
-        grid={LIST_GRID}
-        dataSource={dataSource}
-        renderItem={(brand) => (
-          <List.Item key={brand.id}>
-            {brand.id === "__add__" ? (
+      <Spin spinning={loading}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gap: 16,
+          }}
+        >
+          {dataSource.map((brand) =>
+            brand.id === "__add__" ? (
               <Card
+                key="__add__"
                 hoverable
                 className="neu-model-card"
                 cover={
@@ -78,16 +84,17 @@ export default function BrandsTab({
               />
             ) : (
               <Card
+                key={brand.id}
                 hoverable
                 className="neu-model-card"
                 cover={<CardCover image_url={brand.image_url} name={brand.name} />}
                 onClick={() => onBrandClick(brand)}
                 bodyStyle={{ padding: 0 }}
               />
-            )}
-          </List.Item>
-        )}
-      />
+            )
+          )}
+        </div>
+      </Spin>
     </>
   );
 }

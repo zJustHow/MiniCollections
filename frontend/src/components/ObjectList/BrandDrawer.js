@@ -1,9 +1,10 @@
-import { Button, Card, Drawer, Input, List, Popconfirm, Spin } from "antd";
+import { Button, Card, Drawer, Grid, Input, Popconfirm, Spin } from "antd";
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
+import { DRAWER_WIDTH } from "./constants";
 import { useLocale } from "../../LocaleContext";
 
+const { useBreakpoint } = Grid;
 const { Search } = Input;
 
 function DetailRow({ label, value }) {
@@ -38,6 +39,9 @@ export default function BrandDrawer({
   onDeleteBrand,
 }) {
   const { t } = useLocale();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+  const cols = screens.xl ? 4 : screens.md ? 3 : 2;
   const [draftQuery, setDraftQuery] = useState("");
   const [detailItem, setDetailItem] = useState(null);
 
@@ -125,18 +129,20 @@ export default function BrandDrawer({
           </div>
         )}
       </div>
-      <Search
-        placeholder={t("searchModels")}
-        allowClear
-        value={draftQuery}
-        onChange={(e) => {
-          const v = e.target.value;
-          setDraftQuery(v);
-          if (v === "") onSearchChange("");
-        }}
-        onSearch={(v) => onSearchChange((v ?? "").trim())}
-        style={{ width: 220, flexShrink: 0 }}
-      />
+      {!isMobile && (
+        <Search
+          placeholder={t("searchModels")}
+          allowClear
+          value={draftQuery}
+          onChange={(e) => {
+            const v = e.target.value;
+            setDraftQuery(v);
+            if (v === "") onSearchChange("");
+          }}
+          onSearch={(v) => onSearchChange((v ?? "").trim())}
+          style={{ width: 220, flexShrink: 0 }}
+        />
+      )}
     </div>
   ) : null;
 
@@ -145,7 +151,7 @@ export default function BrandDrawer({
       title={drawerTitle}
       open={open}
       onClose={handleClose}
-      width={DRAWER_WIDTH}
+      width={isMobile ? "100%" : DRAWER_WIDTH}
       afterOpenChange={(isOpen) => {
         if (!isOpen) {
           setDraftQuery("");
@@ -157,61 +163,79 @@ export default function BrandDrawer({
       {selectedBrand && (
         <>
           <div style={{ display: isDetail ? "none" : "block" }}>
-            <Spin spinning={loading}>
-              <List
-                grid={LIST_GRID_DRAWER}
-                dataSource={listData}
-                renderItem={(item) => (
-                  <List.Item key={item.id}>
-                    {item.id === "__add__" ? (
-                      <Card
-                        hoverable
-                        onClick={() => onCreateBrandObject?.()}
-                        bodyStyle={{ height: 56, minHeight: 56, padding: "0 16px", overflow: "hidden", display: "flex", alignItems: "center" }}
-                        cover={
-                          <div
-                            style={{
-                              height: 200,
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              background: "var(--neu-bg-2, rgba(180,180,180,0.08))",
-                            }}
-                          >
-                            <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
-                          </div>
-                        }
-                      >
-                        <span style={{ fontSize: 13, color: "var(--neu-text-2)" }}>{t("addBrandObject")}</span>
-                      </Card>
-                    ) : (
-                      <Card
-                        hoverable
-                        onClick={() => setDetailItem(item)}
-                        bodyStyle={{ height: 56, minHeight: 56, padding: "0 16px", overflow: "hidden", display: "flex", alignItems: "center" }}
-                        cover={
-                          item.image_url ? (
-                            <img
-                              src={item.image_url}
-                              alt={item.name}
-                              loading="lazy"
-                              style={{ width: "100%", height: 200, objectFit: "cover" }}
-                            />
-                          ) : (
-                            <div style={{ width: "100%", height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                              <PictureOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
-                            </div>
-                          )
-                        }
-                      >
-                        <div style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", fontSize: 13 }}>
-                          {item.name}
-                        </div>
-                      </Card>
-                    )}
-                  </List.Item>
-                )}
+            {isMobile && (
+              <Search
+                placeholder={t("searchModels")}
+                allowClear
+                value={draftQuery}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setDraftQuery(v);
+                  if (v === "") onSearchChange("");
+                }}
+                onSearch={(v) => onSearchChange((v ?? "").trim())}
+                style={{ width: "100%", marginBottom: 16 }}
               />
+            )}
+            <Spin spinning={loading}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                  gap: 16,
+                }}
+              >
+                {listData.map((item) =>
+                  item.id === "__add__" ? (
+                    <Card
+                      key="__add__"
+                      hoverable
+                      onClick={() => onCreateBrandObject?.()}
+                      bodyStyle={{ height: 56, minHeight: 56, padding: "0 16px", overflow: "hidden", display: "flex", alignItems: "center" }}
+                      cover={
+                        <div
+                          style={{
+                            height: 200,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "var(--neu-bg-2, rgba(180,180,180,0.08))",
+                          }}
+                        >
+                          <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+                        </div>
+                      }
+                    >
+                      <span style={{ fontSize: 13, color: "var(--neu-text-2)" }}>{t("addBrandObject")}</span>
+                    </Card>
+                  ) : (
+                    <Card
+                      key={item.id}
+                      hoverable
+                      onClick={() => setDetailItem(item)}
+                      bodyStyle={{ height: 56, minHeight: 56, padding: "0 16px", overflow: "hidden", display: "flex", alignItems: "center" }}
+                      cover={
+                        item.image_url ? (
+                          <img
+                            src={item.image_url}
+                            alt={item.name}
+                            loading="lazy"
+                            style={{ width: "100%", height: 200, objectFit: "cover" }}
+                          />
+                        ) : (
+                          <div style={{ width: "100%", height: 200, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <PictureOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+                          </div>
+                        )
+                      }
+                    >
+                      <div style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis", fontSize: 13 }}>
+                        {item.name}
+                      </div>
+                    </Card>
+                  )
+                )}
+              </div>
             </Spin>
           </div>
           {onSubmitMissing && !isDetail && (

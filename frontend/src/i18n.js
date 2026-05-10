@@ -1,8 +1,8 @@
 const en = {
   // Header / Nav
   brands: "Brands",
-  myGroups: "My Groups",
-  myFeedback: "Feedback",
+  groups: "Groups",
+  feedback: "Feedback",
   profile: "Profile",
   logout: "Log Out",
 
@@ -239,8 +239,8 @@ const en = {
 const zh = {
   // Header / Nav
   brands: "品牌",
-  myGroups: "我的分组",
-  myFeedback: "反馈",
+  groups: "分组",
+  feedback: "反馈",
   profile: "个人资料",
   logout: "退出登录",
 
@@ -374,7 +374,7 @@ const zh = {
   cancel: "取消",
 
   // Admin
-  adminPanel: "管理后台",
+  adminPanel: "管理",
   submissionsPending: "待处理",
   submissionsApproved: "已通过",
   submissionsRejected: "已拒绝",

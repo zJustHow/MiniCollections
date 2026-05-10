@@ -53,6 +53,7 @@ function MainLayout({ authed, profile, isAdmin }) {
       >
         {/* Logo */}
         <span
+          className="header-logo"
           style={{
             fontSize: 20,
             fontWeight: 700,
@@ -66,7 +67,7 @@ function MainLayout({ authed, profile, isAdmin }) {
         </span>
 
         {/* Tab buttons */}
-        <div style={{ display: "flex", gap: 10, flex: 1 }}>
+        <div className="header-tabs" style={{ display: "flex", gap: 10, flex: 1 }}>
           <button
             className={`neu-tab-btn${activeTab === "brands" ? " active" : ""}`}
             onClick={() => handleTabChange("brands")}
@@ -77,13 +78,13 @@ function MainLayout({ authed, profile, isAdmin }) {
             className={`neu-tab-btn${activeTab === "groups" ? " active" : ""}`}
             onClick={() => handleTabChange("groups")}
           >
-            {t("myGroups")}
+            {t("groups")}
           </button>
           <button
             className={`neu-tab-btn${activeTab === "feedback" ? " active" : ""}`}
             onClick={() => handleTabChange("feedback")}
           >
-            {t("myFeedback")}
+            {t("feedback")}
           </button>
           {isAdmin && (
             <button
@@ -96,7 +97,7 @@ function MainLayout({ authed, profile, isAdmin }) {
         </div>
 
         {/* Right slot */}
-        <div style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12 }}>
+        <div className="header-right" style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12 }}>
           {authed ? (
             <Tooltip title={profile?.display_name || t("profile")} placement="bottomRight">
               <Avatar
@@ -135,9 +136,10 @@ function MainLayout({ authed, profile, isAdmin }) {
 
       <Content
         style={{
-          padding: "32px 48px",
+          padding: "clamp(12px, 3vw, 32px) clamp(12px, 4vw, 48px)",
           maxHeight: "calc(100% - 64px)",
           overflowY: "auto",
+          overflowX: "hidden",
         }}
       >
         <Outlet />

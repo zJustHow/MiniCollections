@@ -1,9 +1,10 @@
-import { Button, Card, Drawer, Input, List, Spin } from "antd";
+import { Button, Card, Drawer, Grid, Input, Spin } from "antd";
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { LIST_GRID_DRAWER, DRAWER_WIDTH } from "./constants";
+import { DRAWER_WIDTH } from "./constants";
 import { useLocale } from "../../LocaleContext";
 
+const { useBreakpoint } = Grid;
 const { Search } = Input;
 
 
@@ -41,6 +42,9 @@ export default function GroupDrawer({
   onDeleteUserObject,
 }) {
   const { t } = useLocale();
+  const screens = useBreakpoint();
+  const isMobile = !screens.md;
+  const cols = screens.xl ? 4 : screens.md ? 3 : 2;
   const [draftQuery, setDraftQuery] = useState("");
   const [showBrandDetail, setShowBrandDetail] = useState(false);
 
@@ -121,18 +125,20 @@ export default function GroupDrawer({
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
           <Button icon={<EditOutlined />} onClick={onEditGroup} />
           <Button danger icon={<DeleteOutlined />} onClick={onDeleteGroup} />
-          <Search
-            placeholder={t("searchModels")}
-            allowClear
-            value={draftQuery}
-            onChange={(e) => {
-              const v = e.target.value;
-              setDraftQuery(v);
-              if (v === "") onSearchChange("");
-            }}
-            onSearch={(v) => onSearchChange((v ?? "").trim())}
-            style={{ width: 200 }}
-          />
+          {!isMobile && (
+            <Search
+              placeholder={t("searchModels")}
+              allowClear
+              value={draftQuery}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDraftQuery(v);
+                if (v === "") onSearchChange("");
+              }}
+              onSearch={(v) => onSearchChange((v ?? "").trim())}
+              style={{ width: 200 }}
+            />
+          )}
         </div>
       </div>
     );
@@ -145,7 +151,7 @@ export default function GroupDrawer({
       title={drawerTitle}
       open={open}
       onClose={handleClose}
-      width={DRAWER_WIDTH}
+      width={isMobile ? "100%" : DRAWER_WIDTH}
       afterOpenChange={(isOpen) => {
         if (!isOpen) {
           setDraftQuery("");
@@ -236,15 +242,32 @@ export default function GroupDrawer({
           </div>
         ) : (
           <div style={{ minHeight: 200 }}>
-            <List
-              loading={loading}
-              grid={LIST_GRID_DRAWER}
-              dataSource={[{ id: "__add__" }, ...filteredObjects]}
-              locale={{ emptyText: null }}
-              renderItem={(item) => (
-                <List.Item key={item.id}>
-                  {item.id === "__add__" ? (
+            {isMobile && (
+              <Search
+                placeholder={t("searchModels")}
+                allowClear
+                value={draftQuery}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setDraftQuery(v);
+                  if (v === "") onSearchChange("");
+                }}
+                onSearch={(v) => onSearchChange((v ?? "").trim())}
+                style={{ width: "100%", marginBottom: 16 }}
+              />
+            )}
+            <Spin spinning={loading}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                  gap: 16,
+                }}
+              >
+                {[{ id: "__add__" }, ...filteredObjects].map((item) =>
+                  item.id === "__add__" ? (
                     <Card
+                      key="__add__"
                       hoverable
                       bodyStyle={{ height: 56, minHeight: 56, padding: "0 24px", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}
                       cover={
@@ -268,6 +291,7 @@ export default function GroupDrawer({
                     </Card>
                   ) : (
                     <Card
+                      key={item.id}
                       hoverable
                       bodyStyle={{ height: 56, minHeight: 56, padding: "0 24px", overflow: "hidden", display: "flex", alignItems: "center" }}
                       cover={
@@ -290,10 +314,10 @@ export default function GroupDrawer({
                         {item.name ?? "—"}
                       </div>
                     </Card>
-                  )}
-                </List.Item>
-              )}
-            />
+                  )
+                )}
+              </div>
+            </Spin>
           </div>
         )
       )}

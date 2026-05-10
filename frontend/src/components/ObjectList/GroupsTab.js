@@ -1,10 +1,10 @@
-import { Card, Input, List } from "antd";
+import { Card, Grid, Input, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import CardCover from "./CardCover";
-import { LIST_GRID } from "./constants";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
+const { useBreakpoint } = Grid;
 
 export default function GroupsTab({
   groups,
@@ -14,11 +14,14 @@ export default function GroupsTab({
   onCreateGroup,
 }) {
   const { t } = useLocale();
+  const screens = useBreakpoint();
+  const cols = screens.lg ? 4 : screens.md ? 3 : 2;
+
   return (
     <div style={{ position: "relative", minHeight: 200 }}>
       <div
         style={{
-          display: "flex",
+          display: screens.md ? "flex" : "block",
           justifyContent: "flex-end",
           marginBottom: 16,
         }}
@@ -30,17 +33,21 @@ export default function GroupsTab({
           onChange={(e) => {
             if (e.target.value === "") onSearch("");
           }}
-          style={{ width: 260 }}
+          style={{ width: screens.md ? 260 : "100%" }}
         />
       </div>
-      <List
-        loading={loading}
-        grid={LIST_GRID}
-        dataSource={[{ id: "__add__" }, ...groups]}
-        renderItem={(group) => (
-          <List.Item key={group.id}>
-            {group.id === "__add__" ? (
+      <Spin spinning={loading}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gap: 16,
+          }}
+        >
+          {[{ id: "__add__" }, ...groups].map((group) =>
+            group.id === "__add__" ? (
               <Card
+                key="__add__"
                 hoverable
                 className="neu-model-card"
                 cover={
@@ -74,21 +81,17 @@ export default function GroupsTab({
               />
             ) : (
               <Card
+                key={group.id}
                 hoverable
                 className="neu-model-card"
-                cover={
-                  <CardCover
-                    image_url={group.image_url}
-                    name={group.name}
-                  />
-                }
+                cover={<CardCover image_url={group.image_url} name={group.name} />}
                 onClick={() => onGroupClick(group)}
                 bodyStyle={{ padding: 0 }}
               />
-            )}
-          </List.Item>
-        )}
-      />
+            )
+          )}
+        </div>
+      </Spin>
     </div>
   );
 }

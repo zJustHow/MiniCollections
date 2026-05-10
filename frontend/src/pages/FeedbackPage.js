@@ -201,8 +201,7 @@ export default function FeedbackPage() {
 
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-        <Typography.Title level={4} style={{ margin: 0 }}>{t("myFeedbackTitle")}</Typography.Title>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 24 }}>
         <div style={{ display: "flex", gap: 8 }}>
           <Button icon={<ReloadOutlined />} onClick={load} disabled={loading} />
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setSubmitModalVisible(true)}>
