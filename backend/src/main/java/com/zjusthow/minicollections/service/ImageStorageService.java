@@ -1,6 +1,7 @@
 package com.zjusthow.minicollections.service;
 
 import com.zjusthow.minicollections.config.S3Properties;
+import com.zjusthow.minicollections.exception.UnsupportedImageTypeException;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,7 +52,7 @@ public class ImageStorageService {
     public String uploadUserImage(long userId, MultipartFile file) throws IOException {
         String contentType = file.getContentType();
         if (contentType == null || !ALLOWED_TYPES.contains(contentType.toLowerCase(Locale.ROOT))) {
-            throw new IllegalArgumentException("Unsupported image type: " + contentType);
+            throw new UnsupportedImageTypeException(contentType);
         }
         String ext = extensionForContentType(contentType);
         String key = userId + "/" + UUID.randomUUID() + ext;

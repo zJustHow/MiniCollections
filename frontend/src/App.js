@@ -9,15 +9,19 @@ import RegisterPage from "./pages/RegisterPage";
 import AdminPage from "./pages/AdminPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import ProfilePage from "./pages/ProfilePage";
+import BrandObjectsPage from "./pages/BrandObjectsPage";
+import GroupObjectsPage from "./pages/GroupObjectsPage";
 import { getMe, logout } from "./utils";
 import { useLocale } from "./LocaleContext";
+import { HeaderProvider, useHeader } from "./HeaderContext";
 
 const { Header, Content } = Layout;
 
-function MainLayout({ authed, profile, isAdmin }) {
+function MainLayoutInner({ authed, profile, isAdmin }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLocale();
+  const { headerSlot } = useHeader();
 
   const activeTab =
     location.pathname === "/groups"
@@ -51,53 +55,61 @@ function MainLayout({ authed, profile, isAdmin }) {
           gap: 24,
         }}
       >
-        {/* Logo */}
-        <span
-          className="header-logo"
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            letterSpacing: 2.5,
-            textTransform: "uppercase",
-            color: "#3c4f68",
-            flexShrink: 0,
-          }}
-        >
-          Mini <span style={{ color: "#5592cc" }}>Collections</span>
-        </span>
+        {/* Logo — hidden when a page injects its own header slot */}
+        {!headerSlot && (
+          <span
+            className="header-logo"
+            style={{
+              fontSize: 20,
+              fontWeight: 700,
+              letterSpacing: 2.5,
+              textTransform: "uppercase",
+              color: "#3c4f68",
+              flexShrink: 0,
+            }}
+          >
+            Mini <span style={{ color: "#5592cc" }}>Collections</span>
+          </span>
+        )}
 
-        {/* Tab buttons */}
-        <div className="header-tabs" style={{ display: "flex", gap: 10, flex: 1 }}>
-          <button
-            className={`neu-tab-btn${activeTab === "brands" ? " active" : ""}`}
-            onClick={() => handleTabChange("brands")}
-          >
-            {t("brands")}
-          </button>
-          <button
-            className={`neu-tab-btn${activeTab === "groups" ? " active" : ""}`}
-            onClick={() => handleTabChange("groups")}
-          >
-            {t("groups")}
-          </button>
-          <button
-            className={`neu-tab-btn${activeTab === "feedback" ? " active" : ""}`}
-            onClick={() => handleTabChange("feedback")}
-          >
-            {t("feedback")}
-          </button>
-          {isAdmin && (
+        {/* Center slot: either custom page content or default nav tabs */}
+        {headerSlot ? (
+          <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+            {headerSlot}
+          </div>
+        ) : (
+          <div className="header-tabs" style={{ display: "flex", gap: 10, flex: 1 }}>
             <button
-              className={`neu-tab-btn${activeTab === "admin" ? " active" : ""}`}
-              onClick={() => navigate("/admin")}
+              className={`neu-tab-btn${activeTab === "brands" ? " active" : ""}`}
+              onClick={() => handleTabChange("brands")}
             >
-              {t("adminPanel")}
+              {t("brands")}
             </button>
-          )}
-        </div>
+            <button
+              className={`neu-tab-btn${activeTab === "groups" ? " active" : ""}`}
+              onClick={() => handleTabChange("groups")}
+            >
+              {t("groups")}
+            </button>
+            <button
+              className={`neu-tab-btn${activeTab === "feedback" ? " active" : ""}`}
+              onClick={() => handleTabChange("feedback")}
+            >
+              {t("feedback")}
+            </button>
+            {isAdmin && (
+              <button
+                className={`neu-tab-btn${activeTab === "admin" ? " active" : ""}`}
+                onClick={() => navigate("/admin")}
+              >
+                {t("adminPanel")}
+              </button>
+            )}
+          </div>
+        )}
 
-        {/* Right slot */}
-        <div className="header-right" style={{ flexShrink: 0, display: "flex", alignItems: "center", gap: 12 }}>
+        {/* Right slot — hidden when page has its own header slot */}
+        <div className="header-right" style={{ flexShrink: 0, display: headerSlot ? "none" : "flex", alignItems: "center", gap: 12 }}>
           {authed ? (
             <Tooltip title={profile?.display_name || t("profile")} placement="bottomRight">
               <Avatar
@@ -145,6 +157,14 @@ function MainLayout({ authed, profile, isAdmin }) {
         <Outlet />
       </Content>
     </Layout>
+  );
+}
+
+function MainLayout({ authed, profile, isAdmin }) {
+  return (
+    <HeaderProvider>
+      <MainLayoutInner authed={authed} profile={profile} isAdmin={isAdmin} />
+    </HeaderProvider>
   );
 }
 
@@ -234,6 +254,14 @@ export default function App() {
         <Route
           path="groups"
           element={authed ? <ObjectList activeTab="groups" isAdmin={isAdmin} /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="brands/:brandId"
+          element={authed ? <BrandObjectsPage isAdmin={isAdmin} /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="groups/:groupId"
+          element={authed ? <GroupObjectsPage /> : <Navigate to="/login" replace />}
         />
         <Route
           path="feedback"

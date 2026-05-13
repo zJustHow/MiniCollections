@@ -4,11 +4,13 @@ import com.zjusthow.minicollections.entity.GroupEntity;
 import com.zjusthow.minicollections.entity.UserObjectEntity;
 import com.zjusthow.minicollections.exception.GroupNotFoundException;
 import com.zjusthow.minicollections.exception.NoPermissionException;
+import com.zjusthow.minicollections.exception.LimitExceededException;
 import com.zjusthow.minicollections.exception.UserObjectNotFoundException;
 import com.zjusthow.minicollections.model.GroupDto;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.repository.GroupRepository;
 import com.zjusthow.minicollections.repository.UserObjectRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,12 @@ import java.util.List;
 public class GroupService {
     private final GroupRepository groupRepository;
     private final UserObjectRepository userObjectRepository;
+
+    @Value("${app.limits.max-groups-per-user}")
+    private int maxGroupsPerUser;
+
+    @Value("${app.limits.max-objects-per-group}")
+    private int maxObjectsPerGroup;
 
     public GroupService(
             GroupRepository groupRepository,
@@ -80,6 +88,11 @@ public class GroupService {
     )
     @Transactional
     public GroupDto createGroup(Long userId, String name, String imageUrl) {
+        int current = groupRepository.findByUserId(userId)
+                .map(List::size).orElse(0);
+        if (current >= maxGroupsPerUser) {
+            throw new LimitExceededException("error.group.limit", maxGroupsPerUser);
+        }
         GroupEntity groupEntity = new GroupEntity(null, userId, name, imageUrl);
         GroupEntity savedGroupEntity = groupRepository.save(groupEntity);
         return new GroupDto(savedGroupEntity);
@@ -161,6 +174,12 @@ public class GroupService {
 
         if (!groupEntity.userId().equals(userId)) {
             throw new NoPermissionException("No permission to add user object to this group");
+        }
+
+        int current = userObjectRepository.findByGroupId(groupId)
+                .map(List::size).orElse(0);
+        if (current >= maxObjectsPerGroup) {
+            throw new LimitExceededException("error.object.limit", maxObjectsPerGroup);
         }
 
         UserObjectEntity userObjectEntity = new UserObjectEntity(

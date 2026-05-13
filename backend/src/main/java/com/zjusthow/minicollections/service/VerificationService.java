@@ -2,6 +2,7 @@ package com.zjusthow.minicollections.service;
 
 import com.zjusthow.minicollections.exception.InvalidCodeException;
 import com.zjusthow.minicollections.exception.TooManyRequestsException;
+import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.service.sms.SmsSender;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -35,7 +36,7 @@ public class VerificationService {
         String key = PREFIX + target;
         Long ttl = redis.getExpire(key, TimeUnit.SECONDS);
         if (ttl != null && ttl > otpTtlSeconds - resendCooldownSeconds) {
-            throw new TooManyRequestsException("Please wait before requesting another code");
+            throw new TooManyRequestsException("error.resend_wait");
         }
 
         String code = String.format("%06d", ThreadLocalRandom.current().nextInt(1_000_000));
@@ -46,15 +47,15 @@ public class VerificationService {
         } else if ("PHONE".equals(type)) {
             smsSender.send(target, code);
         } else {
-            throw new IllegalArgumentException("Invalid type: " + type);
+            throw new ValidationException("Invalid type: " + type);
         }
     }
 
     public void verify(String target, String code) {
         String key = PREFIX + target;
         String stored = redis.opsForValue().get(key);
-        if (stored == null) throw new InvalidCodeException("Verification code expired or not found");
-        if (!stored.equals(code)) throw new InvalidCodeException("Invalid verification code");
+        if (stored == null) throw new InvalidCodeException("error.code_expired");
+        if (!stored.equals(code)) throw new InvalidCodeException("error.code_invalid");
         redis.delete(key);
     }
 }

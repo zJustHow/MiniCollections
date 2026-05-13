@@ -1,10 +1,10 @@
 package com.zjusthow.minicollections.exception;
 
-public class IdentifierExistsException extends RuntimeException {
+public class LimitExceededException extends RuntimeException {
     private final String messageCode;
     private final Object[] args;
 
-    public IdentifierExistsException(String messageCode, Object... args) {
+    public LimitExceededException(String messageCode, Object... args) {
         super(messageCode);
         this.messageCode = messageCode;
         this.args = args;

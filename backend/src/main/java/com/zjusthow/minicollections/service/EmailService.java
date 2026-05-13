@@ -1,5 +1,6 @@
 package com.zjusthow.minicollections.service;
 
+import com.zjusthow.minicollections.exception.ServiceNotConfiguredException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -16,7 +17,7 @@ public class EmailService {
     private String from;
 
     public void sendCode(String to, String code) {
-        if (mailSender == null) throw new IllegalStateException("Email service is not configured");
+        if (mailSender == null) throw new ServiceNotConfiguredException("Email service is not configured");
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setFrom(from);
         msg.setTo(to);

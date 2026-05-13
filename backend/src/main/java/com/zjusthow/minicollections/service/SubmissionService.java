@@ -4,6 +4,9 @@ import com.zjusthow.minicollections.elasticsearch.BrandObjectDocument;
 import com.zjusthow.minicollections.elasticsearch.BrandObjectSearchRepository;
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.entity.ObjectSubmissionEntity;
+import com.zjusthow.minicollections.exception.LimitExceededException;
+import com.zjusthow.minicollections.exception.SubmissionAlreadyReviewedException;
+import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.model.ApprovalBody;
 import com.zjusthow.minicollections.model.ObjectSubmissionDto;
 import com.zjusthow.minicollections.model.SubmissionBody;
@@ -17,7 +20,9 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -33,6 +38,9 @@ public class SubmissionService {
     @Value("${app.elasticsearch.enabled:true}")
     private boolean elasticsearchEnabled;
 
+    @Value("${app.limits.max-submissions-per-day}")
+    private int maxSubmissionsPerDay;
+
     public SubmissionService(
             ObjectSubmissionRepository submissionRepository,
             BrandObjectRepository brandObjectRepository,
@@ -47,6 +55,11 @@ public class SubmissionService {
     }
 
     public ObjectSubmissionDto submit(Long userId, SubmissionBody body) {
+        OffsetDateTime startOfDay = LocalDate.now(ZoneOffset.UTC).atStartOfDay().atOffset(ZoneOffset.UTC);
+        int todayCount = submissionRepository.countBySubmittedByUserIdAndSubmittedAtAfter(userId, startOfDay);
+        if (todayCount >= maxSubmissionsPerDay) {
+            throw new LimitExceededException("error.submission.limit", maxSubmissionsPerDay);
+        }
         ObjectSubmissionEntity entity = new ObjectSubmissionEntity(
                 null, userId, body.submissionType(),
                 body.brandId(), body.customBrandName(),
@@ -77,12 +90,12 @@ public class SubmissionService {
         ObjectSubmissionEntity submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new NoSuchElementException("Submission not found"));
         if (!"PENDING".equals(submission.status())) {
-            throw new IllegalStateException("Submission already reviewed");
+            throw new SubmissionAlreadyReviewedException();
         }
 
         if ("MISSING_MODEL".equals(submission.submissionType())) {
             if (body.brandId() == null || body.nameEn() == null || body.nameEn().isBlank()) {
-                throw new IllegalArgumentException("brandId and nameEn are required to approve a MISSING_MODEL submission");
+                throw new ValidationException("brandId and nameEn are required to approve a MISSING_MODEL submission");
             }
             BrandObjectEntity brandObject = new BrandObjectEntity(
                     null, body.brandId(), body.nameEn(), body.nameZh(), body.imageUrl(),
@@ -105,7 +118,7 @@ public class SubmissionService {
         ObjectSubmissionEntity submission = submissionRepository.findById(submissionId)
                 .orElseThrow(() -> new NoSuchElementException("Submission not found"));
         if (!"PENDING".equals(submission.status())) {
-            throw new IllegalStateException("Submission already reviewed");
+            throw new SubmissionAlreadyReviewedException();
         }
         return toDto(submissionRepository.save(
                 withStatus(submission, "REJECTED", adminUserId, reason, null)

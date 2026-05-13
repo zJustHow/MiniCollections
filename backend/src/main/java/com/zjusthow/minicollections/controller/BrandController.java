@@ -1,12 +1,10 @@
 package com.zjusthow.minicollections.controller;
 
-import com.zjusthow.minicollections.entity.UserEntity;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
 import com.zjusthow.minicollections.model.BrandObjectBody;
 import com.zjusthow.minicollections.service.BrandService;
-import com.zjusthow.minicollections.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,20 +20,16 @@ public class BrandController {
 
     private final BrandService brandService;
     private final DisplayLocaleResolver displayLocaleResolver;
-    private final UserService userService;
 
     public BrandController(
             BrandService brandService,
-            DisplayLocaleResolver displayLocaleResolver,
-            UserService userService) {
+            DisplayLocaleResolver displayLocaleResolver) {
         this.brandService = brandService;
         this.displayLocaleResolver = displayLocaleResolver;
-        this.userService = userService;
     }
 
     private String effectiveLocale(String acceptLanguage, User user) {
-        UserEntity ue = user != null ? userService.getUserById(Long.parseLong(user.getUsername())) : null;
-        return displayLocaleResolver.resolveEffectiveLocale(acceptLanguage, ue);
+        return displayLocaleResolver.resolveEffectiveLocale(acceptLanguage, user);
     }
 
     @GetMapping

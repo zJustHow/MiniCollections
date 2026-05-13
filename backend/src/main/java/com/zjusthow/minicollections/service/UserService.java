@@ -5,6 +5,7 @@ import com.zjusthow.minicollections.entity.UserEntity;
 import com.zjusthow.minicollections.entity.UserIdentifierEntity;
 import com.zjusthow.minicollections.exception.IdentifierExistsException;
 import com.zjusthow.minicollections.exception.UserNotFoundException;
+import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.repository.GroupRepository;
 import com.zjusthow.minicollections.repository.UserIdentifierRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
@@ -45,18 +46,18 @@ public class UserService {
         final String normalizedPhone = (phone != null && !phone.isBlank()) ? phone.strip() : null;
 
         if (normalizedEmail == null && normalizedPhone == null) {
-            throw new IllegalArgumentException("Email or phone is required");
+            throw new ValidationException("Email or phone is required");
         }
 
         if (normalizedEmail != null) {
             if (identifierRepository.existsByTypeAndIdentifier("email", normalizedEmail)) {
-                throw new IdentifierExistsException("Email already registered");
+                throw new IdentifierExistsException("error.email_registered");
             }
         }
 
         if (normalizedPhone != null) {
             if (identifierRepository.existsByTypeAndIdentifier("phone", normalizedPhone)) {
-                throw new IdentifierExistsException("Phone already registered");
+                throw new IdentifierExistsException("error.phone_registered");
             }
         }
 
@@ -122,7 +123,7 @@ public class UserService {
     public UserProfileDto updatePassword(Long userId, String currentPassword, String newPassword) {
         UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         if (!passwordEncoder.matches(currentPassword, user.password())) {
-            throw new BadCredentialsException("Current password is incorrect");
+            throw new BadCredentialsException("error.password_incorrect");
         }
         userRepository.updatePasswordById(userId, passwordEncoder.encode(newPassword));
         return getProfile(userId);
@@ -137,7 +138,7 @@ public class UserService {
     public UserProfileDto updateIdentifier(Long userId, String type, String identifier) {
         final String normalized = identifier.strip().toLowerCase();
         if (identifierRepository.existsByTypeAndIdentifier(type, normalized)) {
-            throw new IdentifierExistsException(type + " already in use");
+            throw new IdentifierExistsException("error.identifier_in_use", type);
         }
         identifierRepository.findByUserIdAndType(userId, type)
                 .ifPresentOrElse(

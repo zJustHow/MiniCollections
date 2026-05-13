@@ -152,6 +152,11 @@ export const getBrandObjectsByBrandId = async (brandId) => {
   return handleResponse(response);
 };
 
+export const getGroupById = async (groupId) => {
+  const response = await fetch(`/groups/${groupId}`, { headers: authHeaders() });
+  return handleResponse(response);
+};
+
 export const getBrandObjectById = async (id) => {
   const response = await fetch(`/brands/objects/${id}`, { headers: authHeaders() });
   return handleResponse(response);

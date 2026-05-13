@@ -62,6 +62,10 @@ twilio:
     from-number: ${TWILIO_FROM_NUMBER:}
 
 app:
+  limits:
+    max-groups-per-user: ${MAX_GROUPS_PER_USER:100}
+    max-objects-per-group: ${MAX_OBJECTS_PER_GROUP:5000}
+    max-submissions-per-day: ${MAX_SUBMISSIONS_PER_DAY:1000}
   verification:
     otp-ttl-seconds: 300
     resend-cooldown-seconds: 60

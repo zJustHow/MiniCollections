@@ -1,6 +1,8 @@
 package com.zjusthow.minicollections.i18n;
 
 import com.zjusthow.minicollections.entity.UserEntity;
+import com.zjusthow.minicollections.service.UserService;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -8,6 +10,22 @@ import java.util.Locale;
 
 @Component
 public class DisplayLocaleResolver {
+
+    private final UserService userService;
+
+    public DisplayLocaleResolver(UserService userService) {
+        this.userService = userService;
+    }
+
+    public String resolveEffectiveLocale(String acceptLanguage, User user) {
+        UserEntity ue = null;
+        if (user != null) {
+            try {
+                ue = userService.getUserById(Long.parseLong(user.getUsername()));
+            } catch (Exception ignored) {}
+        }
+        return resolveEffectiveLocale(acceptLanguage, ue);
+    }
 
     public String resolveEffectiveLocale(String acceptLanguage, UserEntity user) {
         if (user != null && user.preferredLocale() != null && !user.preferredLocale().isBlank()) {
