@@ -1,8 +1,12 @@
 package com.zjusthow.minicollections.service;
 
+import com.zjusthow.minicollections.elasticsearch.BrandDocument;
+import com.zjusthow.minicollections.elasticsearch.BrandElasticsearchQueryService;
 import com.zjusthow.minicollections.elasticsearch.BrandObjectDocument;
 import com.zjusthow.minicollections.elasticsearch.BrandObjectElasticsearchQueryService;
 import com.zjusthow.minicollections.elasticsearch.BrandObjectSearchRepository;
+import com.zjusthow.minicollections.elasticsearch.BrandSearchRepository;
+import com.zjusthow.minicollections.entity.BrandEntity;
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.exception.BrandNotFoundException;
 import com.zjusthow.minicollections.exception.BrandObjectNotFoundException;
@@ -34,8 +38,10 @@ public class BrandService {
     private final BrandRepository brandRepository;
     private final BrandObjectRepository brandObjectRepository;
     private final DisplayLocaleResolver displayLocaleResolver;
-    private final BrandObjectElasticsearchQueryService elasticsearchQueryService;
+    private final BrandObjectElasticsearchQueryService brandObjectElasticsearchQueryService;
     private final BrandObjectSearchRepository brandObjectSearchRepository;
+    private final BrandElasticsearchQueryService brandElasticsearchQueryService;
+    private final BrandSearchRepository brandSearchRepository;
 
     @Value("${app.elasticsearch.enabled:true}")
     private boolean elasticsearchEnabled;
@@ -44,17 +50,25 @@ public class BrandService {
             BrandRepository brandRepository,
             BrandObjectRepository brandObjectRepository,
             DisplayLocaleResolver displayLocaleResolver,
-            @Autowired(required = false) BrandObjectElasticsearchQueryService elasticsearchQueryService,
-            @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository) {
+            @Autowired(required = false) BrandObjectElasticsearchQueryService brandObjectElasticsearchQueryService,
+            @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository,
+            @Autowired(required = false) BrandElasticsearchQueryService brandElasticsearchQueryService,
+            @Autowired(required = false) BrandSearchRepository brandSearchRepository) {
         this.brandRepository = brandRepository;
         this.brandObjectRepository = brandObjectRepository;
         this.displayLocaleResolver = displayLocaleResolver;
-        this.elasticsearchQueryService = elasticsearchQueryService;
+        this.brandObjectElasticsearchQueryService = brandObjectElasticsearchQueryService;
         this.brandObjectSearchRepository = brandObjectSearchRepository;
+        this.brandElasticsearchQueryService = brandElasticsearchQueryService;
+        this.brandSearchRepository = brandSearchRepository;
     }
 
     private boolean esEnabled() {
-        return elasticsearchEnabled && elasticsearchQueryService != null;
+        return elasticsearchEnabled && brandObjectElasticsearchQueryService != null;
+    }
+
+    private boolean brandEsEnabled() {
+        return elasticsearchEnabled && brandElasticsearchQueryService != null;
     }
 
     @Cacheable(
@@ -87,13 +101,32 @@ public class BrandService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Collections.emptyList();
         }
-        List<BrandDto> brandDtos = getBrands(effectiveLocale);
-        String lowerCaseKeyword = keyword.toLowerCase();
-        return brandDtos.stream()
-                .filter(brandDto ->
-                        brandDto.name().toLowerCase().contains(lowerCaseKeyword) ||
-                        brandDto.nameEn().toLowerCase().contains(lowerCaseKeyword) ||
-                        (brandDto.nameZh() != null && brandDto.nameZh().toLowerCase().contains(lowerCaseKeyword)))
+        String trimmed = keyword.trim();
+        boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+
+        if (brandEsEnabled()) {
+            try {
+                List<Long> ids = brandElasticsearchQueryService.searchIdsByKeyword(trimmed);
+                if (!ids.isEmpty()) {
+                    Set<Long> unique = new LinkedHashSet<>(ids);
+                    return unique.stream()
+                            .map(brandRepository::findById)
+                            .flatMap(java.util.Optional::stream)
+                            .map(e -> BrandDto.from(e, preferZh))
+                            .toList();
+                }
+            } catch (Exception e) {
+                log.warn("Elasticsearch brand search failed, using in-memory fallback: {}", e.getMessage());
+            }
+        }
+
+        // fallback: in-memory filter
+        String lowerCaseKeyword = trimmed.toLowerCase();
+        return getBrands(effectiveLocale).stream()
+                .filter(dto ->
+                        dto.name().toLowerCase().contains(lowerCaseKeyword) ||
+                        dto.nameEn().toLowerCase().contains(lowerCaseKeyword) ||
+                        (dto.nameZh() != null && dto.nameZh().toLowerCase().contains(lowerCaseKeyword)))
                 .toList();
     }
 
@@ -138,21 +171,21 @@ public class BrandService {
         List<BrandObjectEntity> entities;
         if (esEnabled()) {
             try {
-                List<Long> ids = elasticsearchQueryService.searchIdsByKeyword(trimmed);
+                List<Long> ids = brandObjectElasticsearchQueryService.searchIdsByKeyword(trimmed);
                 Set<Long> unique = new LinkedHashSet<>(ids);
                 entities = unique.stream()
                         .map(brandObjectRepository::findById)
                         .flatMap(java.util.Optional::stream)
                         .toList();
                 if (entities.isEmpty()) {
-                    entities = brandObjectRepository.searchByName(trimmed);
+                    entities = brandObjectRepository.searchByNameOrBrandName(trimmed);
                 }
             } catch (Exception e) {
                 log.warn("Elasticsearch search failed, using SQL fallback: {}", e.getMessage());
-                entities = brandObjectRepository.searchByName(trimmed);
+                entities = brandObjectRepository.searchByNameOrBrandName(trimmed);
             }
         } else {
-            entities = brandObjectRepository.searchByName(trimmed);
+            entities = brandObjectRepository.searchByNameOrBrandName(trimmed);
         }
         return entities.stream()
                 .map(e -> BrandObjectDto.from(e, preferZh, preferCny))
@@ -163,6 +196,9 @@ public class BrandService {
     public BrandDto createBrand(BrandBody req, String effectiveLocale) {
         var entity = new com.zjusthow.minicollections.entity.BrandEntity(null, req.nameEn(), req.nameZh(), req.imageUrl());
         var saved = brandRepository.save(entity);
+        if (brandEsEnabled()) {
+            brandSearchRepository.save(BrandDocument.from(saved));
+        }
         return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
@@ -171,6 +207,9 @@ public class BrandService {
         brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
         var updated = new com.zjusthow.minicollections.entity.BrandEntity(id, req.nameEn(), req.nameZh(), req.imageUrl());
         var saved = brandRepository.save(updated);
+        if (brandEsEnabled()) {
+            brandSearchRepository.save(BrandDocument.from(saved));
+        }
         return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
@@ -180,6 +219,9 @@ public class BrandService {
             throw new BrandNotFoundException();
         }
         brandRepository.deleteById(id);
+        if (brandEsEnabled()) {
+            brandSearchRepository.deleteById(id);
+        }
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)
@@ -191,7 +233,11 @@ public class BrandService {
         );
         BrandObjectEntity saved = brandObjectRepository.save(entity);
         if (esEnabled()) {
-            brandObjectSearchRepository.save(BrandObjectDocument.from(saved));
+            BrandEntity brand = brandRepository.findById(brandId).orElse(null);
+            brandObjectSearchRepository.save(BrandObjectDocument.from(
+                    saved,
+                    brand != null ? brand.nameEn() : null,
+                    brand != null ? brand.nameZh() : null));
         }
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
         boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
@@ -209,7 +255,11 @@ public class BrandService {
         );
         BrandObjectEntity saved = brandObjectRepository.save(updated);
         if (esEnabled()) {
-            brandObjectSearchRepository.save(BrandObjectDocument.from(saved));
+            BrandEntity brand = brandRepository.findById(existing.brandId()).orElse(null);
+            brandObjectSearchRepository.save(BrandObjectDocument.from(
+                    saved,
+                    brand != null ? brand.nameEn() : null,
+                    brand != null ? brand.nameZh() : null));
         }
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
         boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);

@@ -14,13 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class BrandObjectElasticsearchQueryService {
+public class BrandElasticsearchQueryService {
 
-    private static final Logger log = LoggerFactory.getLogger(BrandObjectElasticsearchQueryService.class);
+    private static final Logger log = LoggerFactory.getLogger(BrandElasticsearchQueryService.class);
 
     private final ElasticsearchOperations elasticsearchOperations;
 
-    public BrandObjectElasticsearchQueryService(ElasticsearchOperations elasticsearchOperations) {
+    public BrandElasticsearchQueryService(ElasticsearchOperations elasticsearchOperations) {
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
@@ -32,22 +32,22 @@ public class BrandObjectElasticsearchQueryService {
         NativeQuery nativeQuery = NativeQuery.builder()
                 .withQuery(sq -> sq.multiMatch(m -> m
                         .query(q)
-                        .fields("brand_name_en^3", "brand_name_zh^3", "name_en^2", "name_zh^2", "category_en", "category_zh", "scale")
+                        .fields("name_en^2", "name_zh^2")
                         .type(TextQueryType.BestFields)
                         .operator(Operator.Or)))
-                .withMaxResults(10000)
+                .withMaxResults(1000)
                 .build();
         try {
-            SearchHits<BrandObjectDocument> hits = elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
+            SearchHits<BrandDocument> hits = elasticsearchOperations.search(nativeQuery, BrandDocument.class);
             List<Long> ids = new ArrayList<>();
-            for (SearchHit<BrandObjectDocument> hit : hits) {
+            for (SearchHit<BrandDocument> hit : hits) {
                 if (hit.getContent() != null && hit.getContent().id() != null) {
                     ids.add(hit.getContent().id());
                 }
             }
             return ids;
         } catch (Exception e) {
-            log.warn("Elasticsearch query failed: {}", e.getMessage());
+            log.warn("Elasticsearch brand query failed: {}", e.getMessage());
             throw e;
         }
     }

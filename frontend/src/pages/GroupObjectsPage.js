@@ -543,7 +543,7 @@ export default function GroupObjectsPage() {
                 if (v === "") setSearchKeyword("");
               }}
               onSearch={(v) => setSearchKeyword((v ?? "").trim())}
-              style={{ width: screens.md ? 200 : "100%" }}
+              style={{ width: screens.md ? 260 : "100%" }}
             />
           </div>
 

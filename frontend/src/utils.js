@@ -170,6 +170,14 @@ export const searchBrandObjects = async (keyword) => {
   return handleResponse(response);
 };
 
+export const searchBrandsCombined = async (keyword) => {
+  const [brands, objects] = await Promise.all([
+    searchBrands(keyword),
+    searchBrandObjects(keyword),
+  ]);
+  return { brands, objects };
+};
+
 export const getUserObjects = async (groupId) => {
   const response = await fetch(`/groups/${groupId}/objects`, { headers: authHeaders() });
   return handleResponse(response);

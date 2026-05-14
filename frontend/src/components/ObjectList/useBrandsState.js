@@ -1,15 +1,19 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { App } from "antd";
-import { getBrands, searchBrands } from "../../utils";
+import { getBrands, searchBrandsCombined } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 
 export default function useBrandsState() {
   const { message } = App.useApp();
   const { t } = useLocale();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState([]);
   const [loadingBrands, setLoadingBrands] = useState(false);
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchResultBrands, setSearchResultBrands] = useState([]);
+  const [searchResultObjects, setSearchResultObjects] = useState([]);
 
   // Admin: create brand modal
   const [brandModalOpen, setBrandModalOpen] = useState(false);
@@ -26,8 +30,24 @@ export default function useBrandsState() {
     }
   };
 
+  const doSearch = useCallback(async (keyword) => {
+    setLoadingBrands(true);
+    try {
+      const { brands: resultBrands, objects: resultObjects } = await searchBrandsCombined(keyword);
+      setSearchResultBrands(resultBrands);
+      setSearchResultObjects(resultObjects);
+      setSearchActive(true);
+    } catch (err) {
+      message.error(err.message || t("failedToSearchBrands"));
+    } finally {
+      setLoadingBrands(false);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     fetchBrands();
+    const q = searchParams.get("q");
+    if (q) doSearch(q);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBrandClick = (brand) => {
@@ -36,15 +56,15 @@ export default function useBrandsState() {
 
   const handleBrandSearch = async (value) => {
     const keyword = value.trim();
-    setLoadingBrands(true);
-    try {
-      const data = keyword ? await searchBrands(keyword) : await getBrands();
-      setBrands(data);
-    } catch (err) {
-      message.error(err.message || t("failedToSearchBrands"));
-    } finally {
-      setLoadingBrands(false);
+    if (!keyword) {
+      setSearchParams({}, { replace: true });
+      setSearchActive(false);
+      setSearchResultBrands([]);
+      setSearchResultObjects([]);
+      return;
     }
+    setSearchParams({ q: keyword }, { replace: true });
+    await doSearch(keyword);
   };
 
   return {
@@ -56,5 +76,9 @@ export default function useBrandsState() {
     refreshBrands: fetchBrands,
     brandModalOpen,
     setBrandModalOpen,
+    searchActive,
+    searchResultBrands,
+    searchResultObjects,
+    searchValue: searchParams.get("q") || "",
   };
 }

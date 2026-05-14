@@ -10,6 +10,7 @@ import AdminPage from "./pages/AdminPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import ProfilePage from "./pages/ProfilePage";
 import BrandObjectsPage from "./pages/BrandObjectsPage";
+import BrandObjectDetailPage from "./pages/BrandObjectDetailPage";
 import GroupObjectsPage from "./pages/GroupObjectsPage";
 import { getMe, logout } from "./utils";
 import { useLocale } from "./LocaleContext";
@@ -152,6 +153,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
           maxHeight: "calc(100% - 64px)",
           overflowY: "auto",
           overflowX: "hidden",
+          scrollbarGutter: "stable",
         }}
       >
         <Outlet />
@@ -258,6 +260,10 @@ export default function App() {
         <Route
           path="brands/:brandId"
           element={<BrandObjectsPage isAdmin={isAdmin && authed} authed={authed} />}
+        />
+        <Route
+          path="brands/:brandId/objects/:objectId"
+          element={<BrandObjectDetailPage isAdmin={isAdmin && authed} authed={authed} />}
         />
         <Route
           path="groups/:groupId"

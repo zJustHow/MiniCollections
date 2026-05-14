@@ -1,0 +1,23 @@
+{
+  "analysis": {
+    "filter": {
+      "brand_wdg": {
+        "type": "word_delimiter_graph",
+        "catenate_all": true,
+        "preserve_original": true
+      }
+    },
+    "analyzer": {
+      "brand_name_index": {
+        "type": "custom",
+        "tokenizer": "keyword",
+        "filter": ["lowercase", "brand_wdg"]
+      },
+      "brand_name_search": {
+        "type": "custom",
+        "tokenizer": "whitespace",
+        "filter": ["lowercase"]
+      }
+    }
+  }
+}

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 
 public record BrandObjectDto(
         Long id,
+        Long brandId,
         String name,
         String nameEn,
         String nameZh,
@@ -29,6 +30,7 @@ public record BrandObjectDto(
                 entity.releasePriceCny(), entity.releasePriceUsd(), preferCny);
         return new BrandObjectDto(
                 entity.id(),
+                entity.brandId(),
                 name,
                 entity.nameEn(),
                 entity.nameZh(),

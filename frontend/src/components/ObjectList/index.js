@@ -15,6 +15,10 @@ export default function ObjectList({ activeTab, isAdmin }) {
     refreshBrands,
     brandModalOpen,
     setBrandModalOpen,
+    searchActive,
+    searchResultBrands,
+    searchResultObjects,
+    searchValue,
     groups,
     loadingGroups,
     handleGroupClick,
@@ -38,6 +42,10 @@ export default function ObjectList({ activeTab, isAdmin }) {
           onBrandClick={handleBrandClick}
           isAdmin={isAdmin}
           onCreateBrand={() => setBrandModalOpen(true)}
+          searchActive={searchActive}
+          searchResultBrands={searchResultBrands}
+          searchResultObjects={searchResultObjects}
+          searchValue={searchValue}
         />
       ) : (
         <GroupsTab

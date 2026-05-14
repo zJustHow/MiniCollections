@@ -104,7 +104,11 @@ public class SubmissionService {
             );
             BrandObjectEntity saved = brandObjectRepository.save(brandObject);
             if (elasticsearchEnabled && brandObjectSearchRepository != null) {
-                brandObjectSearchRepository.save(BrandObjectDocument.from(saved));
+                var brand = brandRepository.findById(body.brandId()).orElse(null);
+                brandObjectSearchRepository.save(BrandObjectDocument.from(
+                        saved,
+                        brand != null ? brand.nameEn() : null,
+                        brand != null ? brand.nameZh() : null));
             }
         }
 
