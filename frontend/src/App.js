@@ -257,7 +257,7 @@ export default function App() {
         />
         <Route
           path="brands/:brandId"
-          element={authed ? <BrandObjectsPage isAdmin={isAdmin} /> : <Navigate to="/login" replace />}
+          element={<BrandObjectsPage isAdmin={isAdmin && authed} authed={authed} />}
         />
         <Route
           path="groups/:groupId"

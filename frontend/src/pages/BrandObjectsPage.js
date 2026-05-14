@@ -36,7 +36,7 @@ function DetailRow({ label, value }) {
   );
 }
 
-export default function BrandObjectsPage({ isAdmin }) {
+export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const { brandId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
@@ -303,7 +303,7 @@ export default function BrandObjectsPage({ isAdmin }) {
                 type="primary"
                 block
                 icon={<PlusOutlined />}
-                onClick={() => openAddToGroup(detailItem)}
+                onClick={() => authed ? openAddToGroup(detailItem) : navigate("/login")}
               >
                 {t("addToGroup")}
               </Button>
@@ -388,30 +388,32 @@ export default function BrandObjectsPage({ isAdmin }) {
             </div>
           </Spin>
 
-          <div
-            style={{
-              textAlign: "center",
-              marginTop: 24,
-              paddingTop: 12,
-              borderTop: "1px solid rgba(184,182,176,0.2)",
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setSubmitModalVisible(true)}
+          {authed && (
+            <div
               style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                color: "var(--neu-text-2)",
-                fontSize: 13,
-                textDecoration: "underline",
-                padding: 0,
+                textAlign: "center",
+                marginTop: 24,
+                paddingTop: 12,
+                borderTop: "1px solid rgba(184,182,176,0.2)",
               }}
             >
-              {t("reportFeedback")}
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setSubmitModalVisible(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "var(--neu-text-2)",
+                  fontSize: 13,
+                  textDecoration: "underline",
+                  padding: 0,
+                }}
+              >
+                {t("reportFeedback")}
+              </button>
+            </div>
+          )}
         </>
       )}
 

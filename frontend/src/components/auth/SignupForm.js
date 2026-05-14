@@ -1,5 +1,6 @@
 import {
-  App, Button, Form, Input, Radio, Select, Modal } from "antd";
+  App, Button, Form, Input, Radio, Select, Modal,
+} from "antd";
 import { useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { signup, COUNTRIES } from "../../utils";
@@ -92,7 +93,7 @@ function SignupForm({ linkMode = false }) {
           <Form.Item
             style={{ display: registerType === "phone" ? "block" : "none", marginBottom: 24 }}
           >
-            <Input.Group compact>
+            <div style={{ display: "flex", gap: 8 }}>
               <Form.Item name="countryCode" noStyle>
                 <Select style={{ width: 110 }} optionLabelProp="label">
                   {COUNTRIES.map((c) => (
@@ -102,20 +103,19 @@ function SignupForm({ linkMode = false }) {
                   ))}
                 </Select>
               </Form.Item>
-              <Form.Item
-                name="phoneNumber"
-                noStyle
-                rules={registerType === "phone" ? [
-                  { required: true, message: t("phoneRequired") },
-                  { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
-                ] : []}
-              >
-                <Input
-                  style={{ width: "calc(100% - 110px)" }}
-                  placeholder={t("phoneNumber")}
-                />
-              </Form.Item>
-            </Input.Group>
+              <div style={{ flex: 1 }}>
+                <Form.Item
+                  name="phoneNumber"
+                  noStyle
+                  rules={registerType === "phone" ? [
+                    { required: true, message: t("phoneRequired") },
+                    { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
+                  ] : []}
+                >
+                  <Input style={{ width: "100%" }} placeholder={t("phoneNumber")} />
+                </Form.Item>
+              </div>
+            </div>
           </Form.Item>
 
           <Form.Item

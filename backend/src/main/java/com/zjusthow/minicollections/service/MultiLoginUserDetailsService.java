@@ -34,8 +34,11 @@ public class MultiLoginUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
         UserIdentifierEntity ident = identifierRepo.findByIdentifier(identifier)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return loadUserById(ident.userId());
+    }
 
-        UserEntity user = userRepo.findById(ident.userId())
+    public UserDetails loadUserById(Long userId) throws UsernameNotFoundException {
+        UserEntity user = userRepo.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         List<SimpleGrantedAuthority> authorities = jdbc

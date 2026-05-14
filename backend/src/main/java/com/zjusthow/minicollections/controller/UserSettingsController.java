@@ -2,6 +2,7 @@ package com.zjusthow.minicollections.controller;
 
 import com.zjusthow.minicollections.model.*;
 import com.zjusthow.minicollections.service.UserService;
+import com.zjusthow.minicollections.service.VerificationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -13,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserSettingsController {
 
     private final UserService userService;
+    private final VerificationService verificationService;
 
-    public UserSettingsController(UserService userService) {
+    public UserSettingsController(UserService userService, VerificationService verificationService) {
         this.userService = userService;
+        this.verificationService = verificationService;
     }
 
     @GetMapping("/me")
@@ -45,6 +48,7 @@ public class UserSettingsController {
             @AuthenticationPrincipal User user,
             @RequestBody @Valid IdentifierUpdateBody body) {
         Long userId = Long.parseLong(user.getUsername());
+        verificationService.verify(body.identifier(), body.code());
         return ResponseEntity.ok(userService.updateIdentifier(userId, body.type(), body.identifier()));
     }
 

@@ -23,6 +23,7 @@ import { useNavigate } from "react-router-dom";
 import {
   COUNTRIES,
   parsePhone,
+  sendCode,
   updateIdentifier,
   updateLocale,
   updatePassword,
@@ -75,6 +76,8 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   const [nameLoading, setNameLoading] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
+  const [emailCodeLoading, setEmailCodeLoading] = useState(false);
+  const [emailCodeCountdown, setEmailCodeCountdown] = useState(0);
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [localeLoading, setLocaleLoading] = useState(false);
 
@@ -124,11 +127,31 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
     }
   };
 
+  const handleEmailSendCode = async () => {
+    const email = emailForm.getFieldValue("email");
+    if (!email) { emailForm.validateFields(["email"]); return; }
+    setEmailCodeLoading(true);
+    try {
+      await sendCode(email, "EMAIL");
+      message.success(t("codeSent"));
+      setEmailCodeCountdown(60);
+      const timer = setInterval(() => {
+        setEmailCodeCountdown((c) => { if (c <= 1) { clearInterval(timer); return 0; } return c - 1; });
+      }, 1000);
+    } catch (err) {
+      message.error(err.message || t("sendCodeFailed"));
+    } finally {
+      setEmailCodeLoading(false);
+    }
+  };
+
   const handleEmailSave = async (values) => {
     setEmailLoading(true);
     try {
-      const updated = await updateIdentifier({ type: "email", identifier: values.email });
+      const updated = await updateIdentifier({ type: "email", identifier: values.email, code: values.emailCode });
       onProfileChange(updated);
+      emailForm.resetFields(["emailCode"]);
+      setEmailCodeCountdown(0);
       message.success(t("emailUpdated"));
     } catch (err) {
       message.error(err.message || t("emailUpdateFailed"));
@@ -177,7 +200,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
           justifyContent: "space-between",
           paddingLeft: 24,
           paddingRight: 24,
-          gap: 16,
+          position: "relative",
         }}
       >
         <Button
@@ -191,6 +214,9 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             fontWeight: 700,
             letterSpacing: 1,
             color: "var(--neu-text)",
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
           }}
         >
           {t("profileTitle")}
@@ -354,9 +380,28 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   { required: true, message: t("emailRequired") },
                   { type: "email", message: t("emailInvalid") },
                 ]}
-                style={{ marginBottom: 12 }}
+                style={{ marginBottom: 10 }}
               >
                 <Input prefix={<MailOutlined />} placeholder={t("emailAddress")} />
+              </Form.Item>
+              <Form.Item style={{ marginBottom: 12 }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <Form.Item
+                    name="emailCode"
+                    noStyle
+                    rules={[{ required: true, message: t("codeRequired") }]}
+                  >
+                    <Input style={{ width: "100%" }} placeholder={t("verificationCode")} />
+                  </Form.Item>
+                  <Button
+                    loading={emailCodeLoading}
+                    onClick={emailCodeCountdown > 0 ? undefined : handleEmailSendCode}
+                    className={emailCodeCountdown > 0 ? "btn-counting-down" : ""}
+                    style={{ flexShrink: 0 }}
+                  >
+                    {emailCodeCountdown > 0 ? `${emailCodeCountdown}s` : t("sendCode")}
+                  </Button>
+                </div>
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
                 <Button type="primary" htmlType="submit" loading={emailLoading} style={{ width: "100%" }}>
@@ -377,7 +422,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               layout="vertical"
             >
               <Form.Item style={{ marginBottom: 12 }}>
-                <Input.Group compact>
+                <div style={{ display: "flex", gap: 8 }}>
                   <Form.Item name="countryCode" noStyle>
                     <Select style={{ width: 110 }} optionLabelProp="label">
                       {COUNTRIES.map((c) => (
@@ -387,17 +432,19 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                       ))}
                     </Select>
                   </Form.Item>
-                  <Form.Item
-                    name="phoneNumber"
-                    noStyle
-                    rules={[
-                      { required: true, message: t("phoneRequired") },
-                      { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
-                    ]}
-                  >
-                    <Input style={{ width: "calc(100% - 110px)" }} placeholder={t("phoneNumber")} />
-                  </Form.Item>
-                </Input.Group>
+                  <div style={{ flex: 1 }}>
+                    <Form.Item
+                      name="phoneNumber"
+                      noStyle
+                      rules={[
+                        { required: true, message: t("phoneRequired") },
+                        { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
+                      ]}
+                    >
+                      <Input style={{ width: "100%" }} placeholder={t("phoneNumber")} />
+                    </Form.Item>
+                  </div>
+                </div>
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
                 <Button type="primary" htmlType="submit" loading={phoneLoading} style={{ width: "100%" }}>

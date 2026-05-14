@@ -4,6 +4,8 @@ import com.zjusthow.minicollections.service.JwtService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,10 +31,11 @@ public class AuthController {
                 ? rawPhone.strip()
                 : (rawEmail != null ? rawEmail.toLowerCase().strip() : null);
         String password = body.get("password");
-        authenticationManager.authenticate(
+        Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(identifier, password)
         );
-        String token = jwtService.generate(identifier);
+        String userId = ((UserDetails) auth.getPrincipal()).getUsername();
+        String token = jwtService.generate(userId);
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

@@ -5,5 +5,6 @@ import jakarta.validation.constraints.Pattern;
 
 public record IdentifierUpdateBody(
         @NotBlank @Pattern(regexp = "email|phone") String type,
-        @NotBlank String identifier
+        @NotBlank String identifier,
+        @NotBlank String code
 ) {}

@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
 
     private Locale locale(String acceptLanguage, User user) {
         String tag = displayLocaleResolver.resolveEffectiveLocale(acceptLanguage, user);
-        return Locale.forLanguageTag(tag.replace('_', '-'));
+        return Locale.forLanguageTag(tag);
     }
 
     private String msg(String key, String lang, User user, Object... args) {
