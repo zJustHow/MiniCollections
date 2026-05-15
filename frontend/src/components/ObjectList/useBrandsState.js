@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import useSearchParam from "../../hooks/useSearchParam";
 import { App } from "antd";
 import { getBrands, searchBrandsCombined } from "../../utils";
 import { useLocale } from "../../LocaleContext";
@@ -9,7 +10,7 @@ export default function useBrandsState() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchValue, setSearchParam] = useSearchParam();
   const [brands, setBrands] = useState([]);
   const [loadingBrands, setLoadingBrands] = useState(false);
   const [searchActive, setSearchActive] = useState(false);
@@ -48,8 +49,7 @@ export default function useBrandsState() {
   useEffect(() => {
     fetchBrands();
     if (location.pathname === "/") {
-      const q = searchParams.get("q");
-      if (q) doSearch(q);
+      if (searchValue) doSearch(searchValue);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -60,13 +60,13 @@ export default function useBrandsState() {
   const handleBrandSearch = async (value) => {
     const keyword = value.trim();
     if (!keyword) {
-      setSearchParams({}, { replace: true });
+      setSearchParam("");
       setSearchActive(false);
       setSearchResultBrands([]);
       setSearchResultObjects([]);
       return;
     }
-    setSearchParams({ q: keyword }, { replace: true });
+    setSearchParam(keyword);
     await doSearch(keyword);
   };
 
@@ -82,6 +82,6 @@ export default function useBrandsState() {
     searchActive,
     searchResultBrands,
     searchResultObjects,
-    searchValue: searchParams.get("q") || "",
+    searchValue,
   };
 }

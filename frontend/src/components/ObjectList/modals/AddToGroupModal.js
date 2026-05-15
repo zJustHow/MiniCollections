@@ -1,7 +1,6 @@
-import {
-  App, DatePicker, Form, Input, InputNumber, Modal, Select, Upload } from "antd";
-import { uploadImage } from "../../../utils";
+import { DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
 import { useLocale } from "../../../LocaleContext";
+import ImageUploadField from "../../ImageUploadField";
 
 export default function AddToGroupModal({ visible,
   onOk,
@@ -13,7 +12,6 @@ export default function AddToGroupModal({ visible,
   customImageData,
   onImageChange,
 }) {
-  const { message } = App.useApp();
   const { t } = useLocale();
   return (
     <Modal
@@ -33,34 +31,7 @@ export default function AddToGroupModal({ visible,
           <Input />
         </Form.Item>
         <Form.Item label={t("image")}>
-          <Upload
-            listType="picture-card"
-            showUploadList={false}
-            beforeUpload={async (file) => {
-              try {
-                const url = await uploadImage(file);
-                onImageChange(url);
-              } catch (e) {
-                message.error(e.message || t("uploadFailed"));
-              }
-              return false;
-            }}
-          >
-            <div style={{ width: 120 }}>
-              <img
-                src={customImageData || selectedBrandObject?.image_url}
-                alt="preview"
-                style={{
-                  width: "100%",
-                  maxHeight: 120,
-                  objectFit: "contain",
-                  display: "block",
-                  marginBottom: 8,
-                }}
-              />
-              <div style={{ fontSize: 12 }}>{t("selectImage")}</div>
-            </div>
-          </Upload>
+          <ImageUploadField value={customImageData || selectedBrandObject?.image_url} onChange={onImageChange} />
         </Form.Item>
         <Form.Item label={t("purchasePrice")} name="purchasePrice">
           <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode controls={false} />

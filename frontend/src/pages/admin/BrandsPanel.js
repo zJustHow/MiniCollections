@@ -1,0 +1,102 @@
+import { App, Button, Popconfirm, Space, Table } from "antd";
+import { DeleteOutlined, EditOutlined, PlusOutlined, TagsOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import { adminDeleteBrand } from "../../utils";
+import { useLocale } from "../../LocaleContext";
+import BrandModal from "../../components/ObjectList/modals/BrandModal";
+import BrandObjectsDrawer from "./BrandObjectsDrawer";
+
+export default function BrandsPanel({ brands, onBrandsChanged }) {
+  const { message } = App.useApp();
+  const { t } = useLocale();
+  const [brandModalOpen, setBrandModalOpen] = useState(false);
+  const [editingBrand, setEditingBrand] = useState(null);
+  const [selectedBrand, setSelectedBrand] = useState(null);
+
+  const handleDeleteBrand = async (brand) => {
+    try {
+      await adminDeleteBrand(brand.id);
+      message.success(t("brandDeleted"));
+      onBrandsChanged();
+    } catch (err) {
+      message.error(err?.message || t("failedToDeleteBrand"));
+    }
+  };
+
+  const columns = [
+    { title: "#", dataIndex: "id", width: 60 },
+    {
+      title: t("image"),
+      dataIndex: "image_url",
+      width: 60,
+      render: (url) => url
+        ? <img src={url} alt="" style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 6 }} />
+        : <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>—</span>,
+    },
+    { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },
+    { title: t("nameZh"), dataIndex: "name_zh", ellipsis: true, width: 140 },
+    {
+      title: "",
+      key: "actions",
+      width: 130,
+      render: (_, record) => (
+        <Space size={4}>
+          <Button
+            size="small"
+            icon={<TagsOutlined />}
+            onClick={() => setSelectedBrand(record)}
+          >
+            {t("viewObjects")}
+          </Button>
+          <Button
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => { setEditingBrand(record); setBrandModalOpen(true); }}
+          />
+          <Popconfirm
+            title={t("deleteBrandTitle")}
+            description={t("deleteBrandContent").replace("{name}", record.name_en)}
+            onConfirm={() => handleDeleteBrand(record)}
+            okText={t("delete")}
+            okButtonProps={{ danger: true }}
+            cancelText={t("cancel")}
+          >
+            <Button size="small" danger icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => { setEditingBrand(null); setBrandModalOpen(true); }}
+        >
+          {t("addBrand")}
+        </Button>
+      </div>
+      <Table
+        rowKey="id"
+        dataSource={brands}
+        columns={columns}
+        size="middle"
+        pagination={{ pageSize: 20, showSizeChanger: false }}
+      />
+      <BrandModal
+        open={brandModalOpen}
+        brand={editingBrand}
+        onClose={() => { setBrandModalOpen(false); setEditingBrand(null); }}
+        onSuccess={() => { onBrandsChanged(); }}
+      />
+      <BrandObjectsDrawer
+        brand={selectedBrand}
+        onClose={() => setSelectedBrand(null)}
+        onBrandObjectsChanged={() => {}}
+      />
+    </>
+  );
+}

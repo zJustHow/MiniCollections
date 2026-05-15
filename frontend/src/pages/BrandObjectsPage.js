@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useSearchParam from "../hooks/useSearchParam";
 import { App, Button, Card, Grid, Input, Popconfirm, Spin } from "antd";
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import CardCover from "../components/ObjectList/CardCover";
@@ -11,6 +12,7 @@ import { useHeader } from "../HeaderContext";
 import {
   getBrandByBrandId,
   getBrandObjectsByBrandId,
+  searchBrandObjectsByBrandId,
   adminDeleteBrand,
 } from "../utils";
 
@@ -27,12 +29,13 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const screens = useBreakpoint();
   const cols = screens.lg ? 4 : screens.md ? 3 : 2;
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchValue, setSearchParam] = useSearchParam();
   const [brand, setBrand] = useState(location.state?.brand ?? null);
   const [brandObjects, setBrandObjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState(() => searchParams.get("q") || "");
-  const [draftQuery, setDraftQuery] = useState(() => searchParams.get("q") || "");
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [draftQuery, setDraftQuery] = useState(searchValue);
 
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
 
@@ -54,6 +57,19 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     }
   }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const doSearch = useCallback(async (keyword) => {
+    setLoading(true);
+    try {
+      const data = await searchBrandObjectsByBrandId(brandId, keyword);
+      setSearchResults(Array.isArray(data) ? data : []);
+      setSearchActive(true);
+    } catch (err) {
+      message.error(err.message || t("failedToSearchBrands"));
+    } finally {
+      setLoading(false);
+    }
+  }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
+
   useEffect(() => {
     if (!brand) {
       getBrandByBrandId(brandId)
@@ -61,6 +77,10 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         .catch((err) => message.error(err.message || t("failedToLoadBrands")));
     }
     fetchBrandObjects();
+    if (searchValue) {
+      setDraftQuery(searchValue);
+      doSearch(searchValue);
+    }
   }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdminDeleteBrand = async () => {
@@ -108,18 +128,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     return () => setHeaderSlot(null);
   }, [brand, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filteredObjects = searchKeyword.trim()
-    ? brandObjects.filter((bo) => {
-        const kw = searchKeyword.trim().toLowerCase();
-        return (
-          (bo.name || "").toLowerCase().includes(kw) ||
-          (bo.name_en || "").toLowerCase().includes(kw) ||
-          (bo.name_zh || "").toLowerCase().includes(kw)
-        );
-      })
-    : brandObjects;
-
-  const listData = isAdmin ? [{ id: "__add__" }, ...filteredObjects] : filteredObjects;
+  const displayObjects = searchActive ? searchResults : brandObjects;
+  const listData = isAdmin ? [{ id: "__add__" }, ...displayObjects] : displayObjects;
 
   return (
     <div>
@@ -133,15 +143,21 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 const v = e.target.value;
                 setDraftQuery(v);
                 if (v === "") {
-                  setSearchKeyword("");
-                  setSearchParams({}, { replace: true });
+                  setSearchActive(false);
+                  setSearchResults([]);
+                  setSearchParam("");
                 }
               }}
               onSearch={(v) => {
                 const keyword = (v ?? "").trim();
-                setSearchKeyword(keyword);
-                if (keyword) setSearchParams({ q: keyword }, { replace: true });
-                else setSearchParams({}, { replace: true });
+                if (keyword) {
+                  setSearchParam(keyword);
+                  doSearch(keyword);
+                } else {
+                  setSearchActive(false);
+                  setSearchResults([]);
+                  setSearchParam("");
+                }
               }}
               style={{ width: screens.md ? 260 : "100%" }}
             />

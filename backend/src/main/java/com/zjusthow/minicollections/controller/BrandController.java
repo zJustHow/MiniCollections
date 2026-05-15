@@ -64,6 +64,16 @@ public class BrandController {
                 brandId, effectiveLocale(acceptLanguage, user)));
     }
 
+    @GetMapping("/{brandId}/objects/search")
+    public ResponseEntity<List<BrandObjectDto>> searchBrandObjectsByBrandId(
+            @PathVariable Long brandId,
+            @RequestParam String keyword,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(brandService.searchBrandObjectsByBrandId(
+                keyword, brandId, effectiveLocale(acceptLanguage, user)));
+    }
+
     @GetMapping("/objects/search")
     public ResponseEntity<List<BrandObjectDto>> searchBrandObjects(
             @RequestParam String keyword,

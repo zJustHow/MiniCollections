@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import useSearchParam from "../../hooks/useSearchParam";
 import { App, Form } from "antd";
 import { getGroups, searchGroups, createGroup } from "../../utils";
 import { useLocale } from "../../LocaleContext";
@@ -9,7 +10,7 @@ export default function useGroupsState() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchValue, setSearchParam] = useSearchParam();
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
   const [groupSearchActive, setGroupSearchActive] = useState(false);
@@ -27,7 +28,7 @@ export default function useGroupsState() {
     const fetchGroups = async () => {
       setLoadingGroups(true);
       try {
-        const q = searchParams.get("q");
+        const q = searchValue;
         if (q) {
           const data = await searchGroups(q);
           setGroupSearchActive(true);
@@ -53,8 +54,7 @@ export default function useGroupsState() {
 
   const handleGroupSearch = async (value) => {
     const keyword = value.trim();
-    if (keyword) setSearchParams({ q: keyword }, { replace: true });
-    else setSearchParams({}, { replace: true });
+    setSearchParam(keyword);
     setLoadingGroups(true);
     try {
       if (keyword) {
@@ -106,7 +106,7 @@ export default function useGroupsState() {
     loadingGroups,
     handleGroupClick,
     handleGroupSearch,
-    searchValue: searchParams.get("q") || "",
+    searchValue,
     groupSearchActive,
     groupSearchResultGroups,
     groupSearchResultObjects,

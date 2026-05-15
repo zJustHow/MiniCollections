@@ -192,6 +192,38 @@ public class BrandService {
                 .toList();
     }
 
+    public List<BrandObjectDto> searchBrandObjectsByBrandId(String keyword, long brandId, String effectiveLocale) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        String trimmed = keyword.trim();
+        boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
+
+        List<BrandObjectEntity> entities;
+        if (esEnabled()) {
+            try {
+                List<Long> ids = brandObjectElasticsearchQueryService.searchIdsByKeywordAndBrandId(trimmed, brandId);
+                Set<Long> unique = new LinkedHashSet<>(ids);
+                entities = unique.stream()
+                        .map(brandObjectRepository::findById)
+                        .flatMap(java.util.Optional::stream)
+                        .toList();
+                if (entities.isEmpty()) {
+                    entities = brandObjectRepository.searchByNameWithinBrand(trimmed, brandId);
+                }
+            } catch (Exception e) {
+                log.warn("Elasticsearch brand-scoped search failed, using SQL fallback: {}", e.getMessage());
+                entities = brandObjectRepository.searchByNameWithinBrand(trimmed, brandId);
+            }
+        } else {
+            entities = brandObjectRepository.searchByNameWithinBrand(trimmed, brandId);
+        }
+        return entities.stream()
+                .map(e -> BrandObjectDto.from(e, preferZh, preferCny))
+                .toList();
+    }
+
     @CacheEvict(value = "brands", allEntries = true)
     public BrandDto createBrand(BrandBody req, String effectiveLocale) {
         var entity = new com.zjusthow.minicollections.entity.BrandEntity(null, req.nameEn(), req.nameZh(), req.imageUrl());

@@ -37,6 +37,30 @@ public class BrandObjectElasticsearchQueryService {
                         .operator(Operator.Or)))
                 .withMaxResults(10000)
                 .build();
+        return executeSearch(nativeQuery);
+    }
+
+    public List<Long> searchIdsByKeywordAndBrandId(String keyword, Long brandId) {
+        if (keyword == null || keyword.isBlank()) {
+            return List.of();
+        }
+        String q = keyword.trim();
+        NativeQuery nativeQuery = NativeQuery.builder()
+                .withQuery(sq -> sq.bool(b -> b
+                        .must(m -> m.multiMatch(mm -> mm
+                                .query(q)
+                                .fields("name_en^2", "name_zh^2", "category_en", "category_zh", "scale")
+                                .type(TextQueryType.BestFields)
+                                .operator(Operator.Or)))
+                        .filter(f -> f.term(t -> t
+                                .field("brand_id")
+                                .value(brandId)))))
+                .withMaxResults(10000)
+                .build();
+        return executeSearch(nativeQuery);
+    }
+
+    private List<Long> executeSearch(NativeQuery nativeQuery) {
         try {
             SearchHits<BrandObjectDocument> hits = elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
             List<Long> ids = new ArrayList<>();

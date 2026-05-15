@@ -1,18 +1,40 @@
-import {
-  App, DatePicker, Form, Input, InputNumber, Modal, Upload } from "antd";
-import { PictureOutlined } from "@ant-design/icons";
+import { DatePicker, Form, Input, InputNumber, Modal } from "antd";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import { adminCreateBrandObject, adminUpdateBrandObject, uploadImage } from "../../../utils";
+import { adminCreateBrandObject, adminUpdateBrandObject } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
+import ImageUploadField from "../../ImageUploadField";
+import useModalForm from "../../../hooks/useModalForm";
 
 export default function BrandObjectModal({ open, brandObject, brandId, onClose, onSuccess }) {
-  const { message } = App.useApp();
   const { t } = useLocale();
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const isEdit = !!brandObject;
+
+  const { form, loading, handleOk } = useModalForm({
+    onSubmit: async (values) => {
+      const payload = {
+        name_en: values.nameEn,
+        name_zh: values.nameZh || null,
+        image_url: imageUrl || null,
+        scale: values.scale || null,
+        category_en: values.categoryEn || null,
+        category_zh: values.categoryZh || null,
+        release_date: values.releaseDate ? values.releaseDate.format("YYYY-MM-DD") : null,
+        release_price_cny: values.releasePriceCny ?? null,
+        release_price_usd: values.releasePriceUsd ?? null,
+      };
+      if (isEdit) {
+        await adminUpdateBrandObject(brandObject.id, payload);
+      } else {
+        await adminCreateBrandObject(brandId, payload);
+      }
+    },
+    successMessage: isEdit ? t("brandObjectUpdated") : t("brandObjectCreated"),
+    errorMessage: isEdit ? t("failedToUpdateBrandObject") : t("failedToCreateBrandObject"),
+    onSuccess,
+    onClose,
+  });
 
   useEffect(() => {
     if (open) {
@@ -33,38 +55,6 @@ export default function BrandObjectModal({ open, brandObject, brandId, onClose, 
       setImageUrl(brandObject?.image_url || null);
     }
   }, [open, brandObject, form]);
-
-  const handleOk = async () => {
-    let values;
-    try { values = await form.validateFields(); } catch { return; }
-    setLoading(true);
-    try {
-      const payload = {
-        name_en: values.nameEn,
-        name_zh: values.nameZh || null,
-        image_url: imageUrl || null,
-        scale: values.scale || null,
-        category_en: values.categoryEn || null,
-        category_zh: values.categoryZh || null,
-        release_date: values.releaseDate ? values.releaseDate.format("YYYY-MM-DD") : null,
-        release_price_cny: values.releasePriceCny ?? null,
-        release_price_usd: values.releasePriceUsd ?? null,
-      };
-      if (isEdit) {
-        await adminUpdateBrandObject(brandObject.id, payload);
-        message.success(t("brandObjectUpdated"));
-      } else {
-        await adminCreateBrandObject(brandId, payload);
-        message.success(t("brandObjectCreated"));
-      }
-      onSuccess();
-      onClose();
-    } catch (err) {
-      message.error(err?.message || (isEdit ? t("failedToUpdateBrandObject") : t("failedToCreateBrandObject")));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Modal
@@ -105,32 +95,7 @@ export default function BrandObjectModal({ open, brandObject, brandId, onClose, 
           <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
         </Form.Item>
         <Form.Item label={t("image")}>
-          <Upload
-            listType="picture-card"
-            showUploadList={false}
-            beforeUpload={async (file) => {
-              try {
-                const url = await uploadImage(file);
-                setImageUrl(url);
-              } catch (e) {
-                message.error(e.message || t("uploadFailed"));
-              }
-              return false;
-            }}
-          >
-            <div style={{ width: 120 }}>
-              {imageUrl ? (
-                <img
-                  src={imageUrl}
-                  alt="object-preview"
-                  style={{ width: "100%", maxHeight: 120, objectFit: "contain", display: "block", marginBottom: 8 }}
-                />
-              ) : (
-                <PictureOutlined style={{ fontSize: 32, color: "var(--neu-text-2)", marginBottom: 8, display: "block" }} />
-              )}
-              <div style={{ fontSize: 12 }}>{t("selectImage")}</div>
-            </div>
-          </Upload>
+          <ImageUploadField value={imageUrl} onChange={setImageUrl} />
         </Form.Item>
       </Form>
     </Modal>

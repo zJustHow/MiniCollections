@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useSearchParam from "../hooks/useSearchParam";
 import { App, Button, Card, Form, Grid, Input, Spin } from "antd";
 import {
   ArrowLeftOutlined,
@@ -38,12 +39,12 @@ export default function GroupObjectsPage() {
   const screens = useBreakpoint();
   const cols = screens.lg ? 4 : screens.md ? 3 : 2;
 
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchValue, setSearchParam] = useSearchParam();
   const [group, setGroup] = useState(location.state?.group ?? null);
   const [userObjects, setUserObjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState(() => searchParams.get("q") || "");
-  const [draftQuery, setDraftQuery] = useState(() => searchParams.get("q") || "");
+  const [searchKeyword, setSearchKeyword] = useState(searchValue);
+  const [draftQuery, setDraftQuery] = useState(searchValue);
 
   // Edit group modal
   const [editGroupVisible, setEditGroupVisible] = useState(false);
@@ -226,14 +227,13 @@ export default function GroupObjectsPage() {
             setDraftQuery(v);
             if (v === "") {
               setSearchKeyword("");
-              setSearchParams({}, { replace: true });
+              setSearchParam("");
             }
           }}
           onSearch={(v) => {
             const keyword = (v ?? "").trim();
             setSearchKeyword(keyword);
-            if (keyword) setSearchParams({ q: keyword }, { replace: true });
-            else setSearchParams({}, { replace: true });
+            setSearchParam(keyword);
           }}
           style={{ width: screens.md ? 260 : "100%" }}
         />

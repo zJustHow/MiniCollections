@@ -197,6 +197,14 @@ export const searchBrandObjects = async (keyword) => {
   return handleResponse(response);
 };
 
+export const searchBrandObjectsByBrandId = async (brandId, keyword) => {
+  const response = await fetch(
+    `/brands/${brandId}/objects/search?keyword=${encodeURIComponent(keyword)}`,
+    { headers: authHeaders() }
+  );
+  return handleResponse(response);
+};
+
 export const searchBrandsCombined = async (keyword) => {
   const [brands, objects] = await Promise.all([
     searchBrands(keyword),
