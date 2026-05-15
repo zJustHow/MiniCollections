@@ -7,6 +7,10 @@ export default function GuestBrandsView() {
     loadingBrands,
     handleBrandClick,
     handleBrandSearch,
+    searchActive,
+    searchResultBrands,
+    searchResultObjects,
+    searchValue,
   } = useBrandsState();
 
   return (
@@ -15,6 +19,10 @@ export default function GuestBrandsView() {
       loading={loadingBrands}
       onSearch={handleBrandSearch}
       onBrandClick={handleBrandClick}
+      searchActive={searchActive}
+      searchResultBrands={searchResultBrands}
+      searchResultObjects={searchResultObjects}
+      searchValue={searchValue}
     />
   );
 }

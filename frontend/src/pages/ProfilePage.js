@@ -22,6 +22,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   COUNTRIES,
+  getWechatAuthUrl,
   parsePhone,
   sendCode,
   updateIdentifier,
@@ -186,6 +187,21 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       message.error(err.message || t("updateFailed"));
     } finally {
       setLocaleLoading(false);
+    }
+  };
+
+  const [wechatLoading, setWechatLoading] = useState(false);
+
+  const handleWechatBind = async () => {
+    setWechatLoading(true);
+    try {
+      const isMobile = /MicroMessenger/i.test(navigator.userAgent);
+      const { url } = await getWechatAuthUrl(isMobile ? "mp" : "pc");
+      localStorage.setItem("wechat_intent", "bind");
+      window.location.href = url;
+    } catch (err) {
+      message.error(err.message || t("wechatBindFailed"));
+      setWechatLoading(false);
     }
   };
 
@@ -452,6 +468,23 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 </Button>
               </Form.Item>
             </Form>
+          </SectionCard>
+
+          {/* WeChat */}
+          <SectionCard>
+            <SectionLabel title={t("wechatAccount")} />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+              <span style={{ fontSize: 13, color: profile.wechat_bound ? "var(--neu-accent)" : "var(--neu-text-2)" }}>
+                {profile.wechat_bound ? t("wechatBound") : t("wechatNotBound")}
+              </span>
+              <Button
+                loading={wechatLoading}
+                onClick={handleWechatBind}
+                style={{ flexShrink: 0 }}
+              >
+                {profile.wechat_bound ? t("changeWechat") : t("bindWechat")}
+              </Button>
+            </div>
           </SectionCard>
 
           {/* Language */}

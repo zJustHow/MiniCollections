@@ -48,6 +48,15 @@ jwt:
   secret: ${JWT_SECRET}
   expiration-ms: ${JWT_EXPIRATION_MS:604800000}
 
+wechat:
+  appid: ${WECHAT_APPID:}
+  secret: ${WECHAT_SECRET:}
+  redirect-uri: ${WECHAT_REDIRECT_URI:http://localhost:3000/wechat-callback}
+  # 公众号（手机微信内）独立凭证，未配置时自动回退到上方 appid/secret/redirect-uri
+  mp-appid: ${WECHAT_MP_APPID:}
+  mp-secret: ${WECHAT_MP_SECRET:}
+  mp-redirect-uri: ${WECHAT_MP_REDIRECT_URI:}
+
 aliyun:
   sms:
     access-key-id: ${ALIYUN_SMS_ACCESS_KEY_ID:}

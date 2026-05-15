@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useParams, useLocation, useSearchParams } from "react-router-dom";
 import { App, Button, Card, Grid, Input, Popconfirm, Spin } from "antd";
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
 import CardCover from "../components/ObjectList/CardCover";
@@ -27,11 +27,12 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const screens = useBreakpoint();
   const cols = screens.lg ? 4 : screens.md ? 3 : 2;
 
+  const [searchParams, setSearchParams] = useSearchParams();
   const [brand, setBrand] = useState(location.state?.brand ?? null);
   const [brandObjects, setBrandObjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState("");
-  const [draftQuery, setDraftQuery] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState(() => searchParams.get("q") || "");
+  const [draftQuery, setDraftQuery] = useState(() => searchParams.get("q") || "");
 
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
 
@@ -131,9 +132,17 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
               onChange={(e) => {
                 const v = e.target.value;
                 setDraftQuery(v);
-                if (v === "") setSearchKeyword("");
+                if (v === "") {
+                  setSearchKeyword("");
+                  setSearchParams({}, { replace: true });
+                }
               }}
-              onSearch={(v) => setSearchKeyword((v ?? "").trim())}
+              onSearch={(v) => {
+                const keyword = (v ?? "").trim();
+                setSearchKeyword(keyword);
+                if (keyword) setSearchParams({ q: keyword }, { replace: true });
+                else setSearchParams({}, { replace: true });
+              }}
               style={{ width: screens.md ? 260 : "100%" }}
             />
           </div>

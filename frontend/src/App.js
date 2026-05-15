@@ -1,7 +1,7 @@
 import { Layout, Avatar, Tooltip } from "antd";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Routes, Route, Navigate, useNavigate, useLocation, Outlet } from "react-router-dom";
-import { UserOutlined } from "@ant-design/icons";
+import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
 import LoginPage from "./pages/LoginPage";
@@ -12,6 +12,8 @@ import ProfilePage from "./pages/ProfilePage";
 import BrandObjectsPage from "./pages/BrandObjectsPage";
 import BrandObjectDetailPage from "./pages/BrandObjectDetailPage";
 import GroupObjectsPage from "./pages/GroupObjectsPage";
+import GroupObjectDetailPage from "./pages/GroupObjectDetailPage";
+import WechatCallbackPage from "./pages/WechatCallbackPage";
 import { getMe, logout } from "./utils";
 import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
@@ -23,6 +25,19 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
   const location = useLocation();
   const { t } = useLocale();
   const { headerSlot } = useHeader();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [menuOpen]);
+
+  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
 
   const activeTab =
     location.pathname === "/groups"
@@ -145,7 +160,57 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
             </Tooltip>
           )}
         </div>
+
+        {/* Mobile hamburger button — only visible on small screens */}
+        {!headerSlot && (
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setMenuOpen((v) => !v)}
+            aria-label="menu"
+          >
+            {menuOpen ? <CloseOutlined /> : <MenuOutlined />}
+          </button>
+        )}
       </Header>
+
+      {/* Mobile dropdown menu */}
+      {menuOpen && !headerSlot && (
+        <div className="mobile-menu-overlay" ref={menuRef}>
+          <button
+            className={`mobile-menu-item${activeTab === "brands" ? " active" : ""}`}
+            onClick={() => handleTabChange("brands")}
+          >
+            {t("brands")}
+          </button>
+          <button
+            className={`mobile-menu-item${activeTab === "groups" ? " active" : ""}`}
+            onClick={() => handleTabChange("groups")}
+          >
+            {t("groups")}
+          </button>
+          <button
+            className={`mobile-menu-item${activeTab === "feedback" ? " active" : ""}`}
+            onClick={() => handleTabChange("feedback")}
+          >
+            {t("feedback")}
+          </button>
+          {isAdmin && (
+            <button
+              className={`mobile-menu-item${activeTab === "admin" ? " active" : ""}`}
+              onClick={() => navigate("/admin")}
+            >
+              {t("adminPanel")}
+            </button>
+          )}
+          <div className="mobile-menu-divider" />
+          <button
+            className="mobile-menu-item"
+            onClick={() => authed ? navigate("/profile") : navigate("/login")}
+          >
+            {authed ? (profile?.display_name || t("profile")) : t("signIn")}
+          </button>
+        </div>
+      )}
 
       <Content
         style={{
@@ -221,6 +286,11 @@ export default function App() {
     navigate("/");
   };
 
+  const handleWechatBind = (updatedProfile) => {
+    handleProfileChange(updatedProfile);
+    // navigation to /profile is handled inside WechatCallbackPage
+  };
+
   if (loading) return null;
 
   return (
@@ -235,6 +305,14 @@ export default function App() {
         path="/register"
         element={
           authed ? <Navigate to="/" replace /> : <RegisterPage />
+        }
+      />
+      <Route
+        path="/wechat-callback"
+        element={
+          authed && localStorage.getItem("wechat_intent") !== "bind"
+            ? <Navigate to="/" replace />
+            : <WechatCallbackPage onSuccess={handleLoginSuccess} onBind={handleWechatBind} />
         }
       />
       <Route
@@ -268,6 +346,10 @@ export default function App() {
         <Route
           path="groups/:groupId"
           element={authed ? <GroupObjectsPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="groups/:groupId/objects/:objectId"
+          element={authed ? <GroupObjectDetailPage /> : <Navigate to="/login" replace />}
         />
         <Route
           path="feedback"

@@ -94,7 +94,8 @@ public class UserService {
         boolean isAdmin = Boolean.TRUE.equals(jdbc.queryForObject(
                 "SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
                 Boolean.class, userId));
-        return new UserProfileDto(u.id(), email, phone, u.displayName(), u.preferredLocale(), u.avatarUrl(), isAdmin);
+        boolean wechatBound = identifierRepository.findByUserIdAndType(userId, "wechat_openid").isPresent();
+        return new UserProfileDto(u.id(), email, phone, u.displayName(), u.preferredLocale(), u.avatarUrl(), isAdmin, wechatBound);
     }
 
     @Transactional
@@ -126,6 +127,66 @@ public class UserService {
             throw new BadCredentialsException("error.password_incorrect");
         }
         userRepository.updatePasswordById(userId, passwordEncoder.encode(newPassword));
+        return getProfile(userId);
+    }
+
+    @Transactional
+    public Long findOrCreateWechatUser(String openid, String unionid, String nickname, String avatarUrl) {
+        // 优先用 unionid 查找（跨应用唯一）
+        if (unionid != null) {
+            var byUnionid = identifierRepository.findByTypeAndIdentifier("wechat_unionid", unionid);
+            if (byUnionid.isPresent()) return byUnionid.get().userId();
+        }
+        // 次选 openid
+        var byOpenid = identifierRepository.findByTypeAndIdentifier("wechat_openid", openid);
+        if (byOpenid.isPresent()) return byOpenid.get().userId();
+
+        // 新建用户
+        String name = (nickname != null && !nickname.isBlank()) ? nickname : "微信用户";
+        UserEntity user = userRepository.save(new UserEntity(null, name, null, true, "zh-CN", avatarUrl));
+        identifierRepository.save(new UserIdentifierEntity(null, user.id(), "wechat_openid", openid));
+        if (unionid != null) {
+            identifierRepository.save(new UserIdentifierEntity(null, user.id(), "wechat_unionid", unionid));
+        }
+        jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", user.id(), "ROLE_USER");
+        groupRepository.save(new GroupEntity(null, user.id(), "default", null));
+        return user.id();
+    }
+
+    @Transactional
+    public UserProfileDto bindWechat(Long userId, WechatService.WechatUserInfo info) {
+        // Reject if this WeChat account is already bound to a different user
+        if (info.unionid() != null) {
+            identifierRepository.findByTypeAndIdentifier("wechat_unionid", info.unionid())
+                    .ifPresent(existing -> {
+                        if (!existing.userId().equals(userId))
+                            throw new IdentifierExistsException("error.wechat_bound_to_other");
+                    });
+        }
+        identifierRepository.findByTypeAndIdentifier("wechat_openid", info.openid())
+                .ifPresent(existing -> {
+                    if (!existing.userId().equals(userId))
+                        throw new IdentifierExistsException("error.wechat_bound_to_other");
+                });
+
+        // Upsert wechat_openid
+        identifierRepository.findByUserIdAndType(userId, "wechat_openid")
+                .ifPresentOrElse(
+                        existing -> identifierRepository.save(
+                                new UserIdentifierEntity(existing.id(), userId, "wechat_openid", info.openid())),
+                        () -> identifierRepository.save(
+                                new UserIdentifierEntity(null, userId, "wechat_openid", info.openid()))
+                );
+        // Upsert wechat_unionid if present
+        if (info.unionid() != null) {
+            identifierRepository.findByUserIdAndType(userId, "wechat_unionid")
+                    .ifPresentOrElse(
+                            existing -> identifierRepository.save(
+                                    new UserIdentifierEntity(existing.id(), userId, "wechat_unionid", info.unionid())),
+                            () -> identifierRepository.save(
+                                    new UserIdentifierEntity(null, userId, "wechat_unionid", info.unionid()))
+                    );
+        }
         return getProfile(userId);
     }
 

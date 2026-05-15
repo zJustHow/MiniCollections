@@ -2,6 +2,7 @@ package com.zjusthow.minicollections.controller;
 
 import com.zjusthow.minicollections.model.GroupBody;
 import com.zjusthow.minicollections.model.GroupDto;
+import com.zjusthow.minicollections.model.GroupSearchResult;
 import com.zjusthow.minicollections.model.UserObjectBody;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.service.GroupService;
@@ -40,10 +41,10 @@ public class GroupController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<GroupDto>> searchGroups(
+    public ResponseEntity<GroupSearchResult> searchGroups(
             @AuthenticationPrincipal User user,
             @RequestParam String keyword) {
-        return ResponseEntity.ok(groupService.searchGroups(userId(user), keyword));
+        return ResponseEntity.ok(groupService.crossSearch(userId(user), keyword));
     }
 
     @PostMapping

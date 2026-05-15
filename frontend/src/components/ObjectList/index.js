@@ -23,6 +23,9 @@ export default function ObjectList({ activeTab, isAdmin }) {
     loadingGroups,
     handleGroupClick,
     handleGroupSearch,
+    groupSearchActive,
+    groupSearchResultGroups,
+    groupSearchResultObjects,
     createGroupModalVisible,
     setCreateGroupModalVisible,
     createGroupLoading,
@@ -57,6 +60,10 @@ export default function ObjectList({ activeTab, isAdmin }) {
             groupForm.resetFields();
             setCreateGroupModalVisible(true);
           }}
+          searchValue={searchValue}
+          searchActive={groupSearchActive}
+          searchResultGroups={groupSearchResultGroups}
+          searchResultObjects={groupSearchResultObjects}
         />
       )}
 

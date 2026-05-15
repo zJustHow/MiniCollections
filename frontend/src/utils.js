@@ -68,6 +68,33 @@ export const logout = () => {
   localStorage.removeItem(TOKEN_KEY);
 };
 
+export const getWechatAuthUrl = async (platform = "pc") => {
+  const response = await fetch(`/auth/wechat/url?platform=${platform}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(response);
+};
+
+export const exchangeWechatCode = async ({ code, state }) => {
+  const response = await fetch("/auth/wechat/exchange", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ code, state }),
+  });
+  const data = await handleResponse(response);
+  localStorage.setItem(TOKEN_KEY, data.token);
+  return data;
+};
+
+export const bindWechatAccount = async ({ code, state }) => {
+  const response = await fetch("/auth/wechat/bind", {
+    method: "POST",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ code, state }),
+  });
+  return handleResponse(response);
+};
+
 export const sendCode = async (target, type) => {
   const response = await fetch("/send-code", {
     method: "POST",

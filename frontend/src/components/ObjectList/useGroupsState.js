@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { App, Form } from "antd";
 import { getGroups, searchGroups, createGroup } from "../../utils";
 import { useLocale } from "../../LocaleContext";
@@ -8,8 +8,13 @@ export default function useGroupsState() {
   const { message } = App.useApp();
   const { t } = useLocale();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
+  const [groupSearchActive, setGroupSearchActive] = useState(false);
+  const [groupSearchResultGroups, setGroupSearchResultGroups] = useState([]);
+  const [groupSearchResultObjects, setGroupSearchResultObjects] = useState([]);
 
   // Create group modal
   const [createGroupModalVisible, setCreateGroupModalVisible] = useState(false);
@@ -18,11 +23,21 @@ export default function useGroupsState() {
   const [groupImageData, setGroupImageData] = useState(null);
 
   useEffect(() => {
+    if (location.pathname !== "/groups") return;
     const fetchGroups = async () => {
       setLoadingGroups(true);
       try {
-        const data = await getGroups();
-        setGroups(data);
+        const q = searchParams.get("q");
+        if (q) {
+          const data = await searchGroups(q);
+          setGroupSearchActive(true);
+          setGroupSearchResultGroups(data.groups ?? []);
+          setGroupSearchResultObjects(data.objects ?? []);
+        } else {
+          const data = await getGroups();
+          setGroups(data);
+          setGroupSearchActive(false);
+        }
       } catch (err) {
         message.error(err.message || t("failedToLoadGroups"));
       } finally {
@@ -30,7 +45,7 @@ export default function useGroupsState() {
       }
     };
     fetchGroups();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleGroupClick = (group) => {
     navigate(`/groups/${group.id}`, { state: { group } });
@@ -38,10 +53,22 @@ export default function useGroupsState() {
 
   const handleGroupSearch = async (value) => {
     const keyword = value.trim();
+    if (keyword) setSearchParams({ q: keyword }, { replace: true });
+    else setSearchParams({}, { replace: true });
     setLoadingGroups(true);
     try {
-      const data = keyword ? await searchGroups(keyword) : await getGroups();
-      setGroups(data);
+      if (keyword) {
+        const data = await searchGroups(keyword);
+        setGroupSearchActive(true);
+        setGroupSearchResultGroups(data.groups ?? []);
+        setGroupSearchResultObjects(data.objects ?? []);
+      } else {
+        const data = await getGroups();
+        setGroups(data);
+        setGroupSearchActive(false);
+        setGroupSearchResultGroups([]);
+        setGroupSearchResultObjects([]);
+      }
     } catch (err) {
       message.error(err.message || t("failedToSearchGroups"));
     } finally {
@@ -79,6 +106,10 @@ export default function useGroupsState() {
     loadingGroups,
     handleGroupClick,
     handleGroupSearch,
+    searchValue: searchParams.get("q") || "",
+    groupSearchActive,
+    groupSearchResultGroups,
+    groupSearchResultObjects,
     createGroupModalVisible,
     setCreateGroupModalVisible,
     createGroupLoading,

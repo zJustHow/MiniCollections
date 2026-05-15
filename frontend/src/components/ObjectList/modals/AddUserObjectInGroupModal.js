@@ -61,7 +61,7 @@ export default function AddUserObjectInGroupModal({ visible,
           <Input />
         </Form.Item>
         <Form.Item label={t("purchasePrice")} name="purchasePrice">
-          <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+          <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode controls={false} />
         </Form.Item>
         <Form.Item label={t("purchaseDate")} name="purchaseDate">
           <DatePicker style={{ width: "100%" }} />

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { App } from "antd";
 import { getBrands, searchBrandsCombined } from "../../utils";
 import { useLocale } from "../../LocaleContext";
@@ -8,6 +8,7 @@ export default function useBrandsState() {
   const { message } = App.useApp();
   const { t } = useLocale();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [brands, setBrands] = useState([]);
   const [loadingBrands, setLoadingBrands] = useState(false);
@@ -46,8 +47,10 @@ export default function useBrandsState() {
 
   useEffect(() => {
     fetchBrands();
-    const q = searchParams.get("q");
-    if (q) doSearch(q);
+    if (location.pathname === "/") {
+      const q = searchParams.get("q");
+      if (q) doSearch(q);
+    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleBrandClick = (brand) => {
