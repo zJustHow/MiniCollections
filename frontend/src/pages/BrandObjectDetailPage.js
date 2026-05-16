@@ -56,7 +56,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       const data = await getBrandObjectById(objectId);
       setBrandObject(data);
     } catch (err) {
-      message.error(err.message || t("failedToLoadModels"));
+      message.error(err?.message || t("failedToLoadModels"));
     }
   }, [objectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -64,7 +64,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
     if (!brand) {
       getBrandByBrandId(brandId)
         .then(setBrand)
-        .catch((err) => message.error(err.message || t("failedToLoadBrands")));
+        .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
     }
     if (!brandObject) {
       fetchBrandObject();
@@ -129,7 +129,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       const data = await getGroups();
       setGroups(Array.isArray(data) ? data : []);
     } catch (err) {
-      message.error(err.message || t("failedToLoadGroups"));
+      message.error(err?.message || t("failedToLoadGroups"));
     }
     setAddToGroupVisible(true);
   };
@@ -152,7 +152,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
         message.success(t("addedToGroupSuccessfully"));
         setAddToGroupVisible(false);
       } catch (err) {
-        message.error(err.message || t("failedToAddModelToGroup"));
+        message.error(err?.message || t("failedToAddModelToGroup"));
       } finally {
         setAddToGroupLoading(false);
       }

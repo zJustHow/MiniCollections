@@ -26,7 +26,7 @@ export default function useBrandsState() {
       const data = await getBrands();
       setBrands(data);
     } catch (err) {
-      message.error(err.message || t("failedToLoadBrands"));
+      message.error(err?.message || t("failedToLoadBrands"));
     } finally {
       setLoadingBrands(false);
     }
@@ -40,7 +40,7 @@ export default function useBrandsState() {
       setSearchResultObjects(resultObjects);
       setSearchActive(true);
     } catch (err) {
-      message.error(err.message || t("failedToSearchBrands"));
+      message.error(err?.message || t("failedToSearchBrands"));
     } finally {
       setLoadingBrands(false);
     }

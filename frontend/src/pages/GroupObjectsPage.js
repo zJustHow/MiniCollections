@@ -16,6 +16,7 @@ import { useHeader } from "../HeaderContext";
 import {
   getGroupById,
   getUserObjects,
+  searchGroupObjects,
   updateGroup,
   deleteGroup,
   createUserObject,
@@ -43,7 +44,8 @@ export default function GroupObjectsPage() {
   const [group, setGroup] = useState(location.state?.group ?? null);
   const [userObjects, setUserObjects] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchKeyword, setSearchKeyword] = useState(searchValue);
+  const [searchActive, setSearchActive] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
   const [draftQuery, setDraftQuery] = useState(searchValue);
 
   // Edit group modal
@@ -67,7 +69,20 @@ export default function GroupObjectsPage() {
       const data = await getUserObjects(groupId);
       setUserObjects(normalizeList(data));
     } catch (err) {
-      message.error(err.message || t("failedToLoadGroupModels"));
+      message.error(err?.message || t("failedToLoadGroupModels"));
+    } finally {
+      setLoading(false);
+    }
+  }, [groupId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const doSearch = useCallback(async (keyword) => {
+    setLoading(true);
+    try {
+      const data = await searchGroupObjects(groupId, keyword);
+      setSearchResults(Array.isArray(data) ? data : []);
+      setSearchActive(true);
+    } catch (err) {
+      message.error(err?.message || t("failedToSearchBrands"));
     } finally {
       setLoading(false);
     }
@@ -77,9 +92,10 @@ export default function GroupObjectsPage() {
     if (!group) {
       getGroupById(groupId)
         .then(setGroup)
-        .catch((err) => message.error(err.message || t("failedToLoadGroups")));
+        .catch((err) => message.error(err?.message || t("failedToLoadGroups")));
     }
     fetchUserObjects();
+    if (searchValue) doSearch(searchValue);
   }, [groupId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDeleteGroup = () => {
@@ -96,7 +112,7 @@ export default function GroupObjectsPage() {
           message.success(t("groupDeleted"));
           navigate("/groups");
         } catch (err) {
-          message.error(err.message || t("failedToDeleteGroup"));
+          message.error(err?.message || t("failedToDeleteGroup"));
         }
       },
     });
@@ -120,11 +136,7 @@ export default function GroupObjectsPage() {
     return () => setHeaderSlot(null);
   }, [group]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const filteredObjects = searchKeyword.trim()
-    ? userObjects.filter((item) =>
-        (item.name ?? "").toLowerCase().includes(searchKeyword.trim().toLowerCase())
-      )
-    : userObjects;
+  const displayObjects = searchActive ? searchResults : userObjects;
 
   const openEditGroup = () => {
     if (!group) return;
@@ -145,7 +157,7 @@ export default function GroupObjectsPage() {
         setGroup((prev) => ({ ...prev, name: data.name, image_url: data.image_url }));
         setEditGroupVisible(false);
       } catch (err) {
-        message.error(err.message || t("failedToUpdateGroup"));
+        message.error(err?.message || t("failedToUpdateGroup"));
       } finally {
         setEditGroupLoading(false);
       }
@@ -183,7 +195,7 @@ export default function GroupObjectsPage() {
         ]);
         setAddVisible(false);
       } catch (err) {
-        message.error(err.message || t("failedToAddModel"));
+        message.error(err?.message || t("failedToAddModel"));
       } finally {
         setAddLoading(false);
       }
@@ -226,14 +238,21 @@ export default function GroupObjectsPage() {
             const v = e.target.value;
             setDraftQuery(v);
             if (v === "") {
-              setSearchKeyword("");
+              setSearchActive(false);
+              setSearchResults([]);
               setSearchParam("");
             }
           }}
           onSearch={(v) => {
             const keyword = (v ?? "").trim();
-            setSearchKeyword(keyword);
-            setSearchParam(keyword);
+            if (keyword) {
+              setSearchParam(keyword);
+              doSearch(keyword);
+            } else {
+              setSearchActive(false);
+              setSearchResults([]);
+              setSearchParam("");
+            }
           }}
           style={{ width: screens.md ? 260 : "100%" }}
         />
@@ -241,7 +260,7 @@ export default function GroupObjectsPage() {
 
       <Spin spinning={loading}>
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 16 }}>
-          {[{ id: "__add__" }, ...filteredObjects].map((item) =>
+          {[{ id: "__add__" }, ...displayObjects].map((item) =>
             item.id === "__add__" ? (
               <Card
                 key="__add__"

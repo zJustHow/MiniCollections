@@ -40,7 +40,7 @@ function SignupForm({ linkMode = false }) {
       setDisplayModal(false);
       message.success(t("registerSuccess"));
     } catch (err) {
-      message.error(err.message);
+      message.error(err?.message);
     }
   };
 

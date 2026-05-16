@@ -183,6 +183,53 @@ public class GroupService {
         groupRepository.deleteById(groupId);
     }
 
+    public List<UserObjectDto> searchUserObjectsByGroupId(Long userId, Long groupId, String keyword) {
+        GroupEntity groupEntity = groupRepository.findById(groupId)
+                .orElseThrow(GroupNotFoundException::new);
+        if (!groupEntity.userId().equals(userId)) {
+            throw new NoPermissionException("No permission to view this group");
+        }
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> brandObjectIds;
+        try {
+            brandObjectIds = esQueryService.searchIdsByKeyword(keyword.trim());
+        } catch (Exception e) {
+            brandObjectIds = List.of();
+        }
+        List<Long> safeIds = brandObjectIds.isEmpty() ? List.of(-1L) : brandObjectIds;
+
+        return jdbcClient.sql("""
+                        SELECT id, user_id, group_id, brand_object_id, name, image_url,
+                               purchase_date, purchase_price, other_notes
+                        FROM user_objects
+                        WHERE group_id = :groupId
+                          AND user_id = :userId
+                          AND (
+                            name ILIKE '%' || :keyword || '%'
+                            OR brand_object_id = ANY(:brandObjectIds)
+                          )
+                        """)
+                .param("groupId", groupId)
+                .param("userId", userId)
+                .param("keyword", keyword.trim())
+                .param("brandObjectIds", safeIds.toArray(Long[]::new))
+                .query((rs, rowNum) -> new UserObjectDto(
+                        rs.getLong("id"),
+                        rs.getLong("user_id"),
+                        rs.getLong("group_id"),
+                        rs.getObject("brand_object_id") != null ? rs.getLong("brand_object_id") : null,
+                        rs.getString("name"),
+                        rs.getString("image_url"),
+                        rs.getObject("purchase_date") != null ? rs.getObject("purchase_date", Date.class).toLocalDate() : null,
+                        rs.getObject("purchase_price") != null ? rs.getBigDecimal("purchase_price") : null,
+                        rs.getString("other_notes")
+                ))
+                .list();
+    }
+
     @Cacheable(
             value = "user_objects",
             key = "'group_' + #userId + '_' + #groupId"

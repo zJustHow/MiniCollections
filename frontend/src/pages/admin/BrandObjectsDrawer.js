@@ -19,8 +19,8 @@ export default function BrandObjectsDrawer({ brand, onClose, onBrandObjectsChang
     try {
       const data = await getBrandObjectsByBrandId(brand.id);
       setObjects(Array.isArray(data) ? data : []);
-    } catch {
-      message.error(t("failedToLoadBrandObjects"));
+    } catch (err) {
+      message.error(err?.message || t("failedToLoadBrandObjects"));
     } finally {
       setLoading(false);
     }

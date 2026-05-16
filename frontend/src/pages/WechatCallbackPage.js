@@ -30,12 +30,12 @@ export default function WechatCallbackPage({ onSuccess, onBind }) {
         })
         .catch((err) => {
           localStorage.removeItem(BIND_INTENT_KEY);
-          setError(err.message || t("wechatBindFailed"));
+          setError(err?.message || t("wechatBindFailed"));
         });
     } else {
       exchangeWechatCode({ code, state })
         .then(() => onSuccess())
-        .catch((err) => setError(err.message || t("wechatLoginFailed")));
+        .catch((err) => setError(err?.message || t("wechatLoginFailed")));
     }
   }, []);
 

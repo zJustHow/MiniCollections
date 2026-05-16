@@ -40,7 +40,7 @@ export default function useGroupsState() {
           setGroupSearchActive(false);
         }
       } catch (err) {
-        message.error(err.message || t("failedToLoadGroups"));
+        message.error(err?.message || t("failedToLoadGroups"));
       } finally {
         setLoadingGroups(false);
       }
@@ -70,7 +70,7 @@ export default function useGroupsState() {
         setGroupSearchResultObjects([]);
       }
     } catch (err) {
-      message.error(err.message || t("failedToSearchGroups"));
+      message.error(err?.message || t("failedToSearchGroups"));
     } finally {
       setLoadingGroups(false);
     }
@@ -91,7 +91,7 @@ export default function useGroupsState() {
         setCreateGroupModalVisible(false);
         setGroupImageData(null);
       } catch (err) {
-        message.error(err.message || t("failedToCreateGroup"));
+        message.error(err?.message || t("failedToCreateGroup"));
       } finally {
         setCreateGroupLoading(false);
       }

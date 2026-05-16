@@ -56,7 +56,7 @@ export default function RegisterPage() {
         });
       }, 1000);
     } catch (err) {
-      message.error(err.message);
+      message.error(err?.message);
     } finally {
       setSendingCode(false);
     }
@@ -87,7 +87,7 @@ export default function RegisterPage() {
       message.success(t("registerSuccess"));
       navigate("/login");
     } catch (err) {
-      setError(err.message);
+      setError(err?.message);
     } finally {
       setLoading(false);
     }

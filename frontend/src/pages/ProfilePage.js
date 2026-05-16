@@ -95,7 +95,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       onProfileChange(updated);
       message.success(t("avatarUpdated"));
     } catch (err) {
-      message.error(err.message || t("avatarUploadFailed"));
+      message.error(err?.message || t("avatarUploadFailed"));
     } finally {
       setAvatarLoading(false);
     }
@@ -109,7 +109,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       onProfileChange(updated);
       message.success(t("displayNameUpdated"));
     } catch (err) {
-      message.error(err.message || t("updateFailed"));
+      message.error(err?.message || t("updateFailed"));
     } finally {
       setNameLoading(false);
     }
@@ -122,7 +122,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       pwForm.resetFields();
       message.success(t("passwordUpdated"));
     } catch (err) {
-      message.error(err.message || t("passwordUpdateFailed"));
+      message.error(err?.message || t("passwordUpdateFailed"));
     } finally {
       setPwLoading(false);
     }
@@ -140,7 +140,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
         setEmailCodeCountdown((c) => { if (c <= 1) { clearInterval(timer); return 0; } return c - 1; });
       }, 1000);
     } catch (err) {
-      message.error(err.message || t("sendCodeFailed"));
+      message.error(err?.message || t("sendCodeFailed"));
     } finally {
       setEmailCodeLoading(false);
     }
@@ -155,7 +155,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       setEmailCodeCountdown(0);
       message.success(t("emailUpdated"));
     } catch (err) {
-      message.error(err.message || t("emailUpdateFailed"));
+      message.error(err?.message || t("emailUpdateFailed"));
     } finally {
       setEmailLoading(false);
     }
@@ -171,7 +171,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       onProfileChange(updated);
       message.success(t("phoneUpdated"));
     } catch (err) {
-      message.error(err.message || t("phoneUpdateFailed"));
+      message.error(err?.message || t("phoneUpdateFailed"));
     } finally {
       setPhoneLoading(false);
     }
@@ -184,7 +184,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       onProfileChange(updated);
       message.success(t("languageUpdated"));
     } catch (err) {
-      message.error(err.message || t("updateFailed"));
+      message.error(err?.message || t("updateFailed"));
     } finally {
       setLocaleLoading(false);
     }
@@ -200,7 +200,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       localStorage.setItem("wechat_intent", "bind");
       window.location.href = url;
     } catch (err) {
-      message.error(err.message || t("wechatBindFailed"));
+      message.error(err?.message || t("wechatBindFailed"));
       setWechatLoading(false);
     }
   };

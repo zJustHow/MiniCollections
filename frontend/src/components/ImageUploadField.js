@@ -20,7 +20,7 @@ export default function ImageUploadField({ value, onChange, onRemove }) {
           const url = await uploadImage(file);
           onChange(url);
         } catch (e) {
-          message.error(e.message || t("uploadFailed"));
+          message.error(e?.message || t("uploadFailed"));
         } finally {
           setUploading(false);
         }

@@ -79,6 +79,14 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getUserObjects(userId(user), groupId));
     }
 
+    @GetMapping("/{groupId}/objects/search")
+    public ResponseEntity<List<UserObjectDto>> searchUserObjects(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long groupId,
+            @RequestParam String keyword) {
+        return ResponseEntity.ok(groupService.searchUserObjectsByGroupId(userId(user), groupId, keyword));
+    }
+
     @PostMapping("/{groupId}/objects")
     public ResponseEntity<UserObjectDto> createUserObject(
             @AuthenticationPrincipal User user,

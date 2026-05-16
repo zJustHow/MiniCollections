@@ -51,7 +51,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       const data = await getBrandObjectsByBrandId(brandId);
       setBrandObjects(Array.isArray(data) ? data : []);
     } catch (err) {
-      message.error(err.message || t("failedToLoadModels"));
+      message.error(err?.message || t("failedToLoadModels"));
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       setSearchResults(Array.isArray(data) ? data : []);
       setSearchActive(true);
     } catch (err) {
-      message.error(err.message || t("failedToSearchBrands"));
+      message.error(err?.message || t("failedToSearchBrands"));
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     if (!brand) {
       getBrandByBrandId(brandId)
         .then(setBrand)
-        .catch((err) => message.error(err.message || t("failedToLoadBrands")));
+        .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
     }
     fetchBrandObjects();
     if (searchValue) {

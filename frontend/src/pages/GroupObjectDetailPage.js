@@ -57,7 +57,7 @@ export default function GroupObjectDetailPage() {
       const found = list.find((o) => String(o.id) === String(objectId));
       if (found) setUserObject(found);
     } catch (err) {
-      message.error(err.message || t("failedToLoadGroupModels"));
+      message.error(err?.message || t("failedToLoadGroupModels"));
     }
   }, [groupId, objectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -65,7 +65,7 @@ export default function GroupObjectDetailPage() {
     if (!group) {
       getGroupById(groupId)
         .then(setGroup)
-        .catch((err) => message.error(err.message || t("failedToLoadGroups")));
+        .catch((err) => message.error(err?.message || t("failedToLoadGroups")));
     }
     if (!userObject) fetchUserObject();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -95,7 +95,7 @@ export default function GroupObjectDetailPage() {
           message.success(t("modelDeleted"));
           navigate(`/groups/${groupId}`, { replace: true });
         } catch (err) {
-          message.error(err.message || t("failedToDeleteModel"));
+          message.error(err?.message || t("failedToDeleteModel"));
         }
       },
     });
@@ -162,7 +162,7 @@ export default function GroupObjectDetailPage() {
         }
         setEditVisible(false);
       } catch (err) {
-        message.error(err.message || t("failedToUpdateModel"));
+        message.error(err?.message || t("failedToUpdateModel"));
       } finally {
         setEditLoading(false);
       }

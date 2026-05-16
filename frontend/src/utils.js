@@ -218,6 +218,14 @@ export const getUserObjects = async (groupId) => {
   return handleResponse(response);
 };
 
+export const searchGroupObjects = async (groupId, keyword) => {
+  const response = await fetch(
+    `/groups/${groupId}/objects/search?keyword=${encodeURIComponent(keyword)}`,
+    { headers: authHeaders() }
+  );
+  return handleResponse(response);
+};
+
 export const createUserObject = async (groupId, payload) => {
   const response = await fetch(`/groups/${groupId}/objects`, {
     method: "POST",

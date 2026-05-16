@@ -32,7 +32,7 @@ function LoginForm({ onSuccess }) {
       const { url } = await getWechatAuthUrl(platform);
       window.location.href = url;
     } catch (err) {
-      setError(err.message);
+      setError(err?.message);
       setWechatLoading(false);
     }
   };
@@ -48,7 +48,7 @@ function LoginForm({ onSuccess }) {
       await login({ identifier, password: values.password, loginType });
       onSuccess();
     } catch (err) {
-      setError(err.message);
+      setError(err?.message);
     } finally {
       setLoading(false);
     }
