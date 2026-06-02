@@ -98,9 +98,9 @@ public class SubmissionService {
                 throw new ValidationException("brandId and nameEn are required to approve a MISSING_MODEL submission");
             }
             BrandObjectEntity brandObject = new BrandObjectEntity(
-                    null, body.brandId(), body.nameEn(), body.nameZh(), body.imageUrl(),
+                    null, body.brandId(), body.nameEn(), body.nameZh(), body.imageUrl(), body.imageSource(),
                     body.releasePriceCny(), body.releasePriceUsd(), body.releaseDate(),
-                    body.categoryEn(), body.categoryZh(), body.scale()
+                    body.categoryEn(), body.categoryZh(), body.scale(), 0L
             );
             BrandObjectEntity saved = brandObjectRepository.save(brandObject);
             if (elasticsearchEnabled && brandObjectSearchRepository != null) {

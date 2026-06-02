@@ -2,6 +2,7 @@ import { Card, Grid, Input, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import CardCover from "./CardCover";
+import BrandObjectListCard from "./BrandObjectListCard";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
@@ -64,7 +65,9 @@ export default function BrandsTab({
                 justifyContent: "center",
               }}
             >
-              <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+              <PlusOutlined
+                style={{ fontSize: 36, color: "var(--neu-text-2)" }}
+              />
             </div>
             <div className="neu-nameplate">{t("addBrand")}</div>
           </div>
@@ -77,20 +80,27 @@ export default function BrandsTab({
         key={brand.id}
         hoverable
         className="neu-model-card"
-        cover={<CardCover image_url={brand.image_url} name={brand.name} />}
+        cover={
+          <CardCover
+            image_url={brand.image_url}
+            name={brand.name}
+            objectFit="contain"
+          />
+        }
         onClick={() => onBrandClick(brand)}
         bodyStyle={{ padding: 0 }}
       />
     );
 
   const renderObjectCard = (obj) => (
-    <Card
+    <BrandObjectListCard
       key={obj.id}
-      hoverable
-      className="neu-model-card"
-      cover={<CardCover image_url={obj.image_url} name={obj.name} />}
-      onClick={() => navigate(`/brands/${obj.brand_id}/objects/${obj.id}`, { state: { brandObject: obj } })}
-      bodyStyle={{ padding: 0 }}
+      item={obj}
+      onClick={() =>
+        navigate(`/brands/${obj.brand_id}/objects/${obj.id}`, {
+          state: { brandObject: obj },
+        })
+      }
     />
   );
 
@@ -130,7 +140,12 @@ export default function BrandsTab({
             )}
             {searchResultObjects.length > 0 && (
               <>
-                <div style={{ ...sectionLabelStyle, marginTop: searchResultBrands.length > 0 ? 24 : 0 }}>
+                <div
+                  style={{
+                    ...sectionLabelStyle,
+                    marginTop: searchResultBrands.length > 0 ? 24 : 0,
+                  }}
+                >
                   {t("brandObjects")}
                 </div>
                 <div style={gridStyle}>
@@ -138,19 +153,23 @@ export default function BrandsTab({
                 </div>
               </>
             )}
-            {searchResultBrands.length === 0 && searchResultObjects.length === 0 && (
-              <div style={{ textAlign: "center", color: "var(--neu-text-2)", padding: "32px 0" }}>
-                {t("noSearchResults")}
-              </div>
-            )}
+            {searchResultBrands.length === 0 &&
+              searchResultObjects.length === 0 && (
+                <div
+                  style={{
+                    textAlign: "center",
+                    color: "var(--neu-text-2)",
+                    padding: "32px 0",
+                  }}
+                >
+                  {t("noSearchResults")}
+                </div>
+              )}
           </>
         ) : (
-          <div style={gridStyle}>
-            {dataSource.map(renderBrandCard)}
-          </div>
+          <div style={gridStyle}>{dataSource.map(renderBrandCard)}</div>
         )}
       </Spin>
-
     </>
   );
 }

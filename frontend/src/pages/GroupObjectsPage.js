@@ -61,7 +61,8 @@ export default function GroupObjectsPage() {
   const [addImageData, setAddImageData] = useState(null);
   const [addSearchResults, setAddSearchResults] = useState([]);
   const [addSearchLoading, setAddSearchLoading] = useState(false);
-  const [selectedBrandObjectForAdd, setSelectedBrandObjectForAdd] = useState(null);
+  const [selectedBrandObjectForAdd, setSelectedBrandObjectForAdd] =
+    useState(null);
 
   const fetchUserObjects = useCallback(async () => {
     setLoading(true);
@@ -75,18 +76,21 @@ export default function GroupObjectsPage() {
     }
   }, [groupId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const doSearch = useCallback(async (keyword) => {
-    setLoading(true);
-    try {
-      const data = await searchGroupObjects(groupId, keyword);
-      setSearchResults(Array.isArray(data) ? data : []);
-      setSearchActive(true);
-    } catch (err) {
-      message.error(err?.message || t("failedToSearchBrands"));
-    } finally {
-      setLoading(false);
-    }
-  }, [groupId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const doSearch = useCallback(
+    async (keyword) => {
+      setLoading(true);
+      try {
+        const data = await searchGroupObjects(groupId, keyword);
+        setSearchResults(Array.isArray(data) ? data : []);
+        setSearchActive(true);
+      } catch (err) {
+        message.error(err?.message || t("failedToSearchBrands"));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [groupId],
+  ); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!group) {
@@ -120,18 +124,43 @@ export default function GroupObjectsPage() {
 
   useEffect(() => {
     setHeaderSlot(
-      <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", width: "100%", gap: 8 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
+          width: "100%",
+          gap: 8,
+        }}
+      >
         <div>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/groups")} />
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate("/groups")}
+          />
         </div>
-        <span style={{ fontSize: 15, fontWeight: 700, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 700,
+            color: "var(--neu-text)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            textAlign: "center",
+          }}
+        >
           {group?.name ?? "…"}
         </span>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           <Button icon={<EditOutlined />} onClick={openEditGroup} />
-          <Button danger icon={<DeleteOutlined />} onClick={handleDeleteGroup} />
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={handleDeleteGroup}
+          />
         </div>
-      </div>
+      </div>,
     );
     return () => setHeaderSlot(null);
   }, [group]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -152,9 +181,16 @@ export default function GroupObjectsPage() {
       setEditGroupLoading(true);
       const image_url = editGroupImageData ?? group.image_url;
       try {
-        const data = await updateGroup(group.id, { name: values.name, image_url: image_url || null });
+        const data = await updateGroup(group.id, {
+          name: values.name,
+          image_url: image_url || null,
+        });
         message.success(t("groupUpdated"));
-        setGroup((prev) => ({ ...prev, name: data.name, image_url: data.image_url }));
+        setGroup((prev) => ({
+          ...prev,
+          name: data.name,
+          image_url: data.image_url,
+        }));
         setEditGroupVisible(false);
       } catch (err) {
         message.error(err?.message || t("failedToUpdateGroup"));
@@ -170,12 +206,15 @@ export default function GroupObjectsPage() {
     if (!group) return;
     try {
       const values = await addForm.validateFields();
-      const image_url = addImageData ?? selectedBrandObjectForAdd?.image_url ?? null;
+      const image_url =
+        addImageData ?? selectedBrandObjectForAdd?.image_url ?? null;
       const payload = {
         brand_object_id: values.brandObjectId ?? null,
         name: values.name,
         image_url: image_url || null,
-        purchase_date: values.purchaseDate ? values.purchaseDate.format("YYYY-MM-DD") : null,
+        purchase_date: values.purchaseDate
+          ? values.purchaseDate.format("YYYY-MM-DD")
+          : null,
         ...purchasePriceFromFormValue(values.purchasePrice),
         other_notes: values.otherNotes || null,
       };
@@ -214,7 +253,10 @@ export default function GroupObjectsPage() {
 
   const handleAddSearch = async (value) => {
     const keyword = (value || "").trim();
-    if (keyword === "") { setAddSearchResults([]); return; }
+    if (keyword === "") {
+      setAddSearchResults([]);
+      return;
+    }
     setAddSearchLoading(true);
     try {
       const data = await searchBrandObjects(keyword);
@@ -229,7 +271,13 @@ export default function GroupObjectsPage() {
 
   return (
     <div>
-      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: 16,
+        }}
+      >
         <Search
           placeholder={t("searchModels")}
           allowClear
@@ -259,7 +307,13 @@ export default function GroupObjectsPage() {
       </div>
 
       <Spin spinning={loading}>
-        <div style={{ display: "grid", gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 16 }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: `repeat(${cols}, 1fr)`,
+            gap: 16,
+          }}
+        >
           {[{ id: "__add__" }, ...displayObjects].map((item) =>
             item.id === "__add__" ? (
               <Card
@@ -267,9 +321,29 @@ export default function GroupObjectsPage() {
                 hoverable
                 className="neu-model-card"
                 cover={
-                  <div style={{ position: "relative", paddingTop: "75%", overflow: "hidden", borderRadius: "32px 32px 0 0" }}>
-                    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+                  <div
+                    style={{
+                      position: "relative",
+                      paddingTop: "75%",
+                      overflow: "hidden",
+                      borderRadius: "32px 32px 0 0",
+                    }}
+                  >
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <PlusOutlined
+                        style={{ fontSize: 36, color: "var(--neu-text-2)" }}
+                      />
                     </div>
                     <div className="neu-nameplate">{t("addModel")}</div>
                   </div>
@@ -282,7 +356,12 @@ export default function GroupObjectsPage() {
                 key={item.id}
                 hoverable
                 className="neu-model-card"
-                cover={<CardCover image_url={item.image_url} name={item.name ?? "—"} />}
+                cover={
+                  <CardCover
+                    image_url={item.image_url}
+                    name={item.name ?? "—"}
+                  />
+                }
                 onClick={() =>
                   navigate(`/groups/${groupId}/objects/${item.id}`, {
                     state: { userObject: item, group },
@@ -290,7 +369,7 @@ export default function GroupObjectsPage() {
                 }
                 bodyStyle={{ padding: 0 }}
               />
-            )
+            ),
           )}
         </div>
       </Spin>
@@ -316,7 +395,10 @@ export default function GroupObjectsPage() {
         searchLoading={addSearchLoading}
         onSearch={handleAddSearch}
         onSelectChange={(value) => {
-          if (value == null) { setSelectedBrandObjectForAdd(null); return; }
+          if (value == null) {
+            setSelectedBrandObjectForAdd(null);
+            return;
+          }
           const bo = addSearchResults.find((o) => o.id === value);
           setSelectedBrandObjectForAdd(bo ?? null);
           if (bo) addForm.setFieldsValue({ name: bo.name ?? "" });

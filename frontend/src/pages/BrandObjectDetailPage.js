@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { App, Button, Form, Grid, Popconfirm } from "antd";
-import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PictureOutlined, PlusOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PictureOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 import AddToGroupModal from "../components/ObjectList/modals/AddToGroupModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
 import { useLocale } from "../LocaleContext";
@@ -13,6 +19,7 @@ import {
   createUserObject,
   adminDeleteBrandObject,
   purchasePriceFromFormValue,
+  formatReleasePrice,
 } from "../utils";
 
 const { useBreakpoint } = Grid;
@@ -20,8 +27,22 @@ const { useBreakpoint } = Grid;
 function DetailRow({ label, value }) {
   if (value == null || value === "") return null;
   return (
-    <div style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
-      <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 100, flexShrink: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        padding: "10px 0",
+        borderBottom: "1px solid rgba(184,182,176,0.2)",
+      }}
+    >
+      <span
+        style={{
+          color: "var(--neu-text-2)",
+          fontSize: 13,
+          minWidth: 100,
+          flexShrink: 0,
+        }}
+      >
         {label}
       </span>
       <span style={{ color: "var(--neu-text)", fontSize: 13, fontWeight: 500 }}>
@@ -41,7 +62,9 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const screens = useBreakpoint();
 
   const [brand, setBrand] = useState(location.state?.brand ?? null);
-  const [brandObject, setBrandObject] = useState(location.state?.brandObject ?? null);
+  const [brandObject, setBrandObject] = useState(
+    location.state?.brandObject ?? null,
+  );
 
   const [groups, setGroups] = useState([]);
   const [addToGroupVisible, setAddToGroupVisible] = useState(false);
@@ -66,10 +89,8 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
         .then(setBrand)
         .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
     }
-    if (!brandObject) {
-      fetchBrandObject();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchBrandObject();
+  }, [objectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdminDeleteBrandObject = async () => {
     if (!brandObject) return;
@@ -84,11 +105,29 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
 
   useEffect(() => {
     setHeaderSlot(
-      <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", width: "100%", gap: 8 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
+          width: "100%",
+          gap: 8,
+        }}
+      >
         <div>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
         </div>
-        <span style={{ fontSize: 15, fontWeight: 600, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 600,
+            color: "var(--neu-text)",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            textAlign: "center",
+          }}
+        >
           {brandObject?.name ?? "…"}
         </span>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
@@ -100,7 +139,10 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
               />
               <Popconfirm
                 title={t("deleteBrandObjectTitle")}
-                description={t("deleteBrandObjectContent").replace("{name}", brandObject.name)}
+                description={t("deleteBrandObjectContent").replace(
+                  "{name}",
+                  brandObject.name,
+                )}
                 onConfirm={handleAdminDeleteBrandObject}
                 okText={t("delete")}
                 okButtonProps={{ danger: true }}
@@ -111,7 +153,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
             </>
           )}
         </div>
-      </div>
+      </div>,
     );
     return () => setHeaderSlot(null);
   }, [brandObject, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -142,7 +184,9 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
         brand_object_id: brandObject.id,
         name: values.name,
         image_url: customImageData || brandObject.image_url,
-        purchase_date: values.purchaseDate ? values.purchaseDate.format("YYYY-MM-DD") : null,
+        purchase_date: values.purchaseDate
+          ? values.purchaseDate.format("YYYY-MM-DD")
+          : null,
         ...purchasePriceFromFormValue(values.purchasePrice),
         other_notes: values.otherNotes || null,
       };
@@ -163,8 +207,20 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 32, alignItems: "flex-start", flexWrap: screens.md ? "nowrap" : "wrap" }}>
-        <div style={{ flex: screens.md ? "0 0 45%" : "1 1 100%", maxWidth: screens.md ? "45%" : "100%" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 32,
+          alignItems: "flex-start",
+          flexWrap: screens.md ? "nowrap" : "wrap",
+        }}
+      >
+        <div
+          style={{
+            flex: screens.md ? "0 0 45%" : "1 1 100%",
+            maxWidth: screens.md ? "45%" : "100%",
+          }}
+        >
           {brandObject?.image_url ? (
             <img
               src={brandObject.image_url}
@@ -191,7 +247,9 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
                 justifyContent: "center",
               }}
             >
-              <PictureOutlined style={{ fontSize: 48, color: "var(--neu-text-2)" }} />
+              <PictureOutlined
+                style={{ fontSize: 48, color: "var(--neu-text-2)" }}
+              />
             </div>
           )}
         </div>
@@ -201,18 +259,22 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
           <DetailRow label={t("scale")} value={brandObject?.scale} />
           <DetailRow
             label={t("releasePrice")}
-            value={brandObject?.release_price ?? brandObject?.releasePrice}
+            value={formatReleasePrice(brandObject)}
           />
           <DetailRow
             label={t("releaseDate")}
             value={brandObject?.release_date ?? brandObject?.releaseDate}
+          />
+          <DetailRow
+            label={t("imageSource")}
+            value={brandObject?.image_source ?? brandObject?.imageSource}
           />
           <div style={{ marginTop: 24 }}>
             <Button
               type="primary"
               block
               icon={<PlusOutlined />}
-              onClick={() => authed ? openAddToGroup() : navigate("/login")}
+              onClick={() => (authed ? openAddToGroup() : navigate("/login"))}
             >
               {t("addToGroup")}
             </Button>

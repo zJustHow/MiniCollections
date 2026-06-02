@@ -272,6 +272,21 @@ export const uploadImage = async (file) => {
   return data.url;
 };
 
+export const uploadBrandLogo = async (brandId, file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await fetch(`/admin/brands/${brandId}/logo`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: formData,
+  });
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Upload failed");
+  }
+  return handleResponse(response);
+};
+
 export const getMe = async () => {
   const response = await fetch("/users/me", { headers: authHeaders() });
   return handleResponse(response);
@@ -436,4 +451,13 @@ export const purchasePriceFromFormValue = (value) => {
 export const displayPurchasePriceFromObject = (obj) => {
   if (!obj) return undefined;
   return obj.purchase_price ?? obj.purchasePrice;
+};
+
+export const formatReleasePrice = (obj) => {
+  const cny = obj?.releasePriceCny ?? obj?.release_price_cny;
+  const usd = obj?.releasePriceUsd ?? obj?.release_price_usd;
+  const parts = [];
+  if (cny != null) parts.push(`¥${cny}`);
+  if (usd != null) parts.push(`$${usd}`);
+  return parts.length > 0 ? parts.join(" / ") : null;
 };

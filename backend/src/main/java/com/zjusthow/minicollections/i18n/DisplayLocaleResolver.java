@@ -5,7 +5,6 @@ import com.zjusthow.minicollections.service.UserService;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.Locale;
 
 @Component
@@ -44,10 +43,6 @@ public class DisplayLocaleResolver {
         return Locale.forLanguageTag(effectiveLocale.replace('_', '-')).getLanguage().equalsIgnoreCase("zh");
     }
 
-    public boolean prefersCny(String effectiveLocale) {
-        return prefersZh(effectiveLocale);
-    }
-
     public static String pickName(String nameEn, String nameZh, boolean preferZh) {
         if (preferZh) {
             return firstNonBlank(nameZh, nameEn);
@@ -62,13 +57,6 @@ public class DisplayLocaleResolver {
         return firstNonBlank(catEn, catZh);
     }
 
-    public static BigDecimal pickPrice(BigDecimal cny, BigDecimal usd, boolean preferCny) {
-        if (preferCny) {
-            return firstNonNull(cny, usd);
-        }
-        return firstNonNull(usd, cny);
-    }
-
     private static String firstNonBlank(String a, String b) {
         if (a != null && !a.isBlank()) {
             return a;
@@ -79,7 +67,4 @@ public class DisplayLocaleResolver {
         return "";
     }
 
-    private static BigDecimal firstNonNull(BigDecimal a, BigDecimal b) {
-        return a != null ? a : b;
-    }
 }

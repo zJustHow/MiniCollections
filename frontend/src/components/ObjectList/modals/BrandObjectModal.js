@@ -17,6 +17,7 @@ export default function BrandObjectModal({ open, brandObject, brandId, onClose, 
         name_en: values.nameEn,
         name_zh: values.nameZh || null,
         image_url: imageUrl || null,
+        image_source: values.imageSource || null,
         scale: values.scale || null,
         category_en: values.categoryEn || null,
         category_zh: values.categoryZh || null,
@@ -47,10 +48,12 @@ export default function BrandObjectModal({ open, brandObject, brandId, onClose, 
         releaseDate: brandObject.release_date ? dayjs(brandObject.release_date) : null,
         releasePriceCny: brandObject.release_price_cny,
         releasePriceUsd: brandObject.release_price_usd,
+        imageSource: brandObject.image_source,
       } : {
         nameEn: "", nameZh: "", scale: "",
         categoryEn: "", categoryZh: "", releaseDate: null,
         releasePriceCny: null, releasePriceUsd: null,
+        imageSource: "",
       });
       setImageUrl(brandObject?.image_url || null);
     }
@@ -96,6 +99,9 @@ export default function BrandObjectModal({ open, brandObject, brandId, onClose, 
         </Form.Item>
         <Form.Item label={t("image")}>
           <ImageUploadField value={imageUrl} onChange={setImageUrl} />
+        </Form.Item>
+        <Form.Item label={t("imageSource")} name="imageSource">
+          <Input placeholder={t("imageSource")} />
         </Form.Item>
       </Form>
     </Modal>

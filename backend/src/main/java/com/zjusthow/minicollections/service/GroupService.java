@@ -1,6 +1,5 @@
 package com.zjusthow.minicollections.service;
 
-import com.zjusthow.minicollections.elasticsearch.BrandObjectElasticsearchQueryService;
 import com.zjusthow.minicollections.entity.GroupEntity;
 import com.zjusthow.minicollections.entity.UserObjectEntity;
 import com.zjusthow.minicollections.exception.GroupNotFoundException;
@@ -13,6 +12,7 @@ import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.model.UserObjectSearchDto;
 import com.zjusthow.minicollections.repository.GroupRepository;
 import com.zjusthow.minicollections.repository.UserObjectRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -30,8 +30,8 @@ import java.util.List;
 public class GroupService {
     private final GroupRepository groupRepository;
     private final UserObjectRepository userObjectRepository;
-    private final BrandObjectElasticsearchQueryService esQueryService;
     private final JdbcClient jdbcClient;
+    private final ImageStorageService imageStorageService;
 
     @Value("${app.limits.max-groups-per-user}")
     private int maxGroupsPerUser;
@@ -42,12 +42,12 @@ public class GroupService {
     public GroupService(
             GroupRepository groupRepository,
             UserObjectRepository userObjectRepository,
-            BrandObjectElasticsearchQueryService esQueryService,
-            JdbcClient jdbcClient) {
+            JdbcClient jdbcClient,
+            @Autowired(required = false) ImageStorageService imageStorageService) {
         this.groupRepository = groupRepository;
         this.userObjectRepository = userObjectRepository;
-        this.esQueryService = esQueryService;
         this.jdbcClient = jdbcClient;
+        this.imageStorageService = imageStorageService;
     }
 
     @Cacheable(
@@ -83,9 +83,6 @@ public class GroupService {
         List<GroupDto> groups = groupRepository.searchByKeyword(userId, keyword)
                 .stream().map(GroupDto::new).toList();
 
-        List<Long> brandObjectIds = esQueryService.searchIdsByKeyword(keyword);
-        List<Long> safeIds = brandObjectIds.isEmpty() ? List.of(-1L) : brandObjectIds;
-
         List<UserObjectSearchDto> objects = jdbcClient.sql("""
                         SELECT DISTINCT uo.id, uo.user_id, uo.group_id, g.name AS group_name,
                                uo.brand_object_id, uo.name, uo.image_url, uo.purchase_date,
@@ -100,13 +97,15 @@ public class GroupService {
                         LEFT JOIN brands br ON bo.brand_id = br.id
                         WHERE uo.user_id = :userId
                           AND (
-                            uo.name ILIKE '%' || :keyword || '%'
-                            OR uo.brand_object_id = ANY(:brandObjectIds)
+                            uo.name       ILIKE '%' || :keyword || '%'
+                            OR bo.name_en ILIKE '%' || :keyword || '%'
+                            OR bo.name_zh ILIKE '%' || :keyword || '%'
+                            OR br.name_en ILIKE '%' || :keyword || '%'
+                            OR br.name_zh ILIKE '%' || :keyword || '%'
                           )
                         """)
                 .param("userId", userId)
-                .param("keyword", keyword)
-                .param("brandObjectIds", safeIds.toArray(Long[]::new))
+                .param("keyword", keyword.trim())
                 .query((rs, rowNum) -> new UserObjectSearchDto(
                         rs.getLong("id"),
                         rs.getLong("user_id"),
@@ -157,6 +156,8 @@ public class GroupService {
             throw new NoPermissionException("No permission to update this group");
         }
 
+        deleteReplacedUserImage(userId, groupEntity.imageUrl(), imageUrl);
+
         GroupEntity updatedGroupEntity = new GroupEntity(
                 groupId,
                 userId,
@@ -180,6 +181,11 @@ public class GroupService {
             throw new NoPermissionException("No permission to delete this group");
         }
 
+        deleteUserImage(userId, groupEntity.imageUrl());
+        userObjectRepository.findByGroupId(groupId)
+                .orElse(Collections.emptyList())
+                .forEach(uo -> deleteUserImage(userId, uo.imageUrl()));
+
         groupRepository.deleteById(groupId);
     }
 
@@ -193,29 +199,25 @@ public class GroupService {
             return Collections.emptyList();
         }
 
-        List<Long> brandObjectIds;
-        try {
-            brandObjectIds = esQueryService.searchIdsByKeyword(keyword.trim());
-        } catch (Exception e) {
-            brandObjectIds = List.of();
-        }
-        List<Long> safeIds = brandObjectIds.isEmpty() ? List.of(-1L) : brandObjectIds;
-
         return jdbcClient.sql("""
-                        SELECT id, user_id, group_id, brand_object_id, name, image_url,
-                               purchase_date, purchase_price, other_notes
-                        FROM user_objects
-                        WHERE group_id = :groupId
-                          AND user_id = :userId
+                        SELECT uo.id, uo.user_id, uo.group_id, uo.brand_object_id,
+                               uo.name, uo.image_url, uo.purchase_date, uo.purchase_price, uo.other_notes
+                        FROM user_objects uo
+                        LEFT JOIN brand_objects bo ON uo.brand_object_id = bo.id
+                        LEFT JOIN brands br ON bo.brand_id = br.id
+                        WHERE uo.group_id = :groupId
+                          AND uo.user_id = :userId
                           AND (
-                            name ILIKE '%' || :keyword || '%'
-                            OR brand_object_id = ANY(:brandObjectIds)
+                            uo.name       ILIKE '%' || :keyword || '%'
+                            OR bo.name_en ILIKE '%' || :keyword || '%'
+                            OR bo.name_zh ILIKE '%' || :keyword || '%'
+                            OR br.name_en ILIKE '%' || :keyword || '%'
+                            OR br.name_zh ILIKE '%' || :keyword || '%'
                           )
                         """)
                 .param("groupId", groupId)
                 .param("userId", userId)
                 .param("keyword", keyword.trim())
-                .param("brandObjectIds", safeIds.toArray(Long[]::new))
                 .query((rs, rowNum) -> new UserObjectDto(
                         rs.getLong("id"),
                         rs.getLong("user_id"),
@@ -310,6 +312,9 @@ public class GroupService {
         if (!existing.userId().equals(userId)) {
             throw new NoPermissionException("No permission to update this user object");
         }
+
+        deleteReplacedUserImage(userId, existing.imageUrl(), imageUrl);
+
         UserObjectEntity updated = new UserObjectEntity(
                 userObjectId,
                 existing.userId(),
@@ -338,7 +343,20 @@ public class GroupService {
             throw new NoPermissionException("No permission to delete this user object");
         }
 
+        deleteUserImage(userId, userObjectEntity.imageUrl());
         userObjectRepository.deleteById(userObjectId);
+    }
+
+    private void deleteReplacedUserImage(long userId, String previousUrl, String newUrl) {
+        if (imageStorageService != null) {
+            imageStorageService.deleteReplacedUserImage(userId, previousUrl, newUrl);
+        }
+    }
+
+    private void deleteUserImage(long userId, String imageUrl) {
+        if (imageStorageService != null) {
+            imageStorageService.deleteUserImageIfOwned(userId, imageUrl);
+        }
     }
 
 }

@@ -1,12 +1,9 @@
 import { Modal } from "antd";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
+import { formatReleasePrice } from "../../../utils";
 
-export default function BrandObjectDetailModal({
-  visible,
-  onCancel,
-  detail,
-}) {
+export default function BrandObjectDetailModal({ visible, onCancel, detail }) {
   const { t } = useLocale();
   if (!detail) return null;
   return (
@@ -41,18 +38,22 @@ export default function BrandObjectDetailModal({
         <strong>{t("scale")}: </strong>
         {detail.scale ?? "—"}
       </p>
-      <p>
-        <strong>{t("releasePrice")}: </strong>
-        {detail.release_price != null
-          ? detail.release_price
-          : detail.releasePrice != null
-            ? detail.releasePrice
-            : "—"}
-      </p>
+      {formatReleasePrice(detail) != null && (
+        <p>
+          <strong>{t("releasePrice")}: </strong>
+          {formatReleasePrice(detail)}
+        </p>
+      )}
       <p>
         <strong>{t("releaseDate")}: </strong>
         {detail.release_date ?? detail.releaseDate ?? "—"}
       </p>
+      {(detail.image_source ?? detail.imageSource) && (
+        <p>
+          <strong>{t("imageSource")}: </strong>
+          {detail.image_source ?? detail.imageSource}
+        </p>
+      )}
     </Modal>
   );
 }

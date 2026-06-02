@@ -63,7 +63,9 @@ export default function GroupsTab({
                 justifyContent: "center",
               }}
             >
-              <PlusOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+              <PlusOutlined
+                style={{ fontSize: 36, color: "var(--neu-text-2)" }}
+              />
             </div>
             <div className="neu-nameplate">{t("addGroup")}</div>
           </div>
@@ -87,17 +89,19 @@ export default function GroupsTab({
       key={obj.id}
       hoverable
       className="neu-model-card"
-      cover={<CardCover image_url={obj.imageUrl ?? obj.image_url} name={obj.name} />}
+      cover={
+        <CardCover image_url={obj.imageUrl ?? obj.image_url} name={obj.name} />
+      }
       onClick={() =>
-        navigate(
-          `/groups/${obj.groupId ?? obj.group_id}/objects/${obj.id}`,
-          {
-            state: {
-              userObject: obj,
-              group: { id: obj.groupId ?? obj.group_id, name: obj.groupName ?? obj.group_name },
+        navigate(`/groups/${obj.groupId ?? obj.group_id}/objects/${obj.id}`, {
+          state: {
+            userObject: obj,
+            group: {
+              id: obj.groupId ?? obj.group_id,
+              name: obj.groupName ?? obj.group_name,
             },
-          }
-        )
+          },
+        })
       }
       bodyStyle={{ padding: 0 }}
     />
@@ -137,7 +141,12 @@ export default function GroupsTab({
             )}
             {searchResultObjects.length > 0 && (
               <>
-                <div style={{ ...sectionLabelStyle, marginTop: searchResultGroups.length > 0 ? 24 : 0 }}>
+                <div
+                  style={{
+                    ...sectionLabelStyle,
+                    marginTop: searchResultGroups.length > 0 ? 24 : 0,
+                  }}
+                >
                   {t("myObjects")}
                 </div>
                 <div style={gridStyle}>
@@ -145,11 +154,18 @@ export default function GroupsTab({
                 </div>
               </>
             )}
-            {searchResultGroups.length === 0 && searchResultObjects.length === 0 && (
-              <div style={{ textAlign: "center", color: "var(--neu-text-2)", padding: "32px 0" }}>
-                {t("noSearchResults")}
-              </div>
-            )}
+            {searchResultGroups.length === 0 &&
+              searchResultObjects.length === 0 && (
+                <div
+                  style={{
+                    textAlign: "center",
+                    color: "var(--neu-text-2)",
+                    padding: "32px 0",
+                  }}
+                >
+                  {t("noSearchResults")}
+                </div>
+              )}
           </>
         ) : (
           <div style={gridStyle}>

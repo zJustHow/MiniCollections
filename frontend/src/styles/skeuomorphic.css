@@ -6,38 +6,41 @@
 
 :root {
   /* ── Color palette ── */
-  --neu-bg:           #fcfbf8;              /* warm near-white              */
-  --neu-sd:           rgba(184, 182, 176, 0.55); /* warm-neutral dark shadow  */
-  --neu-sl:           rgba(255, 255, 255, 0.95); /* bright white highlight   */
+  --neu-bg: #fcfbf8; /* warm near-white              */
+  --neu-sd: rgba(184, 182, 176, 0.55); /* warm-neutral dark shadow  */
+  --neu-sl: rgba(255, 255, 255, 0.95); /* bright white highlight   */
 
-  --neu-accent:       #5592cc;              /* cooler medium blue           */
-  --neu-accent-dark:  #3d78b8;              /* pressed / darker accent      */
-  --neu-accent-light: #6aa8dc;              /* hover / lighter accent       */
+  --neu-accent: #5592cc; /* cooler medium blue           */
+  --neu-accent-dark: #3d78b8; /* pressed / darker accent      */
+  --neu-accent-light: #6aa8dc; /* hover / lighter accent       */
 
-  --neu-danger:       #c44040;
+  --neu-danger: #c44040;
   --neu-danger-light: #d45858;
-  --neu-danger-dark:  #962e2e;
+  --neu-danger-dark: #962e2e;
 
-  --neu-text:         #3c4f68;              /* dark navy-gray text         */
-  --neu-text-2:       #8a9db8;              /* secondary / placeholder     */
+  --neu-text: #3c4f68; /* dark navy-gray text         */
+  --neu-text-2: #8a9db8; /* secondary / placeholder     */
 
   /* ── Border radius tiers ── */
-  --r-md: 10px;  /* buttons, inputs, controls  */
-  --r-lg: 14px;  /* cards, modals, drawers, panels */
+  --r-md: 10px; /* buttons, inputs, controls  */
+  --r-lg: 14px; /* cards, modals, drawers, panels */
 
   --neu-border-r: var(--r-lg);
 
   /* raised (convex) — element floats above surface */
-  --raised:    8px 8px 20px var(--neu-sd), -8px -8px 20px var(--neu-sl);
+  --raised: 8px 8px 20px var(--neu-sd), -8px -8px 20px var(--neu-sl);
   --raised-sm: 5px 5px 12px var(--neu-sd), -5px -5px 12px var(--neu-sl);
 
   /* inset (concave) — element pressed into surface */
-  --inset:    inset 5px 5px 12px var(--neu-sd), inset -5px -5px 12px var(--neu-sl);
-  --inset-sm: inset 3px 3px 8px  var(--neu-sd), inset -3px -3px 8px  var(--neu-sl);
+  --inset: inset 5px 5px 12px var(--neu-sd), inset -5px -5px 12px var(--neu-sl);
+  --inset-sm:
+    inset 3px 3px 8px var(--neu-sd), inset -3px -3px 8px var(--neu-sl);
 }
 
 /* ── GLOBAL ───────────────────────────────────────────────── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -60,8 +63,9 @@ body {
 /* ── HEADER ───────────────────────────────────────────────── */
 .ant-layout-header {
   background: var(--neu-bg);
-  box-shadow: 0 6px 20px rgba(184, 182, 176, 0.5),
-              0 2px 6px rgba(184, 182, 176, 0.3);
+  box-shadow:
+    0 6px 20px rgba(184, 182, 176, 0.5),
+    0 2px 6px rgba(184, 182, 176, 0.3);
   border-bottom: none;
   position: relative;
   z-index: 10;
@@ -162,8 +166,8 @@ body {
 
 .ant-table-thead > tr > th,
 .ant-table-thead > tr > .ant-table-cell {
-  background: rgba(184, 182, 176, 0.10);
-  border-bottom: 1px solid rgba(184, 182, 176, 0.30);
+  background: rgba(184, 182, 176, 0.1);
+  border-bottom: 1px solid rgba(184, 182, 176, 0.3);
   color: var(--neu-text-2);
   font-size: 11px;
   font-weight: 700;
@@ -207,13 +211,17 @@ body {
   border: none;
   border-radius: var(--r-lg);
   box-shadow: var(--raised);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
   overflow: hidden;
 }
 
 .ant-card-hoverable:hover {
   transform: translateY(-3px);
-  box-shadow: 10px 10px 22px var(--neu-sd), -6px -6px 16px var(--neu-sl);
+  box-shadow:
+    10px 10px 22px var(--neu-sd),
+    -6px -6px 16px var(--neu-sl);
 }
 
 .ant-card-hoverable:active {
@@ -230,20 +238,23 @@ body {
 /* ── MODEL CARD (neumorphic pill style) ───────────────────── */
 .neu-model-card.ant-card {
   border-radius: 32px;
-  box-shadow: 16px 16px 48px rgba(184, 182, 176, 0.72),
-              -16px -16px 48px rgba(255, 255, 255, 0.98);
+  box-shadow:
+    16px 16px 48px rgba(184, 182, 176, 0.72),
+    -16px -16px 48px rgba(255, 255, 255, 0.98);
 }
 
 .neu-model-card.ant-card-hoverable:hover {
   transform: translateY(-4px) scale(1.01);
-  box-shadow: 20px 20px 60px rgba(184, 182, 176, 0.80),
-              -12px -12px 40px rgba(255, 255, 255, 1);
+  box-shadow:
+    20px 20px 60px rgba(184, 182, 176, 0.8),
+    -12px -12px 40px rgba(255, 255, 255, 1);
 }
 
 .neu-model-card.ant-card-hoverable:active {
   transform: translateY(0) scale(1);
-  box-shadow: inset 6px 6px 16px rgba(184, 182, 176, 0.55),
-              inset -6px -6px 16px rgba(255, 255, 255, 0.95);
+  box-shadow:
+    inset 6px 6px 16px rgba(184, 182, 176, 0.55),
+    inset -6px -6px 16px rgba(255, 255, 255, 0.95);
 }
 
 /* ── BUTTONS ──────────────────────────────────────────────── */
@@ -253,10 +264,11 @@ body {
 }
 
 .avatar-upload-trigger:active .ant-avatar {
-  box-shadow: 0px 0px 0px rgba(61, 120, 184, 0.40),
-              0px 0px 0px rgba(255, 255, 255, 0.70),
-              inset 4px 4px 12px rgba(30, 70, 140, 0.45),
-              inset -4px -4px 12px rgba(120, 180, 255, 0.20);
+  box-shadow:
+    0px 0px 0px rgba(61, 120, 184, 0.4),
+    0px 0px 0px rgba(255, 255, 255, 0.7),
+    inset 4px 4px 12px rgba(30, 70, 140, 0.45),
+    inset -4px -4px 12px rgba(120, 180, 255, 0.2);
 }
 
 .ant-btn {
@@ -266,8 +278,9 @@ body {
   letter-spacing: 0.3px;
   background: var(--neu-bg);
   color: var(--neu-text);
-  box-shadow: 6px 6px 12px rgba(184, 182, 176, 0.60),
-              -6px -6px 12px rgba(255, 255, 255, 0.98);
+  box-shadow:
+    6px 6px 12px rgba(184, 182, 176, 0.6),
+    -6px -6px 12px rgba(255, 255, 255, 0.98);
   transition: all 0.3s;
 }
 
@@ -281,17 +294,19 @@ body {
 
 .ant-btn:hover:not([disabled]) {
   color: var(--neu-accent);
-  box-shadow: 8px 8px 16px rgba(184, 182, 176, 0.65),
-              -8px -8px 16px rgba(255, 255, 255, 1);
+  box-shadow:
+    8px 8px 16px rgba(184, 182, 176, 0.65),
+    -8px -8px 16px rgba(255, 255, 255, 1);
 }
 
 .ant-btn:active:not([disabled]) {
   color: #666;
   /* outer shadows collapse to 0, inset shadows appear — enables smooth transition */
-  box-shadow: 0px 0px 0px rgba(184, 182, 176, 0.60),
-              0px 0px 0px rgba(255, 255, 255, 0.98),
-              inset 4px 4px 12px rgba(184, 182, 176, 0.60),
-              inset -4px -4px 12px rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0px 0px 0px rgba(184, 182, 176, 0.6),
+    0px 0px 0px rgba(255, 255, 255, 0.98),
+    inset 4px 4px 12px rgba(184, 182, 176, 0.6),
+    inset -4px -4px 12px rgba(255, 255, 255, 0.98);
 }
 
 .ant-btn.btn-counting-down,
@@ -299,18 +314,20 @@ body {
 .ant-btn.btn-counting-down:focus:not(:active),
 .ant-btn.btn-counting-down:focus-visible:not(:active) {
   color: #666 !important;
-  box-shadow: 0px 0px 0px rgba(184, 182, 176, 0.60),
-              0px 0px 0px rgba(255, 255, 255, 0.98),
-              inset 4px 4px 12px rgba(184, 182, 176, 0.60),
-              inset -4px -4px 12px rgba(255, 255, 255, 0.98) !important;
+  box-shadow:
+    0px 0px 0px rgba(184, 182, 176, 0.6),
+    0px 0px 0px rgba(255, 255, 255, 0.98),
+    inset 4px 4px 12px rgba(184, 182, 176, 0.6),
+    inset -4px -4px 12px rgba(255, 255, 255, 0.98) !important;
 }
 
 /* strip antd v5 focus ring globally — only apply when not being pressed */
 .ant-btn:focus:not(:active),
 .ant-btn:focus-visible:not(:active) {
   outline: none !important;
-  box-shadow: 6px 6px 12px rgba(184, 182, 176, 0.60),
-              -6px -6px 12px rgba(255, 255, 255, 0.98) !important;
+  box-shadow:
+    6px 6px 12px rgba(184, 182, 176, 0.6),
+    -6px -6px 12px rgba(255, 255, 255, 0.98) !important;
 }
 
 .ant-btn:focus,
@@ -321,22 +338,25 @@ body {
 /* default button — triple-class beats antd v5 focus ring (same pattern as danger button) */
 .ant-btn.ant-btn-default {
   border-color: var(--neu-bg);
-  box-shadow: 6px 6px 12px rgba(184, 182, 176, 0.60),
-              -6px -6px 12px rgba(255, 255, 255, 0.98);
+  box-shadow:
+    6px 6px 12px rgba(184, 182, 176, 0.6),
+    -6px -6px 12px rgba(255, 255, 255, 0.98);
 }
 
 .ant-btn.ant-btn-default:hover:not([disabled]) {
   border-color: var(--neu-bg);
-  box-shadow: 8px 8px 16px rgba(184, 182, 176, 0.65),
-              -8px -8px 16px rgba(255, 255, 255, 1);
+  box-shadow:
+    8px 8px 16px rgba(184, 182, 176, 0.65),
+    -8px -8px 16px rgba(255, 255, 255, 1);
 }
 
 .ant-btn.ant-btn-default:active:not([disabled]) {
   border-color: var(--neu-bg);
-  box-shadow: 0px 0px 0px rgba(184, 182, 176, 0.60),
-              0px 0px 0px rgba(255, 255, 255, 0.98),
-              inset 4px 4px 12px rgba(184, 182, 176, 0.60),
-              inset -4px -4px 12px rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0px 0px 0px rgba(184, 182, 176, 0.6),
+    0px 0px 0px rgba(255, 255, 255, 0.98),
+    inset 4px 4px 12px rgba(184, 182, 176, 0.6),
+    inset -4px -4px 12px rgba(255, 255, 255, 0.98);
 }
 
 /* primary — accent blue */
@@ -344,24 +364,27 @@ body {
   background: var(--neu-accent);
   color: #fff;
   border-color: var(--neu-accent);
-  box-shadow: 6px 6px 12px rgba(61, 120, 184, 0.40),
-              -6px -6px 12px rgba(255, 255, 255, 0.70);
+  box-shadow:
+    6px 6px 12px rgba(61, 120, 184, 0.4),
+    -6px -6px 12px rgba(255, 255, 255, 0.7);
 }
 
 .ant-btn-primary:hover:not([disabled]) {
   background: var(--neu-accent-light);
   color: #fff;
-  box-shadow: 8px 8px 16px rgba(61, 120, 184, 0.45),
-              -8px -8px 16px rgba(255, 255, 255, 0.75);
+  box-shadow:
+    8px 8px 16px rgba(61, 120, 184, 0.45),
+    -8px -8px 16px rgba(255, 255, 255, 0.75);
 }
 
 .ant-btn-primary:active:not([disabled]) {
   background: var(--neu-accent-dark);
   color: rgba(255, 255, 255, 0.85);
-  box-shadow: 0px 0px 0px rgba(61, 120, 184, 0.40),
-              0px 0px 0px rgba(255, 255, 255, 0.70),
-              inset 4px 4px 12px rgba(30, 70, 140, 0.45),
-              inset -4px -4px 12px rgba(120, 180, 255, 0.20);
+  box-shadow:
+    0px 0px 0px rgba(61, 120, 184, 0.4),
+    0px 0px 0px rgba(255, 255, 255, 0.7),
+    inset 4px 4px 12px rgba(30, 70, 140, 0.45),
+    inset -4px -4px 12px rgba(120, 180, 255, 0.2);
 }
 
 /* danger button — triple-class selector (0,3,0 / 0,5,0 on hover) beats antd v5 color-variant selectors */
@@ -369,26 +392,29 @@ body {
   background: var(--neu-danger);
   color: #fff;
   border-color: var(--neu-danger);
-  box-shadow: 6px 6px 12px rgba(196, 64, 64, 0.38),
-              -6px -6px 12px rgba(255, 255, 255, 0.70);
+  box-shadow:
+    6px 6px 12px rgba(196, 64, 64, 0.38),
+    -6px -6px 12px rgba(255, 255, 255, 0.7);
 }
 
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:hover:not([disabled]) {
   background: var(--neu-danger-light);
   color: #fff;
   border-color: var(--neu-danger-light);
-  box-shadow: 8px 8px 16px rgba(196, 64, 64, 0.42),
-              -8px -8px 16px rgba(255, 255, 255, 0.75);
+  box-shadow:
+    8px 8px 16px rgba(196, 64, 64, 0.42),
+    -8px -8px 16px rgba(255, 255, 255, 0.75);
 }
 
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not([disabled]) {
   background: var(--neu-danger-dark);
   color: rgba(255, 255, 255, 0.85);
   border-color: var(--neu-danger-dark);
-  box-shadow: 0px 0px 0px rgba(196, 64, 64, 0.38),
-              0px 0px 0px rgba(255, 255, 255, 0.70),
-              inset 4px 4px 12px rgba(150, 30, 30, 0.45),
-              inset -4px -4px 12px rgba(255, 120, 120, 0.15);
+  box-shadow:
+    0px 0px 0px rgba(196, 64, 64, 0.38),
+    0px 0px 0px rgba(255, 255, 255, 0.7),
+    inset 4px 4px 12px rgba(150, 30, 30, 0.45),
+    inset -4px -4px 12px rgba(255, 120, 120, 0.15);
 }
 
 /* ── INPUTS ───────────────────────────────────────────────── */
@@ -457,40 +483,58 @@ body {
 
 .ant-input-group-addon .ant-btn,
 .ant-input-search-button,
-.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child .ant-input-search-button {
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button {
   background: var(--neu-bg);
   border: none;
   color: var(--neu-text);
   border-radius: var(--r-md);
-  box-shadow: 6px 6px 12px rgba(184, 182, 176, 0.60),
-              -6px -6px 12px rgba(255, 255, 255, 0.98);
+  box-shadow:
+    6px 6px 12px rgba(184, 182, 176, 0.6),
+    -6px -6px 12px rgba(255, 255, 255, 0.98);
   transition: all 0.3s;
 }
 
 .ant-input-group-addon .ant-btn:hover:not([disabled]),
 .ant-input-search-button:hover:not([disabled]),
-.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child .ant-input-search-button:hover:not([disabled]) {
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:hover:not([disabled]) {
   color: var(--neu-accent);
-  box-shadow: 8px 8px 16px rgba(184, 182, 176, 0.65),
-              -8px -8px 16px rgba(255, 255, 255, 1);
+  box-shadow:
+    8px 8px 16px rgba(184, 182, 176, 0.65),
+    -8px -8px 16px rgba(255, 255, 255, 1);
 }
 
 .ant-input-group-addon .ant-btn:active:not([disabled]),
 .ant-input-search-button:active:not([disabled]),
-.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child .ant-input-search-button:active:not([disabled]) {
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:active:not([disabled]) {
   color: #666;
-  box-shadow: 0px 0px 0px rgba(184, 182, 176, 0.60),
-              0px 0px 0px rgba(255, 255, 255, 0.98),
-              inset 4px 4px 12px rgba(184, 182, 176, 0.60),
-              inset -4px -4px 12px rgba(255, 255, 255, 0.98);
+  box-shadow:
+    0px 0px 0px rgba(184, 182, 176, 0.6),
+    0px 0px 0px rgba(255, 255, 255, 0.98),
+    inset 4px 4px 12px rgba(184, 182, 176, 0.6),
+    inset -4px -4px 12px rgba(255, 255, 255, 0.98);
 }
 
 .ant-input-group-addon .ant-btn:focus,
 .ant-input-group-addon .ant-btn:focus-visible,
 .ant-input-search-button:focus,
 .ant-input-search-button:focus-visible,
-.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child .ant-input-search-button:focus,
-.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child .ant-input-search-button:focus-visible {
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:focus,
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:focus-visible {
   outline: none !important;
   border-color: transparent !important;
 }
@@ -499,10 +543,17 @@ body {
 .ant-input-group-addon .ant-btn:focus-visible:not(:active),
 .ant-input-search-button:focus:not(:active),
 .ant-input-search-button:focus-visible:not(:active),
-.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child .ant-input-search-button:focus:not(:active),
-.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child .ant-input-search-button:focus-visible:not(:active) {
-  box-shadow: 6px 6px 12px rgba(184, 182, 176, 0.60),
-              -6px -6px 12px rgba(255, 255, 255, 0.98) !important;
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:focus:not(:active),
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:focus-visible:not(:active) {
+  box-shadow:
+    6px 6px 12px rgba(184, 182, 176, 0.6),
+    -6px -6px 12px rgba(255, 255, 255, 0.98) !important;
 }
 
 /* textarea */
@@ -511,8 +562,9 @@ textarea.ant-input {
 }
 
 textarea.ant-input:focus {
-  box-shadow: var(--inset-sm),
-              0 0 0 2px rgba(91, 155, 213, 0.2);
+  box-shadow:
+    var(--inset-sm),
+    0 0 0 2px rgba(91, 155, 213, 0.2);
 }
 
 /* ── SELECT ───────────────────────────────────────────────── */
@@ -678,7 +730,7 @@ textarea.ant-input:focus {
   -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: var(--r-lg);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .ant-popover-inner-content {
@@ -733,22 +785,25 @@ textarea.ant-input:focus {
   background: var(--neu-accent);
   border: none;
   color: #fff;
-  box-shadow: 5px 5px 14px rgba(61, 120, 184, 0.42),
-              -3px -3px 8px rgba(255, 255, 255, 0.75);
+  box-shadow:
+    5px 5px 14px rgba(61, 120, 184, 0.42),
+    -3px -3px 8px rgba(255, 255, 255, 0.75);
   transition: all 0.16s ease;
 }
 
 .neu-fab:hover {
   background: var(--neu-accent-light);
-  box-shadow: 7px 7px 18px rgba(61, 120, 184, 0.46),
-              -3px -3px 10px rgba(255, 255, 255, 0.8);
+  box-shadow:
+    7px 7px 18px rgba(61, 120, 184, 0.46),
+    -3px -3px 10px rgba(255, 255, 255, 0.8);
   transform: translateY(-2px);
 }
 
 .neu-fab:active {
   background: var(--neu-accent-dark);
-  box-shadow: inset 4px 4px 10px rgba(30, 70, 140, 0.4),
-              inset -2px -2px 6px rgba(120, 180, 255, 0.25);
+  box-shadow:
+    inset 4px 4px 10px rgba(30, 70, 140, 0.4),
+    inset -2px -2px 6px rgba(120, 180, 255, 0.25);
   transform: translateY(0);
 }
 
@@ -758,7 +813,9 @@ textarea.ant-input:focus {
   border: none;
   cursor: pointer;
   box-shadow: var(--raised-sm);
-  transition: box-shadow 0.18s ease, color 0.18s ease;
+  transition:
+    box-shadow 0.18s ease,
+    color 0.18s ease;
   text-align: left;
   width: 100%;
 }
@@ -776,8 +833,9 @@ textarea.ant-input:focus {
   background: var(--neu-accent);
   border: none;
   color: #fff;
-  box-shadow: 3px 3px 8px rgba(61, 120, 184, 0.38),
-              -1px -1px 4px rgba(255, 255, 255, 0.6);
+  box-shadow:
+    3px 3px 8px rgba(61, 120, 184, 0.38),
+    -1px -1px 4px rgba(255, 255, 255, 0.6);
   transition: all 0.14s ease;
 }
 
@@ -799,8 +857,9 @@ textarea.ant-input:focus {
   border: none;
   border-radius: 24px;
   padding: 48px 44px;
-  box-shadow: 14px 14px 32px rgba(184, 182, 176, 0.65),
-              -10px -10px 24px rgba(255, 255, 255, 0.85);
+  box-shadow:
+    14px 14px 32px rgba(184, 182, 176, 0.65),
+    -10px -10px 24px rgba(255, 255, 255, 0.85);
   max-width: 360px;
   margin: 60px auto 0;
 }
@@ -816,6 +875,76 @@ textarea.ant-input:focus {
 }
 
 .neu-login-title span {
+  color: var(--neu-accent);
+}
+
+/* ── Brand object list card (name + stats below image) ─────── */
+.neu-brand-object-list-card.ant-card {
+  overflow: hidden;
+}
+
+.neu-brand-object-list-card .ant-card-cover {
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.neu-brand-object-list-card .ant-card-cover > div {
+  border-radius: 0 0 24px 24px;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.neu-brand-object-list-card .ant-card-cover img {
+  transition: transform 0.35s ease;
+  will-change: transform;
+}
+
+.neu-brand-object-list-card:hover .ant-card-cover img {
+  transform: scale(1.08);
+}
+
+.neu-brand-object-list-card .ant-card-body {
+  border-top: none;
+}
+
+.neu-card-footer {
+  padding: 12px 14px 14px;
+  background: var(--neu-bg);
+}
+
+.neu-card-title {
+  color: var(--neu-text);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.3px;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.neu-card-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.neu-card-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--neu-text-2);
+  box-shadow: var(--inset-sm);
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+
+.neu-card-stat .anticon {
+  font-size: 13px;
   color: var(--neu-accent);
 }
 
@@ -856,13 +985,27 @@ textarea.ant-input:focus {
   color: var(--neu-text-2);
 }
 
-.ant-tag-orange  { color: #b86e10; }
-.ant-tag-green   { color: #1e7d50; }
-.ant-tag-red     { color: var(--neu-danger); }
-.ant-tag-cyan    { color: #0e7490; }
-.ant-tag-blue    { color: var(--neu-accent); }
-.ant-tag-volcano { color: #c2501a; }
-.ant-tag-purple  { color: #6d28d9; }
+.ant-tag-orange {
+  color: #b86e10;
+}
+.ant-tag-green {
+  color: #1e7d50;
+}
+.ant-tag-red {
+  color: var(--neu-danger);
+}
+.ant-tag-cyan {
+  color: #0e7490;
+}
+.ant-tag-blue {
+  color: var(--neu-accent);
+}
+.ant-tag-volcano {
+  color: #c2501a;
+}
+.ant-tag-purple {
+  color: #6d28d9;
+}
 
 /* ── DIVIDER ──────────────────────────────────────────────── */
 .ant-divider {
@@ -881,13 +1024,25 @@ textarea.ant-input:focus {
 /* Replace scale(0) start with a gentler scale+lift feel.           */
 
 @keyframes neu-modal-in {
-  from { opacity: 0; transform: scale(0.94) translateY(14px); }
-  to   { opacity: 1; transform: scale(1)    translateY(0);    }
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes neu-modal-out {
-  from { opacity: 1; transform: scale(1)    translateY(0);   }
-  to   { opacity: 0; transform: scale(0.97) translateY(8px); }
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
 }
 
 /* Override initial hidden state (antd defaults to scale(0)) */
@@ -1048,7 +1203,9 @@ textarea.ant-input:focus {
     font-size: 16px;
     cursor: pointer;
     flex-shrink: 0;
-    transition: box-shadow 0.15s ease, color 0.15s ease;
+    transition:
+      box-shadow 0.15s ease,
+      color 0.15s ease;
   }
 
   .mobile-menu-btn:active {
@@ -1080,7 +1237,9 @@ textarea.ant-input:focus {
     font-size: 15px;
     color: var(--neu-text-2);
     cursor: pointer;
-    transition: background 0.12s ease, color 0.12s ease;
+    transition:
+      background 0.12s ease,
+      color 0.12s ease;
   }
 
   .mobile-menu-item:active,

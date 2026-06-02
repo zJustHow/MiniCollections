@@ -1,13 +1,14 @@
 import { Form, Input, Modal } from "antd";
 import { useEffect, useState } from "react";
-import { adminCreateBrand, adminUpdateBrand } from "../../../utils";
+import { adminCreateBrand, adminUpdateBrand, uploadBrandLogo } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
-import ImageUploadField from "../../ImageUploadField";
+import BrandLogoUploadField from "../../BrandLogoUploadField";
 import useModalForm from "../../../hooks/useModalForm";
 
 export default function BrandModal({ open, brand, onClose, onSuccess }) {
   const { t } = useLocale();
   const [imageUrl, setImageUrl] = useState(null);
+  const [pendingLogoFile, setPendingLogoFile] = useState(null);
   const isEdit = !!brand;
 
   const { form, loading, handleOk } = useModalForm({
@@ -20,7 +21,15 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
       if (isEdit) {
         await adminUpdateBrand(brand.id, payload);
       } else {
-        await adminCreateBrand(payload);
+        const created = await adminCreateBrand({
+          name_en: payload.name_en,
+          name_zh: payload.name_zh,
+          image_url: null,
+        });
+        if (pendingLogoFile && created?.id) {
+          const updated = await uploadBrandLogo(created.id, pendingLogoFile);
+          setImageUrl(updated.image_url ?? updated.imageUrl ?? null);
+        }
       }
     },
     successMessage: isEdit ? t("brandUpdated") : t("brandCreated"),
@@ -36,6 +45,7 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
         : { nameEn: "", nameZh: "" }
       );
       setImageUrl(brand?.image_url || null);
+      setPendingLogoFile(null);
     }
   }, [open, brand, form]);
 
@@ -59,7 +69,12 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
           <Input />
         </Form.Item>
         <Form.Item label={t("image")}>
-          <ImageUploadField value={imageUrl} onChange={setImageUrl} />
+          <BrandLogoUploadField
+            brandId={isEdit ? brand.id : null}
+            value={imageUrl}
+            onChange={setImageUrl}
+            onPendingFile={setPendingLogoFile}
+          />
         </Form.Item>
       </Form>
     </Modal>

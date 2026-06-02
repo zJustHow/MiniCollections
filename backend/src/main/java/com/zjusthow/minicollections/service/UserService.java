@@ -10,6 +10,7 @@ import com.zjusthow.minicollections.repository.GroupRepository;
 import com.zjusthow.minicollections.repository.UserIdentifierRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
 import com.zjusthow.minicollections.model.UserProfileDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,18 +27,21 @@ public class UserService {
     private final UserIdentifierRepository identifierRepository;
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbc;
+    private final ImageStorageService imageStorageService;
 
     public UserService(
             GroupRepository groupRepository,
             UserRepository userRepository,
             UserIdentifierRepository identifierRepository,
             PasswordEncoder passwordEncoder,
-            JdbcTemplate jdbc) {
+            JdbcTemplate jdbc,
+            @Autowired(required = false) ImageStorageService imageStorageService) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.identifierRepository = identifierRepository;
         this.passwordEncoder = passwordEncoder;
         this.jdbc = jdbc;
+        this.imageStorageService = imageStorageService;
     }
 
     @Transactional
@@ -108,6 +112,10 @@ public class UserService {
     @Transactional
     @CacheEvict(value = "users", key = "#userId", beforeInvocation = true)
     public UserProfileDto updateAvatarUrl(Long userId, String avatarUrl) {
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        if (imageStorageService != null) {
+            imageStorageService.deleteReplacedUserImage(userId, user.avatarUrl(), avatarUrl);
+        }
         userRepository.updateAvatarUrlById(userId, avatarUrl);
         return getProfile(userId);
     }

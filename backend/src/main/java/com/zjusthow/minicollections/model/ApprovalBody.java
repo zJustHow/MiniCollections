@@ -8,6 +8,7 @@ public record ApprovalBody(
         String nameEn,
         String nameZh,
         String imageUrl,
+        String imageSource,
         BigDecimal releasePriceCny,
         BigDecimal releasePriceUsd,
         LocalDate releaseDate,

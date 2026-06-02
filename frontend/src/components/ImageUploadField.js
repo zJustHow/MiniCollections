@@ -4,7 +4,7 @@ import { useState } from "react";
 import { uploadImage } from "../utils";
 import { useLocale } from "../LocaleContext";
 
-export default function ImageUploadField({ value, onChange, onRemove }) {
+export default function ImageUploadField({ value, onChange, onRemove, uploadFn }) {
   const { message } = App.useApp();
   const { t } = useLocale();
   const [uploading, setUploading] = useState(false);
@@ -17,8 +17,8 @@ export default function ImageUploadField({ value, onChange, onRemove }) {
       beforeUpload={async (file) => {
         setUploading(true);
         try {
-          const url = await uploadImage(file);
-          onChange(url);
+          const url = uploadFn ? await uploadFn(file) : await uploadImage(file);
+          onChange(typeof url === "string" ? url : url?.image_url ?? url?.imageUrl);
         } catch (e) {
           message.error(e?.message || t("uploadFailed"));
         } finally {

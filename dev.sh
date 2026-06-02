@@ -38,6 +38,19 @@ until curl -sf "http://localhost:9200/_cluster/health?wait_for_status=yellow&tim
 done
 log "Elasticsearch is ready."
 
+log "Uploading seed brand logos to MinIO..."
+if ! "$ROOT/scripts/upload-brand-logos.sh"; then
+  warn "Brand logo upload failed (is MinIO up on :9000?). Logos may 404 until you run scripts/upload-brand-logos.sh"
+fi
+
+FRONTIART_STATIC="$ROOT/backend/src/main/resources/static/images/frontiart"
+if [ -d "$FRONTIART_STATIC" ]; then
+  log "Uploading FrontiArt product images to MinIO..."
+  if ! python3 "$ROOT/scripts/import-frontiart-products.py" --upload-only; then
+    warn "FrontiArt product upload failed. Run: python3 scripts/import-frontiart-products.py --upload-only"
+  fi
+fi
+
 # 2. Start backend
 log "Starting Spring Boot backend..."
 cd "$BACKEND"
@@ -47,6 +60,22 @@ fi
 ./gradlew bootRun --console=plain > "$ROOT/backend.log" 2>&1 &
 BACKEND_PID=$!
 log "Backend PID: $BACKEND_PID  (logs → backend.log)"
+
+log "Waiting for backend to be ready..."
+BACKEND_RETRIES=0
+until curl -sf "http://localhost:8080/brands" > /dev/null 2>&1; do
+  BACKEND_RETRIES=$((BACKEND_RETRIES + 1))
+  if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+    echo -e "${RED}[dev]${NC} Backend process exited. Check backend.log." >&2
+    exit 1
+  fi
+  if [ "$BACKEND_RETRIES" -ge 90 ]; then
+    echo -e "${RED}[dev]${NC} Backend did not become ready after 180s. Check backend.log." >&2
+    exit 1
+  fi
+  sleep 2
+done
+log "Backend is ready."
 
 # 3. Start frontend
 log "Starting React frontend..."

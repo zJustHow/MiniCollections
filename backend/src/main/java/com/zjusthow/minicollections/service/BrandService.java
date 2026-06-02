@@ -24,11 +24,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BrandService {
@@ -42,6 +49,7 @@ public class BrandService {
     private final BrandObjectSearchRepository brandObjectSearchRepository;
     private final BrandElasticsearchQueryService brandElasticsearchQueryService;
     private final BrandSearchRepository brandSearchRepository;
+    private final ImageStorageService imageStorageService;
 
     @Value("${app.elasticsearch.enabled:true}")
     private boolean elasticsearchEnabled;
@@ -53,7 +61,8 @@ public class BrandService {
             @Autowired(required = false) BrandObjectElasticsearchQueryService brandObjectElasticsearchQueryService,
             @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository,
             @Autowired(required = false) BrandElasticsearchQueryService brandElasticsearchQueryService,
-            @Autowired(required = false) BrandSearchRepository brandSearchRepository) {
+            @Autowired(required = false) BrandSearchRepository brandSearchRepository,
+            @Autowired(required = false) ImageStorageService imageStorageService) {
         this.brandRepository = brandRepository;
         this.brandObjectRepository = brandObjectRepository;
         this.displayLocaleResolver = displayLocaleResolver;
@@ -61,6 +70,7 @@ public class BrandService {
         this.brandObjectSearchRepository = brandObjectSearchRepository;
         this.brandElasticsearchQueryService = brandElasticsearchQueryService;
         this.brandSearchRepository = brandSearchRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     private boolean esEnabled() {
@@ -69,6 +79,35 @@ public class BrandService {
 
     private boolean brandEsEnabled() {
         return elasticsearchEnabled && brandElasticsearchQueryService != null;
+    }
+
+    private Map<Long, Long> groupAddCountsFor(List<BrandObjectEntity> entities) {
+        List<Long> ids = entities.stream()
+                .map(BrandObjectEntity::id)
+                .filter(Objects::nonNull)
+                .toList();
+        if (ids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return brandObjectRepository.countGroupAddsByBrandObjectIds(ids).stream()
+                .collect(Collectors.toMap(
+                        row -> row.brandObjectId(),
+                        row -> row.addCount() != null ? row.addCount() : 0L,
+                        (a, b) -> a));
+    }
+
+    private List<BrandObjectDto> toDtos(List<BrandObjectEntity> entities, boolean preferZh) {
+        Map<Long, Long> groupAdds = groupAddCountsFor(entities);
+        return entities.stream()
+                .map(e -> BrandObjectDto.from(e, preferZh, groupAdds.getOrDefault(e.id(), 0L)))
+                .toList();
+    }
+
+    private BrandObjectDto toDto(BrandObjectEntity entity, boolean preferZh) {
+        long groupAdds = entity.id() == null
+                ? 0L
+                : groupAddCountsFor(List.of(entity)).getOrDefault(entity.id(), 0L);
+        return BrandObjectDto.from(entity, preferZh, groupAdds);
     }
 
     @Cacheable(
@@ -130,43 +169,31 @@ public class BrandService {
                 .toList();
     }
 
-    @Cacheable(
-            value = "brandObjects",
-            key = "'brandId_' + #brandId + '_' + #effectiveLocale"
-    )
     public List<BrandObjectDto> getBrandObjectsByBrandId(long brandId, String effectiveLocale) {
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
-        return brandObjectRepository.findByBrandId(brandId)
-                .orElse(Collections.emptyList())
-                .stream()
-                .map(e -> BrandObjectDto.from(e, preferZh, preferCny))
-                .toList();
+        List<BrandObjectEntity> entities = brandObjectRepository.findByBrandId(brandId)
+                .orElse(Collections.emptyList());
+        return toDtos(entities, preferZh);
     }
 
-    @Cacheable(
-            value = "brandObjects",
-            key = "'id_' + #id + '_' + #effectiveLocale"
-    )
+    @Transactional
     public BrandObjectDto getBrandObjectById(long id, String effectiveLocale) {
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
+        if (!brandObjectRepository.existsById(id)) {
+            throw new BrandObjectNotFoundException();
+        }
+        brandObjectRepository.incrementViewCount(id);
         BrandObjectEntity entity = brandObjectRepository.findById(id)
-                .orElseThrow(BrandNotFoundException::new);
-        return BrandObjectDto.from(entity, preferZh, preferCny);
+                .orElseThrow(BrandObjectNotFoundException::new);
+        return toDto(entity, preferZh);
     }
 
-    @Cacheable(
-            value = "brandObjects",
-            key = "'search_' + #keyword + '_' + #effectiveLocale"
-    )
     public List<BrandObjectDto> searchBrandObjects(String keyword, String effectiveLocale) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Collections.emptyList();
         }
         String trimmed = keyword.trim();
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
 
         List<BrandObjectEntity> entities;
         if (esEnabled()) {
@@ -187,9 +214,7 @@ public class BrandService {
         } else {
             entities = brandObjectRepository.searchByNameOrBrandName(trimmed);
         }
-        return entities.stream()
-                .map(e -> BrandObjectDto.from(e, preferZh, preferCny))
-                .toList();
+        return toDtos(entities, preferZh);
     }
 
     public List<BrandObjectDto> searchBrandObjectsByBrandId(String keyword, long brandId, String effectiveLocale) {
@@ -198,7 +223,6 @@ public class BrandService {
         }
         String trimmed = keyword.trim();
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
 
         List<BrandObjectEntity> entities;
         if (esEnabled()) {
@@ -219,9 +243,7 @@ public class BrandService {
         } else {
             entities = brandObjectRepository.searchByNameWithinBrand(trimmed, brandId);
         }
-        return entities.stream()
-                .map(e -> BrandObjectDto.from(e, preferZh, preferCny))
-                .toList();
+        return toDtos(entities, preferZh);
     }
 
     @CacheEvict(value = "brands", allEntries = true)
@@ -245,6 +267,21 @@ public class BrandService {
         return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
+    @CacheEvict(value = "brands", allEntries = true)
+    public BrandDto uploadBrandLogo(long id, MultipartFile file, String effectiveLocale) throws IOException {
+        if (imageStorageService == null) {
+            throw new IllegalStateException("Image storage is not configured");
+        }
+        BrandEntity brand = brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
+        String imageUrl = imageStorageService.uploadBrandAsset(id, brand.nameEn(), file);
+        var updated = new BrandEntity(id, brand.nameEn(), brand.nameZh(), imageUrl);
+        var saved = brandRepository.save(updated);
+        if (brandEsEnabled()) {
+            brandSearchRepository.save(BrandDocument.from(saved));
+        }
+        return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
+    }
+
     @CacheEvict(value = {"brands", "brandObjects"}, allEntries = true)
     public void deleteBrand(long id) {
         if (!brandRepository.existsById(id)) {
@@ -259,9 +296,9 @@ public class BrandService {
     @CacheEvict(value = "brandObjects", allEntries = true)
     public BrandObjectDto createBrandObject(long brandId, BrandObjectBody req, String effectiveLocale) {
         BrandObjectEntity entity = new BrandObjectEntity(
-                null, brandId, req.nameEn(), req.nameZh(), req.imageUrl(),
+                null, brandId, req.nameEn(), req.nameZh(), req.imageUrl(), req.imageSource(),
                 req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
-                req.categoryEn(), req.categoryZh(), req.scale()
+                req.categoryEn(), req.categoryZh(), req.scale(), 0L
         );
         BrandObjectEntity saved = brandObjectRepository.save(entity);
         if (esEnabled()) {
@@ -272,8 +309,7 @@ public class BrandService {
                     brand != null ? brand.nameZh() : null));
         }
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
-        return BrandObjectDto.from(saved, preferZh, preferCny);
+        return toDto(saved, preferZh);
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)
@@ -281,9 +317,9 @@ public class BrandService {
         BrandObjectEntity existing = brandObjectRepository.findById(id)
                 .orElseThrow(BrandObjectNotFoundException::new);
         BrandObjectEntity updated = new BrandObjectEntity(
-                existing.id(), existing.brandId(), req.nameEn(), req.nameZh(), req.imageUrl(),
+                existing.id(), existing.brandId(), req.nameEn(), req.nameZh(), req.imageUrl(), req.imageSource(),
                 req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
-                req.categoryEn(), req.categoryZh(), req.scale()
+                req.categoryEn(), req.categoryZh(), req.scale(), existing.viewCount()
         );
         BrandObjectEntity saved = brandObjectRepository.save(updated);
         if (esEnabled()) {
@@ -294,8 +330,7 @@ public class BrandService {
                     brand != null ? brand.nameZh() : null));
         }
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        boolean preferCny = displayLocaleResolver.prefersCny(effectiveLocale);
-        return BrandObjectDto.from(saved, preferZh, preferCny);
+        return toDto(saved, preferZh);
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)

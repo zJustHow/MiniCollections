@@ -14,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/admin/brands")
@@ -53,6 +56,15 @@ public class AdminBrandController {
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.updateBrand(id, body, effectiveLocale(acceptLanguage, user)));
+    }
+
+    @PostMapping("/{id}/logo")
+    public ResponseEntity<BrandDto> uploadBrandLogo(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
+            @AuthenticationPrincipal User user) throws IOException {
+        return ResponseEntity.ok(brandService.uploadBrandLogo(id, file, effectiveLocale(acceptLanguage, user)));
     }
 
     @DeleteMapping("/{id}")
