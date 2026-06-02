@@ -89,8 +89,10 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
         .then(setBrand)
         .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
     }
-    fetchBrandObject();
-  }, [objectId]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!brandObject) {
+      fetchBrandObject();
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdminDeleteBrandObject = async () => {
     if (!brandObject) return;

@@ -100,7 +100,7 @@ public class SubmissionService {
             BrandObjectEntity brandObject = new BrandObjectEntity(
                     null, body.brandId(), body.nameEn(), body.nameZh(), body.imageUrl(), body.imageSource(),
                     body.releasePriceCny(), body.releasePriceUsd(), body.releaseDate(),
-                    body.categoryEn(), body.categoryZh(), body.scale(), 0L
+                    body.categoryEn(), body.categoryZh(), body.scale()
             );
             BrandObjectEntity saved = brandObjectRepository.save(brandObject);
             if (elasticsearchEnabled && brandObjectSearchRepository != null) {

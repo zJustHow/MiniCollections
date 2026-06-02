@@ -9,7 +9,6 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import CardCover from "../components/ObjectList/CardCover";
-import BrandObjectListCard from "../components/ObjectList/BrandObjectListCard";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import BrandModal from "../components/ObjectList/modals/BrandModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
@@ -253,14 +252,19 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 bodyStyle={{ padding: 0 }}
               />
             ) : (
-              <BrandObjectListCard
+              <Card
                 key={item.id}
-                item={item}
+                hoverable
+                className="neu-model-card"
+                cover={
+                  <CardCover image_url={item.image_url} name={item.name} />
+                }
                 onClick={() =>
                   navigate(`/brands/${brandId}/objects/${item.id}`, {
                     state: { brandObject: item, brand },
                   })
                 }
+                bodyStyle={{ padding: 0 }}
               />
             ),
           )}

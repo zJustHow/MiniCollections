@@ -30,12 +30,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BrandService {
@@ -79,35 +74,6 @@ public class BrandService {
 
     private boolean brandEsEnabled() {
         return elasticsearchEnabled && brandElasticsearchQueryService != null;
-    }
-
-    private Map<Long, Long> groupAddCountsFor(List<BrandObjectEntity> entities) {
-        List<Long> ids = entities.stream()
-                .map(BrandObjectEntity::id)
-                .filter(Objects::nonNull)
-                .toList();
-        if (ids.isEmpty()) {
-            return Collections.emptyMap();
-        }
-        return brandObjectRepository.countGroupAddsByBrandObjectIds(ids).stream()
-                .collect(Collectors.toMap(
-                        row -> row.brandObjectId(),
-                        row -> row.addCount() != null ? row.addCount() : 0L,
-                        (a, b) -> a));
-    }
-
-    private List<BrandObjectDto> toDtos(List<BrandObjectEntity> entities, boolean preferZh) {
-        Map<Long, Long> groupAdds = groupAddCountsFor(entities);
-        return entities.stream()
-                .map(e -> BrandObjectDto.from(e, preferZh, groupAdds.getOrDefault(e.id(), 0L)))
-                .toList();
-    }
-
-    private BrandObjectDto toDto(BrandObjectEntity entity, boolean preferZh) {
-        long groupAdds = entity.id() == null
-                ? 0L
-                : groupAddCountsFor(List.of(entity)).getOrDefault(entity.id(), 0L);
-        return BrandObjectDto.from(entity, preferZh, groupAdds);
     }
 
     @Cacheable(
@@ -169,25 +135,34 @@ public class BrandService {
                 .toList();
     }
 
+    @Cacheable(
+            value = "brandObjects",
+            key = "'brandId_' + #brandId + '_' + #effectiveLocale"
+    )
     public List<BrandObjectDto> getBrandObjectsByBrandId(long brandId, String effectiveLocale) {
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        List<BrandObjectEntity> entities = brandObjectRepository.findByBrandId(brandId)
-                .orElse(Collections.emptyList());
-        return toDtos(entities, preferZh);
+        return brandObjectRepository.findByBrandId(brandId)
+                .orElse(Collections.emptyList())
+                .stream()
+                .map(e -> BrandObjectDto.from(e, preferZh))
+                .toList();
     }
 
-    @Transactional
+    @Cacheable(
+            value = "brandObjects",
+            key = "'id_' + #id + '_' + #effectiveLocale"
+    )
     public BrandObjectDto getBrandObjectById(long id, String effectiveLocale) {
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        if (!brandObjectRepository.existsById(id)) {
-            throw new BrandObjectNotFoundException();
-        }
-        brandObjectRepository.incrementViewCount(id);
         BrandObjectEntity entity = brandObjectRepository.findById(id)
                 .orElseThrow(BrandObjectNotFoundException::new);
-        return toDto(entity, preferZh);
+        return BrandObjectDto.from(entity, preferZh);
     }
 
+    @Cacheable(
+            value = "brandObjects",
+            key = "'search_' + #keyword + '_' + #effectiveLocale"
+    )
     public List<BrandObjectDto> searchBrandObjects(String keyword, String effectiveLocale) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return Collections.emptyList();
@@ -214,7 +189,9 @@ public class BrandService {
         } else {
             entities = brandObjectRepository.searchByNameOrBrandName(trimmed);
         }
-        return toDtos(entities, preferZh);
+        return entities.stream()
+                .map(e -> BrandObjectDto.from(e, preferZh))
+                .toList();
     }
 
     public List<BrandObjectDto> searchBrandObjectsByBrandId(String keyword, long brandId, String effectiveLocale) {
@@ -243,7 +220,9 @@ public class BrandService {
         } else {
             entities = brandObjectRepository.searchByNameWithinBrand(trimmed, brandId);
         }
-        return toDtos(entities, preferZh);
+        return entities.stream()
+                .map(e -> BrandObjectDto.from(e, preferZh))
+                .toList();
     }
 
     @CacheEvict(value = "brands", allEntries = true)
@@ -298,7 +277,7 @@ public class BrandService {
         BrandObjectEntity entity = new BrandObjectEntity(
                 null, brandId, req.nameEn(), req.nameZh(), req.imageUrl(), req.imageSource(),
                 req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
-                req.categoryEn(), req.categoryZh(), req.scale(), 0L
+                req.categoryEn(), req.categoryZh(), req.scale()
         );
         BrandObjectEntity saved = brandObjectRepository.save(entity);
         if (esEnabled()) {
@@ -309,7 +288,7 @@ public class BrandService {
                     brand != null ? brand.nameZh() : null));
         }
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        return toDto(saved, preferZh);
+        return BrandObjectDto.from(saved, preferZh);
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)
@@ -319,7 +298,7 @@ public class BrandService {
         BrandObjectEntity updated = new BrandObjectEntity(
                 existing.id(), existing.brandId(), req.nameEn(), req.nameZh(), req.imageUrl(), req.imageSource(),
                 req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
-                req.categoryEn(), req.categoryZh(), req.scale(), existing.viewCount()
+                req.categoryEn(), req.categoryZh(), req.scale()
         );
         BrandObjectEntity saved = brandObjectRepository.save(updated);
         if (esEnabled()) {
@@ -330,7 +309,7 @@ public class BrandService {
                     brand != null ? brand.nameZh() : null));
         }
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        return toDto(saved, preferZh);
+        return BrandObjectDto.from(saved, preferZh);
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)

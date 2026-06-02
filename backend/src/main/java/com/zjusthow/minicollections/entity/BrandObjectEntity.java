@@ -19,7 +19,6 @@ public record BrandObjectEntity(
         LocalDate releaseDate,
         String categoryEn,
         String categoryZh,
-        String scale,
-        Long viewCount
+        String scale
 ) {
 }

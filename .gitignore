@@ -74,5 +74,8 @@ nbdist/
 *.swo
 *~
 
+# Catalog product images (upload to MinIO locally; seed SQL uses S3 URLs)
+backend/src/main/resources/static/images/
+
 # Claude Code
 .claude/settings.local.json

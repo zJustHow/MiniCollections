@@ -44,6 +44,12 @@ public final class BrandStorageKeys {
             case 29 -> "amalgam";
             case 30 -> "cmc";
             case 31 -> "bbr-models";
+            case 32 -> "bburago";
+            case 33 -> "hot-wheels";
+            case 34 -> "welly";
+            case 35 -> "make-up";
+            case 36 -> "greenlight";
+            case 37 -> "mr-collection";
             default -> slugify(nameEn);
         };
     }

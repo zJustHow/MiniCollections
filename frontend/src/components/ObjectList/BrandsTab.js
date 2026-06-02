@@ -2,7 +2,6 @@ import { Card, Grid, Input, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import CardCover from "./CardCover";
-import BrandObjectListCard from "./BrandObjectListCard";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
@@ -93,14 +92,17 @@ export default function BrandsTab({
     );
 
   const renderObjectCard = (obj) => (
-    <BrandObjectListCard
+    <Card
       key={obj.id}
-      item={obj}
+      hoverable
+      className="neu-model-card"
+      cover={<CardCover image_url={obj.image_url} name={obj.name} />}
       onClick={() =>
         navigate(`/brands/${obj.brand_id}/objects/${obj.id}`, {
           state: { brandObject: obj },
         })
       }
+      bodyStyle={{ padding: 0 }}
     />
   );
 

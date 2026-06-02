@@ -42,14 +42,8 @@ log "Uploading seed brand logos to MinIO..."
 if ! "$ROOT/scripts/upload-brand-logos.sh"; then
   warn "Brand logo upload failed (is MinIO up on :9000?). Logos may 404 until you run scripts/upload-brand-logos.sh"
 fi
-
-FRONTIART_STATIC="$ROOT/backend/src/main/resources/static/images/frontiart"
-if [ -d "$FRONTIART_STATIC" ]; then
-  log "Uploading FrontiArt product images to MinIO..."
-  if ! python3 "$ROOT/scripts/import-frontiart-products.py" --upload-only; then
-    warn "FrontiArt product upload failed. Run: python3 scripts/import-frontiart-products.py --upload-only"
-  fi
-fi
+# FrontiArt product images (like other brands): upload once when MinIO is empty:
+#   python3 scripts/import-frontiart-products.py --upload-only
 
 # 2. Start backend
 log "Starting Spring Boot backend..."

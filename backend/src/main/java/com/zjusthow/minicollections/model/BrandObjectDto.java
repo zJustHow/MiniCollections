@@ -20,19 +20,12 @@ public record BrandObjectDto(
         String category,
         String categoryEn,
         String categoryZh,
-        String scale,
-        long viewCount,
-        long groupAddCount
+        String scale
 ) {
 
     public static BrandObjectDto from(BrandObjectEntity entity, boolean preferZh) {
-        return from(entity, preferZh, 0L);
-    }
-
-    public static BrandObjectDto from(BrandObjectEntity entity, boolean preferZh, long groupAddCount) {
         String name = DisplayLocaleResolver.pickName(entity.nameEn(), entity.nameZh(), preferZh);
         String cat = DisplayLocaleResolver.pickCategory(entity.categoryEn(), entity.categoryZh(), preferZh);
-        long views = entity.viewCount() != null ? entity.viewCount() : 0L;
         return new BrandObjectDto(
                 entity.id(),
                 entity.brandId(),
@@ -47,9 +40,7 @@ public record BrandObjectDto(
                 cat,
                 entity.categoryEn(),
                 entity.categoryZh(),
-                entity.scale(),
-                views,
-                groupAddCount
+                entity.scale()
         );
     }
 }
