@@ -50,6 +50,7 @@ public final class BrandStorageKeys {
             case 35 -> "make-up";
             case 36 -> "greenlight";
             case 37 -> "mr-collection";
+            case 38 -> "topspeed-model";
             default -> slugify(nameEn);
         };
     }

@@ -54,6 +54,7 @@ spring:
         - "classpath:seed/hot-wheels-brand-objects.sql"
         - "classpath:seed/welly-brand-objects.sql"
         - "classpath:seed/mr-collection-brand-objects.sql"
+        - "classpath:seed/topspeed-model-brand-objects.sql"
         - "classpath:seed/make-up-brand-objects.sql"
         - "classpath:seed/greenlight-brand-objects.sql"
         - "classpath:seed/exoto-brand-objects.sql"

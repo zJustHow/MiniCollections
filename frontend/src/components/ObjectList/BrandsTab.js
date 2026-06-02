@@ -2,6 +2,7 @@ import { Card, Grid, Input, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import CardCover from "./CardCover";
+import InfiniteSliceFooter from "../InfiniteSliceFooter";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
@@ -18,6 +19,9 @@ export default function BrandsTab({
   searchResultBrands,
   searchResultObjects,
   searchValue,
+  brandsListSlice,
+  brandsSearchSlice,
+  objectsSearchSlice,
 }) {
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -138,6 +142,15 @@ export default function BrandsTab({
                 <div style={gridStyle}>
                   {searchResultBrands.map(renderBrandCard)}
                 </div>
+                <InfiniteSliceFooter
+                  hasMore={brandsSearchSlice?.hasMore}
+                  loading={brandsSearchSlice?.loading}
+                  loadingMore={brandsSearchSlice?.loadingMore}
+                  onLoadMore={brandsSearchSlice?.loadMore}
+                  itemCount={searchResultBrands.length}
+                  totalElements={brandsSearchSlice?.totalElements}
+                  totalExact={brandsSearchSlice?.totalExact}
+                />
               </>
             )}
             {searchResultObjects.length > 0 && (
@@ -153,10 +166,21 @@ export default function BrandsTab({
                 <div style={gridStyle}>
                   {searchResultObjects.map(renderObjectCard)}
                 </div>
+                <InfiniteSliceFooter
+                  hasMore={objectsSearchSlice?.hasMore}
+                  loading={objectsSearchSlice?.loading}
+                  loadingMore={objectsSearchSlice?.loadingMore}
+                  onLoadMore={objectsSearchSlice?.loadMore}
+                  itemCount={searchResultObjects.length}
+                  totalElements={objectsSearchSlice?.totalElements}
+                  totalExact={objectsSearchSlice?.totalExact}
+                />
               </>
             )}
             {searchResultBrands.length === 0 &&
-              searchResultObjects.length === 0 && (
+              searchResultObjects.length === 0 &&
+              !brandsSearchSlice?.loading &&
+              !objectsSearchSlice?.loading && (
                 <div
                   style={{
                     textAlign: "center",
@@ -169,7 +193,16 @@ export default function BrandsTab({
               )}
           </>
         ) : (
-          <div style={gridStyle}>{dataSource.map(renderBrandCard)}</div>
+          <>
+            <div style={gridStyle}>{dataSource.map(renderBrandCard)}</div>
+            <InfiniteSliceFooter
+              hasMore={brandsListSlice?.hasMore}
+              loading={brandsListSlice?.loading}
+              loadingMore={brandsListSlice?.loadingMore}
+              onLoadMore={brandsListSlice?.loadMore}
+              itemCount={brands.length}
+            />
+          </>
         )}
       </Spin>
     </>

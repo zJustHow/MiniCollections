@@ -19,6 +19,9 @@ export default function ObjectList({ activeTab, isAdmin }) {
     searchResultBrands,
     searchResultObjects,
     searchValue,
+    brandsListSlice,
+    brandsSearchSlice,
+    objectsSearchSlice,
     groups,
     loadingGroups,
     handleGroupClick,
@@ -49,6 +52,9 @@ export default function ObjectList({ activeTab, isAdmin }) {
           searchResultBrands={searchResultBrands}
           searchResultObjects={searchResultObjects}
           searchValue={searchValue}
+          brandsListSlice={brandsListSlice}
+          brandsSearchSlice={brandsSearchSlice}
+          objectsSearchSlice={objectsSearchSlice}
         />
       ) : (
         <GroupsTab

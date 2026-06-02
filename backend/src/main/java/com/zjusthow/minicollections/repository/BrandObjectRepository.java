@@ -16,10 +16,89 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
 
     @Query("""
             SELECT * FROM brand_objects
+            WHERE brand_id = :brandId
+            ORDER BY id ASC
+            LIMIT :limit
+            """)
+    List<BrandObjectEntity> findFirstPageByBrandId(
+            @Param("brandId") Long brandId,
+            @Param("limit") int limit);
+
+    @Query("""
+            SELECT * FROM brand_objects
+            WHERE brand_id = :brandId AND id > :afterId
+            ORDER BY id ASC
+            LIMIT :limit
+            """)
+    List<BrandObjectEntity> findAfterIdByBrandId(
+            @Param("brandId") Long brandId,
+            @Param("afterId") Long afterId,
+            @Param("limit") int limit);
+
+    @Query("""
+            SELECT * FROM brand_objects
+            WHERE LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+            ORDER BY id ASC
+            LIMIT :limit
+            """)
+    List<BrandObjectEntity> searchFirstPage(@Param("keyword") String keyword, @Param("limit") int limit);
+
+    @Query("""
+            SELECT * FROM brand_objects
+            WHERE id > :afterId
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            ORDER BY id ASC
+            LIMIT :limit
+            """)
+    List<BrandObjectEntity> searchAfterId(
+            @Param("keyword") String keyword,
+            @Param("afterId") Long afterId,
+            @Param("limit") int limit);
+
+    @Query("""
+            SELECT COUNT(*) FROM brand_objects
             WHERE LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
             """)
-    List<BrandObjectEntity> searchByName(@Param("keyword") String keyword);
+    long countSearch(@Param("keyword") String keyword);
+
+    @Query("""
+            SELECT * FROM brand_objects
+            WHERE brand_id = :brandId
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            ORDER BY id ASC
+            LIMIT :limit
+            """)
+    List<BrandObjectEntity> searchFirstPageWithinBrand(
+            @Param("keyword") String keyword,
+            @Param("brandId") Long brandId,
+            @Param("limit") int limit);
+
+    @Query("""
+            SELECT * FROM brand_objects
+            WHERE brand_id = :brandId
+              AND id > :afterId
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            ORDER BY id ASC
+            LIMIT :limit
+            """)
+    List<BrandObjectEntity> searchAfterIdWithinBrand(
+            @Param("keyword") String keyword,
+            @Param("brandId") Long brandId,
+            @Param("afterId") Long afterId,
+            @Param("limit") int limit);
+
+    @Query("""
+            SELECT COUNT(*) FROM brand_objects
+            WHERE brand_id = :brandId
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            """)
+    long countSearchWithinBrand(@Param("keyword") String keyword, @Param("brandId") Long brandId);
 
     @Query("""
             SELECT bo.* FROM brand_objects bo

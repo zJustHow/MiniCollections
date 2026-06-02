@@ -270,7 +270,7 @@ SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 
 -- Spark (incl. Sparky lineup): 10264 products in spark-brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (25, 'Spark', NULL, 'http://localhost:9000/minicollections-media/brands/spark/logo.ico');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (25, 'Spark', NULL, 'http://localhost:9000/minicollections-media/brands/spark/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -282,7 +282,7 @@ SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 
 -- TSM Model: 436 products in tsm-model-brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (27, 'TSM Model', NULL, 'http://localhost:9000/minicollections-media/brands/tsm-model/logo.ico');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (27, 'TSM Model', NULL, 'http://localhost:9000/minicollections-media/brands/tsm-model/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -343,6 +343,12 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 
 -- MR Collection: 1610 products in mr-collection-brand-objects.sql
 INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (37, 'MR Collection', NULL, 'http://localhost:9000/minicollections-media/brands/mr-collection/logo.jpg');
+
+SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
+SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
+
+-- TopSpeed Model: 362 products in topspeed-model-brand-objects.sql
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (38, 'TopSpeed Model', NULL, 'http://localhost:9000/minicollections-media/brands/topspeed-model/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));

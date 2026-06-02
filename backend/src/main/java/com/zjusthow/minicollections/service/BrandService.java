@@ -6,6 +6,7 @@ import com.zjusthow.minicollections.elasticsearch.BrandObjectDocument;
 import com.zjusthow.minicollections.elasticsearch.BrandObjectElasticsearchQueryService;
 import com.zjusthow.minicollections.elasticsearch.BrandObjectSearchRepository;
 import com.zjusthow.minicollections.elasticsearch.BrandSearchRepository;
+import com.zjusthow.minicollections.elasticsearch.EsSearchSliceResult;
 import com.zjusthow.minicollections.entity.BrandEntity;
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.exception.BrandNotFoundException;
@@ -15,8 +16,10 @@ import com.zjusthow.minicollections.model.BrandBody;
 import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
 import com.zjusthow.minicollections.model.BrandObjectBody;
+import com.zjusthow.minicollections.model.SliceResponse;
 import com.zjusthow.minicollections.repository.BrandObjectRepository;
 import com.zjusthow.minicollections.repository.BrandRepository;
+import com.zjusthow.minicollections.util.CursorCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,15 +30,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.function.Function;
 
 @Service
 public class BrandService {
 
     private static final Logger log = LoggerFactory.getLogger(BrandService.class);
+    private static final int DEFAULT_SIZE = 24;
+    private static final int MAX_SIZE = 48;
 
     private final BrandRepository brandRepository;
     private final BrandObjectRepository brandObjectRepository;
@@ -76,15 +83,19 @@ public class BrandService {
         return elasticsearchEnabled && brandElasticsearchQueryService != null;
     }
 
-    @Cacheable(
-            value = "brands",
-            key = "'all_' + #effectiveLocale"
-    )
-    public List<BrandDto> getBrands(String effectiveLocale) {
+    public SliceResponse<BrandDto> getBrandsSlice(String effectiveLocale, int size, String cursor) {
+        int pageSize = clampSize(size);
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        return brandRepository.findAll().stream()
+        Long afterId = CursorCodec.decodeSql(cursor);
+
+        List<BrandEntity> entities = afterId == null
+                ? brandRepository.findFirstPage(pageSize)
+                : brandRepository.findAfterId(afterId, pageSize);
+
+        List<BrandDto> content = entities.stream()
                 .map(e -> BrandDto.from(e, preferZh))
                 .toList();
+        return toSqlSlice(content, pageSize);
     }
 
     @Cacheable(
@@ -98,54 +109,55 @@ public class BrandService {
                 .orElseThrow(BrandNotFoundException::new);
     }
 
-    @Cacheable(
-            value = "brands",
-            key = "'search_' + #keyword + '_' + #effectiveLocale"
-    )
-    public List<BrandDto> searchBrands(String keyword, String effectiveLocale) {
+    public SliceResponse<BrandDto> searchBrandsSlice(
+            String keyword,
+            String effectiveLocale,
+            int size,
+            String cursor) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return Collections.emptyList();
+            return SliceResponse.of(Collections.emptyList(), clampSize(size), false, null, 0L, true);
         }
         String trimmed = keyword.trim();
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        int pageSize = clampSize(size);
+        boolean firstPage = cursor == null || cursor.isBlank();
 
-        if (brandEsEnabled()) {
+        if (CursorCodec.isEsCursor(cursor) || (firstPage && brandEsEnabled())) {
             try {
-                List<Long> ids = brandElasticsearchQueryService.searchIdsByKeyword(trimmed);
-                if (!ids.isEmpty()) {
-                    Set<Long> unique = new LinkedHashSet<>(ids);
-                    return unique.stream()
-                            .map(brandRepository::findById)
-                            .flatMap(java.util.Optional::stream)
-                            .map(e -> BrandDto.from(e, preferZh))
-                            .toList();
+                List<Object> searchAfter = CursorCodec.isEsCursor(cursor) ? CursorCodec.decodeEs(cursor) : null;
+                EsSearchSliceResult esResult = brandElasticsearchQueryService.searchSlice(
+                        trimmed, searchAfter, pageSize, firstPage);
+                if (!esResult.ids().isEmpty() || CursorCodec.isEsCursor(cursor)) {
+                    return fromEsBrandSlice(esResult, preferZh, pageSize);
                 }
             } catch (Exception e) {
-                log.warn("Elasticsearch brand search failed, using in-memory fallback: {}", e.getMessage());
+                if (CursorCodec.isEsCursor(cursor)) {
+                    throw e;
+                }
+                log.warn("Elasticsearch brand search failed, using SQL fallback: {}", e.getMessage());
             }
         }
 
-        // fallback: in-memory filter
-        String lowerCaseKeyword = trimmed.toLowerCase();
-        return getBrands(effectiveLocale).stream()
-                .filter(dto ->
-                        dto.name().toLowerCase().contains(lowerCaseKeyword) ||
-                        dto.nameEn().toLowerCase().contains(lowerCaseKeyword) ||
-                        (dto.nameZh() != null && dto.nameZh().toLowerCase().contains(lowerCaseKeyword)))
-                .toList();
+        return searchBrandsSqlSlice(trimmed, preferZh, pageSize, cursor, firstPage);
     }
 
-    @Cacheable(
-            value = "brandObjects",
-            key = "'brandId_' + #brandId + '_' + #effectiveLocale"
-    )
-    public List<BrandObjectDto> getBrandObjectsByBrandId(long brandId, String effectiveLocale) {
+    public SliceResponse<BrandObjectDto> getBrandObjectsSlice(
+            long brandId,
+            String effectiveLocale,
+            int size,
+            String cursor) {
+        int pageSize = clampSize(size);
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        return brandObjectRepository.findByBrandId(brandId)
-                .orElse(Collections.emptyList())
-                .stream()
+        Long afterId = CursorCodec.decodeSql(cursor);
+
+        List<BrandObjectEntity> entities = afterId == null
+                ? brandObjectRepository.findFirstPageByBrandId(brandId, pageSize)
+                : brandObjectRepository.findAfterIdByBrandId(brandId, afterId, pageSize);
+
+        List<BrandObjectDto> content = entities.stream()
                 .map(e -> BrandObjectDto.from(e, preferZh))
                 .toList();
+        return toSqlSlice(content, pageSize);
     }
 
     @Cacheable(
@@ -159,70 +171,194 @@ public class BrandService {
         return BrandObjectDto.from(entity, preferZh);
     }
 
-    @Cacheable(
-            value = "brandObjects",
-            key = "'search_' + #keyword + '_' + #effectiveLocale"
-    )
-    public List<BrandObjectDto> searchBrandObjects(String keyword, String effectiveLocale) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-        String trimmed = keyword.trim();
-        boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-
-        List<BrandObjectEntity> entities;
-        if (esEnabled()) {
-            try {
-                List<Long> ids = brandObjectElasticsearchQueryService.searchIdsByKeyword(trimmed);
-                Set<Long> unique = new LinkedHashSet<>(ids);
-                entities = unique.stream()
-                        .map(brandObjectRepository::findById)
-                        .flatMap(java.util.Optional::stream)
-                        .toList();
-                if (entities.isEmpty()) {
-                    entities = brandObjectRepository.searchByNameOrBrandName(trimmed);
-                }
-            } catch (Exception e) {
-                log.warn("Elasticsearch search failed, using SQL fallback: {}", e.getMessage());
-                entities = brandObjectRepository.searchByNameOrBrandName(trimmed);
-            }
-        } else {
-            entities = brandObjectRepository.searchByNameOrBrandName(trimmed);
-        }
-        return entities.stream()
-                .map(e -> BrandObjectDto.from(e, preferZh))
-                .toList();
+    public SliceResponse<BrandObjectDto> searchBrandObjectsSlice(
+            String keyword,
+            String effectiveLocale,
+            int size,
+            String cursor) {
+        return searchBrandObjectsInternal(keyword, null, effectiveLocale, size, cursor);
     }
 
-    public List<BrandObjectDto> searchBrandObjectsByBrandId(String keyword, long brandId, String effectiveLocale) {
+    public SliceResponse<BrandObjectDto> searchBrandObjectsByBrandIdSlice(
+            String keyword,
+            long brandId,
+            String effectiveLocale,
+            int size,
+            String cursor) {
+        return searchBrandObjectsInternal(keyword, brandId, effectiveLocale, size, cursor);
+    }
+
+    private SliceResponse<BrandObjectDto> searchBrandObjectsInternal(
+            String keyword,
+            Long brandId,
+            String effectiveLocale,
+            int size,
+            String cursor) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return Collections.emptyList();
+            return SliceResponse.of(Collections.emptyList(), clampSize(size), false, null, 0L, true);
         }
         String trimmed = keyword.trim();
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        int pageSize = clampSize(size);
+        boolean firstPage = cursor == null || cursor.isBlank();
 
-        List<BrandObjectEntity> entities;
-        if (esEnabled()) {
+        if (CursorCodec.isEsCursor(cursor) || (firstPage && esEnabled())) {
             try {
-                List<Long> ids = brandObjectElasticsearchQueryService.searchIdsByKeywordAndBrandId(trimmed, brandId);
-                Set<Long> unique = new LinkedHashSet<>(ids);
-                entities = unique.stream()
-                        .map(brandObjectRepository::findById)
-                        .flatMap(java.util.Optional::stream)
-                        .toList();
-                if (entities.isEmpty()) {
-                    entities = brandObjectRepository.searchByNameWithinBrand(trimmed, brandId);
+                List<Object> searchAfter = CursorCodec.isEsCursor(cursor) ? CursorCodec.decodeEs(cursor) : null;
+                EsSearchSliceResult esResult = brandId == null
+                        ? brandObjectElasticsearchQueryService.searchSlice(
+                                trimmed, searchAfter, pageSize, firstPage)
+                        : brandObjectElasticsearchQueryService.searchSliceByBrandId(
+                                trimmed, brandId, searchAfter, pageSize, firstPage);
+                if (!esResult.ids().isEmpty() || CursorCodec.isEsCursor(cursor)) {
+                    return fromEsBrandObjectSlice(esResult, preferZh, pageSize);
                 }
             } catch (Exception e) {
-                log.warn("Elasticsearch brand-scoped search failed, using SQL fallback: {}", e.getMessage());
-                entities = brandObjectRepository.searchByNameWithinBrand(trimmed, brandId);
+                if (CursorCodec.isEsCursor(cursor)) {
+                    throw e;
+                }
+                log.warn("Elasticsearch search failed, using SQL fallback: {}", e.getMessage());
             }
-        } else {
-            entities = brandObjectRepository.searchByNameWithinBrand(trimmed, brandId);
         }
-        return entities.stream()
+
+        return searchBrandObjectsSqlSlice(trimmed, brandId, preferZh, pageSize, cursor, firstPage);
+    }
+
+    private SliceResponse<BrandDto> searchBrandsSqlSlice(
+            String keyword,
+            boolean preferZh,
+            int pageSize,
+            String cursor,
+            boolean firstPage) {
+        Long afterId = CursorCodec.decodeSql(cursor);
+        List<BrandEntity> entities = afterId == null
+                ? brandRepository.searchFirstPage(keyword, pageSize)
+                : brandRepository.searchAfterId(keyword, afterId, pageSize);
+        List<BrandDto> content = entities.stream()
+                .map(e -> BrandDto.from(e, preferZh))
+                .toList();
+        Long total = firstPage ? brandRepository.countSearch(keyword) : null;
+        return toSqlSearchSlice(content, pageSize, total);
+    }
+
+    private SliceResponse<BrandObjectDto> searchBrandObjectsSqlSlice(
+            String keyword,
+            Long brandId,
+            boolean preferZh,
+            int pageSize,
+            String cursor,
+            boolean firstPage) {
+        Long afterId = CursorCodec.decodeSql(cursor);
+        List<BrandObjectEntity> entities;
+        long total;
+        if (brandId == null) {
+            entities = afterId == null
+                    ? brandObjectRepository.searchFirstPage(keyword, pageSize)
+                    : brandObjectRepository.searchAfterId(keyword, afterId, pageSize);
+            total = firstPage ? brandObjectRepository.countSearch(keyword) : -1;
+        } else {
+            entities = afterId == null
+                    ? brandObjectRepository.searchFirstPageWithinBrand(keyword, brandId, pageSize)
+                    : brandObjectRepository.searchAfterIdWithinBrand(keyword, brandId, afterId, pageSize);
+            total = firstPage ? brandObjectRepository.countSearchWithinBrand(keyword, brandId) : -1;
+        }
+        List<BrandObjectDto> content = entities.stream()
                 .map(e -> BrandObjectDto.from(e, preferZh))
                 .toList();
+        return toSqlSearchSlice(content, pageSize, firstPage ? total : null);
+    }
+
+    private SliceResponse<BrandDto> fromEsBrandSlice(
+            EsSearchSliceResult esResult,
+            boolean preferZh,
+            int pageSize) {
+        List<BrandDto> content = loadByIdsInOrder(
+                esResult.ids(),
+                brandRepository::findAllById,
+                e -> BrandDto.from(e, preferZh));
+        return fromEsSlice(content, esResult, pageSize);
+    }
+
+    private SliceResponse<BrandObjectDto> fromEsBrandObjectSlice(
+            EsSearchSliceResult esResult,
+            boolean preferZh,
+            int pageSize) {
+        List<BrandObjectDto> content = loadByIdsInOrder(
+                esResult.ids(),
+                brandObjectRepository::findAllById,
+                e -> BrandObjectDto.from(e, preferZh));
+        return fromEsSlice(content, esResult, pageSize);
+    }
+
+    private <T, E> List<T> loadByIdsInOrder(
+            List<Long> ids,
+            Function<Iterable<Long>, Iterable<E>> loader,
+            Function<E, T> mapper) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, E> byId = new HashMap<>();
+        loader.apply(ids).forEach(entity -> {
+            if (entity instanceof BrandEntity brandEntity) {
+                byId.put(brandEntity.id(), entity);
+            } else if (entity instanceof BrandObjectEntity brandObjectEntity) {
+                byId.put(brandObjectEntity.id(), entity);
+            }
+        });
+        List<T> content = new ArrayList<>(ids.size());
+        for (Long id : ids) {
+            E entity = byId.get(id);
+            if (entity != null) {
+                content.add(mapper.apply(entity));
+            }
+        }
+        return content;
+    }
+
+    private <T> SliceResponse<T> fromEsSlice(List<T> content, EsSearchSliceResult esResult, int pageSize) {
+        String nextCursor = esResult.hasMore() && esResult.nextSortValues() != null
+                ? CursorCodec.encodeEs(esResult.nextSortValues())
+                : null;
+        return SliceResponse.of(
+                content,
+                pageSize,
+                esResult.hasMore(),
+                nextCursor,
+                esResult.totalElements(),
+                esResult.totalExact());
+    }
+
+    private <T> SliceResponse<T> toSqlSlice(List<T> content, int pageSize) {
+        boolean hasMore = content.size() == pageSize;
+        String nextCursor = hasMore && !content.isEmpty()
+                ? CursorCodec.encodeSql(extractId(content.get(content.size() - 1)))
+                : null;
+        return SliceResponse.ofList(content, pageSize, hasMore, nextCursor);
+    }
+
+    private <T> SliceResponse<T> toSqlSearchSlice(List<T> content, int pageSize, Long total) {
+        boolean hasMore = content.size() == pageSize;
+        String nextCursor = hasMore && !content.isEmpty()
+                ? CursorCodec.encodeSql(extractId(content.get(content.size() - 1)))
+                : null;
+        return SliceResponse.of(content, pageSize, hasMore, nextCursor, total, true);
+    }
+
+    private long extractId(Object dto) {
+        if (dto instanceof BrandDto brandDto) {
+            return brandDto.id();
+        }
+        if (dto instanceof BrandObjectDto brandObjectDto) {
+            return brandObjectDto.id();
+        }
+        throw new IllegalStateException("Unsupported DTO type: " + dto.getClass());
+    }
+
+    private int clampSize(int size) {
+        if (size <= 0) {
+            return DEFAULT_SIZE;
+        }
+        return Math.min(size, MAX_SIZE);
     }
 
     @CacheEvict(value = "brands", allEntries = true)

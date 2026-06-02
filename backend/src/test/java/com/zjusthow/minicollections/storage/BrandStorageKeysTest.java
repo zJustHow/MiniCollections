@@ -22,9 +22,9 @@ class BrandStorageKeysTest {
         assertEquals("brands/frontiart/logo.png", BrandStorageKeys.logoObjectKey(22, "FrontiArt (FA)", ".png"));
         assertEquals("brands/looksmart/logo.png", BrandStorageKeys.logoObjectKey(23, "Looksmart", ".png"));
         assertEquals("brands/norev/logo.png", BrandStorageKeys.logoObjectKey(24, "Norev", ".png"));
-        assertEquals("brands/spark/logo.ico", BrandStorageKeys.logoObjectKey(25, "Spark", ".ico"));
+        assertEquals("brands/spark/logo.png", BrandStorageKeys.logoObjectKey(25, "Spark", ".png"));
         assertEquals("brands/ixo-models/logo.png", BrandStorageKeys.logoObjectKey(26, "IXO MODELS", ".png"));
-        assertEquals("brands/tsm-model/logo.ico", BrandStorageKeys.logoObjectKey(27, "TSM Model", ".ico"));
+        assertEquals("brands/tsm-model/logo.svg", BrandStorageKeys.logoObjectKey(27, "TSM Model", ".svg"));
         assertEquals("brands/bbr-models/logo.png", BrandStorageKeys.logoObjectKey(31, "BBR MODELS", ".png"));
         assertEquals("brands/bburago/logo.png", BrandStorageKeys.logoObjectKey(32, "Bburago", ".png"));
         assertEquals("brands/hot-wheels/logo.png", BrandStorageKeys.logoObjectKey(33, "Hot Wheels", ".png"));
@@ -32,6 +32,7 @@ class BrandStorageKeysTest {
         assertEquals("brands/make-up/logo.png", BrandStorageKeys.logoObjectKey(35, "Make Up", ".png"));
         assertEquals("brands/greenlight/logo.png", BrandStorageKeys.logoObjectKey(36, "GreenLight", ".png"));
         assertEquals("brands/mr-collection/logo.jpg", BrandStorageKeys.logoObjectKey(37, "MR Collection", ".jpg"));
+        assertEquals("brands/topspeed-model/logo.svg", BrandStorageKeys.logoObjectKey(38, "TopSpeed Model", ".svg"));
         assertEquals("brands/exoto/logo.png", BrandStorageKeys.logoObjectKey(28, "Exoto", ".png"));
         assertEquals("brands/amalgam/logo.png", BrandStorageKeys.logoObjectKey(29, "Amalgam", ".png"));
         assertEquals("brands/cmc/logo.png", BrandStorageKeys.logoObjectKey(30, "CMC", ".png"));

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
+import useInfiniteSlice from "../hooks/useInfiniteSlice";
 import { App, Button, Card, Grid, Input, Popconfirm, Spin } from "antd";
 import {
   ArrowLeftOutlined,
@@ -9,6 +10,7 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import CardCover from "../components/ObjectList/CardCover";
+import InfiniteSliceFooter from "../components/InfiniteSliceFooter";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import BrandModal from "../components/ObjectList/modals/BrandModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
@@ -16,9 +18,10 @@ import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import {
   getBrandByBrandId,
-  getBrandObjectsByBrandId,
-  searchBrandObjectsByBrandId,
+  getBrandObjectsSlice,
+  searchBrandObjectsByBrandIdSlice,
   adminDeleteBrand,
+  SLICE_SIZE,
 } from "../utils";
 
 const { Search } = Input;
@@ -36,10 +39,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
 
   const [searchValue, setSearchParam] = useSearchParam();
   const [brand, setBrand] = useState(location.state?.brand ?? null);
-  const [brandObjects, setBrandObjects] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchActive, setSearchActive] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchActive, setSearchActive] = useState(Boolean((searchValue ?? "").trim()));
+  const [searchKeyword, setSearchKeyword] = useState((searchValue ?? "").trim());
   const [draftQuery, setDraftQuery] = useState(searchValue);
 
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
@@ -50,33 +51,29 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const [brandObjectModalOpen, setBrandObjectModalOpen] = useState(false);
   const [editingBrandObject, setEditingBrandObject] = useState(null);
 
-  const fetchBrandObjects = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getBrandObjectsByBrandId(brandId);
-      setBrandObjects(Array.isArray(data) ? data : []);
-    } catch (err) {
-      message.error(err?.message || t("failedToLoadModels"));
-    } finally {
-      setLoading(false);
-    }
-  }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const doSearch = useCallback(
-    async (keyword) => {
-      setLoading(true);
-      try {
-        const data = await searchBrandObjectsByBrandId(brandId, keyword);
-        setSearchResults(Array.isArray(data) ? data : []);
-        setSearchActive(true);
-      } catch (err) {
-        message.error(err?.message || t("failedToSearchBrands"));
-      } finally {
-        setLoading(false);
-      }
+  const objectsList = useInfiniteSlice(
+    ({ size, cursor }) => getBrandObjectsSlice(brandId, { size, cursor }),
+    {
+      resetKey: `brand-objects:${brandId}`,
+      enabled: !searchActive,
+      pageSize: SLICE_SIZE,
     },
-    [brandId],
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const objectsSearch = useInfiniteSlice(
+    ({ size, cursor }) =>
+      searchBrandObjectsByBrandIdSlice(brandId, searchKeyword, { size, cursor }),
+    {
+      resetKey: `brand-objects-search:${brandId}:${searchKeyword}`,
+      enabled: searchActive && Boolean(searchKeyword),
+      pageSize: SLICE_SIZE,
+    },
+  );
+
+  const activeSlice = searchActive ? objectsSearch : objectsList;
+  const displayObjects = activeSlice.items;
+  const showAddCard = isAdmin && !searchActive;
+  const listData = showAddCard ? [{ id: "__add__" }, ...displayObjects] : displayObjects;
 
   useEffect(() => {
     if (!brand) {
@@ -84,12 +81,16 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         .then(setBrand)
         .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
     }
-    fetchBrandObjects();
-    if (searchValue) {
-      setDraftQuery(searchValue);
-      doSearch(searchValue);
-    }
   }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const keyword = (searchValue ?? "").trim();
+    if (keyword) {
+      setDraftQuery(keyword);
+      setSearchKeyword(keyword);
+      setSearchActive(true);
+    }
+  }, [brandId, searchValue]);
 
   const handleAdminDeleteBrand = async () => {
     if (!brand) return;
@@ -160,14 +161,28 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     return () => setHeaderSlot(null);
   }, [brand, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const displayObjects = searchActive ? searchResults : brandObjects;
-  const listData = isAdmin
-    ? [{ id: "__add__" }, ...displayObjects]
-    : displayObjects;
+  const refreshObjects = useCallback(() => {
+    activeSlice.loadInitial();
+  }, [activeSlice]);
+
+  const runSearch = useCallback(
+    (keyword) => {
+      const trimmed = keyword.trim();
+      if (!trimmed) {
+        setSearchActive(false);
+        setSearchKeyword("");
+        setSearchParam("");
+        return;
+      }
+      setSearchParam(trimmed);
+      setSearchKeyword(trimmed);
+      setSearchActive(true);
+    },
+    [setSearchParam],
+  );
 
   return (
     <div>
-      {/* Search bar */}
       <div
         style={{
           display: "flex",
@@ -184,26 +199,20 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
             setDraftQuery(v);
             if (v === "") {
               setSearchActive(false);
-              setSearchResults([]);
+              setSearchKeyword("");
               setSearchParam("");
             }
           }}
           onSearch={(v) => {
             const keyword = (v ?? "").trim();
-            if (keyword) {
-              setSearchParam(keyword);
-              doSearch(keyword);
-            } else {
-              setSearchActive(false);
-              setSearchResults([]);
-              setSearchParam("");
-            }
+            setDraftQuery(keyword);
+            runSearch(keyword);
           }}
           style={{ width: screens.md ? 260 : "100%" }}
         />
       </div>
 
-      <Spin spinning={loading}>
+      <Spin spinning={activeSlice.loading && displayObjects.length === 0}>
         <div
           style={{
             display: "grid",
@@ -269,6 +278,16 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
             ),
           )}
         </div>
+
+        <InfiniteSliceFooter
+          hasMore={activeSlice.hasMore}
+          loading={activeSlice.loading}
+          loadingMore={activeSlice.loadingMore}
+          onLoadMore={activeSlice.loadMore}
+          itemCount={displayObjects.length}
+          totalElements={searchActive ? activeSlice.totalElements : null}
+          totalExact={activeSlice.totalExact}
+        />
       </Spin>
 
       {authed && (
@@ -321,7 +340,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         brandObject={editingBrandObject}
         brandId={brandId}
         onClose={() => setBrandObjectModalOpen(false)}
-        onSuccess={fetchBrandObjects}
+        onSuccess={refreshObjects}
       />
     </div>
   );

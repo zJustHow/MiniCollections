@@ -11,6 +11,9 @@ export default function GuestBrandsView() {
     searchResultBrands,
     searchResultObjects,
     searchValue,
+    brandsListSlice,
+    brandsSearchSlice,
+    objectsSearchSlice,
   } = useBrandsState();
 
   return (
@@ -23,6 +26,9 @@ export default function GuestBrandsView() {
       searchResultBrands={searchResultBrands}
       searchResultObjects={searchResultObjects}
       searchValue={searchValue}
+      brandsListSlice={brandsListSlice}
+      brandsSearchSlice={brandsSearchSlice}
+      objectsSearchSlice={objectsSearchSlice}
     />
   );
 }

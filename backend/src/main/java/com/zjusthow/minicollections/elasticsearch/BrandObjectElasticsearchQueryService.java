@@ -1,5 +1,6 @@
 package com.zjusthow.minicollections.elasticsearch;
 
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import org.slf4j.Logger;
@@ -24,52 +25,85 @@ public class BrandObjectElasticsearchQueryService {
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
-    public List<Long> searchIdsByKeyword(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
-            return List.of();
-        }
-        String q = keyword.trim();
-        NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(sq -> sq.multiMatch(m -> m
-                        .query(q)
-                        .fields("brand_name_en^3", "brand_name_zh^3", "name_en^2", "name_zh^2", "category_en", "category_zh", "scale")
-                        .type(TextQueryType.BestFields)
-                        .operator(Operator.Or)))
-                .withMaxResults(10000)
-                .build();
-        return executeSearch(nativeQuery);
+    public EsSearchSliceResult searchSlice(String keyword, List<Object> searchAfter, int size, boolean countTotal) {
+        return searchSliceInternal(keyword, null, searchAfter, size, countTotal);
     }
 
-    public List<Long> searchIdsByKeywordAndBrandId(String keyword, Long brandId) {
-        if (keyword == null || keyword.isBlank()) {
-            return List.of();
-        }
-        String q = keyword.trim();
-        NativeQuery nativeQuery = NativeQuery.builder()
-                .withQuery(sq -> sq.bool(b -> b
-                        .must(m -> m.multiMatch(mm -> mm
-                                .query(q)
-                                .fields("name_en^2", "name_zh^2", "category_en", "category_zh", "scale")
-                                .type(TextQueryType.BestFields)
-                                .operator(Operator.Or)))
-                        .filter(f -> f.term(t -> t
-                                .field("brand_id")
-                                .value(brandId)))))
-                .withMaxResults(10000)
-                .build();
-        return executeSearch(nativeQuery);
+    public EsSearchSliceResult searchSliceByBrandId(
+            String keyword,
+            Long brandId,
+            List<Object> searchAfter,
+            int size,
+            boolean countTotal) {
+        return searchSliceInternal(keyword, brandId, searchAfter, size, countTotal);
     }
 
-    private List<Long> executeSearch(NativeQuery nativeQuery) {
+    private EsSearchSliceResult searchSliceInternal(
+            String keyword,
+            Long brandId,
+            List<Object> searchAfter,
+            int size,
+            boolean countTotal) {
+        if (keyword == null || keyword.isBlank()) {
+            return new EsSearchSliceResult(List.of(), null, 0L, true, false);
+        }
+        String q = keyword.trim();
+        var builder = NativeQuery.builder()
+                .withSort(s -> s.score(sc -> sc.order(SortOrder.Desc)))
+                .withSort(s -> s.field(f -> f.field("id").order(SortOrder.Asc)))
+                .withMaxResults(size);
+
+        if (brandId == null) {
+            builder.withQuery(sq -> sq.multiMatch(m -> m
+                    .query(q)
+                    .fields("brand_name_en^3", "brand_name_zh^3", "name_en^2", "name_zh^2",
+                            "category_en", "category_zh", "scale")
+                    .type(TextQueryType.BestFields)
+                    .operator(Operator.Or)));
+        } else {
+            builder.withQuery(sq -> sq.bool(b -> b
+                    .must(m -> m.multiMatch(mm -> mm
+                            .query(q)
+                            .fields("name_en^2", "name_zh^2", "category_en", "category_zh", "scale")
+                            .type(TextQueryType.BestFields)
+                            .operator(Operator.Or)))
+                    .filter(f -> f.term(t -> t
+                            .field("brand_id")
+                            .value(brandId)))));
+        }
+
+        if (searchAfter != null && !searchAfter.isEmpty()) {
+            builder.withSearchAfter(searchAfter);
+        }
+        if (countTotal) {
+            builder.withTrackTotalHitsUpTo(10_000);
+        } else {
+            builder.withTrackTotalHitsUpTo(0);
+        }
+        return executeSlice(builder.build(), size, countTotal);
+    }
+
+    private EsSearchSliceResult executeSlice(NativeQuery nativeQuery, int size, boolean countTotal) {
         try {
-            SearchHits<BrandObjectDocument> hits = elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
+            SearchHits<BrandObjectDocument> hits =
+                    elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
             List<Long> ids = new ArrayList<>();
+            List<Object> lastSort = null;
             for (SearchHit<BrandObjectDocument> hit : hits) {
                 if (hit.getContent() != null && hit.getContent().id() != null) {
                     ids.add(hit.getContent().id());
+                    lastSort = hit.getSortValues();
                 }
             }
-            return ids;
+            boolean hasMore = ids.size() == size;
+            List<Object> nextSort = hasMore ? lastSort : null;
+            Long totalElements = null;
+            boolean totalExact = true;
+            if (countTotal && hits.getTotalHits() >= 0) {
+                totalElements = hits.getTotalHits();
+                totalExact = hits.getTotalHitsRelation().name().equals("EQUAL_TO");
+            }
+            return new EsSearchSliceResult(ids, nextSort, totalElements, totalExact, hasMore);
         } catch (Exception e) {
             log.warn("Elasticsearch query failed: {}", e.getMessage());
             throw e;

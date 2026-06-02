@@ -113,18 +113,45 @@ export const signup = async (data) => {
   return handleResponse(response);
 };
 
-export const getBrands = async () => {
-  const response = await fetch("/brands", { headers: authHeaders() });
+export const SLICE_SIZE = 24;
+
+async function fetchAllFromSlice(fetchPage) {
+  const all = [];
+  let cursor = null;
+  let hasMore = true;
+  while (hasMore) {
+    const slice = await fetchPage({ size: 48, cursor });
+    all.push(...(slice?.content ?? []));
+    hasMore = Boolean(slice?.has_more && slice?.next_cursor);
+    cursor = slice?.next_cursor ?? null;
+  }
+  return all;
+}
+
+function buildSliceParams({ size = SLICE_SIZE, cursor = null, keyword = null } = {}) {
+  const params = new URLSearchParams({ size: String(size) });
+  if (cursor) params.set("cursor", cursor);
+  if (keyword) params.set("keyword", keyword);
+  return params;
+}
+
+export const getBrandsSlice = async ({ size = SLICE_SIZE, cursor = null } = {}) => {
+  const params = buildSliceParams({ size, cursor });
+  const response = await fetch(`/brands?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
-export const searchBrands = async (keyword) => {
-  const response = await fetch(
-    `/brands/search?keyword=${encodeURIComponent(keyword)}`,
-    { headers: authHeaders() }
-  );
+export const getBrands = async () =>
+  fetchAllFromSlice(({ size, cursor }) => getBrandsSlice({ size, cursor }));
+
+export const searchBrandsSlice = async (keyword, { size = SLICE_SIZE, cursor = null } = {}) => {
+  const params = buildSliceParams({ size, cursor, keyword });
+  const response = await fetch(`/brands/search?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
+
+export const searchBrands = async (keyword) =>
+  fetchAllFromSlice(({ size, cursor }) => searchBrandsSlice(keyword, { size, cursor }));
 
 export const getGroups = async () => {
   const response = await fetch("/groups", { headers: authHeaders() });
@@ -174,10 +201,14 @@ export const getBrandByBrandId = async (brandId) => {
   return handleResponse(response);
 };
 
-export const getBrandObjectsByBrandId = async (brandId) => {
-  const response = await fetch(`/brands/${brandId}/objects`, { headers: authHeaders() });
+export const getBrandObjectsSlice = async (brandId, { size = SLICE_SIZE, cursor = null } = {}) => {
+  const params = buildSliceParams({ size, cursor });
+  const response = await fetch(`/brands/${brandId}/objects?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
+
+export const getBrandObjectsByBrandId = async (brandId) =>
+  fetchAllFromSlice(({ size, cursor }) => getBrandObjectsSlice(brandId, { size, cursor }));
 
 export const getGroupById = async (groupId) => {
   const response = await fetch(`/groups/${groupId}`, { headers: authHeaders() });
@@ -189,28 +220,41 @@ export const getBrandObjectById = async (id) => {
   return handleResponse(response);
 };
 
-export const searchBrandObjects = async (keyword) => {
-  const response = await fetch(
-    `/brands/objects/search?keyword=${encodeURIComponent(keyword)}`,
-    { headers: authHeaders() }
-  );
+export const searchBrandObjectsSlice = async (keyword, { size = SLICE_SIZE, cursor = null } = {}) => {
+  const params = buildSliceParams({ size, cursor, keyword });
+  const response = await fetch(`/brands/objects/search?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
-export const searchBrandObjectsByBrandId = async (brandId, keyword) => {
-  const response = await fetch(
-    `/brands/${brandId}/objects/search?keyword=${encodeURIComponent(keyword)}`,
-    { headers: authHeaders() }
-  );
+export const searchBrandObjects = async (keyword) =>
+  fetchAllFromSlice(({ size, cursor }) => searchBrandObjectsSlice(keyword, { size, cursor }));
+
+export const searchBrandObjectsByBrandIdSlice = async (
+  brandId,
+  keyword,
+  { size = SLICE_SIZE, cursor = null } = {},
+) => {
+  const params = buildSliceParams({ size, cursor, keyword });
+  const response = await fetch(`/brands/${brandId}/objects/search?${params}`, {
+    headers: authHeaders(),
+  });
   return handleResponse(response);
 };
+
+export const searchBrandObjectsByBrandId = async (brandId, keyword) =>
+  fetchAllFromSlice(({ size, cursor }) =>
+    searchBrandObjectsByBrandIdSlice(brandId, keyword, { size, cursor }),
+  );
 
 export const searchBrandsCombined = async (keyword) => {
-  const [brands, objects] = await Promise.all([
-    searchBrands(keyword),
-    searchBrandObjects(keyword),
+  const [brandsSlice, objectsSlice] = await Promise.all([
+    searchBrandsSlice(keyword),
+    searchBrandObjectsSlice(keyword),
   ]);
-  return { brands, objects };
+  return {
+    brands: brandsSlice?.content ?? [],
+    objects: objectsSlice?.content ?? [],
+  };
 };
 
 export const getUserObjects = async (groupId) => {
