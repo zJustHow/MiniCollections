@@ -120,7 +120,7 @@ public class SubmissionService {
 
         if ("MISSING_MODEL".equals(submission.submissionType())) {
             if (body.brandId() == null || body.nameEn() == null || body.nameEn().isBlank()) {
-                throw new ValidationException("brandId and nameEn are required to approve a MISSING_MODEL submission");
+                throw new ValidationException("error.approval_missing_fields");
             }
             BrandObjectEntity brandObject = new BrandObjectEntity(
                     null, body.nameEn(), body.nameZh(), body.imageUrl(), body.imageSource(),
@@ -191,12 +191,12 @@ public class SubmissionService {
             return;
         }
         if (brandId == null) {
-            throw new ValidationException("brandId is required when seriesId is provided");
+            throw new ValidationException("error.brand_required_for_series");
         }
         SeriesEntity series = seriesRepository.findById(seriesId)
                 .orElseThrow(SeriesNotFoundException::new);
         if (!Objects.equals(series.brandId(), brandId)) {
-            throw new ValidationException("Series does not belong to this brand");
+            throw new ValidationException("error.series_brand_mismatch");
         }
     }
 

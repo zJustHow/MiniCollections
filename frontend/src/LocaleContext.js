@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useState } from "react";
 import { App, ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import enUS from "antd/locale/en_US";
-import { detectBrowserLocale, translations } from "./i18n";
+import { detectBrowserLocale, translations, translateError } from "./i18n";
 import { setCurrentLocale } from "./utils";
 
 const antdLocaleMap = { "zh-CN": zhCN, "en-US": enUS };
@@ -18,6 +18,9 @@ export function LocaleProvider({ children }) {
 
   const t = useCallback(
     (key, params) => {
+      if (Array.isArray(params)) {
+        return translateError(key, params, locale);
+      }
       const dict = translations[locale] ?? translations["en-US"];
       const str = dict[key] ?? translations["en-US"][key] ?? key;
       if (!params) return str;

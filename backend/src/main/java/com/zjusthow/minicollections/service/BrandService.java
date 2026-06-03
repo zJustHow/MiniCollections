@@ -550,7 +550,7 @@ public class BrandService {
         SeriesEntity series = seriesRepository.findById(seriesId)
                 .orElseThrow(SeriesNotFoundException::new);
         if (!Objects.equals(series.brandId(), brandId)) {
-            throw new ValidationException("Series does not belong to this brand");
+            throw new ValidationException("error.series_brand_mismatch");
         }
     }
 

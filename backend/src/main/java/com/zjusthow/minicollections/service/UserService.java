@@ -50,7 +50,7 @@ public class UserService {
         final String normalizedPhone = (phone != null && !phone.isBlank()) ? phone.strip() : null;
 
         if (normalizedEmail == null && normalizedPhone == null) {
-            throw new ValidationException("Email or phone is required");
+            throw new ValidationException("error.email_or_phone_required");
         }
 
         if (normalizedEmail != null) {

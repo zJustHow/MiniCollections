@@ -47,7 +47,7 @@ public class VerificationService {
         } else if ("PHONE".equals(type)) {
             smsSender.send(target, code);
         } else {
-            throw new ValidationException("Invalid type: " + type);
+            throw new ValidationException("error.invalid_verification_type", type);
         }
     }
 

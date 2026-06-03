@@ -269,6 +269,44 @@ const en = {
   adminReply: "Admin Reply",
   rejectionReason: "Rejection Reason",
   failedToLoadMySubmissions: "Failed to load your submissions",
+
+  // API errors
+  "error.group.limit": "Group limit reached: maximum {0} groups per user",
+  "error.object.limit": "Object limit reached: maximum {0} objects per group",
+  "error.submission.limit": "Submission limit reached: maximum {0} submissions per day",
+  "error.brand.not_found": "Brand not found",
+  "error.brand_object.not_found": "Brand object not found",
+  "error.series.not_found": "Series not found",
+  "error.category.not_found": "Category not found",
+  "error.scale.not_found": "Scale not found",
+  "error.user.not_found": "User not found",
+  "error.group.not_found": "Group not found",
+  "error.user_object.not_found": "Object not found",
+  "error.not_found": "Not found",
+  "error.no_permission": "No permission",
+  "error.bad_credentials": "Incorrect credentials",
+  "error.password_incorrect": "Current password is incorrect",
+  "error.email_registered": "Email already registered",
+  "error.phone_registered": "Phone already registered",
+  "error.identifier_in_use": "{0} already in use",
+  "error.submission_reviewed": "Submission already reviewed",
+  "error.code_expired": "Verification code expired or not found",
+  "error.code_invalid": "Invalid verification code",
+  "error.resend_wait": "Please wait before requesting another code",
+  "error.wechat_invalid_state": "WeChat authorization expired, please try again",
+  "error.wechat_exchange_failed": "WeChat login failed, please try again",
+  "error.wechat_bound_to_other": "This WeChat account is already linked to another user",
+  "error.email_or_phone_required": "Email or phone is required",
+  "error.invalid_verification_type": "Invalid verification type: {0}",
+  "error.series_brand_mismatch": "Series does not belong to this brand",
+  "error.approval_missing_fields": "Brand and English name are required to approve this submission",
+  "error.brand_required_for_series": "Brand is required when series is provided",
+  "error.unsupported_image_type": "Unsupported image type: {0}",
+  "error.validation_failed": "Validation failed",
+  "error.bad_request": "Bad request",
+  "error.conflict": "Conflict",
+  "error.internal_server_error": "Internal server error",
+  "error.request_failed": "Request failed",
 };
 
 const zh = {
@@ -540,9 +578,56 @@ const zh = {
   adminReply: "管理员回复",
   rejectionReason: "拒绝原因",
   failedToLoadMySubmissions: "加载反馈记录失败",
+
+  // API errors
+  "error.group.limit": "已达收藏组上限：每个用户最多创建 {0} 个收藏组",
+  "error.object.limit": "已达收藏品上限：每个收藏组最多添加 {0} 件收藏品",
+  "error.submission.limit": "已达反馈上限：每天最多提交 {0} 条反馈",
+  "error.brand.not_found": "品牌不存在",
+  "error.brand_object.not_found": "商品不存在",
+  "error.series.not_found": "系列不存在",
+  "error.category.not_found": "类别不存在",
+  "error.scale.not_found": "比例不存在",
+  "error.user.not_found": "用户不存在",
+  "error.group.not_found": "收藏组不存在",
+  "error.user_object.not_found": "收藏品不存在",
+  "error.not_found": "未找到",
+  "error.no_permission": "无权限",
+  "error.bad_credentials": "用户名或密码错误",
+  "error.password_incorrect": "当前密码错误",
+  "error.email_registered": "邮箱已注册",
+  "error.phone_registered": "手机号已注册",
+  "error.identifier_in_use": "{0} 已被使用",
+  "error.submission_reviewed": "该反馈已被审核",
+  "error.code_expired": "验证码已过期或不存在",
+  "error.code_invalid": "验证码错误",
+  "error.resend_wait": "请稍后再获取验证码",
+  "error.wechat_invalid_state": "微信授权已过期，请重试",
+  "error.wechat_exchange_failed": "微信登录失败，请重试",
+  "error.wechat_bound_to_other": "该微信账号已绑定其他用户",
+  "error.email_or_phone_required": "请提供邮箱或手机号",
+  "error.invalid_verification_type": "无效的验证类型：{0}",
+  "error.series_brand_mismatch": "系列不属于该品牌",
+  "error.approval_missing_fields": "通过该反馈需要填写品牌和英文名称",
+  "error.brand_required_for_series": "选择系列时必须指定品牌",
+  "error.unsupported_image_type": "不支持的图片类型：{0}",
+  "error.validation_failed": "表单验证失败",
+  "error.bad_request": "请求无效",
+  "error.conflict": "操作冲突",
+  "error.internal_server_error": "服务器内部错误",
+  "error.request_failed": "请求失败",
 };
 
 export const translations = { "en-US": en, "zh-CN": zh };
+
+export function translateError(code, args, locale = "en-US") {
+  const dict = translations[locale] ?? translations["en-US"];
+  let str = dict[code] ?? translations["en-US"][code] ?? code;
+  if (args?.length) {
+    str = str.replace(/\{(\d+)\}/g, (_, i) => String(args[Number(i)] ?? ""));
+  }
+  return str;
+}
 
 export function detectBrowserLocale() {
   const lang = navigator.language || "en-US";

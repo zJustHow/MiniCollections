@@ -1,3 +1,6 @@
+
+import { translateError } from "./i18n";
+
 const TOKEN_KEY = "auth_token";
 
 export const COUNTRIES = [
@@ -25,10 +28,31 @@ export function parsePhone(phone) {
   return { countryCode: "+86", phoneNumber: phone };
 }
 
+function parseApiError(errorText, fallbackCode = "error.request_failed") {
+  let code;
+  let args;
+  try {
+    const parsed = JSON.parse(errorText);
+    if (parsed && typeof parsed.code === "string") {
+      code = parsed.code;
+      args = parsed.args ?? null;
+    }
+  } catch {
+    // plain-text or non-JSON error body
+  }
+  const message = code
+    ? translateError(code, args, _locale)
+    : (errorText || translateError(fallbackCode, null, _locale));
+  const err = new Error(message);
+  err.code = code;
+  err.args = args;
+  return err;
+}
+
 const handleResponse = async (response) => {
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || "Request failed");
+    throw parseApiError(errorText);
   }
   try {
     return await response.json();
@@ -192,7 +216,7 @@ export const deleteGroup = async (groupId) => {
   if (response.status === 204) return;
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || "Request failed");
+    throw parseApiError(errorText);
   }
 };
 
@@ -311,7 +335,7 @@ export const deleteUserObject = async (groupId, userObjectId) => {
   if (response.status === 204) return;
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || "Request failed");
+    throw parseApiError(errorText);
   }
 };
 
@@ -325,7 +349,7 @@ export const uploadImage = async (file) => {
   });
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || "Upload failed");
+    throw parseApiError(errorText, "uploadFailed");
   }
   const data = await response.json();
   return data.url;
@@ -341,7 +365,7 @@ export const uploadBrandLogo = async (brandId, file) => {
   });
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || "Upload failed");
+    throw parseApiError(errorText, "uploadFailed");
   }
   return handleResponse(response);
 };
@@ -451,7 +475,7 @@ export const adminDeleteBrand = async (id) => {
   if (response.status === 204) return;
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || "Request failed");
+    throw parseApiError(errorText);
   }
 };
 
@@ -481,7 +505,7 @@ export const adminDeleteBrandObject = async (id) => {
   if (response.status === 204) return;
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || "Request failed");
+    throw parseApiError(errorText);
   }
 };
 
@@ -511,7 +535,7 @@ export const adminDeleteSeries = async (id) => {
   if (response.status === 204) return;
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(errorText || "Request failed");
+    throw parseApiError(errorText);
   }
 };
 
