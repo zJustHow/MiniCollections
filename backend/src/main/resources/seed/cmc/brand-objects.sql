@@ -155,6 +155,6 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('CMC Mercedes-Benz W 165, 1939', 'CMC 奔驰 W 165, 1939', 'http://localhost:9000/minicollections-media/cmc/M-018_01.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 12),
 ('CMC Horch 853, 1937 rot/schwarz Maßstab 1:12', 'CMC Horch 853, 1937 rot/schwarz Maßstab 1:12', 'http://localhost:9000/minicollections-media/cmc/C-010-14.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 8),
 ('CMC Alfa-Romeo 8C 2900 B Speciale Touring Coupe, 1938, Maßstab 1:12', 'CMC Alfa-Romeo 8C 2900 B Speciale Touring Coupe, 1938, Maßstab 1:12', 'http://localhost:9000/minicollections-media/cmc/C-009.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 8),
-('CMC Alfa Romeo 8C 2900 B, 1938, Motor mit Vitrine', 'CMC 阿尔法·罗密欧 8C 2900 B, 1938, Motor mit Vitrine', 'http://localhost:9000/minicollections-media/cmc/m-131-04.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 7, NULL),
+('CMC Alfa Romeo 8C 2900 B, 1938, Motor mit Vitrine', 'CMC 阿尔法·罗密欧 8C 2900 B, 1938, Motor mit Vitrine', 'http://localhost:9000/minicollections-media/cmc/m-131-04.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 10, NULL),
 
 ('CMC Ferrari 250 GTO Motor, inklusive Vitrine', 'CMC 法拉利 250 GTO Motor, inklusive Vitrine', 'http://localhost:9000/minicollections-media/cmc/M-260_6.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 7, NULL);

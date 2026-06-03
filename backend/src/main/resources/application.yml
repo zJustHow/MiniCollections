@@ -27,6 +27,7 @@ spring:
         - "classpath:seed/autoart/brand-objects.sql"
         - "classpath:seed/tomica-limited-vintage/brand-objects.sql"
         - "classpath:seed/kyosho/brand-objects.sql"
+        - "classpath:seed/minichamps/series.sql"
         - "classpath:seed/minichamps/brand-objects.sql"
         - "classpath:seed/inno-models/brand-objects.sql"
         - "classpath:seed/xcartoys/brand-objects.sql"
@@ -61,6 +62,10 @@ spring:
         - "classpath:seed/exoto/brand-objects.sql"
         - "classpath:seed/cmc/brand-objects.sql"
         - "classpath:seed/amalgam/brand-objects.sql"
+        - "classpath:seed/almost-real/series.sql"
+        - "classpath:seed/almost-real/brand-objects.sql"
+        - "classpath:seed/gcd/series.sql"
+        - "classpath:seed/gcd/brand-objects.sql"
   cache:
     type: caffeine
     caffeine:

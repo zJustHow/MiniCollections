@@ -22,6 +22,15 @@ export default function ObjectList({ activeTab, isAdmin }) {
     brandsListSlice,
     brandsSearchSlice,
     objectsSearchSlice,
+    showObjectFilters,
+    searchFacets,
+    facetsLoading,
+    selectedCategoryIds,
+    selectedBrandIds,
+    selectedScaleIds,
+    onToggleCategory,
+    onToggleBrand,
+    onToggleScale,
     groups,
     loadingGroups,
     handleGroupClick,
@@ -55,6 +64,15 @@ export default function ObjectList({ activeTab, isAdmin }) {
           brandsListSlice={brandsListSlice}
           brandsSearchSlice={brandsSearchSlice}
           objectsSearchSlice={objectsSearchSlice}
+          showObjectFilters={showObjectFilters}
+          searchFacets={searchFacets}
+          facetsLoading={facetsLoading}
+          selectedCategoryIds={selectedCategoryIds}
+          selectedBrandIds={selectedBrandIds}
+          selectedScaleIds={selectedScaleIds}
+          onToggleCategory={onToggleCategory}
+          onToggleBrand={onToggleBrand}
+          onToggleScale={onToggleScale}
         />
       ) : (
         <GroupsTab

@@ -37,16 +37,30 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
 
     @Query("""
             SELECT * FROM brand_objects
-            WHERE LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+            WHERE (:filterBrands = FALSE OR brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
             ORDER BY id ASC
             LIMIT :limit
             """)
-    List<BrandObjectEntity> searchFirstPage(@Param("keyword") String keyword, @Param("limit") int limit);
+    List<BrandObjectEntity> searchFirstPage(
+            @Param("keyword") String keyword,
+            @Param("filterBrands") boolean filterBrands,
+            @Param("brandIds") List<Long> brandIds,
+            @Param("filterCategories") boolean filterCategories,
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("filterScales") boolean filterScales,
+            @Param("scaleIds") List<Long> scaleIds,
+            @Param("limit") int limit);
 
     @Query("""
             SELECT * FROM brand_objects
-            WHERE id > :afterId
+            WHERE (:filterBrands = FALSE OR brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
+              AND id > :afterId
               AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
             ORDER BY id ASC
@@ -54,19 +68,69 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             """)
     List<BrandObjectEntity> searchAfterId(
             @Param("keyword") String keyword,
+            @Param("filterBrands") boolean filterBrands,
+            @Param("brandIds") List<Long> brandIds,
+            @Param("filterCategories") boolean filterCategories,
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("filterScales") boolean filterScales,
+            @Param("scaleIds") List<Long> scaleIds,
             @Param("afterId") Long afterId,
             @Param("limit") int limit);
 
     @Query("""
             SELECT COUNT(*) FROM brand_objects
-            WHERE LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+            WHERE (:filterBrands = FALSE OR brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
             """)
-    long countSearch(@Param("keyword") String keyword);
+    long countSearch(
+            @Param("keyword") String keyword,
+            @Param("filterBrands") boolean filterBrands,
+            @Param("brandIds") List<Long> brandIds,
+            @Param("filterCategories") boolean filterCategories,
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("filterScales") boolean filterScales,
+            @Param("scaleIds") List<Long> scaleIds);
+
+    @Query("""
+            SELECT category_id AS category_id, COUNT(*) AS cnt
+            FROM brand_objects
+            WHERE category_id IS NOT NULL
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY category_id
+            ORDER BY cnt DESC, category_id ASC
+            """)
+    List<CategoryFacetRow> countByCategorySearch(@Param("keyword") String keyword);
+
+    @Query("""
+            SELECT brand_id AS id, COUNT(*) AS cnt
+            FROM brand_objects
+            WHERE (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY brand_id
+            ORDER BY cnt DESC, brand_id ASC
+            """)
+    List<FacetCountRow> countByBrandSearch(@Param("keyword") String keyword);
+
+    @Query("""
+            SELECT scale_id AS id, COUNT(*) AS cnt
+            FROM brand_objects
+            WHERE scale_id IS NOT NULL
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY scale_id
+            ORDER BY cnt DESC, scale_id ASC
+            """)
+    List<FacetCountRow> countByScaleSearch(@Param("keyword") String keyword);
 
     @Query("""
             SELECT * FROM brand_objects
             WHERE brand_id = :brandId
+              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
               AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
             ORDER BY id ASC
@@ -75,11 +139,17 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
     List<BrandObjectEntity> searchFirstPageWithinBrand(
             @Param("keyword") String keyword,
             @Param("brandId") Long brandId,
+            @Param("filterCategories") boolean filterCategories,
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("filterScales") boolean filterScales,
+            @Param("scaleIds") List<Long> scaleIds,
             @Param("limit") int limit);
 
     @Query("""
             SELECT * FROM brand_objects
             WHERE brand_id = :brandId
+              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
               AND id > :afterId
               AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
@@ -89,16 +159,56 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
     List<BrandObjectEntity> searchAfterIdWithinBrand(
             @Param("keyword") String keyword,
             @Param("brandId") Long brandId,
+            @Param("filterCategories") boolean filterCategories,
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("filterScales") boolean filterScales,
+            @Param("scaleIds") List<Long> scaleIds,
             @Param("afterId") Long afterId,
             @Param("limit") int limit);
 
     @Query("""
             SELECT COUNT(*) FROM brand_objects
             WHERE brand_id = :brandId
+              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
               AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
             """)
-    long countSearchWithinBrand(@Param("keyword") String keyword, @Param("brandId") Long brandId);
+    long countSearchWithinBrand(
+            @Param("keyword") String keyword,
+            @Param("brandId") Long brandId,
+            @Param("filterCategories") boolean filterCategories,
+            @Param("categoryIds") List<Long> categoryIds,
+            @Param("filterScales") boolean filterScales,
+            @Param("scaleIds") List<Long> scaleIds);
+
+    @Query("""
+            SELECT scale_id AS id, COUNT(*) AS cnt
+            FROM brand_objects
+            WHERE brand_id = :brandId
+              AND scale_id IS NOT NULL
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY scale_id
+            ORDER BY cnt DESC, scale_id ASC
+            """)
+    List<FacetCountRow> countByScaleWithinBrandSearch(
+            @Param("keyword") String keyword,
+            @Param("brandId") Long brandId);
+
+    @Query("""
+            SELECT category_id AS category_id, COUNT(*) AS cnt
+            FROM brand_objects
+            WHERE brand_id = :brandId
+              AND category_id IS NOT NULL
+              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY category_id
+            ORDER BY cnt DESC, category_id ASC
+            """)
+    List<CategoryFacetRow> countByCategoryWithinBrandSearch(
+            @Param("keyword") String keyword,
+            @Param("brandId") Long brandId);
 
     @Query("""
             SELECT bo.* FROM brand_objects bo

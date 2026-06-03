@@ -14,6 +14,15 @@ export default function GuestBrandsView() {
     brandsListSlice,
     brandsSearchSlice,
     objectsSearchSlice,
+    showObjectFilters,
+    searchFacets,
+    facetsLoading,
+    selectedCategoryIds,
+    selectedBrandIds,
+    selectedScaleIds,
+    onToggleCategory,
+    onToggleBrand,
+    onToggleScale,
   } = useBrandsState();
 
   return (
@@ -29,6 +38,15 @@ export default function GuestBrandsView() {
       brandsListSlice={brandsListSlice}
       brandsSearchSlice={brandsSearchSlice}
       objectsSearchSlice={objectsSearchSlice}
+      showObjectFilters={showObjectFilters}
+      searchFacets={searchFacets}
+      facetsLoading={facetsLoading}
+      selectedCategoryIds={selectedCategoryIds}
+      selectedBrandIds={selectedBrandIds}
+      selectedScaleIds={selectedScaleIds}
+      onToggleCategory={onToggleCategory}
+      onToggleBrand={onToggleBrand}
+      onToggleScale={onToggleScale}
     />
   );
 }

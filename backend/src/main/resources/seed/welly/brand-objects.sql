@@ -1293,7 +1293,7 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('1969 Ford Capri 43753', '1969 福特 Capri 43753', 'http://localhost:9000/minicollections-media/welly/43753.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 34, 1, 17),
 ('1969 Ford Mustang Boss 429 52376', '1969 福特 Mustang Boss 429 52376', 'http://localhost:9000/minicollections-media/welly/52376.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 34, 1, 26),
 ('Scania P320 Distribution Truck 95220F', '斯堪尼亚 P320 Distribution Truck 95220F', 'http://localhost:9000/minicollections-media/welly/95220F.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 34, 1, 34),
-('New London Bus 99931', 'New London 巴士 99931', 'http://localhost:9000/minicollections-media/welly/99931.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 34, 10, 29),
-('Nuova Fiat 500 92724', 'Nuova 菲亚特 500 92724', 'http://localhost:9000/minicollections-media/welly/92724.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 34, 10, NULL),
+('New London Bus 99931', 'New London 巴士 99931', 'http://localhost:9000/minicollections-media/welly/99931.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 34, 3, 29),
+('Nuova Fiat 500 92724', 'Nuova 菲亚特 500 92724', 'http://localhost:9000/minicollections-media/welly/92724.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 34, 1, NULL),
 
 ('New London Bus 52391', 'New London 巴士 52391', 'http://localhost:9000/minicollections-media/welly/52391.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 34, 10, 35);

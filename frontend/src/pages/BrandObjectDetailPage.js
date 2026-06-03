@@ -251,6 +251,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <DetailRow label={t("brand")} value={brandObject?.brand} />
+          <DetailRow label={t("series")} value={brandObject?.series} />
           <DetailRow label={t("category")} value={brandObject?.category} />
           <DetailRow label={t("scale")} value={brandObject?.scale} />
           <DetailRow
@@ -261,7 +262,6 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
             label={t("releaseDate")}
             value={brandObject?.release_date ?? brandObject?.releaseDate}
           />
-          <DetailRow label={t("series")} value={brandObject?.series} />
           <DetailRow
             label={t("imageSource")}
             value={brandObject?.image_source ?? brandObject?.imageSource}

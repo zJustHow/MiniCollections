@@ -1,5 +1,5 @@
-
 import { translateError } from "./i18n";
+import { appendIdListParams } from "./utils/filterParams";
 
 const TOKEN_KEY = "auth_token";
 
@@ -152,10 +152,20 @@ async function fetchAllFromSlice(fetchPage) {
   return all;
 }
 
-function buildSliceParams({ size = SLICE_SIZE, cursor = null, keyword = null } = {}) {
+function buildSliceParams({
+  size = SLICE_SIZE,
+  cursor = null,
+  keyword = null,
+  categoryIds = null,
+  brandIds = null,
+  scaleIds = null,
+} = {}) {
   const params = new URLSearchParams({ size: String(size) });
   if (cursor) params.set("cursor", cursor);
   if (keyword) params.set("keyword", keyword);
+  appendIdListParams(params, "categoryIds", categoryIds);
+  appendIdListParams(params, "brandIds", brandIds);
+  appendIdListParams(params, "scaleIds", scaleIds);
   return params;
 }
 
@@ -259,9 +269,20 @@ export const getBrandObjectById = async (id) => {
   return handleResponse(response);
 };
 
-export const searchBrandObjectsSlice = async (keyword, { size = SLICE_SIZE, cursor = null } = {}) => {
-  const params = buildSliceParams({ size, cursor, keyword });
+export const searchBrandObjectsSlice = async (
+  keyword,
+  { size = SLICE_SIZE, cursor = null, categoryIds = null, brandIds = null, scaleIds = null } = {},
+) => {
+  const params = buildSliceParams({ size, cursor, keyword, categoryIds, brandIds, scaleIds });
   const response = await fetch(`/brands/objects/search?${params}`, { headers: authHeaders() });
+  return handleResponse(response);
+};
+
+export const searchBrandObjectsFacets = async (keyword) => {
+  const params = new URLSearchParams({ keyword });
+  const response = await fetch(`/brands/objects/search/facets?${params}`, {
+    headers: authHeaders(),
+  });
   return handleResponse(response);
 };
 
@@ -271,12 +292,21 @@ export const searchBrandObjects = async (keyword) =>
 export const searchBrandObjectsByBrandIdSlice = async (
   brandId,
   keyword,
-  { size = SLICE_SIZE, cursor = null } = {},
+  { size = SLICE_SIZE, cursor = null, categoryIds = null, scaleIds = null } = {},
 ) => {
-  const params = buildSliceParams({ size, cursor, keyword });
+  const params = buildSliceParams({ size, cursor, keyword, categoryIds, scaleIds });
   const response = await fetch(`/brands/${brandId}/objects/search?${params}`, {
     headers: authHeaders(),
   });
+  return handleResponse(response);
+};
+
+export const searchBrandObjectsByBrandIdFacets = async (brandId, keyword) => {
+  const params = new URLSearchParams({ keyword });
+  const response = await fetch(
+    `/brands/${brandId}/objects/search/facets?${params}`,
+    { headers: authHeaders() },
+  );
   return handleResponse(response);
 };
 

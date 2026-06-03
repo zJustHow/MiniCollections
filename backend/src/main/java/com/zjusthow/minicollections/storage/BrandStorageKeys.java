@@ -51,6 +51,8 @@ public final class BrandStorageKeys {
             case 36 -> "greenlight";
             case 37 -> "mr-collection";
             case 38 -> "topspeed-model";
+            case 39 -> "almost-real";
+            case 40 -> "gcd";
             default -> slugify(nameEn);
         };
     }

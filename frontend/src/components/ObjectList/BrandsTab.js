@@ -3,6 +3,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import CardCover from "./CardCover";
 import InfiniteSliceFooter from "../InfiniteSliceFooter";
+import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
@@ -22,15 +23,24 @@ export default function BrandsTab({
   brandsListSlice,
   brandsSearchSlice,
   objectsSearchSlice,
+  showObjectFilters,
+  searchFacets,
+  facetsLoading,
+  selectedCategoryIds,
+  selectedBrandIds,
+  selectedScaleIds,
+  onToggleCategory,
+  onToggleBrand,
+  onToggleScale,
 }) {
   const { t } = useLocale();
   const navigate = useNavigate();
   const screens = useBreakpoint();
-  const cols = screens.lg ? 4 : screens.md ? 3 : 2;
+  const browseCols = screens.lg ? 4 : screens.md ? 3 : 2;
 
-  const gridStyle = {
+  const browseGridStyle = {
     display: "grid",
-    gridTemplateColumns: `repeat(${cols}, 1fr)`,
+    gridTemplateColumns: `repeat(${browseCols}, 1fr)`,
     gap: 16,
   };
 
@@ -112,6 +122,12 @@ export default function BrandsTab({
 
   const dataSource = isAdmin ? [{ id: "__add__" }, ...brands] : brands;
 
+  const showObjectsSection =
+    searchActive &&
+    (searchResultObjects.length > 0 ||
+      showObjectFilters ||
+      objectsSearchSlice?.loading);
+
   return (
     <>
       <div
@@ -139,7 +155,7 @@ export default function BrandsTab({
             {searchResultBrands.length > 0 && (
               <>
                 <div style={sectionLabelStyle}>{t("brands")}</div>
-                <div style={gridStyle}>
+                <div style={browseGridStyle}>
                   {searchResultBrands.map(renderBrandCard)}
                 </div>
                 <InfiniteSliceFooter
@@ -153,7 +169,8 @@ export default function BrandsTab({
                 />
               </>
             )}
-            {searchResultObjects.length > 0 && (
+
+            {showObjectsSection && (
               <>
                 <div
                   style={{
@@ -163,8 +180,29 @@ export default function BrandsTab({
                 >
                   {t("brandObjects")}
                 </div>
-                <div style={gridStyle}>
-                  {searchResultObjects.map(renderObjectCard)}
+                <div className="neu-search-objects-layout">
+                  {showObjectFilters && (
+                    <ObjectSearchFilterPanel
+                      facets={searchFacets}
+                      loading={facetsLoading}
+                      selectedCategoryIds={selectedCategoryIds}
+                      selectedBrandIds={selectedBrandIds}
+                      selectedScaleIds={selectedScaleIds}
+                      onToggleCategory={onToggleCategory}
+                      onToggleBrand={onToggleBrand}
+                      onToggleScale={onToggleScale}
+                    />
+                  )}
+                  <div
+                    className="neu-search-objects-cards"
+                    style={
+                      showObjectFilters
+                        ? undefined
+                        : { gridColumn: "1 / -1" }
+                    }
+                  >
+                    {searchResultObjects.map(renderObjectCard)}
+                  </div>
                 </div>
                 <InfiniteSliceFooter
                   hasMore={objectsSearchSlice?.hasMore}
@@ -177,8 +215,9 @@ export default function BrandsTab({
                 />
               </>
             )}
+
             {searchResultBrands.length === 0 &&
-              searchResultObjects.length === 0 &&
+              !showObjectsSection &&
               !brandsSearchSlice?.loading &&
               !objectsSearchSlice?.loading && (
                 <div
@@ -194,7 +233,7 @@ export default function BrandsTab({
           </>
         ) : (
           <>
-            <div style={gridStyle}>{dataSource.map(renderBrandCard)}</div>
+            <div style={browseGridStyle}>{dataSource.map(renderBrandCard)}</div>
             <InfiniteSliceFooter
               hasMore={brandsListSlice?.hasMore}
               loading={brandsListSlice?.loading}

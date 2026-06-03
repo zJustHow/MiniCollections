@@ -6,8 +6,10 @@ import {
   getBrandsSlice,
   searchBrandsSlice,
   searchBrandObjectsSlice,
+  searchBrandObjectsFacets,
   SLICE_SIZE,
 } from "../../utils";
+import { filterKeyFromIds, toggleIdInList } from "../../utils/filterParams";
 
 export default function useBrandsState() {
   const navigate = useNavigate();
@@ -15,8 +17,19 @@ export default function useBrandsState() {
   const [searchValue, setSearchParam] = useSearchParam();
   const [searchActive, setSearchActive] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+  const [selectedBrandIds, setSelectedBrandIds] = useState([]);
+  const [selectedScaleIds, setSelectedScaleIds] = useState([]);
+  const [searchFacets, setSearchFacets] = useState(null);
+  const [facetsLoading, setFacetsLoading] = useState(false);
 
   const [brandModalOpen, setBrandModalOpen] = useState(false);
+
+  const clearObjectFilters = useCallback(() => {
+    setSelectedCategoryIds([]);
+    setSelectedBrandIds([]);
+    setSelectedScaleIds([]);
+  }, []);
 
   const brandsList = useInfiniteSlice(
     ({ size, cursor }) => getBrandsSlice({ size, cursor }),
@@ -36,10 +49,23 @@ export default function useBrandsState() {
     },
   );
 
+  const objectFilterKey = filterKeyFromIds(
+    selectedCategoryIds,
+    selectedBrandIds,
+    selectedScaleIds,
+  );
+
   const objectsSearch = useInfiniteSlice(
-    ({ size, cursor }) => searchBrandObjectsSlice(searchKeyword, { size, cursor }),
+    ({ size, cursor }) =>
+      searchBrandObjectsSlice(searchKeyword, {
+        size,
+        cursor,
+        categoryIds: selectedCategoryIds,
+        brandIds: selectedBrandIds,
+        scaleIds: selectedScaleIds,
+      }),
     {
-      resetKey: `objects-search:${searchKeyword}`,
+      resetKey: `objects-search:${searchKeyword}:${objectFilterKey}`,
       enabled: searchActive && Boolean(searchKeyword),
       pageSize: SLICE_SIZE,
     },
@@ -54,6 +80,38 @@ export default function useBrandsState() {
     }
   }, [location.pathname, searchValue]);
 
+  useEffect(() => {
+    if (!searchActive || !searchKeyword) {
+      setSearchFacets(null);
+      clearObjectFilters();
+      return undefined;
+    }
+
+    let cancelled = false;
+    setFacetsLoading(true);
+    searchBrandObjectsFacets(searchKeyword)
+      .then((data) => {
+        if (!cancelled) {
+          setSearchFacets(data);
+          clearObjectFilters();
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSearchFacets({ total: 0, categories: [], brands: [], scales: [] });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setFacetsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchKeyword, searchActive, clearObjectFilters]);
+
   const handleBrandClick = (brand) => {
     navigate(`/brands/${brand.id}`, { state: { brand } });
   };
@@ -65,13 +123,15 @@ export default function useBrandsState() {
         setSearchParam("");
         setSearchKeyword("");
         setSearchActive(false);
+        clearObjectFilters();
+        setSearchFacets(null);
         return;
       }
       setSearchParam(keyword);
       setSearchKeyword(keyword);
       setSearchActive(true);
     },
-    [setSearchParam],
+    [setSearchParam, clearObjectFilters],
   );
 
   const refreshBrands = useCallback(() => {
@@ -86,6 +146,14 @@ export default function useBrandsState() {
   const loadingBrands = searchActive
     ? brandsSearch.loading || objectsSearch.loading
     : brandsList.loading;
+
+  const showObjectFilters =
+    searchActive &&
+    Boolean(searchKeyword) &&
+    searchFacets != null &&
+    ((searchFacets.categories?.length ?? 0) > 0 ||
+      (searchFacets.brands?.length ?? 0) > 0 ||
+      (searchFacets.scales?.length ?? 0) > 0);
 
   return useMemo(
     () => ({
@@ -103,6 +171,15 @@ export default function useBrandsState() {
       brandsListSlice: brandsList,
       brandsSearchSlice: brandsSearch,
       objectsSearchSlice: objectsSearch,
+      showObjectFilters,
+      searchFacets,
+      facetsLoading,
+      selectedCategoryIds,
+      selectedBrandIds,
+      selectedScaleIds,
+      onToggleCategory: (id) => toggleIdInList(id, setSelectedCategoryIds),
+      onToggleBrand: (id) => toggleIdInList(id, setSelectedBrandIds),
+      onToggleScale: (id) => toggleIdInList(id, setSelectedScaleIds),
     }),
     [
       brandsList,
@@ -114,6 +191,12 @@ export default function useBrandsState() {
       brandModalOpen,
       searchActive,
       searchValue,
+      showObjectFilters,
+      searchFacets,
+      facetsLoading,
+      selectedCategoryIds,
+      selectedBrandIds,
+      selectedScaleIds,
     ],
   );
 }

@@ -11,6 +11,8 @@ import {
 } from "@ant-design/icons";
 import CardCover from "../components/ObjectList/CardCover";
 import InfiniteSliceFooter from "../components/InfiniteSliceFooter";
+import ObjectSearchFilterPanel from "../components/ObjectSearchFilterPanel";
+import { filterKeyFromIds, toggleIdInList } from "../utils/filterParams";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import BrandModal from "../components/ObjectList/modals/BrandModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
@@ -20,6 +22,7 @@ import {
   getBrandByBrandId,
   getBrandObjectsSlice,
   searchBrandObjectsByBrandIdSlice,
+  searchBrandObjectsByBrandIdFacets,
   adminDeleteBrand,
   SLICE_SIZE,
 } from "../utils";
@@ -39,9 +42,17 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
 
   const [searchValue, setSearchParam] = useSearchParam();
   const [brand, setBrand] = useState(location.state?.brand ?? null);
-  const [searchActive, setSearchActive] = useState(Boolean((searchValue ?? "").trim()));
-  const [searchKeyword, setSearchKeyword] = useState((searchValue ?? "").trim());
+  const [searchActive, setSearchActive] = useState(
+    Boolean((searchValue ?? "").trim()),
+  );
+  const [searchKeyword, setSearchKeyword] = useState(
+    (searchValue ?? "").trim(),
+  );
   const [draftQuery, setDraftQuery] = useState(searchValue);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+  const [selectedScaleIds, setSelectedScaleIds] = useState([]);
+  const [searchFacets, setSearchFacets] = useState(null);
+  const [facetsLoading, setFacetsLoading] = useState(false);
 
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
 
@@ -62,9 +73,14 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
 
   const objectsSearch = useInfiniteSlice(
     ({ size, cursor }) =>
-      searchBrandObjectsByBrandIdSlice(brandId, searchKeyword, { size, cursor }),
+      searchBrandObjectsByBrandIdSlice(brandId, searchKeyword, {
+        size,
+        cursor,
+        categoryIds: selectedCategoryIds,
+        scaleIds: selectedScaleIds,
+      }),
     {
-      resetKey: `brand-objects-search:${brandId}:${searchKeyword}`,
+      resetKey: `brand-objects-search:${brandId}:${searchKeyword}:${filterKeyFromIds(selectedCategoryIds, [], selectedScaleIds)}`,
       enabled: searchActive && Boolean(searchKeyword),
       pageSize: SLICE_SIZE,
     },
@@ -73,7 +89,20 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const activeSlice = searchActive ? objectsSearch : objectsList;
   const displayObjects = activeSlice.items;
   const showAddCard = isAdmin && !searchActive;
-  const listData = showAddCard ? [{ id: "__add__" }, ...displayObjects] : displayObjects;
+  const listData = showAddCard
+    ? [{ id: "__add__" }, ...displayObjects]
+    : displayObjects;
+
+  const showObjectFilters =
+    searchActive &&
+    Boolean(searchKeyword) &&
+    searchFacets != null &&
+    ((searchFacets.categories?.length ?? 0) > 0 ||
+      (searchFacets.scales?.length ?? 0) > 0);
+
+  const showSearchObjectsSection =
+    searchActive &&
+    (displayObjects.length > 0 || showObjectFilters || objectsSearch.loading);
 
   useEffect(() => {
     if (!brand) {
@@ -91,6 +120,40 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       setSearchActive(true);
     }
   }, [brandId, searchValue]);
+
+  useEffect(() => {
+    if (!searchActive || !searchKeyword) {
+      setSearchFacets(null);
+      setSelectedCategoryIds([]);
+      setSelectedScaleIds([]);
+      return undefined;
+    }
+
+    let cancelled = false;
+    setFacetsLoading(true);
+    searchBrandObjectsByBrandIdFacets(brandId, searchKeyword)
+      .then((data) => {
+        if (!cancelled) {
+          setSearchFacets(data);
+          setSelectedCategoryIds([]);
+          setSelectedScaleIds([]);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSearchFacets({ total: 0, categories: [], brands: [], scales: [] });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setFacetsLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [brandId, searchKeyword, searchActive]);
 
   const handleAdminDeleteBrand = async () => {
     if (!brand) return;
@@ -172,6 +235,9 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         setSearchActive(false);
         setSearchKeyword("");
         setSearchParam("");
+        setSelectedCategoryIds([]);
+        setSelectedScaleIds([]);
+        setSearchFacets(null);
         return;
       }
       setSearchParam(trimmed);
@@ -201,6 +267,9 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
               setSearchActive(false);
               setSearchKeyword("");
               setSearchParam("");
+              setSelectedCategoryIds([]);
+              setSelectedScaleIds([]);
+              setSearchFacets(null);
             }
           }}
           onSearch={(v) => {
@@ -213,81 +282,147 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       </div>
 
       <Spin spinning={activeSlice.loading && displayObjects.length === 0}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gap: 16,
-          }}
-        >
-          {listData.map((item) =>
-            item.id === "__add__" ? (
-              <Card
-                key="__add__"
-                hoverable
-                className="neu-model-card"
-                cover={
-                  <div
-                    style={{
-                      position: "relative",
-                      paddingTop: "75%",
-                      overflow: "hidden",
-                      borderRadius: "32px 32px 0 0",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <PlusOutlined
-                        style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-                      />
-                    </div>
-                    <div className="neu-nameplate">{t("addBrandObject")}</div>
-                  </div>
-                }
-                onClick={() => {
-                  setEditingBrandObject(null);
-                  setBrandObjectModalOpen(true);
-                }}
-                bodyStyle={{ padding: 0 }}
-              />
+        {searchActive ? (
+          <>
+            {showSearchObjectsSection ? (
+              <div className="neu-search-objects-layout">
+                {showObjectFilters && (
+                  <ObjectSearchFilterPanel
+                    facets={searchFacets}
+                    loading={facetsLoading}
+                    selectedCategoryIds={selectedCategoryIds}
+                    selectedBrandIds={[]}
+                    selectedScaleIds={selectedScaleIds}
+                    onToggleCategory={(id) =>
+                      toggleIdInList(id, setSelectedCategoryIds)
+                    }
+                    onToggleBrand={() => {}}
+                    onToggleScale={(id) => toggleIdInList(id, setSelectedScaleIds)}
+                  />
+                )}
+                <div
+                  className="neu-search-objects-cards"
+                  style={
+                    showObjectFilters ? undefined : { gridColumn: "1 / -1" }
+                  }
+                >
+                  {displayObjects.map((item) => (
+                    <Card
+                      key={item.id}
+                      hoverable
+                      className="neu-model-card"
+                      cover={
+                        <CardCover image_url={item.image_url} name={item.name} />
+                      }
+                      onClick={() =>
+                        navigate(`/brands/${brandId}/objects/${item.id}`, {
+                          state: { brandObject: item, brand },
+                        })
+                      }
+                      bodyStyle={{ padding: 0 }}
+                    />
+                  ))}
+                </div>
+              </div>
             ) : (
-              <Card
-                key={item.id}
-                hoverable
-                className="neu-model-card"
-                cover={
-                  <CardCover image_url={item.image_url} name={item.name} />
-                }
-                onClick={() =>
-                  navigate(`/brands/${brandId}/objects/${item.id}`, {
-                    state: { brandObject: item, brand },
-                  })
-                }
-                bodyStyle={{ padding: 0 }}
-              />
-            ),
-          )}
-        </div>
-
-        <InfiniteSliceFooter
-          hasMore={activeSlice.hasMore}
-          loading={activeSlice.loading}
-          loadingMore={activeSlice.loadingMore}
-          onLoadMore={activeSlice.loadMore}
-          itemCount={displayObjects.length}
-          totalElements={searchActive ? activeSlice.totalElements : null}
-          totalExact={activeSlice.totalExact}
-        />
+              !objectsSearch.loading && (
+                <div
+                  style={{
+                    textAlign: "center",
+                    color: "var(--neu-text-2)",
+                    padding: "32px 0",
+                  }}
+                >
+                  {t("noSearchResults")}
+                </div>
+              )
+            )}
+            <InfiniteSliceFooter
+              hasMore={activeSlice.hasMore}
+              loading={activeSlice.loading}
+              loadingMore={activeSlice.loadingMore}
+              onLoadMore={activeSlice.loadMore}
+              itemCount={displayObjects.length}
+              totalElements={activeSlice.totalElements}
+              totalExact={activeSlice.totalExact}
+            />
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                gap: 16,
+              }}
+            >
+              {listData.map((item) =>
+                item.id === "__add__" ? (
+                  <Card
+                    key="__add__"
+                    hoverable
+                    className="neu-model-card"
+                    cover={
+                      <div
+                        style={{
+                          position: "relative",
+                          paddingTop: "75%",
+                          overflow: "hidden",
+                          borderRadius: "32px 32px 0 0",
+                        }}
+                      >
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <PlusOutlined
+                            style={{ fontSize: 36, color: "var(--neu-text-2)" }}
+                          />
+                        </div>
+                        <div className="neu-nameplate">{t("addBrandObject")}</div>
+                      </div>
+                    }
+                    onClick={() => {
+                      setEditingBrandObject(null);
+                      setBrandObjectModalOpen(true);
+                    }}
+                    bodyStyle={{ padding: 0 }}
+                  />
+                ) : (
+                  <Card
+                    key={item.id}
+                    hoverable
+                    className="neu-model-card"
+                    cover={
+                      <CardCover image_url={item.image_url} name={item.name} />
+                    }
+                    onClick={() =>
+                      navigate(`/brands/${brandId}/objects/${item.id}`, {
+                        state: { brandObject: item, brand },
+                      })
+                    }
+                    bodyStyle={{ padding: 0 }}
+                  />
+                ),
+              )}
+            </div>
+            <InfiniteSliceFooter
+              hasMore={activeSlice.hasMore}
+              loading={activeSlice.loading}
+              loadingMore={activeSlice.loadingMore}
+              onLoadMore={activeSlice.loadMore}
+              itemCount={displayObjects.length}
+            />
+          </>
+        )}
       </Spin>
 
       {authed && (
