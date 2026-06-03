@@ -1,15 +1,56 @@
-import { DatePicker, Form, Input, InputNumber, Modal } from "antd";
+import { DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
-import { adminCreateBrandObject, adminUpdateBrandObject } from "../../../utils";
+import { useCallback, useEffect, useState } from "react";
+import { adminCreateBrandObject, adminUpdateBrandObject, getCategories, getScales, getSeriesByBrandId } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
 import ImageUploadField from "../../ImageUploadField";
 import useModalForm from "../../../hooks/useModalForm";
 
-export default function BrandObjectModal({ open, brandObject, brandId, onClose, onSuccess }) {
+export default function BrandObjectModal({
+  open,
+  brandObject,
+  brandId,
+  onClose,
+  onSuccess,
+  seriesRefreshKey = 0,
+}) {
   const { t } = useLocale();
   const [imageUrl, setImageUrl] = useState(null);
+  const [seriesOptions, setSeriesOptions] = useState([]);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [scaleOptions, setScaleOptions] = useState([]);
   const isEdit = !!brandObject;
+
+  const loadSeries = useCallback(async () => {
+    if (!brandId) {
+      setSeriesOptions([]);
+      return;
+    }
+    try {
+      const data = await getSeriesByBrandId(brandId);
+      setSeriesOptions(Array.isArray(data) ? data : []);
+    } catch {
+      setSeriesOptions([]);
+    }
+  }, [brandId]);
+
+  const loadCategories = useCallback(async () => {
+    try {
+      const data = await getCategories();
+      setCategoryOptions(Array.isArray(data) ? data : []);
+    } catch {
+      setCategoryOptions([]);
+    }
+  }, []);
+
+  const loadScales = useCallback(async () => {
+    try {
+      const data = await getScales();
+      setScaleOptions(Array.isArray(data) ? data : []);
+    } catch {
+      setScaleOptions([]);
+    }
+  }, []);
 
   const { form, loading, handleOk } = useModalForm({
     onSubmit: async (values) => {
@@ -18,10 +59,10 @@ export default function BrandObjectModal({ open, brandObject, brandId, onClose, 
         name_zh: values.nameZh || null,
         image_url: imageUrl || null,
         image_source: values.imageSource || null,
-        scale: values.scale || null,
-        category_en: values.categoryEn || null,
-        category_zh: values.categoryZh || null,
+        scale_id: values.scaleId ?? null,
+        category_id: values.categoryId ?? null,
         release_date: values.releaseDate ? values.releaseDate.format("YYYY-MM-DD") : null,
+        series_id: values.seriesId ?? null,
         release_price_cny: values.releasePriceCny ?? null,
         release_price_usd: values.releasePriceUsd ?? null,
       };
@@ -39,25 +80,29 @@ export default function BrandObjectModal({ open, brandObject, brandId, onClose, 
 
   useEffect(() => {
     if (open) {
+      loadSeries();
+      loadCategories();
+      loadScales();
       form.setFieldsValue(brandObject ? {
         nameEn: brandObject.name_en,
         nameZh: brandObject.name_zh,
-        scale: brandObject.scale,
-        categoryEn: brandObject.category_en,
-        categoryZh: brandObject.category_zh,
+        scaleId: brandObject.scale_id ?? undefined,
+        categoryId: brandObject.category_id ?? undefined,
         releaseDate: brandObject.release_date ? dayjs(brandObject.release_date) : null,
+        seriesId: brandObject.series_id ?? undefined,
         releasePriceCny: brandObject.release_price_cny,
         releasePriceUsd: brandObject.release_price_usd,
         imageSource: brandObject.image_source,
       } : {
-        nameEn: "", nameZh: "", scale: "",
-        categoryEn: "", categoryZh: "", releaseDate: null,
+        nameEn: "", nameZh: "", scaleId: undefined,
+        categoryId: undefined, releaseDate: null,
+        seriesId: undefined,
         releasePriceCny: null, releasePriceUsd: null,
         imageSource: "",
       });
       setImageUrl(brandObject?.image_url || null);
     }
-  }, [open, brandObject, form]);
+  }, [open, brandObject, form, loadSeries, loadCategories, loadScales, seriesRefreshKey]);
 
   return (
     <Modal
@@ -79,17 +124,38 @@ export default function BrandObjectModal({ open, brandObject, brandId, onClose, 
         <Form.Item label={t("nameZh")} name="nameZh">
           <Input />
         </Form.Item>
-        <Form.Item label={t("scale")} name="scale">
-          <Input />
+        <Form.Item label={t("scale")} name="scaleId">
+          <Select
+            allowClear
+            placeholder={t("scale")}
+            options={scaleOptions.map((s) => ({
+              value: s.id,
+              label: s.code,
+            }))}
+          />
         </Form.Item>
-        <Form.Item label={t("categoryEn")} name="categoryEn">
-          <Input />
-        </Form.Item>
-        <Form.Item label={t("categoryZh")} name="categoryZh">
-          <Input />
+        <Form.Item label={t("category")} name="categoryId">
+          <Select
+            allowClear
+            placeholder={t("category")}
+            options={categoryOptions.map((c) => ({
+              value: c.id,
+              label: c.name,
+            }))}
+          />
         </Form.Item>
         <Form.Item label={t("releaseDate")} name="releaseDate">
           <DatePicker style={{ width: "100%" }} />
+        </Form.Item>
+        <Form.Item label={t("series")} name="seriesId">
+          <Select
+            allowClear
+            placeholder={t("selectSeries")}
+            options={seriesOptions.map((s) => ({
+              value: s.id,
+              label: s.name_en || s.name,
+            }))}
+          />
         </Form.Item>
         <Form.Item label={t("priceCNY")} name="releasePriceCny">
           <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />

@@ -9,7 +9,6 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("brand_objects")
 public record BrandObjectEntity(
         @Id Long id,
-        Long brandId,
         String nameEn,
         String nameZh,
         String imageUrl,
@@ -17,8 +16,9 @@ public record BrandObjectEntity(
         BigDecimal releasePriceCny,
         BigDecimal releasePriceUsd,
         LocalDate releaseDate,
-        String categoryEn,
-        String categoryZh,
-        String scale
+        Long brandId,
+        Long seriesId,
+        Long categoryId,
+        Long scaleId
 ) {
 }

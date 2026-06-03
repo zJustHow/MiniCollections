@@ -4,8 +4,10 @@ import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
 import com.zjusthow.minicollections.model.BrandObjectBody;
+import com.zjusthow.minicollections.model.SeriesDto;
 import com.zjusthow.minicollections.model.SliceResponse;
 import com.zjusthow.minicollections.service.BrandService;
+import com.zjusthow.minicollections.service.SeriesService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,12 +20,15 @@ import org.springframework.web.bind.annotation.*;
 public class BrandController {
 
     private final BrandService brandService;
+    private final SeriesService seriesService;
     private final DisplayLocaleResolver displayLocaleResolver;
 
     public BrandController(
             BrandService brandService,
+            SeriesService seriesService,
             DisplayLocaleResolver displayLocaleResolver) {
         this.brandService = brandService;
+        this.seriesService = seriesService;
         this.displayLocaleResolver = displayLocaleResolver;
     }
 
@@ -58,6 +63,15 @@ public class BrandController {
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.getBrandById(brandId, effectiveLocale(acceptLanguage, user)));
+    }
+
+    @GetMapping("/{brandId}/series")
+    public ResponseEntity<java.util.List<SeriesDto>> getSeriesByBrandId(
+            @PathVariable Long brandId,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(seriesService.listByBrandId(
+                brandId, effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/{brandId}/objects")

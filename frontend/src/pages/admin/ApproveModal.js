@@ -1,12 +1,44 @@
 import { DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
-import { approveSubmission } from "../../utils";
+import { approveSubmission, getCategories, getScales, getSeriesByBrandId } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import useModalForm from "../../hooks/useModalForm";
 
 export default function ApproveModal({ open, submission, brands, onClose, onSuccess }) {
   const { t } = useLocale();
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [scaleOptions, setScaleOptions] = useState([]);
+  const [seriesOptions, setSeriesOptions] = useState([]);
+
+  const loadSeries = useCallback(async (brandId) => {
+    if (!brandId) {
+      setSeriesOptions([]);
+      return;
+    }
+    try {
+      const data = await getSeriesByBrandId(brandId);
+      setSeriesOptions(Array.isArray(data) ? data : []);
+    } catch {
+      setSeriesOptions([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      getCategories()
+        .then((data) => setCategoryOptions(Array.isArray(data) ? data : []))
+        .catch(() => setCategoryOptions([]));
+      getScales()
+        .then((data) => setScaleOptions(Array.isArray(data) ? data : []))
+        .catch(() => setScaleOptions([]));
+      if (submission?.brand_id) {
+        loadSeries(submission.brand_id);
+      } else {
+        setSeriesOptions([]);
+      }
+    }
+  }, [open, submission, loadSeries]);
 
   const { form, loading, handleOk } = useModalForm({
     onSubmit: async (values) => {
@@ -18,9 +50,9 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
         release_price_cny: values.releasePriceCny ?? null,
         release_price_usd: values.releasePriceUsd ?? null,
         release_date: values.releaseDate ? values.releaseDate.format("YYYY-MM-DD") : null,
-        category_en: values.categoryEn || null,
-        category_zh: values.categoryZh || null,
-        scale: values.scale || null,
+        series_id: values.seriesId ?? null,
+        category_id: values.categoryId ?? null,
+        scale_id: values.scaleId ?? null,
         admin_note: null,
       });
     },
@@ -40,9 +72,9 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
         releasePriceCny: submission.release_price_cny,
         releasePriceUsd: submission.release_price_usd,
         releaseDate: submission.release_date ? dayjs(submission.release_date) : null,
-        categoryEn: submission.category_en,
-        categoryZh: submission.category_zh,
-        scale: submission.scale,
+        seriesId: submission.series_id ?? undefined,
+        categoryId: submission.category_id ?? undefined,
+        scaleId: submission.scale_id ?? undefined,
       });
     }
   }, [open, submission, form]);
@@ -62,7 +94,14 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
     >
       <Form layout="vertical" form={form}>
         <Form.Item label={t("brand")} name="brandId" rules={[{ required: true, message: t("brandRequired") }]}>
-          <Select showSearch optionFilterProp="children">
+          <Select
+            showSearch
+            optionFilterProp="children"
+            onChange={(brandId) => {
+              form.setFieldValue("seriesId", undefined);
+              loadSeries(brandId);
+            }}
+          >
             {brands.map((b) => (
               <Select.Option key={b.id} value={b.id}>{b.name}</Select.Option>
             ))}
@@ -77,17 +116,38 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
         <Form.Item label={t("image")} name="imageUrl">
           <Input placeholder="https://..." />
         </Form.Item>
-        <Form.Item label={t("scale")} name="scale">
-          <Input />
+        <Form.Item label={t("scale")} name="scaleId">
+          <Select
+            allowClear
+            placeholder={t("scale")}
+            options={scaleOptions.map((s) => ({
+              value: s.id,
+              label: s.code,
+            }))}
+          />
         </Form.Item>
-        <Form.Item label={t("category")} name="categoryEn">
-          <Input />
-        </Form.Item>
-        <Form.Item label="Category (ZH)" name="categoryZh">
-          <Input />
+        <Form.Item label={t("category")} name="categoryId">
+          <Select
+            allowClear
+            placeholder={t("category")}
+            options={categoryOptions.map((c) => ({
+              value: c.id,
+              label: c.name,
+            }))}
+          />
         </Form.Item>
         <Form.Item label={t("releaseDate")} name="releaseDate">
           <DatePicker style={{ width: "100%" }} />
+        </Form.Item>
+        <Form.Item label={t("series")} name="seriesId">
+          <Select
+            allowClear
+            placeholder={t("selectSeries")}
+            options={seriesOptions.map((s) => ({
+              value: s.id,
+              label: s.name_en || s.name,
+            }))}
+          />
         </Form.Item>
         <Form.Item label={t("priceCNY")} name="releasePriceCny">
           <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />

@@ -11,8 +11,8 @@ public record BrandObjectBody(
         BigDecimal releasePriceCny,
         BigDecimal releasePriceUsd,
         LocalDate releaseDate,
-        String categoryEn,
-        String categoryZh,
-        String scale
+        Long seriesId,
+        Long categoryId,
+        Long scaleId
 ) {
 }

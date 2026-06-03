@@ -23,6 +23,7 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
           { label: t("scale"), value: submission.scale },
           { label: t("category"), value: submission.category_en },
           { label: t("releaseDate"), value: submission.release_date },
+          { label: t("series"), value: submission.series_en },
           { label: t("priceCNY"), value: submission.release_price_cny },
           { label: t("priceUSD"), value: submission.release_price_usd },
           { label: t("additionalNotes"), value: submission.notes },

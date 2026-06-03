@@ -15,7 +15,7 @@ export default function ResolveModal({ open, submission, onClose, onSuccess }) {
       await approveSubmission(submission.id, {
         brand_id: null, name_en: null, name_zh: null, image_url: null,
         release_price_cny: null, release_price_usd: null, release_date: null,
-        category_en: null, category_zh: null, scale: null,
+        category_id: null, scale_id: null,
         admin_note: adminNote || null,
       });
       message.success(t("submissionResolved"));

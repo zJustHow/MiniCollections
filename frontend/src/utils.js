@@ -201,6 +201,21 @@ export const getBrandByBrandId = async (brandId) => {
   return handleResponse(response);
 };
 
+export const getSeriesByBrandId = async (brandId) => {
+  const response = await fetch(`/brands/${brandId}/series`, { headers: authHeaders() });
+  return handleResponse(response);
+};
+
+export const getCategories = async () => {
+  const response = await fetch("/categories", { headers: authHeaders() });
+  return handleResponse(response);
+};
+
+export const getScales = async () => {
+  const response = await fetch("/scales", { headers: authHeaders() });
+  return handleResponse(response);
+};
+
 export const getBrandObjectsSlice = async (brandId, { size = SLICE_SIZE, cursor = null } = {}) => {
   const params = buildSliceParams({ size, cursor });
   const response = await fetch(`/brands/${brandId}/objects?${params}`, { headers: authHeaders() });
@@ -460,6 +475,36 @@ export const adminUpdateBrandObject = async (id, payload) => {
 
 export const adminDeleteBrandObject = async (id) => {
   const response = await fetch(`/admin/brands/objects/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (response.status === 204) return;
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Request failed");
+  }
+};
+
+export const adminCreateSeries = async (brandId, payload) => {
+  const response = await fetch(`/admin/series/brands/${brandId}`, {
+    method: "POST",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+};
+
+export const adminUpdateSeries = async (id, payload) => {
+  const response = await fetch(`/admin/series/${id}`, {
+    method: "PUT",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+};
+
+export const adminDeleteSeries = async (id) => {
+  const response = await fetch(`/admin/series/${id}`, {
     method: "DELETE",
     headers: authHeaders(),
   });

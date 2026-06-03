@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record ApprovalBody(
-        Long brandId,
         String nameEn,
         String nameZh,
         String imageUrl,
@@ -12,8 +11,9 @@ public record ApprovalBody(
         BigDecimal releasePriceCny,
         BigDecimal releasePriceUsd,
         LocalDate releaseDate,
-        String categoryEn,
-        String categoryZh,
-        String scale,
+        Long brandId,
+        Long seriesId,
+        Long categoryId,
+        Long scaleId,
         String adminNote
 ) {}

@@ -7,16 +7,16 @@ import java.time.LocalDate;
 
 public record SubmissionBody(
         @NotBlank String submissionType,
-        Long brandId,
-        String customBrandName,
         String nameEn,
         String nameZh,
         String imageUrl,
         BigDecimal releasePriceCny,
         BigDecimal releasePriceUsd,
         LocalDate releaseDate,
-        String categoryEn,
-        String categoryZh,
-        String scale,
+        Long brandId,
+        String customBrandName,
+        Long seriesId,
+        Long categoryId,
+        Long scaleId,
         String notes
 ) {}

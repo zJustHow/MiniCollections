@@ -53,6 +53,36 @@ public class GlobalExceptionHandler {
         return msg("error.brand.not_found", lang, user);
     }
 
+    @ExceptionHandler(SeriesNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleSeriesNotFoundException(
+            SeriesNotFoundException ex,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String lang,
+            @AuthenticationPrincipal User user) {
+        log.debug("Series not found");
+        return msg("error.series.not_found", lang, user);
+    }
+
+    @ExceptionHandler(CategoryNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleCategoryNotFoundException(
+            CategoryNotFoundException ex,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String lang,
+            @AuthenticationPrincipal User user) {
+        log.debug("Category not found");
+        return msg("error.category.not_found", lang, user);
+    }
+
+    @ExceptionHandler(ScaleNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String handleScaleNotFoundException(
+            ScaleNotFoundException ex,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String lang,
+            @AuthenticationPrincipal User user) {
+        log.debug("Scale not found");
+        return msg("error.scale.not_found", lang, user);
+    }
+
     @ExceptionHandler(BrandObjectNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleBrandObjectNotFoundException(

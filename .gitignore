@@ -77,5 +77,8 @@ nbdist/
 # Catalog product images (upload to MinIO locally; seed SQL uses S3 URLs)
 backend/src/main/resources/static/images/
 
+# Frontend production build copied into Spring Boot (npm run build → public/)
+backend/src/main/resources/public/
+
 # Claude Code
 .claude/settings.local.json

@@ -31,6 +31,10 @@ export default function BrandObjectDetailModal({ visible, onCancel, detail }) {
         {detail.name ?? "—"}
       </p>
       <p>
+        <strong>{t("brand")}: </strong>
+        {detail.brand ?? "—"}
+      </p>
+      <p>
         <strong>{t("category")}: </strong>
         {detail.category ?? "—"}
       </p>
@@ -47,6 +51,10 @@ export default function BrandObjectDetailModal({ visible, onCancel, detail }) {
       <p>
         <strong>{t("releaseDate")}: </strong>
         {detail.release_date ?? detail.releaseDate ?? "—"}
+      </p>
+      <p>
+        <strong>{t("series")}: </strong>
+        {detail.series ?? "—"}
       </p>
       {(detail.image_source ?? detail.imageSource) && (
         <p>

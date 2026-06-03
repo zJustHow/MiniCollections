@@ -9,8 +9,15 @@ import com.zjusthow.minicollections.elasticsearch.BrandSearchRepository;
 import com.zjusthow.minicollections.elasticsearch.EsSearchSliceResult;
 import com.zjusthow.minicollections.entity.BrandEntity;
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
+import com.zjusthow.minicollections.entity.CategoryEntity;
+import com.zjusthow.minicollections.entity.ScaleEntity;
+import com.zjusthow.minicollections.entity.SeriesEntity;
 import com.zjusthow.minicollections.exception.BrandNotFoundException;
 import com.zjusthow.minicollections.exception.BrandObjectNotFoundException;
+import com.zjusthow.minicollections.exception.CategoryNotFoundException;
+import com.zjusthow.minicollections.exception.ScaleNotFoundException;
+import com.zjusthow.minicollections.exception.SeriesNotFoundException;
+import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.BrandBody;
 import com.zjusthow.minicollections.model.BrandDto;
@@ -19,6 +26,9 @@ import com.zjusthow.minicollections.model.BrandObjectBody;
 import com.zjusthow.minicollections.model.SliceResponse;
 import com.zjusthow.minicollections.repository.BrandObjectRepository;
 import com.zjusthow.minicollections.repository.BrandRepository;
+import com.zjusthow.minicollections.repository.CategoryRepository;
+import com.zjusthow.minicollections.repository.ScaleRepository;
+import com.zjusthow.minicollections.repository.SeriesRepository;
 import com.zjusthow.minicollections.util.CursorCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +43,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 @Service
@@ -46,6 +59,9 @@ public class BrandService {
 
     private final BrandRepository brandRepository;
     private final BrandObjectRepository brandObjectRepository;
+    private final SeriesRepository seriesRepository;
+    private final CategoryRepository categoryRepository;
+    private final ScaleRepository scaleRepository;
     private final DisplayLocaleResolver displayLocaleResolver;
     private final BrandObjectElasticsearchQueryService brandObjectElasticsearchQueryService;
     private final BrandObjectSearchRepository brandObjectSearchRepository;
@@ -59,6 +75,9 @@ public class BrandService {
     public BrandService(
             BrandRepository brandRepository,
             BrandObjectRepository brandObjectRepository,
+            SeriesRepository seriesRepository,
+            CategoryRepository categoryRepository,
+            ScaleRepository scaleRepository,
             DisplayLocaleResolver displayLocaleResolver,
             @Autowired(required = false) BrandObjectElasticsearchQueryService brandObjectElasticsearchQueryService,
             @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository,
@@ -67,6 +86,9 @@ public class BrandService {
             @Autowired(required = false) ImageStorageService imageStorageService) {
         this.brandRepository = brandRepository;
         this.brandObjectRepository = brandObjectRepository;
+        this.seriesRepository = seriesRepository;
+        this.categoryRepository = categoryRepository;
+        this.scaleRepository = scaleRepository;
         this.displayLocaleResolver = displayLocaleResolver;
         this.brandObjectElasticsearchQueryService = brandObjectElasticsearchQueryService;
         this.brandObjectSearchRepository = brandObjectSearchRepository;
@@ -154,9 +176,7 @@ public class BrandService {
                 ? brandObjectRepository.findFirstPageByBrandId(brandId, pageSize)
                 : brandObjectRepository.findAfterIdByBrandId(brandId, afterId, pageSize);
 
-        List<BrandObjectDto> content = entities.stream()
-                .map(e -> BrandObjectDto.from(e, preferZh))
-                .toList();
+        List<BrandObjectDto> content = toBrandObjectDtos(entities, preferZh);
         return toSqlSlice(content, pageSize);
     }
 
@@ -168,7 +188,7 @@ public class BrandService {
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
         BrandObjectEntity entity = brandObjectRepository.findById(id)
                 .orElseThrow(BrandObjectNotFoundException::new);
-        return BrandObjectDto.from(entity, preferZh);
+        return toBrandObjectDto(entity, preferZh);
     }
 
     public SliceResponse<BrandObjectDto> searchBrandObjectsSlice(
@@ -262,9 +282,7 @@ public class BrandService {
                     : brandObjectRepository.searchAfterIdWithinBrand(keyword, brandId, afterId, pageSize);
             total = firstPage ? brandObjectRepository.countSearchWithinBrand(keyword, brandId) : -1;
         }
-        List<BrandObjectDto> content = entities.stream()
-                .map(e -> BrandObjectDto.from(e, preferZh))
-                .toList();
+        List<BrandObjectDto> content = toBrandObjectDtos(entities, preferZh);
         return toSqlSearchSlice(content, pageSize, firstPage ? total : null);
     }
 
@@ -286,7 +304,7 @@ public class BrandService {
         List<BrandObjectDto> content = loadByIdsInOrder(
                 esResult.ids(),
                 brandObjectRepository::findAllById,
-                e -> BrandObjectDto.from(e, preferZh));
+                e -> toBrandObjectDto(e, preferZh));
         return fromEsSlice(content, esResult, pageSize);
     }
 
@@ -371,7 +389,7 @@ public class BrandService {
         return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
-    @CacheEvict(value = "brands", allEntries = true)
+    @CacheEvict(value = {"brands", "brandObjects"}, allEntries = true)
     public BrandDto updateBrand(long id, BrandBody req, String effectiveLocale) {
         brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
         var updated = new com.zjusthow.minicollections.entity.BrandEntity(id, req.nameEn(), req.nameZh(), req.imageUrl());
@@ -379,6 +397,7 @@ public class BrandService {
         if (brandEsEnabled()) {
             brandSearchRepository.save(BrandDocument.from(saved));
         }
+        reindexBrandObjectsForBrand(saved);
         return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
@@ -410,42 +429,37 @@ public class BrandService {
 
     @CacheEvict(value = "brandObjects", allEntries = true)
     public BrandObjectDto createBrandObject(long brandId, BrandObjectBody req, String effectiveLocale) {
+        validateSeriesForBrand(req.seriesId(), brandId);
+        validateCategoryId(req.categoryId());
+        validateScaleId(req.scaleId());
         BrandObjectEntity entity = new BrandObjectEntity(
-                null, brandId, req.nameEn(), req.nameZh(), req.imageUrl(), req.imageSource(),
+                null, req.nameEn(), req.nameZh(), req.imageUrl(), req.imageSource(),
                 req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
-                req.categoryEn(), req.categoryZh(), req.scale()
+                brandId, req.seriesId(), req.categoryId(), req.scaleId()
         );
         BrandObjectEntity saved = brandObjectRepository.save(entity);
-        if (esEnabled()) {
-            BrandEntity brand = brandRepository.findById(brandId).orElse(null);
-            brandObjectSearchRepository.save(BrandObjectDocument.from(
-                    saved,
-                    brand != null ? brand.nameEn() : null,
-                    brand != null ? brand.nameZh() : null));
-        }
+        indexBrandObject(saved);
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        return BrandObjectDto.from(saved, preferZh);
+        return toBrandObjectDto(saved, preferZh);
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)
     public BrandObjectDto updateBrandObject(long id, BrandObjectBody req, String effectiveLocale) {
         BrandObjectEntity existing = brandObjectRepository.findById(id)
                 .orElseThrow(BrandObjectNotFoundException::new);
+        validateSeriesForBrand(req.seriesId(), existing.brandId());
+        validateCategoryId(req.categoryId());
+        validateScaleId(req.scaleId());
         BrandObjectEntity updated = new BrandObjectEntity(
-                existing.id(), existing.brandId(), req.nameEn(), req.nameZh(), req.imageUrl(), req.imageSource(),
+                existing.id(), req.nameEn(), req.nameZh(),
+                req.imageUrl(), req.imageSource(),
                 req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
-                req.categoryEn(), req.categoryZh(), req.scale()
+                existing.brandId(), req.seriesId(), req.categoryId(), req.scaleId()
         );
         BrandObjectEntity saved = brandObjectRepository.save(updated);
-        if (esEnabled()) {
-            BrandEntity brand = brandRepository.findById(existing.brandId()).orElse(null);
-            brandObjectSearchRepository.save(BrandObjectDocument.from(
-                    saved,
-                    brand != null ? brand.nameEn() : null,
-                    brand != null ? brand.nameZh() : null));
-        }
+        indexBrandObject(saved);
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        return BrandObjectDto.from(saved, preferZh);
+        return toBrandObjectDto(saved, preferZh);
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)
@@ -457,5 +471,129 @@ public class BrandService {
         if (esEnabled()) {
             brandObjectSearchRepository.deleteById(id);
         }
+    }
+
+    private BrandObjectDto toBrandObjectDto(BrandObjectEntity entity, boolean preferZh) {
+        BrandEntity brand = brandRepository.findById(entity.brandId()).orElse(null);
+        SeriesEntity series = entity.seriesId() != null
+                ? seriesRepository.findById(entity.seriesId()).orElse(null)
+                : null;
+        CategoryEntity category = entity.categoryId() != null
+                ? categoryRepository.findById(entity.categoryId()).orElse(null)
+                : null;
+        ScaleEntity scale = entity.scaleId() != null
+                ? scaleRepository.findById(entity.scaleId()).orElse(null)
+                : null;
+        return BrandObjectDto.from(entity, brand, series, category, scale, preferZh);
+    }
+
+    private List<BrandObjectDto> toBrandObjectDtos(List<BrandObjectEntity> entities, boolean preferZh) {
+        if (entities.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> brandIds = new HashSet<>();
+        Set<Long> seriesIds = new HashSet<>();
+        Set<Long> categoryIds = new HashSet<>();
+        Set<Long> scaleIds = new HashSet<>();
+        for (BrandObjectEntity entity : entities) {
+            brandIds.add(entity.brandId());
+            if (entity.seriesId() != null) {
+                seriesIds.add(entity.seriesId());
+            }
+            if (entity.categoryId() != null) {
+                categoryIds.add(entity.categoryId());
+            }
+            if (entity.scaleId() != null) {
+                scaleIds.add(entity.scaleId());
+            }
+        }
+        Map<Long, BrandEntity> brandById = new HashMap<>();
+        if (!brandIds.isEmpty()) {
+            brandRepository.findAllById(brandIds).forEach(b -> brandById.put(b.id(), b));
+        }
+        Map<Long, SeriesEntity> seriesById = new HashMap<>();
+        if (!seriesIds.isEmpty()) {
+            seriesRepository.findAllById(seriesIds).forEach(s -> seriesById.put(s.id(), s));
+        }
+        Map<Long, CategoryEntity> categoryById = new HashMap<>();
+        if (!categoryIds.isEmpty()) {
+            categoryRepository.findAllById(categoryIds).forEach(c -> categoryById.put(c.id(), c));
+        }
+        Map<Long, ScaleEntity> scaleById = new HashMap<>();
+        if (!scaleIds.isEmpty()) {
+            scaleRepository.findAllById(scaleIds).forEach(s -> scaleById.put(s.id(), s));
+        }
+        return entities.stream()
+                .map(e -> BrandObjectDto.from(
+                        e,
+                        brandById.get(e.brandId()),
+                        seriesById.get(e.seriesId()),
+                        categoryById.get(e.categoryId()),
+                        scaleById.get(e.scaleId()),
+                        preferZh))
+                .toList();
+    }
+
+    private void reindexBrandObjectsForBrand(BrandEntity brand) {
+        if (!esEnabled()) {
+            return;
+        }
+        brandObjectRepository.findByBrandId(brand.id())
+                .orElse(List.of())
+                .forEach(this::indexBrandObject);
+    }
+
+    private void validateSeriesForBrand(Long seriesId, Long brandId) {
+        if (seriesId == null) {
+            return;
+        }
+        SeriesEntity series = seriesRepository.findById(seriesId)
+                .orElseThrow(SeriesNotFoundException::new);
+        if (!Objects.equals(series.brandId(), brandId)) {
+            throw new ValidationException("Series does not belong to this brand");
+        }
+    }
+
+    private void validateCategoryId(Long categoryId) {
+        if (categoryId == null) {
+            return;
+        }
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new CategoryNotFoundException();
+        }
+    }
+
+    private void validateScaleId(Long scaleId) {
+        if (scaleId == null) {
+            return;
+        }
+        if (!scaleRepository.existsById(scaleId)) {
+            throw new ScaleNotFoundException();
+        }
+    }
+
+    private void indexBrandObject(BrandObjectEntity saved) {
+        if (!esEnabled()) {
+            return;
+        }
+        BrandEntity brand = brandRepository.findById(saved.brandId()).orElse(null);
+        SeriesEntity series = saved.seriesId() != null
+                ? seriesRepository.findById(saved.seriesId()).orElse(null)
+                : null;
+        CategoryEntity category = saved.categoryId() != null
+                ? categoryRepository.findById(saved.categoryId()).orElse(null)
+                : null;
+        ScaleEntity scale = saved.scaleId() != null
+                ? scaleRepository.findById(saved.scaleId()).orElse(null)
+                : null;
+        brandObjectSearchRepository.save(BrandObjectDocument.from(
+                saved,
+                brand != null ? brand.nameEn() : null,
+                brand != null ? brand.nameZh() : null,
+                series != null ? series.nameEn() : null,
+                series != null ? series.nameZh() : null,
+                category != null ? category.nameEn() : null,
+                category != null ? category.nameZh() : null,
+                scale != null ? scale.code() : null));
     }
 }

@@ -2,13 +2,13 @@ import {
   App, DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
 import { BugOutlined, EditOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { useLocale } from "../../../LocaleContext";
-import { submitFeedback } from "../../../utils";
-import { useState } from "react";
+import { submitFeedback, getCategories, getScales, getSeriesByBrandId } from "../../../utils";
+import { useState, useEffect, useCallback } from "react";
 import ImageUploadField from "../../ImageUploadField";
 
 const OTHER_BRAND = "__OTHER__";
 
-function MissingModelForm({ form, brands, brandValue, onBrandChange, imageValue, onImageChange, onImageRemove }) {
+function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSeries, categoryOptions, scaleOptions, seriesOptions, imageValue, onImageChange, onImageRemove }) {
   const { t } = useLocale();
   return (
     <>
@@ -19,7 +19,13 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, imageValue,
           placeholder={t("brand")}
           onChange={(v) => {
             onBrandChange(v);
-            if (v !== OTHER_BRAND) form.setFieldValue("customBrandName", undefined);
+            form.setFieldValue("seriesId", undefined);
+            if (v !== OTHER_BRAND) {
+              form.setFieldValue("customBrandName", undefined);
+              onLoadSeries(v);
+            } else {
+              onLoadSeries(null);
+            }
           }}
         >
           {(brands || []).map((b) => (
@@ -47,16 +53,42 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, imageValue,
         <Input />
       </Form.Item>
 
-      <Form.Item label={t("scale")} name="scale">
-        <Input placeholder="e.g. 1:64" />
+      <Form.Item label={t("scale")} name="scaleId">
+        <Select
+          allowClear
+          placeholder={t("scale")}
+          options={scaleOptions.map((s) => ({
+            value: s.id,
+            label: s.code,
+          }))}
+        />
       </Form.Item>
 
-      <Form.Item label={t("category")} name="categoryEn">
-        <Input />
+      <Form.Item label={t("category")} name="categoryId">
+        <Select
+          allowClear
+          placeholder={t("category")}
+          options={categoryOptions.map((c) => ({
+            value: c.id,
+            label: c.name,
+          }))}
+        />
       </Form.Item>
 
       <Form.Item label={t("releaseDate")} name="releaseDate">
         <DatePicker style={{ width: "100%" }} />
+      </Form.Item>
+
+      <Form.Item label={t("series")} name="seriesId">
+        <Select
+          allowClear
+          placeholder={t("selectSeries")}
+          disabled={!brandValue || brandValue === OTHER_BRAND}
+          options={seriesOptions.map((s) => ({
+            value: s.id,
+            label: s.name_en || s.name,
+          }))}
+        />
       </Form.Item>
 
       <Form.Item label={t("priceCNY")} name="releasePriceCny">
@@ -162,6 +194,22 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
   const [submissionType, setSubmissionType] = useState("MISSING_MODEL");
   const [brandValue, setBrandValue] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  const [scaleOptions, setScaleOptions] = useState([]);
+  const [seriesOptions, setSeriesOptions] = useState([]);
+
+  const loadSeries = useCallback(async (brandId) => {
+    if (!brandId || brandId === OTHER_BRAND) {
+      setSeriesOptions([]);
+      return;
+    }
+    try {
+      const data = await getSeriesByBrandId(brandId);
+      setSeriesOptions(Array.isArray(data) ? data : []);
+    } catch {
+      setSeriesOptions([]);
+    }
+  }, []);
 
   const typeOptions = [
     { value: "MISSING_MODEL", icon: <PlusCircleOutlined />, labelKey: "feedbackTypeMissingModel" },
@@ -174,10 +222,28 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
     form.resetFields();
     setBrandValue(null);
     setImageUrl(null);
+    setSeriesOptions([]);
     if (val === "MISSING_MODEL" && selectedBrand?.id) {
       form.setFieldValue("brandId", selectedBrand.id);
+      setBrandValue(selectedBrand.id);
+      loadSeries(selectedBrand.id);
     }
   };
+
+  useEffect(() => {
+    if (visible) {
+      getCategories()
+        .then((data) => setCategoryOptions(Array.isArray(data) ? data : []))
+        .catch(() => setCategoryOptions([]));
+      getScales()
+        .then((data) => setScaleOptions(Array.isArray(data) ? data : []))
+        .catch(() => setScaleOptions([]));
+      if (selectedBrand?.id) {
+        setBrandValue(selectedBrand.id);
+        loadSeries(selectedBrand.id);
+      }
+    }
+  }, [visible, selectedBrand, loadSeries]);
 
   const handleOk = async () => {
     let values;
@@ -199,9 +265,9 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
         release_price_cny: values.releasePriceCny ?? null,
         release_price_usd: values.releasePriceUsd ?? null,
         release_date: values.releaseDate ? values.releaseDate.format("YYYY-MM-DD") : null,
-        category_en: values.categoryEn || null,
-        category_zh: values.categoryZh || null,
-        scale: values.scale || null,
+        series_id: values.seriesId ?? null,
+        category_id: values.categoryId ?? null,
+        scale_id: values.scaleId ?? null,
         notes: values.notes || null,
       };
       await submitFeedback(body);
@@ -275,6 +341,10 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
             brands={brands}
             brandValue={brandValue}
             onBrandChange={setBrandValue}
+            onLoadSeries={loadSeries}
+            categoryOptions={categoryOptions}
+            scaleOptions={scaleOptions}
+            seriesOptions={seriesOptions}
             {...imageProps}
           />
         )}

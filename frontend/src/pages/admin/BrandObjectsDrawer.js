@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { adminDeleteBrandObject, getBrandObjectsByBrandId } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import BrandObjectModal from "../../components/ObjectList/modals/BrandObjectModal";
+import SeriesModal from "../../components/ObjectList/modals/SeriesModal";
 
 export default function BrandObjectsDrawer({ brand, onClose, onBrandObjectsChanged }) {
   const { message } = App.useApp();
@@ -12,6 +13,8 @@ export default function BrandObjectsDrawer({ brand, onClose, onBrandObjectsChang
   const [loading, setLoading] = useState(false);
   const [objectModalOpen, setObjectModalOpen] = useState(false);
   const [editingObject, setEditingObject] = useState(null);
+  const [seriesModalOpen, setSeriesModalOpen] = useState(false);
+  const [seriesRefreshKey, setSeriesRefreshKey] = useState(0);
 
   const fetchObjects = async () => {
     if (!brand) return;
@@ -47,8 +50,9 @@ export default function BrandObjectsDrawer({ brand, onClose, onBrandObjectsChang
     { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },
     { title: t("nameZh"), dataIndex: "name_zh", ellipsis: true, width: 120 },
     { title: t("scale"), dataIndex: "scale", width: 80 },
-    { title: t("category"), dataIndex: "category_en", width: 100, ellipsis: true },
+    { title: t("category"), dataIndex: "category", width: 100, ellipsis: true },
     { title: t("releaseDate"), dataIndex: "release_date", width: 110 },
+    { title: t("series"), dataIndex: "series", width: 100, ellipsis: true },
     {
       title: "",
       key: "actions",
@@ -83,13 +87,18 @@ export default function BrandObjectsDrawer({ brand, onClose, onBrandObjectsChang
         onClose={onClose}
         width={720}
         extra={
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => { setEditingObject(null); setObjectModalOpen(true); }}
-          >
-            {t("addBrandObject")}
-          </Button>
+          <Space>
+            <Button onClick={() => setSeriesModalOpen(true)}>
+              {t("addSeries")}
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => { setEditingObject(null); setObjectModalOpen(true); }}
+            >
+              {t("addBrandObject")}
+            </Button>
+          </Space>
         }
       >
         <Table
@@ -105,8 +114,17 @@ export default function BrandObjectsDrawer({ brand, onClose, onBrandObjectsChang
         open={objectModalOpen}
         brandObject={editingObject}
         brandId={brand?.id}
+        seriesRefreshKey={seriesRefreshKey}
         onClose={() => { setObjectModalOpen(false); setEditingObject(null); }}
         onSuccess={() => { fetchObjects(); onBrandObjectsChanged?.(); }}
+      />
+      <SeriesModal
+        open={seriesModalOpen}
+        brandId={brand?.id}
+        onClose={() => setSeriesModalOpen(false)}
+        onSuccess={() => {
+          setSeriesRefreshKey((k) => k + 1);
+        }}
       />
     </>
   );

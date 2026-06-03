@@ -57,14 +57,15 @@ public class BrandObjectElasticsearchQueryService {
             builder.withQuery(sq -> sq.multiMatch(m -> m
                     .query(q)
                     .fields("brand_name_en^3", "brand_name_zh^3", "name_en^2", "name_zh^2",
-                            "category_en", "category_zh", "scale")
+                            "series_en", "series_zh", "category_en", "category_zh", "scale")
                     .type(TextQueryType.BestFields)
                     .operator(Operator.Or)));
         } else {
             builder.withQuery(sq -> sq.bool(b -> b
                     .must(m -> m.multiMatch(mm -> mm
                             .query(q)
-                            .fields("name_en^2", "name_zh^2", "category_en", "category_zh", "scale")
+                            .fields("name_en^2", "name_zh^2", "series_en", "series_zh",
+                                    "category_en", "category_zh", "scale")
                             .type(TextQueryType.BestFields)
                             .operator(Operator.Or)))
                     .filter(f -> f.term(t -> t

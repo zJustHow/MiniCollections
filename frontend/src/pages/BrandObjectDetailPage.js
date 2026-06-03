@@ -13,7 +13,6 @@ import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import {
-  getBrandByBrandId,
   getBrandObjectById,
   getGroups,
   createUserObject,
@@ -61,7 +60,6 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const { setHeaderSlot } = useHeader();
   const screens = useBreakpoint();
 
-  const [brand, setBrand] = useState(location.state?.brand ?? null);
   const [brandObject, setBrandObject] = useState(
     location.state?.brandObject ?? null,
   );
@@ -84,12 +82,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   }, [objectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    if (!brand) {
-      getBrandByBrandId(brandId)
-        .then(setBrand)
-        .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
-    }
-    if (!brandObject) {
+    if (!brandObject?.brand) {
       fetchBrandObject();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -257,6 +250,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
+          <DetailRow label={t("brand")} value={brandObject?.brand} />
           <DetailRow label={t("category")} value={brandObject?.category} />
           <DetailRow label={t("scale")} value={brandObject?.scale} />
           <DetailRow
@@ -267,6 +261,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
             label={t("releaseDate")}
             value={brandObject?.release_date ?? brandObject?.releaseDate}
           />
+          <DetailRow label={t("series")} value={brandObject?.series} />
           <DetailRow
             label={t("imageSource")}
             value={brandObject?.image_source ?? brandObject?.imageSource}
