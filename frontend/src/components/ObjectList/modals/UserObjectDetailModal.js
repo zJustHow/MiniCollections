@@ -2,6 +2,7 @@ import { Button, Modal, Spin, Tooltip } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
+import { radius } from "../../../theme/radius";
 
 export default function UserObjectDetailModal({
   visible,
@@ -95,7 +96,7 @@ export default function UserObjectDetailModal({
                   width: 60,
                   height: 60,
                   objectFit: "cover",
-                  borderRadius: 4,
+                  borderRadius: radius.xs,
                   marginRight: 12,
                 }}
               />

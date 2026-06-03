@@ -58,32 +58,20 @@ export default function BrandsTab({
         hoverable
         className="neu-model-card"
         cover={
-          <div
-            style={{
-              position: "relative",
-              paddingTop: "75%",
-              overflow: "hidden",
-              borderRadius: "32px 32px 0 0",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <PlusOutlined
-                style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-              />
+          <>
+            <div className="neu-card-cover">
+              <div className="neu-card-image-well">
+                <div className="neu-card-image-frame">
+                  <div className="neu-card-image-placeholder">
+                    <PlusOutlined
+                      style={{ fontSize: 36, color: "var(--neu-text-2)" }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="neu-nameplate">{t("addBrand")}</div>
-          </div>
+          </>
         }
         onClick={onCreateBrand}
         bodyStyle={{ padding: 0 }}
@@ -122,17 +110,20 @@ export default function BrandsTab({
 
   const dataSource = isAdmin ? [{ id: "__add__" }, ...brands] : brands;
 
+  const showFilterColumn =
+    showObjectFilters || (searchActive && facetsLoading);
+
   const showObjectsSection =
     searchActive &&
     (searchResultObjects.length > 0 ||
-      showObjectFilters ||
+      showFilterColumn ||
       objectsSearchSlice?.loading);
 
   const spinning = searchActive
     ? (brandsSearchSlice?.loading || objectsSearchSlice?.loading) &&
       searchResultBrands.length === 0 &&
       searchResultObjects.length === 0 &&
-      !showObjectFilters
+      !showFilterColumn
     : brandsListSlice?.loading && brands.length === 0;
 
   return (
@@ -188,7 +179,7 @@ export default function BrandsTab({
                   {t("brandObjects")}
                 </div>
                 <div className="neu-search-objects-layout">
-                  {showObjectFilters && (
+                  {showFilterColumn && (
                     <ObjectSearchFilterPanel
                       facets={searchFacets}
                       loading={facetsLoading}
@@ -203,9 +194,7 @@ export default function BrandsTab({
                   <div
                     className="neu-search-objects-cards"
                     style={
-                      showObjectFilters
-                        ? undefined
-                        : { gridColumn: "1 / -1" }
+                      showFilterColumn ? undefined : { gridColumn: "1 / -1" }
                     }
                   >
                     {searchResultObjects.map(renderObjectCard)}

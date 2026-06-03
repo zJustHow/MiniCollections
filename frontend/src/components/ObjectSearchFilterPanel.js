@@ -46,7 +46,16 @@ export default function ObjectSearchFilterPanel({
 }) {
   const { t } = useLocale();
 
-  if (!facets) return null;
+  if (!facets) {
+    if (!loading) return null;
+    return (
+      <aside className="neu-filter-panel">
+        <Spin spinning>
+          <div className="neu-filter-panel-title">{t("searchFilters")}</div>
+        </Spin>
+      </aside>
+    );
+  }
 
   const hasCategories = facets.categories?.length > 0;
   const hasBrands = facets.brands?.length > 0;

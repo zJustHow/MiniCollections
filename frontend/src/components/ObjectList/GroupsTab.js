@@ -2,6 +2,7 @@ import { Card, Grid, Input, Spin } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import CardCover from "./CardCover";
+import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = Input;
@@ -17,6 +18,15 @@ export default function GroupsTab({
   searchActive,
   searchResultGroups,
   searchResultObjects,
+  showObjectFilters,
+  searchFacets,
+  facetsLoading,
+  selectedCategoryIds,
+  selectedBrandIds,
+  selectedScaleIds,
+  onToggleCategory,
+  onToggleBrand,
+  onToggleScale,
 }) {
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -43,32 +53,20 @@ export default function GroupsTab({
         hoverable
         className="neu-model-card"
         cover={
-          <div
-            style={{
-              position: "relative",
-              paddingTop: "75%",
-              overflow: "hidden",
-              borderRadius: "32px 32px 0 0",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <PlusOutlined
-                style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-              />
+          <>
+            <div className="neu-card-cover">
+              <div className="neu-card-image-well">
+                <div className="neu-card-image-frame">
+                  <div className="neu-card-image-placeholder">
+                    <PlusOutlined
+                      style={{ fontSize: 36, color: "var(--neu-text-2)" }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="neu-nameplate">{t("addGroup")}</div>
-          </div>
+          </>
         }
         onClick={onCreateGroup}
         bodyStyle={{ padding: 0 }}
@@ -83,6 +81,22 @@ export default function GroupsTab({
         bodyStyle={{ padding: 0 }}
       />
     );
+
+  const showFilterColumn =
+    showObjectFilters || (searchActive && facetsLoading);
+
+  const showObjectsSection =
+    searchActive &&
+    (searchResultObjects.length > 0 ||
+      showFilterColumn ||
+      loading);
+
+  const spinning =
+    searchActive &&
+    loading &&
+    searchResultGroups.length === 0 &&
+    searchResultObjects.length === 0 &&
+    !showFilterColumn;
 
   const renderObjectCard = (obj) => (
     <Card
@@ -128,7 +142,7 @@ export default function GroupsTab({
         />
       </div>
 
-      <Spin spinning={loading}>
+      <Spin spinning={spinning}>
         {searchActive ? (
           <>
             {searchResultGroups.length > 0 && (
@@ -139,7 +153,7 @@ export default function GroupsTab({
                 </div>
               </>
             )}
-            {searchResultObjects.length > 0 && (
+            {showObjectsSection && (
               <>
                 <div
                   style={{
@@ -149,13 +163,33 @@ export default function GroupsTab({
                 >
                   {t("myObjects")}
                 </div>
-                <div style={gridStyle}>
-                  {searchResultObjects.map(renderObjectCard)}
+                <div className="neu-search-objects-layout">
+                  {showFilterColumn && (
+                    <ObjectSearchFilterPanel
+                      facets={searchFacets}
+                      loading={facetsLoading}
+                      selectedCategoryIds={selectedCategoryIds}
+                      selectedBrandIds={selectedBrandIds}
+                      selectedScaleIds={selectedScaleIds}
+                      onToggleCategory={onToggleCategory}
+                      onToggleBrand={onToggleBrand}
+                      onToggleScale={onToggleScale}
+                    />
+                  )}
+                  <div
+                    className="neu-search-objects-cards"
+                    style={
+                      showFilterColumn ? undefined : { gridColumn: "1 / -1" }
+                    }
+                  >
+                    {searchResultObjects.map(renderObjectCard)}
+                  </div>
                 </div>
               </>
             )}
             {searchResultGroups.length === 0 &&
-              searchResultObjects.length === 0 && (
+              !showObjectsSection &&
+              !loading && (
                 <div
                   style={{
                     textAlign: "center",

@@ -2,50 +2,28 @@ import React from "react";
 import { PictureOutlined } from "@ant-design/icons";
 
 const CardCover = ({ image_url, name, objectFit = "cover" }) => (
-  <div
-    style={{
-      position: "relative",
-      paddingTop: "75%",
-      overflow: "hidden",
-      borderRadius: "32px 32px 0 0",
-    }}
-  >
-    {image_url ? (
-      <img
-        src={image_url}
-        alt={name}
-        loading="lazy"
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          objectFit,
-          ...(objectFit === "contain" && {
-            padding: "12%",
-            boxSizing: "border-box",
-          }),
-        }}
-      />
-    ) : (
+  <>
+    <div className="neu-card-cover">
       <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        className={`neu-card-image-well${
+          objectFit === "contain" ? " neu-card-image-well--contain" : ""
+        }`}
       >
-        <PictureOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+        {image_url ? (
+          <div className="neu-card-image-frame">
+            <img src={image_url} alt={name} loading="lazy" />
+          </div>
+        ) : (
+          <div className="neu-card-image-frame">
+            <div className="neu-card-image-placeholder">
+              <PictureOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
+            </div>
+          </div>
+        )}
       </div>
-    )}
+    </div>
     <div className="neu-nameplate">{name}</div>
-  </div>
+  </>
 );
 
 export default CardCover;

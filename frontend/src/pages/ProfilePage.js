@@ -32,6 +32,7 @@ import {
   uploadAvatar,
 } from "../utils";
 import { useLocale } from "../LocaleContext";
+import { radius } from "../theme/radius";
 
 const { Header, Content } = Layout;
 
@@ -57,7 +58,7 @@ function SectionCard({ children }) {
     <div
       style={{
         background: "var(--neu-bg)",
-        borderRadius: 16,
+        borderRadius: radius.card,
         padding: "22px 24px",
         boxShadow: "var(--raised-sm)",
         marginBottom: 16,
@@ -284,7 +285,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   <div style={{
                     position: "absolute",
                     inset: 0,
-                    borderRadius: "50%",
+                    borderRadius: radius.round,
                     background: "rgba(0,0,0,0.35)",
                     display: "flex",
                     alignItems: "center",

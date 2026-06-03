@@ -2,6 +2,7 @@ import {
   App, DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
 import { BugOutlined, EditOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { useLocale } from "../../../LocaleContext";
+import { radius } from "../../../theme/radius";
 import { submitFeedback, getCategories, getScales, getSeriesByBrandId } from "../../../utils";
 import { useState, useEffect, useCallback } from "react";
 import ImageUploadField from "../../ImageUploadField";
@@ -310,7 +311,7 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
         style={{
           display: "flex",
           gap: 8,
-          borderRadius: 14,
+          borderRadius: radius.card,
           padding: 5,
           boxShadow: "var(--inset-sm)",
           marginBottom: 20,

@@ -3,6 +3,7 @@ import { DeleteOutlined, LoadingOutlined, PictureOutlined } from "@ant-design/ic
 import { useState } from "react";
 import { uploadImage } from "../utils";
 import { useLocale } from "../LocaleContext";
+import { radius } from "../theme/radius";
 
 export default function ImageUploadField({ value, onChange, onRemove, uploadFn }) {
   const { message } = App.useApp();
@@ -43,7 +44,7 @@ export default function ImageUploadField({ value, onChange, onRemove, uploadFn }
                 style={{
                   position: "absolute", top: 4, right: 4,
                   background: "rgba(0,0,0,0.45)", color: "#fff",
-                  borderRadius: "50%", padding: 4, fontSize: 12, cursor: "pointer",
+                  borderRadius: radius.round, padding: 4, fontSize: 12, cursor: "pointer",
                 }}
               />
             )}

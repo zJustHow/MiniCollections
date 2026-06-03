@@ -3,6 +3,7 @@ import { DeleteOutlined, EditOutlined, PlusOutlined, TagsOutlined } from "@ant-d
 import { useState } from "react";
 import { adminDeleteBrand } from "../../utils";
 import { useLocale } from "../../LocaleContext";
+import { radius } from "../../theme/radius";
 import BrandModal from "../../components/ObjectList/modals/BrandModal";
 import BrandObjectsDrawer from "./BrandObjectsDrawer";
 
@@ -30,7 +31,7 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
       dataIndex: "image_url",
       width: 60,
       render: (url) => url
-        ? <img src={url} alt="" style={{ width: 36, height: 36, objectFit: "contain", borderRadius: 6 }} />
+        ? <img src={url} alt="" style={{ width: 36, height: 36, objectFit: "contain", borderRadius: radius.sm }} />
         : <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>—</span>,
     },
     { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },

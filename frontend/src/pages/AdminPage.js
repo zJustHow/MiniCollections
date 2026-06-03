@@ -9,6 +9,7 @@ import {
 import { useEffect, useState } from "react";
 import { getAdminSubmissions, getBrands } from "../utils";
 import { useLocale } from "../LocaleContext";
+import { radius } from "../theme/radius";
 import { STATUS_COLOR, TYPE_COLOR, useStatusLabel, useTypeLabel } from "./admin/constants";
 import ApproveModal from "./admin/ApproveModal";
 import ResolveModal from "./admin/ResolveModal";
@@ -114,7 +115,7 @@ export default function AdminPage() {
             display: "flex",
             flexDirection: "column",
             gap: 8,
-            borderRadius: 14,
+            borderRadius: radius.card,
             padding: 5,
             boxShadow: "var(--inset-sm)",
             width: 160,
@@ -150,7 +151,7 @@ export default function AdminPage() {
                   style={{
                     background: "var(--neu-accent)",
                     color: "#fff",
-                    borderRadius: 10,
+                    borderRadius: radius.md,
                     fontSize: 11,
                     fontWeight: 700,
                     padding: "1px 7px",
@@ -193,7 +194,7 @@ export default function AdminPage() {
         <div
           style={{
             flex: 1,
-            borderRadius: 14,
+            borderRadius: radius.card,
             padding: 24,
             boxShadow: "var(--inset)",
           }}

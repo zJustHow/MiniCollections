@@ -5,6 +5,7 @@ import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PictureOutlined } from
 import dayjs from "dayjs";
 import EditUserObjectModal from "../components/ObjectList/modals/EditUserObjectModal";
 import { useLocale } from "../LocaleContext";
+import { radius } from "../theme/radius";
 import { useHeader } from "../HeaderContext";
 import {
   getGroupById,
@@ -23,7 +24,7 @@ function DetailRow({ label, value }) {
   if (value == null || value === "" || value === "—") return null;
   return (
     <div style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
-      <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 110, flexShrink: 0 }}>{label}</span>
+      <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 100, flexShrink: 0 }}>{label}</span>
       <span style={{ color: "var(--neu-text)", fontSize: 13, fontWeight: 500 }}>{value}</span>
     </div>
   );
@@ -220,18 +221,23 @@ export default function GroupObjectDetailPage() {
     <div>
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start", flexWrap: screens.md ? "nowrap" : "wrap" }}>
         <div style={{ flex: screens.md ? "0 0 45%" : "1 1 100%", maxWidth: screens.md ? "45%" : "100%" }}>
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={userObject?.name ?? ""}
-              loading="lazy"
-              style={{ width: "100%", aspectRatio: "4/3", objectFit: "cover", borderRadius: 16, boxShadow: "var(--raised-sm)", display: "block" }}
-            />
-          ) : (
-            <div style={{ width: "100%", aspectRatio: "4/3", borderRadius: 16, boxShadow: "var(--raised-sm)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <PictureOutlined style={{ fontSize: 48, color: "var(--neu-text-2)" }} />
+          <div className="neu-detail-image">
+            <div className="neu-detail-image-well">
+              <div className="neu-card-image-frame">
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={userObject?.name ?? ""}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="neu-card-image-placeholder">
+                    <PictureOutlined style={{ fontSize: 48, color: "var(--neu-text-2)" }} />
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -246,7 +252,7 @@ export default function GroupObjectDetailPage() {
                 <button
                   type="button"
                   className="neu-clickable"
-                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: 10 }}
+                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: radius.md }}
                   onClick={() => {
                     const bId = brandObjectDetail.brand_id ?? brandObjectDetail.brandId;
                     navigate(`/brands/${bId}/objects/${brandObjectDetail.id}`, {
@@ -255,10 +261,25 @@ export default function GroupObjectDetailPage() {
                   }}
                 >
                   {brandObjectDetail.image_url ? (
-                    <img src={brandObjectDetail.image_url} alt={brandObjectDetail.name} style={{ width: 56, height: 56, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
+                    <div className="neu-related-model-thumb">
+                      <div className="neu-related-model-thumb-well">
+                        <div className="neu-card-image-frame">
+                          <img
+                            src={brandObjectDetail.image_url}
+                            alt={brandObjectDetail.name}
+                          />
+                        </div>
+                      </div>
+                    </div>
                   ) : (
-                    <div style={{ width: 56, height: 56, borderRadius: 8, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <PictureOutlined style={{ fontSize: 20, color: "var(--neu-text-2)" }} />
+                    <div className="neu-related-model-thumb">
+                      <div className="neu-related-model-thumb-well">
+                        <div className="neu-card-image-frame">
+                          <div className="neu-card-image-placeholder">
+                            <PictureOutlined style={{ color: "var(--neu-text-2)" }} />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                   <div>

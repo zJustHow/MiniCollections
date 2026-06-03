@@ -1,6 +1,7 @@
 import { Button, Drawer, Space, Tag } from "antd";
 import { useState } from "react";
 import { useLocale } from "../../LocaleContext";
+import { radius } from "../../theme/radius";
 import { STATUS_COLOR, TYPE_COLOR, useStatusLabel, useTypeLabel } from "./constants";
 
 export default function DetailDrawer({ submission, onClose, onApprove, onResolve, onReject }) {
@@ -68,7 +69,7 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
           style={{
             position: "relative",
             marginBottom: 16,
-            borderRadius: 12,
+            borderRadius: radius.md,
             overflow: "hidden",
             boxShadow: "var(--raised-sm)",
             cursor: "pointer",

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useSearchParam from "../../hooks/useSearchParam";
 import useInfiniteSlice from "../../hooks/useInfiniteSlice";
@@ -24,6 +24,7 @@ export default function useBrandsState() {
   const [facetsLoading, setFacetsLoading] = useState(false);
 
   const [brandModalOpen, setBrandModalOpen] = useState(false);
+  const syncedKeywordRef = useRef("");
 
   const clearObjectFilters = useCallback(() => {
     setSelectedCategoryIds([]);
@@ -75,15 +76,20 @@ export default function useBrandsState() {
     if (location.pathname !== "/") return;
     const keyword = (searchValue ?? "").trim();
     if (keyword) {
+      if (keyword !== syncedKeywordRef.current) {
+        clearObjectFilters();
+        syncedKeywordRef.current = keyword;
+      }
       setSearchKeyword(keyword);
       setSearchActive(true);
+    } else {
+      syncedKeywordRef.current = "";
     }
-  }, [location.pathname, searchValue]);
+  }, [location.pathname, searchValue, clearObjectFilters]);
 
   useEffect(() => {
     if (!searchActive || !searchKeyword) {
       setSearchFacets(null);
-      clearObjectFilters();
       return undefined;
     }
 
@@ -93,7 +99,6 @@ export default function useBrandsState() {
       .then((data) => {
         if (!cancelled) {
           setSearchFacets(data);
-          clearObjectFilters();
         }
       })
       .catch(() => {
@@ -125,7 +130,12 @@ export default function useBrandsState() {
         setSearchActive(false);
         clearObjectFilters();
         setSearchFacets(null);
+        syncedKeywordRef.current = "";
         return;
+      }
+      if (keyword !== syncedKeywordRef.current) {
+        clearObjectFilters();
+        syncedKeywordRef.current = keyword;
       }
       setSearchParam(keyword);
       setSearchKeyword(keyword);

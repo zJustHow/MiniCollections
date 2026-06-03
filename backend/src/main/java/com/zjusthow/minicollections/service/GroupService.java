@@ -6,11 +6,25 @@ import com.zjusthow.minicollections.exception.GroupNotFoundException;
 import com.zjusthow.minicollections.exception.NoPermissionException;
 import com.zjusthow.minicollections.exception.LimitExceededException;
 import com.zjusthow.minicollections.exception.UserObjectNotFoundException;
+import com.zjusthow.minicollections.entity.BrandEntity;
+import com.zjusthow.minicollections.entity.CategoryEntity;
+import com.zjusthow.minicollections.entity.ScaleEntity;
+import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
+import com.zjusthow.minicollections.model.BrandFacetDto;
+import com.zjusthow.minicollections.model.BrandObjectSearchFacetsDto;
+import com.zjusthow.minicollections.model.BrandObjectSearchFilter;
+import com.zjusthow.minicollections.model.CategoryFacetDto;
 import com.zjusthow.minicollections.model.GroupDto;
 import com.zjusthow.minicollections.model.GroupSearchResult;
+import com.zjusthow.minicollections.model.ScaleFacetDto;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.model.UserObjectSearchDto;
+import com.zjusthow.minicollections.repository.BrandRepository;
+import com.zjusthow.minicollections.repository.CategoryRepository;
+import com.zjusthow.minicollections.repository.CategoryFacetRow;
+import com.zjusthow.minicollections.repository.FacetCountRow;
 import com.zjusthow.minicollections.repository.GroupRepository;
+import com.zjusthow.minicollections.repository.ScaleRepository;
 import com.zjusthow.minicollections.repository.UserObjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,13 +37,41 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 public class GroupService {
+
+    private static final String USER_OBJECT_SEARCH_FROM = """
+            FROM user_objects uo
+            JOIN groups g ON uo.group_id = g.id
+            LEFT JOIN brand_objects bo ON uo.brand_object_id = bo.id
+            LEFT JOIN brands br ON bo.brand_id = br.id
+            """;
+
+    private static final String USER_OBJECT_KEYWORD_MATCH = """
+            uo.user_id = :userId
+              AND (
+                uo.name       ILIKE '%' || :keyword || '%'
+                OR bo.name_en ILIKE '%' || :keyword || '%'
+                OR bo.name_zh ILIKE '%' || :keyword || '%'
+                OR br.name_en ILIKE '%' || :keyword || '%'
+                OR br.name_zh ILIKE '%' || :keyword || '%'
+              )
+            """;
+
     private final GroupRepository groupRepository;
     private final UserObjectRepository userObjectRepository;
+    private final CategoryRepository categoryRepository;
+    private final BrandRepository brandRepository;
+    private final ScaleRepository scaleRepository;
+    private final DisplayLocaleResolver displayLocaleResolver;
     private final JdbcClient jdbcClient;
     private final ImageStorageService imageStorageService;
 
@@ -42,10 +84,18 @@ public class GroupService {
     public GroupService(
             GroupRepository groupRepository,
             UserObjectRepository userObjectRepository,
+            CategoryRepository categoryRepository,
+            BrandRepository brandRepository,
+            ScaleRepository scaleRepository,
+            DisplayLocaleResolver displayLocaleResolver,
             JdbcClient jdbcClient,
             @Autowired(required = false) ImageStorageService imageStorageService) {
         this.groupRepository = groupRepository;
         this.userObjectRepository = userObjectRepository;
+        this.categoryRepository = categoryRepository;
+        this.brandRepository = brandRepository;
+        this.scaleRepository = scaleRepository;
+        this.displayLocaleResolver = displayLocaleResolver;
         this.jdbcClient = jdbcClient;
         this.imageStorageService = imageStorageService;
     }
@@ -75,15 +125,100 @@ public class GroupService {
         return new GroupDto(group);
     }
 
-    public GroupSearchResult crossSearch(Long userId, String keyword) {
+    public GroupSearchResult crossSearch(
+            Long userId,
+            String keyword,
+            List<Long> categoryIds,
+            List<Long> brandIds,
+            List<Long> scaleIds) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return new GroupSearchResult(Collections.emptyList(), Collections.emptyList());
         }
 
-        List<GroupDto> groups = groupRepository.searchByKeyword(userId, keyword)
+        String trimmed = keyword.trim();
+        BrandObjectSearchFilter filter =
+                BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds);
+
+        List<GroupDto> groups = groupRepository.searchByKeyword(userId, trimmed)
                 .stream().map(GroupDto::new).toList();
 
-        List<UserObjectSearchDto> objects = jdbcClient.sql("""
+        List<UserObjectSearchDto> objects = searchUserObjects(userId, trimmed, filter);
+        return new GroupSearchResult(groups, objects);
+    }
+
+    public BrandObjectSearchFacetsDto searchCollectionFacets(
+            Long userId,
+            String keyword,
+            String effectiveLocale) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new BrandObjectSearchFacetsDto(0L, List.of(), List.of(), List.of());
+        }
+        String trimmed = keyword.trim();
+        boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        long total = countUserObjectSearch(userId, trimmed);
+        List<CategoryFacetDto> categories = toCategoryFacetDtos(
+                jdbcClient.sql("""
+                                SELECT bo.category_id AS category_id, COUNT(DISTINCT uo.id) AS cnt
+                                """ + USER_OBJECT_SEARCH_FROM + """
+                                WHERE """ + USER_OBJECT_KEYWORD_MATCH + """
+                                  AND bo.category_id IS NOT NULL
+                                GROUP BY bo.category_id
+                                ORDER BY cnt DESC, bo.category_id ASC
+                                """)
+                        .param("userId", userId)
+                        .param("keyword", trimmed)
+                        .query((rs, rowNum) -> new CategoryFacetRow(
+                                rs.getLong("category_id"),
+                                rs.getLong("cnt")))
+                        .list(),
+                preferZh);
+        List<BrandFacetDto> brands = toBrandFacetDtos(
+                jdbcClient.sql("""
+                                SELECT bo.brand_id AS id, COUNT(DISTINCT uo.id) AS cnt
+                                """ + USER_OBJECT_SEARCH_FROM + """
+                                WHERE """ + USER_OBJECT_KEYWORD_MATCH + """
+                                  AND bo.brand_id IS NOT NULL
+                                GROUP BY bo.brand_id
+                                ORDER BY cnt DESC, bo.brand_id ASC
+                                """)
+                        .param("userId", userId)
+                        .param("keyword", trimmed)
+                        .query(FacetCountRow.class)
+                        .list(),
+                preferZh);
+        List<ScaleFacetDto> scales = toScaleFacetDtos(
+                jdbcClient.sql("""
+                                SELECT bo.scale_id AS id, COUNT(DISTINCT uo.id) AS cnt
+                                """ + USER_OBJECT_SEARCH_FROM + """
+                                WHERE """ + USER_OBJECT_KEYWORD_MATCH + """
+                                  AND bo.scale_id IS NOT NULL
+                                GROUP BY bo.scale_id
+                                ORDER BY cnt DESC, bo.scale_id ASC
+                                """)
+                        .param("userId", userId)
+                        .param("keyword", trimmed)
+                        .query(FacetCountRow.class)
+                        .list());
+        return new BrandObjectSearchFacetsDto(total, categories, brands, scales);
+    }
+
+    private long countUserObjectSearch(Long userId, String keyword) {
+        Long count = jdbcClient.sql("""
+                        SELECT COUNT(DISTINCT uo.id)
+                        """ + USER_OBJECT_SEARCH_FROM + """
+                        WHERE """ + USER_OBJECT_KEYWORD_MATCH)
+                .param("userId", userId)
+                .param("keyword", keyword)
+                .query(Long.class)
+                .single();
+        return count != null ? count : 0L;
+    }
+
+    private List<UserObjectSearchDto> searchUserObjects(
+            Long userId,
+            String keyword,
+            BrandObjectSearchFilter filter) {
+        return jdbcClient.sql("""
                         SELECT DISTINCT uo.id, uo.user_id, uo.group_id, g.name AS group_name,
                                uo.brand_object_id, uo.name, uo.image_url, uo.purchase_date,
                                uo.purchase_price, uo.other_notes,
@@ -91,21 +226,20 @@ public class GroupService {
                                bo.name_zh AS brand_object_name_zh,
                                br.name_en AS brand_name_en,
                                br.name_zh AS brand_name_zh
-                        FROM user_objects uo
-                        JOIN groups g ON uo.group_id = g.id
-                        LEFT JOIN brand_objects bo ON uo.brand_object_id = bo.id
-                        LEFT JOIN brands br ON bo.brand_id = br.id
-                        WHERE uo.user_id = :userId
-                          AND (
-                            uo.name       ILIKE '%' || :keyword || '%'
-                            OR bo.name_en ILIKE '%' || :keyword || '%'
-                            OR bo.name_zh ILIKE '%' || :keyword || '%'
-                            OR br.name_en ILIKE '%' || :keyword || '%'
-                            OR br.name_zh ILIKE '%' || :keyword || '%'
-                          )
+                        """ + USER_OBJECT_SEARCH_FROM + """
+                        WHERE """ + USER_OBJECT_KEYWORD_MATCH + """
+                          AND (:filterCategories = FALSE OR bo.category_id IN (:categoryIds))
+                          AND (:filterBrands = FALSE OR bo.brand_id IN (:brandIds))
+                          AND (:filterScales = FALSE OR bo.scale_id IN (:scaleIds))
                         """)
                 .param("userId", userId)
-                .param("keyword", keyword.trim())
+                .param("keyword", keyword)
+                .param("filterCategories", filter.filterCategories())
+                .param("categoryIds", filter.categoryIdsParam())
+                .param("filterBrands", filter.filterBrands())
+                .param("brandIds", filter.brandIdsParam())
+                .param("filterScales", filter.filterScales())
+                .param("scaleIds", filter.scaleIdsParam())
                 .query((rs, rowNum) -> new UserObjectSearchDto(
                         rs.getLong("id"),
                         rs.getLong("user_id"),
@@ -123,8 +257,68 @@ public class GroupService {
                         rs.getString("brand_name_zh")
                 ))
                 .list();
+    }
 
-        return new GroupSearchResult(groups, objects);
+    private List<CategoryFacetDto> toCategoryFacetDtos(
+            List<CategoryFacetRow> rows,
+            boolean preferZh) {
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> categoryIds = new HashSet<>();
+        for (var row : rows) {
+            categoryIds.add(row.categoryId());
+        }
+        Map<Long, CategoryEntity> categoryById = new HashMap<>();
+        categoryRepository.findAllById(categoryIds).forEach(c -> categoryById.put(c.id(), c));
+        List<CategoryFacetDto> categories = new ArrayList<>();
+        for (var row : rows) {
+            CategoryEntity category = categoryById.get(row.categoryId());
+            if (category != null && row.cnt() != null) {
+                categories.add(CategoryFacetDto.from(category, row.cnt(), preferZh));
+            }
+        }
+        return categories;
+    }
+
+    private List<BrandFacetDto> toBrandFacetDtos(List<FacetCountRow> rows, boolean preferZh) {
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> ids = new HashSet<>();
+        for (FacetCountRow row : rows) {
+            ids.add(row.id());
+        }
+        Map<Long, BrandEntity> byId = new HashMap<>();
+        brandRepository.findAllById(ids).forEach(b -> byId.put(b.id(), b));
+        List<BrandFacetDto> result = new ArrayList<>();
+        for (FacetCountRow row : rows) {
+            BrandEntity entity = byId.get(row.id());
+            if (entity != null && row.cnt() != null) {
+                result.add(BrandFacetDto.from(entity, row.cnt(), preferZh));
+            }
+        }
+        return result;
+    }
+
+    private List<ScaleFacetDto> toScaleFacetDtos(List<FacetCountRow> rows) {
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> ids = new HashSet<>();
+        for (FacetCountRow row : rows) {
+            ids.add(row.id());
+        }
+        Map<Long, ScaleEntity> byId = new HashMap<>();
+        scaleRepository.findAllById(ids).forEach(s -> byId.put(s.id(), s));
+        List<ScaleFacetDto> result = new ArrayList<>();
+        for (FacetCountRow row : rows) {
+            ScaleEntity entity = byId.get(row.id());
+            if (entity != null && row.cnt() != null) {
+                result.add(ScaleFacetDto.from(entity, row.cnt()));
+            }
+        }
+        return result;
     }
 
     @CacheEvict(

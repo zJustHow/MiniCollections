@@ -1,12 +1,11 @@
 /* ============================================================
    NEUMORPHISM THEME — MiniCollections
-   Aligned with Themesberg Neumorphism UI (demo.themesberg.com)
    ============================================================ */
 
 @import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap");
 
 :root {
-  /* ── Surface & shadows (Themesberg tokens) ── */
+  /* ── Surface & shadows ── */
   --neu-bg: #fcfbf8;
   --neu-sd: #b8b9be;
   --neu-sl: #ffffff;
@@ -30,12 +29,19 @@
   --neu-text-2: #66799e;
   --neu-border: #d1d9e6;
 
-  /* ── Border radius (≈ Themesberg 0.55rem base) ── */
-  --r-md: 9px;
-  --r-lg: 14px;
-  --r-pill: 2rem;
+  /* ── Border radius — see theme/radius.js ── */
+  --r-ink: 0;
+  --r-xs: 0;
+  --r-sm: 0;
+  --r-md: 0;
+  --r-lg: 0;
+  --r-pill: 0;
+  --r-round: 0;
 
-  --neu-border-r: var(--r-lg);
+  /* semantic aliases */
+  --r-card: var(--r-lg);
+  --r-card-well: var(--r-md);
+  --r-card-frame: 0;
 
   /* raised / inset — box-shadow-soft & shadow-inset */
   --raised: 6px 6px 12px var(--neu-sd), -6px -6px 12px var(--neu-sl);
@@ -44,6 +50,12 @@
 
   --inset: inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
   --inset-sm: inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
+
+  /* Button motion ($transition-base) */
+  --neu-btn-transition: all 0.2s ease;
+
+  /* navbar dropdown-item hover tint (rgba(230,231,238,.1)) */
+  --neu-item-hover-bg: rgba(230, 231, 238, 0.1);
 }
 
 /* ── GLOBAL ───────────────────────────────────────────────── */
@@ -117,31 +129,62 @@ a:hover {
   border-bottom: none;
   position: relative;
   z-index: 10;
+  height: 64px;
+  line-height: normal;
 }
 
-/* ── HEADER TAB BUTTONS ───────────────────────────────────── */
+.header-tabs {
+  display: flex;
+  flex: 1;
+  gap: 6px;
+  align-self: stretch;
+  align-items: stretch;
+  min-width: 0;
+}
+
+/* ── HEADER TAB BUTTONS (navbar dropdown-item motion) ── */
 .neu-tab-btn {
-  background: var(--neu-bg);
+  position: relative;
+  background: transparent;
   border: none;
-  border-radius: var(--r-pill);
-  padding: 10px 20px;
+  border-radius: var(--r-md);
+  padding: 10px 16px;
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1.4;
-  color: var(--neu-text-2);
-  box-shadow: var(--raised-sm);
+  color: var(--neu-dark);
+  box-shadow: none;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: var(--neu-btn-transition);
   letter-spacing: 0.2px;
 }
 
-.neu-tab-btn:hover {
-  color: var(--neu-text);
+.header-tabs .neu-tab-btn {
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0;
+  padding: 0 20px;
+  margin: 0;
+}
+
+.neu-tab-btn:hover:not(.active) {
+  color: var(--neu-dark);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
 }
 
 .neu-tab-btn.active {
-  box-shadow: var(--inset-sm);
   color: var(--neu-accent);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+.neu-tab-btn:active:not(.active) {
+  color: var(--neu-dark);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
 }
 
 /* ── TABS (antd — kept for compatibility) ─────────────────── */
@@ -188,7 +231,7 @@ a:hover {
 .ant-tabs-ink-bar {
   background: var(--neu-accent);
   height: 3px;
-  border-radius: 2px;
+  border-radius: var(--r-ink);
   bottom: 0;
 }
 
@@ -257,7 +300,7 @@ a:hover {
 .ant-card {
   background: var(--neu-bg);
   border: none;
-  border-radius: var(--r-lg);
+  border-radius: var(--r-card);
   box-shadow: var(--raised);
   transition:
     box-shadow 0.2s ease,
@@ -285,7 +328,7 @@ a:hover {
 
 /* ── MODEL CARD (neumorphic pill style) ───────────────────── */
 .neu-model-card.ant-card {
-  border-radius: var(--r-pill);
+  border-radius: var(--r-card);
   box-shadow: var(--raised-lg);
 }
 
@@ -297,29 +340,133 @@ a:hover {
 }
 
 .neu-model-card.ant-card-hoverable:active {
-  transform: translateY(0) scale(1);
-  box-shadow: var(--inset);
+  transform: translateY(0) scale(0.99);
+  box-shadow: var(--raised-sm);
 }
 
-/* ── BUTTONS (Themesberg soft / inset press) ───────────────── */
+.neu-model-card .ant-card-cover {
+  padding-bottom: 10px;
+}
+
+.neu-card-cover {
+  padding: 10px 10px 8px;
+}
+
+.neu-card-image-well,
+.neu-detail-image-well {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--r-card-well);
+  background: var(--neu-bg);
+  box-shadow: var(--inset-sm);
+  --neu-card-well-inset: 6px;
+}
+
+.neu-card-image-well {
+  padding-top: 75%;
+}
+
+.neu-detail-image {
+  border-radius: var(--r-card);
+  box-shadow: var(--raised-sm);
+  background: var(--neu-bg);
+  padding: 10px;
+}
+
+.neu-detail-image-well {
+  aspect-ratio: 4 / 3;
+}
+
+.neu-related-model-thumb {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-md);
+  background: var(--neu-bg);
+}
+
+.neu-related-model-thumb-well {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--r-md);
+  background: var(--neu-bg);
+  box-shadow: var(--inset-sm);
+  --neu-card-well-inset: 3px;
+}
+
+.neu-related-model-thumb-well .neu-card-image-placeholder svg,
+.neu-related-model-thumb-well .neu-card-image-placeholder .anticon {
+  font-size: 18px;
+}
+
+.neu-card-image-frame {
+  position: absolute;
+  inset: var(--neu-card-well-inset);
+  overflow: hidden;
+  border-radius: var(--r-card-frame);
+}
+
+.neu-card-image-frame img {
+  position: static;
+  inset: auto;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.neu-card-image-well--contain .neu-card-image-frame img {
+  object-fit: contain;
+}
+
+.neu-card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── BUTTONS (raised → inset on hover) ─────────── */
 .avatar-upload-trigger .ant-avatar {
-  box-shadow: var(--raised);
-  transition: box-shadow 0.3s;
+  box-shadow: var(--raised-sm);
+  transition: var(--neu-btn-transition);
+}
+
+.avatar-upload-trigger:hover .ant-avatar {
+  box-shadow: var(--inset);
 }
 
 .avatar-upload-trigger:active .ant-avatar {
   box-shadow: var(--inset);
 }
 
+/* Shared interactive controls */
+.ant-btn,
+.ant-input-group-addon .ant-btn,
+.ant-input-search-button,
+.neu-fab,
+.neu-add-btn,
+.mobile-menu-btn,
+.ant-radio-button-wrapper,
+.ant-pagination .ant-pagination-item,
+.ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next .ant-pagination-item-link {
+  position: relative;
+  transition: var(--neu-btn-transition) !important;
+}
+
 .ant-btn {
   border: 1px solid var(--neu-bg);
   border-radius: var(--r-md);
   font-weight: 600;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.025em;
   background: var(--neu-bg);
   color: var(--neu-text);
   box-shadow: var(--raised-sm);
-  transition: all 0.2s ease;
 }
 
 .ant-btn-lg,
@@ -330,24 +477,25 @@ a:hover {
   border-radius: var(--r-md);
 }
 
-.ant-btn:hover:not([disabled]) {
+/* Hover: inset shadow */
+.ant-btn:hover:not([disabled]):not(:active) {
   color: var(--neu-accent);
-  box-shadow: var(--raised);
+  box-shadow: var(--inset) !important;
 }
 
 .ant-btn:active:not([disabled]),
 .ant-btn.btn-counting-down,
 .ant-btn.btn-counting-down:hover,
-.ant-btn.btn-counting-down:focus:not(:active),
-.ant-btn.btn-counting-down:focus-visible:not(:active) {
+.ant-btn.btn-counting-down:focus,
+.ant-btn.btn-counting-down:focus-visible {
   color: var(--neu-text-2) !important;
-  box-shadow: var(--inset-sm) !important;
+  box-shadow: var(--inset) !important;
 }
 
 .ant-btn:focus:not(:active),
 .ant-btn:focus-visible:not(:active) {
   outline: none !important;
-  box-shadow: var(--raised-sm) !important;
+  box-shadow: var(--inset) !important;
 }
 
 .ant-btn:focus,
@@ -357,65 +505,80 @@ a:hover {
 
 .ant-btn.ant-btn-default {
   border-color: var(--neu-bg);
-  box-shadow: var(--raised-sm);
-}
-
-.ant-btn.ant-btn-default:hover:not([disabled]) {
-  border-color: var(--neu-bg);
-  box-shadow: var(--raised);
-}
-
-.ant-btn.ant-btn-default:active:not([disabled]) {
-  border-color: var(--neu-bg);
-  box-shadow: var(--inset-sm);
 }
 
 .ant-btn-primary {
   background: var(--neu-accent);
   color: #fff;
   border-color: var(--neu-accent);
-  box-shadow:
-    6px 6px 12px rgba(85, 146, 204, 0.35),
-    -6px -6px 12px rgba(255, 255, 255, 0.75);
+  box-shadow: var(--raised-sm);
 }
 
-.ant-btn-primary:hover:not([disabled]) {
+.ant-btn-primary:hover:not([disabled]):not(:active) {
   background: var(--neu-accent-light);
   color: #fff;
-  box-shadow:
-    8px 8px 16px rgba(85, 146, 204, 0.4),
-    -8px -8px 16px rgba(255, 255, 255, 0.8);
+  border-color: var(--neu-accent-light);
+  box-shadow: var(--inset) !important;
 }
 
-.ant-btn-primary:active:not([disabled]) {
+.ant-btn-primary:active:not([disabled]),
+.ant-btn-primary:focus:not(:active),
+.ant-btn-primary:focus-visible:not(:active) {
   background: var(--neu-accent-dark);
-  color: rgba(255, 255, 255, 0.9);
-  box-shadow: var(--inset-sm);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: var(--neu-accent-dark);
+  box-shadow: var(--inset) !important;
 }
 
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous {
   background: var(--neu-danger);
   color: #fff;
   border-color: var(--neu-danger);
-  box-shadow:
-    6px 6px 12px rgba(250, 82, 82, 0.35),
-    -6px -6px 12px rgba(255, 255, 255, 0.75);
+  box-shadow: var(--raised-sm);
 }
 
-.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:hover:not([disabled]) {
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:hover:not([disabled]):not(:active) {
   background: var(--neu-danger-light);
   color: #fff;
   border-color: var(--neu-danger-light);
-  box-shadow:
-    8px 8px 16px rgba(250, 82, 82, 0.4),
-    -8px -8px 16px rgba(255, 255, 255, 0.8);
+  box-shadow: var(--inset) !important;
 }
 
-.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not([disabled]) {
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not([disabled]),
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:focus:not(:active),
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:focus-visible:not(:active) {
   background: var(--neu-danger-dark);
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   border-color: var(--neu-danger-dark);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset) !important;
+}
+
+.ant-btn[disabled],
+.ant-btn-disabled {
+  transform: none !important;
+  box-shadow: var(--raised-sm) !important;
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Link buttons — no neumorphic shadow / lift */
+.ant-btn-link,
+.ant-btn-text {
+  box-shadow: none !important;
+  background: transparent !important;
+  border-color: transparent !important;
+  transform: none !important;
+}
+
+.ant-btn-link:hover:not([disabled]),
+.ant-btn-link:active:not([disabled]),
+.ant-btn-link:focus,
+.ant-btn-text:hover:not([disabled]),
+.ant-btn-text:active:not([disabled]),
+.ant-btn-text:focus {
+  box-shadow: none !important;
+  transform: none !important;
+  color: var(--neu-accent);
 }
 
 /* ── INPUTS ───────────────────────────────────────────────── */
@@ -493,27 +656,6 @@ a:hover {
   color: var(--neu-text);
   border-radius: var(--r-md);
   box-shadow: var(--raised-sm);
-  transition: all 0.2s ease;
-}
-
-.ant-input-group-addon .ant-btn:hover:not([disabled]),
-.ant-input-search-button:hover:not([disabled]),
-.ant-input-search
-  > .ant-input-group
-  > .ant-input-group-addon:last-child
-  .ant-input-search-button:hover:not([disabled]) {
-  color: var(--neu-accent);
-  box-shadow: var(--raised);
-}
-
-.ant-input-group-addon .ant-btn:active:not([disabled]),
-.ant-input-search-button:active:not([disabled]),
-.ant-input-search
-  > .ant-input-group
-  > .ant-input-group-addon:last-child
-  .ant-input-search-button:active:not([disabled]) {
-  color: var(--neu-text-2);
-  box-shadow: var(--inset-sm);
 }
 
 .ant-input-group-addon .ant-btn:focus,
@@ -544,7 +686,7 @@ a:hover {
   > .ant-input-group
   > .ant-input-group-addon:last-child
   .ant-input-search-button:focus-visible:not(:active) {
-  box-shadow: var(--raised-sm) !important;
+  box-shadow: var(--inset) !important;
 }
 
 /* textarea */
@@ -753,13 +895,13 @@ textarea.ant-input:focus {
 
 ::-webkit-scrollbar-track {
   background: var(--neu-bg);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   box-shadow: var(--inset-sm);
 }
 
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--neu-text-2), #93a5be);
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   border: 2px solid var(--neu-bg);
 }
 
@@ -767,27 +909,22 @@ textarea.ant-input:focus {
   background: linear-gradient(180deg, #93a5be, var(--neu-text-2));
 }
 
-/* ── FAB (Floating Action Button) — flat ─────────────────── */
+/* ── FAB (Floating Action Button) ─────────────────────────── */
 .neu-fab {
   background: var(--neu-accent);
   border: none;
   color: #fff;
-  box-shadow:
-    6px 6px 12px rgba(85, 146, 204, 0.35),
-    -3px -3px 8px rgba(255, 255, 255, 0.75);
-  transition: all 0.16s ease;
+  box-shadow: var(--raised-sm);
 }
 
-.neu-fab:hover {
+.neu-fab:hover:not(:active) {
   background: var(--neu-accent-light);
-  box-shadow: var(--raised);
-  transform: translateY(-2px);
+  box-shadow: var(--inset);
 }
 
 .neu-fab:active {
   background: var(--neu-accent-dark);
-  box-shadow: var(--inset-sm);
-  transform: translateY(0);
+  box-shadow: var(--inset);
 }
 
 /* ── CLICKABLE CARD (generic interactive surface) ────────── */
@@ -811,25 +948,22 @@ textarea.ant-input:focus {
   box-shadow: var(--inset-sm);
 }
 
-/* ── CARD ADD BUTTON (image overlay) — flat ──────────────── */
+/* ── CARD ADD BUTTON (image overlay) ─────────────────────── */
 .neu-add-btn {
   background: var(--neu-accent);
   border: none;
   color: #fff;
   box-shadow: var(--raised-sm);
-  transition: all 0.14s ease;
 }
 
-.neu-add-btn:hover {
+.neu-add-btn:hover:not(:active) {
   background: var(--neu-accent-light);
-  transform: scale(1.12);
-  box-shadow: var(--raised);
+  box-shadow: var(--inset);
 }
 
 .neu-add-btn:active {
   background: var(--neu-accent-dark);
-  transform: scale(0.96);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
 }
 
 /* ── LOGIN PANEL ──────────────────────────────────────────── */
@@ -861,7 +995,7 @@ textarea.ant-input:focus {
 .neu-filter-panel {
   background: var(--neu-bg);
   border: none;
-  border-radius: var(--r-pill);
+  border-radius: var(--r-card);
   box-shadow: var(--raised-lg);
   padding: 18px 14px;
   width: 100%;
@@ -899,11 +1033,11 @@ textarea.ant-input:focus {
 .neu-filter-options-inset {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 0;
   max-height: 148px;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 8px;
+  padding: 5px 15px;
   border-radius: var(--r-md);
   background: var(--neu-bg);
   box-shadow: var(--inset);
@@ -918,12 +1052,12 @@ textarea.ant-input:focus {
 
 .neu-filter-options-inset::-webkit-scrollbar-track {
   background: transparent;
-  border-radius: 4px;
+  border-radius: var(--r-xs);
 }
 
 .neu-filter-options-inset::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #93a5be, var(--neu-text-2));
-  border-radius: 4px;
+  border-radius: var(--r-xs);
   border: 1px solid var(--neu-bg);
 }
 
@@ -932,9 +1066,10 @@ textarea.ant-input:focus {
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 6px 4px;
+  padding: 8px;
+  margin-bottom: 5px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--r-md);
   background: transparent;
   color: var(--neu-text);
   font-size: 13px;
@@ -943,25 +1078,36 @@ textarea.ant-input:focus {
   text-align: left;
   box-shadow: none;
   flex-shrink: 0;
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
+  position: relative;
+  transition: var(--neu-btn-transition);
 }
 
-.neu-filter-option:hover {
-  background: rgba(255, 255, 255, 0.35);
+.neu-filter-option:last-child {
+  margin-bottom: 0;
+}
+
+.neu-filter-option:hover:not(.selected) {
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
 }
 
 .neu-filter-option.selected {
   color: var(--neu-accent);
   font-weight: 600;
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+.neu-filter-option:active:not(.selected) {
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
 }
 
 .neu-filter-dot {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
-  border-radius: 50%;
+  border-radius: var(--r-round);
   background: var(--neu-bg);
   box-shadow: var(--inset-sm);
   transition:
@@ -1038,17 +1184,8 @@ textarea.ant-input:focus {
 
 /* ── CARD COVER nameplate ─────────────────────────────────── */
 .neu-nameplate {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  padding: 24px 14px 12px;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(252, 251, 248, 0.92) 55%,
-    var(--neu-bg) 100%
-  );
+  padding: 2px 10px 0;
+  background: transparent;
   color: var(--neu-text);
   font-weight: 700;
   font-size: 13px;
@@ -1056,13 +1193,14 @@ textarea.ant-input:focus {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
 }
 
 /* ── TAGS ─────────────────────────────────────────────────── */
 .ant-tag {
   background: var(--neu-bg);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--r-sm);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -1204,7 +1342,7 @@ textarea.ant-input:focus {
   border-radius: var(--r-md);
   font-weight: 600;
   font-size: 13px;
-  transition: color 0.15s ease;
+  transition: var(--neu-btn-transition);
 }
 
 .ant-segmented-item:hover:not(.ant-segmented-item-selected) {
@@ -1221,8 +1359,9 @@ textarea.ant-input:focus {
 
 .ant-segmented-thumb {
   background: var(--neu-bg);
-  box-shadow: var(--raised-sm);
+  box-shadow: var(--inset);
   border-radius: var(--r-md);
+  transition: var(--neu-btn-transition);
 }
 
 /* ── RADIO & CHECKBOX ─────────────────────────────────────── */
@@ -1257,10 +1396,15 @@ textarea.ant-input:focus {
   display: none;
 }
 
+.ant-radio-button-wrapper:hover:not(.ant-radio-button-wrapper-checked):not(.ant-radio-button-wrapper-disabled) {
+  color: var(--neu-text);
+  box-shadow: var(--inset);
+}
+
 .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
   color: var(--neu-accent);
   background: var(--neu-bg);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
 }
 
 .ant-radio-button-wrapper:first-child {
@@ -1281,10 +1425,15 @@ textarea.ant-input:focus {
 
 .ant-pagination .ant-pagination-item a {
   color: var(--neu-text);
+  transition: var(--neu-btn-transition);
+}
+
+.ant-pagination .ant-pagination-item:hover:not(.ant-pagination-item-active) {
+  box-shadow: var(--inset);
 }
 
 .ant-pagination .ant-pagination-item-active {
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
   background: var(--neu-bg);
 }
 
@@ -1300,6 +1449,17 @@ textarea.ant-input:focus {
   border-radius: var(--r-md);
   color: var(--neu-text-2);
   box-shadow: var(--raised-sm);
+}
+
+.ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
+  color: var(--neu-accent);
+  box-shadow: var(--inset);
+}
+
+.ant-pagination .ant-pagination-prev:active .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next:active .ant-pagination-item-link {
+  box-shadow: var(--inset);
 }
 
 /* ── TOOLTIP ──────────────────────────────────────────────── */
@@ -1370,19 +1530,22 @@ textarea.ant-input:focus {
     height: 36px;
     border: none;
     background: var(--neu-bg);
-    border-radius: 10px;
+    border-radius: var(--r-md);
     box-shadow: var(--raised-sm);
     color: var(--neu-text-2);
     font-size: 16px;
     cursor: pointer;
     flex-shrink: 0;
-    transition:
-      box-shadow 0.15s ease,
-      color 0.15s ease;
+    transition: var(--neu-btn-transition);
+  }
+
+  .mobile-menu-btn:hover:not(:active) {
+    box-shadow: var(--inset);
+    color: var(--neu-accent);
   }
 
   .mobile-menu-btn:active {
-    box-shadow: var(--inset-sm);
+    box-shadow: var(--inset);
     color: var(--neu-accent);
   }
 
@@ -1402,29 +1565,33 @@ textarea.ant-input:focus {
   }
 
   .mobile-menu-item {
-    width: 100%;
+    width: calc(100% - 16px);
+    margin: 0 8px 5px;
     text-align: left;
-    padding: 14px 20px;
+    padding: 10px 16px;
     border: none;
+    border-radius: var(--r-md);
     background: transparent;
     font-size: 15px;
-    color: var(--neu-text-2);
+    font-weight: 600;
+    color: var(--neu-dark);
     cursor: pointer;
-    transition:
-      background 0.12s ease,
-      color 0.12s ease;
+    box-shadow: none;
+    transition: var(--neu-btn-transition);
   }
 
-  .mobile-menu-item:active,
-  .mobile-menu-item:hover {
-    background: rgba(85, 146, 204, 0.1);
-    color: var(--neu-accent);
+  .mobile-menu-item:hover:not(.active),
+  .mobile-menu-item:active:not(.active) {
+    color: var(--neu-dark);
+    background: var(--neu-item-hover-bg);
+    box-shadow: var(--inset);
   }
 
   .mobile-menu-item.active {
     color: var(--neu-accent);
+    background: var(--neu-item-hover-bg);
+    box-shadow: var(--inset);
     font-weight: 600;
-    background: rgba(85, 146, 204, 0.08);
   }
 
   .mobile-menu-divider {
@@ -1440,10 +1607,15 @@ textarea.ant-input:focus {
     white-space: nowrap;
   }
 
+  .header-tabs .neu-tab-btn {
+    height: auto;
+    padding: 7px 12px;
+  }
+
   /* Login panel */
   .neu-login-panel {
     padding: 32px 24px !important;
     margin: 16px auto 0 !important;
-    border-radius: 16px !important;
+    border-radius: var(--r-card) !important;
   }
 }

@@ -4,6 +4,7 @@ import { LockOutlined, MailOutlined, PhoneOutlined, WechatOutlined } from "@ant-
 import { useNavigate } from "react-router-dom";
 import { login, getWechatAuthUrl, COUNTRIES } from "../../utils";
 import { useLocale } from "../../LocaleContext";
+import { radius } from "../../theme/radius";
 
 const isWechatBrowser = () => /MicroMessenger/i.test(navigator.userAgent);
 const isMobileBrowser = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -75,7 +76,7 @@ function LoginForm({ onSuccess }) {
               width: "100%",
               padding: "12px 0",
               fontSize: 15,
-              borderRadius: 12,
+              borderRadius: radius.md,
               marginBottom: 8,
               background: "#07C160",
               color: "#fff",
@@ -98,7 +99,7 @@ function LoginForm({ onSuccess }) {
         style={{
           display: "flex",
           gap: 8,
-          borderRadius: 14,
+          borderRadius: radius.card,
           padding: 5,
           boxShadow: "var(--inset-sm)",
           marginBottom: 24,
@@ -209,7 +210,7 @@ function LoginForm({ onSuccess }) {
             style={{
               color: "#e05d5d",
               background: "rgba(224, 93, 93, 0.08)",
-              borderRadius: 10,
+              borderRadius: radius.md,
               padding: "8px 14px",
               marginBottom: 16,
               fontSize: 13,
@@ -227,7 +228,7 @@ function LoginForm({ onSuccess }) {
             htmlType="submit"
             loading={loading}
             size="large"
-            style={{ width: "100%", borderRadius: 12 }}
+            style={{ width: "100%", borderRadius: radius.md }}
           >
             {t("signIn")}
           </Button>
@@ -250,7 +251,7 @@ function LoginForm({ onSuccess }) {
                 alignItems: "center",
                 gap: 10,
                 padding: "10px 14px",
-                borderRadius: 12,
+                borderRadius: radius.md,
                 boxShadow: "var(--inset-sm)",
                 color: "var(--neu-text-2)",
                 fontSize: 13,
@@ -266,7 +267,7 @@ function LoginForm({ onSuccess }) {
               className="neu-tab-btn"
               onClick={handleWechatLogin}
               disabled={wechatLoading}
-              style={{ width: "100%", padding: "10px 0", fontSize: 14, borderRadius: 12 }}
+              style={{ width: "100%", padding: "10px 0", fontSize: 14, borderRadius: radius.md }}
             >
               <WechatOutlined style={{ marginRight: 8, color: "#07C160", fontSize: 18 }} />
               {wechatLoading ? t("wechatLoggingIn") : t("loginWithWechat")}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useInfiniteSlice from "../hooks/useInfiniteSlice";
@@ -53,6 +53,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const [selectedScaleIds, setSelectedScaleIds] = useState([]);
   const [searchFacets, setSearchFacets] = useState(null);
   const [facetsLoading, setFacetsLoading] = useState(false);
+  const syncedKeywordRef = useRef(searchKeyword);
 
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
 
@@ -100,9 +101,12 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     ((searchFacets.categories?.length ?? 0) > 0 ||
       (searchFacets.scales?.length ?? 0) > 0);
 
+  const showFilterColumn =
+    showObjectFilters || (searchActive && facetsLoading);
+
   const showSearchObjectsSection =
     searchActive &&
-    (displayObjects.length > 0 || showObjectFilters || objectsSearch.loading);
+    (displayObjects.length > 0 || showFilterColumn || objectsSearch.loading);
 
   useEffect(() => {
     if (!brand) {
@@ -115,6 +119,11 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   useEffect(() => {
     const keyword = (searchValue ?? "").trim();
     if (keyword) {
+      if (keyword !== syncedKeywordRef.current) {
+        setSelectedCategoryIds([]);
+        setSelectedScaleIds([]);
+        syncedKeywordRef.current = keyword;
+      }
       setDraftQuery(keyword);
       setSearchKeyword(keyword);
       setSearchActive(true);
@@ -124,8 +133,6 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   useEffect(() => {
     if (!searchActive || !searchKeyword) {
       setSearchFacets(null);
-      setSelectedCategoryIds([]);
-      setSelectedScaleIds([]);
       return undefined;
     }
 
@@ -135,8 +142,6 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       .then((data) => {
         if (!cancelled) {
           setSearchFacets(data);
-          setSelectedCategoryIds([]);
-          setSelectedScaleIds([]);
         }
       })
       .catch(() => {
@@ -238,7 +243,13 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         setSelectedCategoryIds([]);
         setSelectedScaleIds([]);
         setSearchFacets(null);
+        syncedKeywordRef.current = "";
         return;
+      }
+      if (trimmed !== syncedKeywordRef.current) {
+        setSelectedCategoryIds([]);
+        setSelectedScaleIds([]);
+        syncedKeywordRef.current = trimmed;
       }
       setSearchParam(trimmed);
       setSearchKeyword(trimmed);
@@ -286,7 +297,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
           <>
             {showSearchObjectsSection ? (
               <div className="neu-search-objects-layout">
-                {showObjectFilters && (
+                {showFilterColumn && (
                   <ObjectSearchFilterPanel
                     facets={searchFacets}
                     loading={facetsLoading}
@@ -303,7 +314,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 <div
                   className="neu-search-objects-cards"
                   style={
-                    showObjectFilters ? undefined : { gridColumn: "1 / -1" }
+                    showFilterColumn ? undefined : { gridColumn: "1 / -1" }
                   }
                 >
                   {displayObjects.map((item) => (
@@ -363,32 +374,20 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                     hoverable
                     className="neu-model-card"
                     cover={
-                      <div
-                        style={{
-                          position: "relative",
-                          paddingTop: "75%",
-                          overflow: "hidden",
-                          borderRadius: "32px 32px 0 0",
-                        }}
-                      >
-                        <div
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            width: "100%",
-                            height: "100%",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <PlusOutlined
-                            style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-                          />
+                      <>
+                        <div className="neu-card-cover">
+                          <div className="neu-card-image-well">
+                            <div className="neu-card-image-frame">
+                              <div className="neu-card-image-placeholder">
+                                <PlusOutlined
+                                  style={{ fontSize: 36, color: "var(--neu-text-2)" }}
+                                />
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         <div className="neu-nameplate">{t("addBrandObject")}</div>
-                      </div>
+                      </>
                     }
                     onClick={() => {
                       setEditingBrandObject(null);

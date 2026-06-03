@@ -3,6 +3,7 @@ import {
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { useLocale } from "../LocaleContext";
+import { radius } from "../theme/radius";
 import { getBrands, getMySubmissions } from "../utils";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import dayjs from "dayjs";
@@ -58,7 +59,7 @@ function SubmissionCard({ item, t, onClick }) {
       onClick={onClick}
       style={{
         background: "var(--neu-bg)",
-        borderRadius: 14,
+        borderRadius: radius.card,
         padding: "14px 18px",
         boxShadow: "var(--raised-sm)",
         display: "flex",
@@ -136,7 +137,7 @@ function SubmissionDrawer({ item, onClose, t }) {
           <span style={{ color: "var(--neu-text-2)", fontSize: 13, display: "block", marginBottom: 8 }}>{t("image")}</span>
           <div
             onClick={() => window.open(item.image_url, "_blank")}
-            style={{ display: "inline-block", borderRadius: 10, overflow: "hidden", boxShadow: "var(--raised-sm)", cursor: "pointer", lineHeight: 0 }}
+            style={{ display: "inline-block", borderRadius: radius.md, overflow: "hidden", boxShadow: "var(--raised-sm)", cursor: "pointer", lineHeight: 0 }}
           >
             <img
               src={item.image_url}
@@ -148,7 +149,7 @@ function SubmissionDrawer({ item, onClose, t }) {
       )}
 
       {item.admin_note && (
-        <div style={{ marginTop: 16, borderRadius: 10, padding: "10px 14px", boxShadow: "var(--inset-sm)", borderLeft: "3px solid var(--neu-accent)" }}>
+        <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset-sm)", borderLeft: "3px solid var(--neu-accent)" }}>
           <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, fontWeight: 600, letterSpacing: "0.3px" }}>
             {t("adminReply")}
           </Text>
@@ -157,7 +158,7 @@ function SubmissionDrawer({ item, onClose, t }) {
       )}
 
       {item.reject_reason && (
-        <div style={{ marginTop: 16, borderRadius: 10, padding: "10px 14px", boxShadow: "var(--inset-sm)", borderLeft: "3px solid var(--neu-danger)" }}>
+        <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset-sm)", borderLeft: "3px solid var(--neu-danger)" }}>
           <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, fontWeight: 600, letterSpacing: "0.3px" }}>
             {t("rejectionReason")}
           </Text>

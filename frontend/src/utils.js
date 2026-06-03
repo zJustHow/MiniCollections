@@ -192,11 +192,20 @@ export const getGroups = async () => {
   return handleResponse(response);
 };
 
-export const searchGroups = async (keyword) => {
-  const response = await fetch(
-    `/groups/search?keyword=${encodeURIComponent(keyword)}`,
-    { headers: authHeaders() }
-  );
+export const searchGroups = async (
+  keyword,
+  { categoryIds = null, brandIds = null, scaleIds = null } = {},
+) => {
+  const params = buildSliceParams({ keyword, categoryIds, brandIds, scaleIds });
+  const response = await fetch(`/groups/search?${params}`, { headers: authHeaders() });
+  return handleResponse(response);
+};
+
+export const searchGroupsFacets = async (keyword) => {
+  const params = new URLSearchParams({ keyword });
+  const response = await fetch(`/groups/search/facets?${params}`, {
+    headers: authHeaders(),
+  });
   return handleResponse(response);
 };
 

@@ -267,7 +267,9 @@ public class BrandService {
             try {
                 EsSearchFacetsResult esResult =
                         brandObjectElasticsearchQueryService.searchFacets(trimmed, brandId);
-                return toSearchFacetsDto(esResult, preferZh);
+                if (esResult.total() > 0) {
+                    return toSearchFacetsDto(esResult, preferZh);
+                }
             } catch (Exception e) {
                 log.warn("Elasticsearch search facets failed, using SQL fallback: {}", e.getMessage());
             }

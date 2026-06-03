@@ -216,37 +216,25 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
             maxWidth: screens.md ? "45%" : "100%",
           }}
         >
-          {brandObject?.image_url ? (
-            <img
-              src={brandObject.image_url}
-              alt={brandObject.name}
-              loading="lazy"
-              style={{
-                width: "100%",
-                aspectRatio: "4/3",
-                objectFit: "cover",
-                borderRadius: 16,
-                boxShadow: "var(--raised-sm)",
-                display: "block",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: "100%",
-                aspectRatio: "4/3",
-                borderRadius: 16,
-                boxShadow: "var(--raised-sm)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <PictureOutlined
-                style={{ fontSize: 48, color: "var(--neu-text-2)" }}
-              />
+          <div className="neu-detail-image">
+            <div className="neu-detail-image-well">
+              <div className="neu-card-image-frame">
+                {brandObject?.image_url ? (
+                  <img
+                    src={brandObject.image_url}
+                    alt={brandObject.name}
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="neu-card-image-placeholder">
+                    <PictureOutlined
+                      style={{ fontSize: 48, color: "var(--neu-text-2)" }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>

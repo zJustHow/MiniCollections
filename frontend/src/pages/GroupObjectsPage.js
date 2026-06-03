@@ -321,32 +321,20 @@ export default function GroupObjectsPage() {
                 hoverable
                 className="neu-model-card"
                 cover={
-                  <div
-                    style={{
-                      position: "relative",
-                      paddingTop: "75%",
-                      overflow: "hidden",
-                      borderRadius: "32px 32px 0 0",
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <PlusOutlined
-                        style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-                      />
+                  <>
+                    <div className="neu-card-cover">
+                      <div className="neu-card-image-well">
+                        <div className="neu-card-image-frame">
+                          <div className="neu-card-image-placeholder">
+                            <PlusOutlined
+                              style={{ fontSize: 36, color: "var(--neu-text-2)" }}
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                     <div className="neu-nameplate">{t("addModel")}</div>
-                  </div>
+                  </>
                 }
                 onClick={openAddUserObject}
                 bodyStyle={{ padding: 0 }}

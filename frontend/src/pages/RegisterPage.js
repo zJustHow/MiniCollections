@@ -5,6 +5,7 @@ import { LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from "@ant-de
 import { useNavigate } from "react-router-dom";
 import { signup, sendCode, COUNTRIES } from "../utils";
 import { useLocale } from "../LocaleContext";
+import { radius } from "../theme/radius";
 import { detectBrowserLocale } from "../i18n";
 
 const { Header, Content } = Layout;
@@ -127,7 +128,7 @@ export default function RegisterPage() {
             style={{
               display: "flex",
               gap: 8,
-              borderRadius: 14,
+              borderRadius: radius.card,
               padding: 5,
               boxShadow: "var(--inset-sm)",
               marginBottom: 24,
@@ -296,7 +297,7 @@ export default function RegisterPage() {
                 style={{
                   display: "flex",
                   gap: 8,
-                  borderRadius: 14,
+                  borderRadius: radius.card,
                   padding: 5,
                   boxShadow: "var(--inset-sm)",
                 }}
@@ -325,7 +326,7 @@ export default function RegisterPage() {
                 style={{
                   color: "#e05d5d",
                   background: "rgba(224, 93, 93, 0.08)",
-                  borderRadius: 10,
+                  borderRadius: radius.md,
                   padding: "8px 14px",
                   marginBottom: 16,
                   fontSize: 13,
@@ -343,7 +344,7 @@ export default function RegisterPage() {
                 htmlType="submit"
                 loading={loading}
                 size="large"
-                style={{ width: "100%", borderRadius: 12 }}
+                style={{ width: "100%", borderRadius: radius.md }}
               >
                 {t("register")}
               </Button>

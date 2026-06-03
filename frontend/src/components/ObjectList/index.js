@@ -38,6 +38,15 @@ export default function ObjectList({ activeTab, isAdmin }) {
     groupSearchActive,
     groupSearchResultGroups,
     groupSearchResultObjects,
+    groupShowObjectFilters,
+    groupSearchFacets,
+    groupFacetsLoading,
+    groupSelectedCategoryIds,
+    groupSelectedBrandIds,
+    groupSelectedScaleIds,
+    onGroupToggleCategory,
+    onGroupToggleBrand,
+    onGroupToggleScale,
     createGroupModalVisible,
     setCreateGroupModalVisible,
     createGroupLoading,
@@ -88,6 +97,15 @@ export default function ObjectList({ activeTab, isAdmin }) {
           searchActive={groupSearchActive}
           searchResultGroups={groupSearchResultGroups}
           searchResultObjects={groupSearchResultObjects}
+          showObjectFilters={groupShowObjectFilters}
+          searchFacets={groupSearchFacets}
+          facetsLoading={groupFacetsLoading}
+          selectedCategoryIds={groupSelectedCategoryIds}
+          selectedBrandIds={groupSelectedBrandIds}
+          selectedScaleIds={groupSelectedScaleIds}
+          onToggleCategory={onGroupToggleCategory}
+          onToggleBrand={onGroupToggleBrand}
+          onToggleScale={onGroupToggleScale}
         />
       )}
 

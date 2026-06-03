@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { bindWechatAccount, exchangeWechatCode } from "../utils";
 import { useLocale } from "../LocaleContext";
+import { radius } from "../theme/radius";
 
 const BIND_INTENT_KEY = "wechat_intent";
 
@@ -58,7 +59,7 @@ export default function WechatCallbackPage({ onSuccess, onBind }) {
           style={{
             color: "#e05d5d",
             background: "rgba(224, 93, 93, 0.08)",
-            borderRadius: 10,
+            borderRadius: radius.md,
             padding: "12px 20px",
             fontSize: 14,
             boxShadow:

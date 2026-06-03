@@ -84,7 +84,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
             {headerSlot}
           </div>
         ) : (
-          <div className="header-tabs" style={{ display: "flex", gap: 10, flex: 1 }}>
+          <div className="header-tabs">
             <button
               className={`neu-tab-btn${activeTab === "brands" ? " active" : ""}`}
               onClick={() => handleTabChange("brands")}

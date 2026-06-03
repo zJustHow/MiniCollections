@@ -3,6 +3,7 @@ import { App, ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import enUS from "antd/locale/en_US";
 import { detectBrowserLocale, translations, translateError } from "./i18n";
+import { RADIUS_PX } from "./theme/radius";
 import { setCurrentLocale } from "./utils";
 
 const antdLocaleMap = { "zh-CN": zhCN, "en-US": enUS };
@@ -48,10 +49,10 @@ export function LocaleProvider({ children }) {
             colorBgContainer:   "#fcfbf8",
             colorBgElevated:    "#fcfbf8",
             colorBgLayout:      "#fcfbf8",
-            borderRadius:       9,
-            borderRadiusSM:     9,
-            borderRadiusLG:     14,
-            borderRadiusXS:     6,
+            borderRadius:       RADIUS_PX.md,
+            borderRadiusSM:     RADIUS_PX.md,
+            borderRadiusLG:     RADIUS_PX.lg,
+            borderRadiusXS:     RADIUS_PX.sm,
           },
         }}
       >
