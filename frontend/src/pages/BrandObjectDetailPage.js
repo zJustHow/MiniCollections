@@ -5,9 +5,9 @@ import {
   ArrowLeftOutlined,
   DeleteOutlined,
   EditOutlined,
-  PictureOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import DetailImage from "../components/DetailImage";
 import AddToGroupModal from "../components/ObjectList/modals/AddToGroupModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
 import { useLocale } from "../LocaleContext";
@@ -216,25 +216,10 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
             maxWidth: screens.md ? "45%" : "100%",
           }}
         >
-          <div className="neu-detail-image">
-            <div className="neu-detail-image-well">
-              <div className="neu-card-image-frame">
-                {brandObject?.image_url ? (
-                  <img
-                    src={brandObject.image_url}
-                    alt={brandObject.name}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="neu-card-image-placeholder">
-                    <PictureOutlined
-                      style={{ fontSize: 48, color: "var(--neu-text-2)" }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <DetailImage
+            imageUrl={brandObject?.image_url}
+            alt={brandObject?.name}
+          />
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>

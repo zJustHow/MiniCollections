@@ -49,13 +49,26 @@
   --raised-sm: 3px 3px 6px var(--neu-sd), -3px -3px 6px var(--neu-sl);
 
   --inset: inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
-  --inset-sm: inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
+  --inset-sm:
+    inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
+  /* tinted inset for colored surfaces (avoid white highlight on accent/danger) */
+  --inset-accent:
+    inset 2px 2px 5px var(--neu-accent-dark),
+    inset -3px -3px 7px var(--neu-accent-light);
+  --inset-danger:
+    inset 2px 2px 5px var(--neu-danger-dark),
+    inset -3px -3px 7px var(--neu-danger-light);
 
   /* Button motion ($transition-base) */
   --neu-btn-transition: all 0.2s ease;
 
   /* navbar dropdown-item hover tint (rgba(230,231,238,.1)) */
   --neu-item-hover-bg: rgba(230, 231, 238, 0.1);
+
+  /* layout */
+  --header-height: 80px;
+  --header-height-mobile: 64px;
+  --header-tab-width: 120px;
 }
 
 /* ── GLOBAL ───────────────────────────────────────────────── */
@@ -68,8 +81,15 @@
 body {
   background-color: var(--neu-bg);
   color: var(--neu-text);
-  font-family: "Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family:
+    "Nunito Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -129,7 +149,7 @@ a:hover {
   border-bottom: none;
   position: relative;
   z-index: 10;
-  height: 64px;
+  height: var(--header-height);
   line-height: normal;
 }
 
@@ -160,13 +180,17 @@ a:hover {
 }
 
 .header-tabs .neu-tab-btn {
+  flex: 0 0 var(--header-tab-width);
+  width: var(--header-tab-width);
   height: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 0;
-  padding: 0 20px;
+  padding: 0;
   margin: 0;
+  font-size: 16px;
+  font-weight: 400;
 }
 
 .neu-tab-btn:hover:not(.active) {
@@ -357,13 +381,29 @@ a:hover {
   position: relative;
   overflow: hidden;
   border-radius: var(--r-card-well);
-  background: var(--neu-bg);
-  box-shadow: var(--inset-sm);
   --neu-card-well-inset: 6px;
+  --neu-groove-pad: 4px;
 }
 
 .neu-card-image-well {
   padding-top: 75%;
+}
+
+.neu-card-image-slot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-card-image-preload {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .neu-detail-image {
@@ -375,6 +415,53 @@ a:hover {
 
 .neu-detail-image-well {
   aspect-ratio: 4 / 3;
+  width: 100%;
+}
+
+.neu-related-model-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: var(--r-md);
+  background: var(--neu-bg);
+  box-shadow: var(--raised-lg);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.neu-related-model-btn:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    10px 10px 20px var(--neu-sd),
+    -10px -10px 20px var(--neu-sl);
+}
+
+.neu-related-model-btn:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: var(--raised-sm);
+}
+
+.neu-related-model-btn-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.neu-related-model-btn-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--neu-text);
+}
+
+.neu-related-model-btn-meta {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--neu-text-2);
 }
 
 .neu-related-model-thumb {
@@ -391,9 +478,8 @@ a:hover {
   height: 100%;
   overflow: hidden;
   border-radius: var(--r-md);
-  background: var(--neu-bg);
-  box-shadow: var(--inset-sm);
   --neu-card-well-inset: 3px;
+  --neu-groove-pad: 2px;
 }
 
 .neu-related-model-thumb-well .neu-card-image-placeholder svg,
@@ -401,25 +487,61 @@ a:hover {
   font-size: 18px;
 }
 
-.neu-card-image-frame {
-  position: absolute;
-  inset: var(--neu-card-well-inset);
+.neu-image-groove-well .neu-card-image-frame {
+  position: relative;
+  flex: 0 0 auto;
+  isolation: isolate;
   overflow: hidden;
   border-radius: var(--r-card-frame);
+  padding: var(--neu-groove-pad);
+  background: var(--neu-bg);
+  line-height: 0;
 }
 
-.neu-card-image-frame img {
-  position: static;
-  inset: auto;
+/* Inset rim drawn above the photo */
+.neu-image-groove-well .neu-card-image-groove {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: var(--inset-sm);
+  background: transparent;
+}
+
+.neu-image-groove-well .neu-card-image-frame--fill {
+  position: absolute;
+  inset: var(--neu-card-well-inset);
+  box-shadow: var(--inset-sm);
+}
+
+.neu-image-groove-well .neu-card-image-frame img {
+  position: relative;
+  z-index: 0;
   display: block;
   width: 100%;
   height: 100%;
-  border-radius: 0;
+  border-radius: calc(var(--r-card-frame) - var(--neu-groove-pad));
+  object-fit: contain;
+  object-position: center;
+}
+
+.neu-card-image-well--cover .neu-card-image-frame img {
   object-fit: cover;
 }
 
-.neu-card-image-well--contain .neu-card-image-frame img {
-  object-fit: contain;
+/* Brand logos: smaller artwork + lift off the light groove background */
+.neu-card-image-well--logo .neu-card-image-frame--fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-card-image-well--logo .neu-card-image-frame img {
+  width: 68%;
+  height: 68%;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.35))
+    drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
 }
 
 .neu-card-image-placeholder {
@@ -518,7 +640,7 @@ a:hover {
   background: var(--neu-accent-light);
   color: #fff;
   border-color: var(--neu-accent-light);
-  box-shadow: var(--inset) !important;
+  box-shadow: var(--inset-accent) !important;
 }
 
 .ant-btn-primary:active:not([disabled]),
@@ -527,7 +649,7 @@ a:hover {
   background: var(--neu-accent-dark);
   color: rgba(255, 255, 255, 0.95);
   border-color: var(--neu-accent-dark);
-  box-shadow: var(--inset) !important;
+  box-shadow: var(--inset-accent) !important;
 }
 
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous {
@@ -537,11 +659,13 @@ a:hover {
   box-shadow: var(--raised-sm);
 }
 
-.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:hover:not([disabled]):not(:active) {
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:hover:not([disabled]):not(
+    :active
+  ) {
   background: var(--neu-danger-light);
   color: #fff;
   border-color: var(--neu-danger-light);
-  box-shadow: var(--inset) !important;
+  box-shadow: var(--inset-danger) !important;
 }
 
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not([disabled]),
@@ -550,7 +674,7 @@ a:hover {
   background: var(--neu-danger-dark);
   color: rgba(255, 255, 255, 0.95);
   border-color: var(--neu-danger-dark);
-  box-shadow: var(--inset) !important;
+  box-shadow: var(--inset-danger) !important;
 }
 
 .ant-btn[disabled],
@@ -919,12 +1043,12 @@ textarea.ant-input:focus {
 
 .neu-fab:hover:not(:active) {
   background: var(--neu-accent-light);
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-accent);
 }
 
 .neu-fab:active {
   background: var(--neu-accent-dark);
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-accent);
 }
 
 /* ── CLICKABLE CARD (generic interactive surface) ────────── */
@@ -958,12 +1082,12 @@ textarea.ant-input:focus {
 
 .neu-add-btn:hover:not(:active) {
   background: var(--neu-accent-light);
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-accent);
 }
 
 .neu-add-btn:active {
   background: var(--neu-accent-dark);
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-accent);
 }
 
 /* ── LOGIN PANEL ──────────────────────────────────────────── */
@@ -1396,7 +1520,9 @@ textarea.ant-input:focus {
   display: none;
 }
 
-.ant-radio-button-wrapper:hover:not(.ant-radio-button-wrapper-checked):not(.ant-radio-button-wrapper-disabled) {
+.ant-radio-button-wrapper:hover:not(.ant-radio-button-wrapper-checked):not(
+    .ant-radio-button-wrapper-disabled
+  ) {
   color: var(--neu-text);
   box-shadow: var(--inset);
 }
@@ -1501,7 +1627,7 @@ textarea.ant-input:focus {
 @media (max-width: 640px) {
   /* Header: single row with logo + hamburger */
   .ant-layout-header {
-    height: 52px !important;
+    height: var(--header-height-mobile) !important;
     line-height: normal !important;
     padding: 0 14px !important;
     flex-wrap: nowrap !important;
@@ -1554,7 +1680,7 @@ textarea.ant-input:focus {
     display: flex;
     flex-direction: column;
     position: fixed;
-    top: 52px;
+    top: var(--header-height-mobile);
     left: 0;
     right: 0;
     background: var(--neu-bg);
@@ -1572,8 +1698,8 @@ textarea.ant-input:focus {
     border: none;
     border-radius: var(--r-md);
     background: transparent;
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 17px;
+    font-weight: 400;
     color: var(--neu-dark);
     cursor: pointer;
     box-shadow: none;
@@ -1591,7 +1717,6 @@ textarea.ant-input:focus {
     color: var(--neu-accent);
     background: var(--neu-item-hover-bg);
     box-shadow: var(--inset);
-    font-weight: 600;
   }
 
   .mobile-menu-divider {

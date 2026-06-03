@@ -1,6 +1,6 @@
 import { Card, Grid, Input, Spin } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import AddCardCover from "./AddCardCover";
 import CardCover from "./CardCover";
 import InfiniteSliceFooter from "../InfiniteSliceFooter";
 import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
@@ -57,22 +57,7 @@ export default function BrandsTab({
         key="__add__"
         hoverable
         className="neu-model-card"
-        cover={
-          <>
-            <div className="neu-card-cover">
-              <div className="neu-card-image-well">
-                <div className="neu-card-image-frame">
-                  <div className="neu-card-image-placeholder">
-                    <PlusOutlined
-                      style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="neu-nameplate">{t("addBrand")}</div>
-          </>
-        }
+        cover={<AddCardCover label={t("addBrand")} />}
         onClick={onCreateBrand}
         bodyStyle={{ padding: 0 }}
       />
@@ -85,7 +70,8 @@ export default function BrandsTab({
           <CardCover
             image_url={brand.image_url}
             name={brand.name}
-            objectFit="contain"
+            fixedGroove
+            logoShadow
           />
         }
         onClick={() => onBrandClick(brand)}
@@ -110,8 +96,7 @@ export default function BrandsTab({
 
   const dataSource = isAdmin ? [{ id: "__add__" }, ...brands] : brands;
 
-  const showFilterColumn =
-    showObjectFilters || (searchActive && facetsLoading);
+  const showFilterColumn = showObjectFilters || (searchActive && facetsLoading);
 
   const showObjectsSection =
     searchActive &&

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useSearchParam from "../../hooks/useSearchParam";
+import useObjectFilterParams from "../../hooks/useObjectFilterParams";
 import useInfiniteSlice from "../../hooks/useInfiniteSlice";
 import {
   getBrandsSlice,
@@ -9,28 +10,28 @@ import {
   searchBrandObjectsFacets,
   SLICE_SIZE,
 } from "../../utils";
-import { filterKeyFromIds, toggleIdInList } from "../../utils/filterParams";
+import { filterKeyFromIds } from "../../utils/filterParams";
 
 export default function useBrandsState() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchValue, setSearchParam] = useSearchParam();
+  const {
+    selectedCategoryIds,
+    selectedBrandIds,
+    selectedScaleIds,
+    clearObjectFilters,
+    onToggleCategory,
+    onToggleBrand,
+    onToggleScale,
+  } = useObjectFilterParams();
   const [searchActive, setSearchActive] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
-  const [selectedBrandIds, setSelectedBrandIds] = useState([]);
-  const [selectedScaleIds, setSelectedScaleIds] = useState([]);
   const [searchFacets, setSearchFacets] = useState(null);
   const [facetsLoading, setFacetsLoading] = useState(false);
 
   const [brandModalOpen, setBrandModalOpen] = useState(false);
-  const syncedKeywordRef = useRef("");
-
-  const clearObjectFilters = useCallback(() => {
-    setSelectedCategoryIds([]);
-    setSelectedBrandIds([]);
-    setSelectedScaleIds([]);
-  }, []);
+  const syncedKeywordRef = useRef((searchValue ?? "").trim());
 
   const brandsList = useInfiniteSlice(
     ({ size, cursor }) => getBrandsSlice({ size, cursor }),
@@ -187,9 +188,9 @@ export default function useBrandsState() {
       selectedCategoryIds,
       selectedBrandIds,
       selectedScaleIds,
-      onToggleCategory: (id) => toggleIdInList(id, setSelectedCategoryIds),
-      onToggleBrand: (id) => toggleIdInList(id, setSelectedBrandIds),
-      onToggleScale: (id) => toggleIdInList(id, setSelectedScaleIds),
+      onToggleCategory,
+      onToggleBrand,
+      onToggleScale,
     }),
     [
       brandsList,

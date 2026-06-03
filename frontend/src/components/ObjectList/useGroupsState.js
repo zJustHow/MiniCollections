@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useSearchParam from "../../hooks/useSearchParam";
+import useObjectFilterParams from "../../hooks/useObjectFilterParams";
 import { App, Form } from "antd";
 import { getGroups, searchGroups, searchGroupsFacets, createGroup } from "../../utils";
-import { filterKeyFromIds, toggleIdInList } from "../../utils/filterParams";
+import { filterKeyFromIds } from "../../utils/filterParams";
 import { useLocale } from "../../LocaleContext";
 
 export default function useGroupsState() {
@@ -12,6 +13,15 @@ export default function useGroupsState() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchValue, setSearchParam] = useSearchParam();
+  const {
+    selectedCategoryIds,
+    selectedBrandIds,
+    selectedScaleIds,
+    clearObjectFilters,
+    onToggleCategory,
+    onToggleBrand,
+    onToggleScale,
+  } = useObjectFilterParams();
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
   const [groupSearchActive, setGroupSearchActive] = useState(false);
@@ -20,23 +30,14 @@ export default function useGroupsState() {
   const [groupSearchResultObjects, setGroupSearchResultObjects] = useState([]);
   const [searchFacets, setSearchFacets] = useState(null);
   const [facetsLoading, setFacetsLoading] = useState(false);
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
-  const [selectedBrandIds, setSelectedBrandIds] = useState([]);
-  const [selectedScaleIds, setSelectedScaleIds] = useState([]);
 
   // Create group modal
   const [createGroupModalVisible, setCreateGroupModalVisible] = useState(false);
   const [createGroupLoading, setCreateGroupLoading] = useState(false);
   const [groupForm] = Form.useForm();
   const [groupImageData, setGroupImageData] = useState(null);
-  const syncedKeywordRef = useRef("");
+  const syncedKeywordRef = useRef((searchValue ?? "").trim());
   const fetchKeywordRef = useRef("");
-
-  const clearObjectFilters = useCallback(() => {
-    setSelectedCategoryIds([]);
-    setSelectedBrandIds([]);
-    setSelectedScaleIds([]);
-  }, []);
 
   const objectFilterKey = filterKeyFromIds(
     selectedCategoryIds,
@@ -229,9 +230,9 @@ export default function useGroupsState() {
     groupSelectedCategoryIds: selectedCategoryIds,
     groupSelectedBrandIds: selectedBrandIds,
     groupSelectedScaleIds: selectedScaleIds,
-    onGroupToggleCategory: (id) => toggleIdInList(id, setSelectedCategoryIds),
-    onGroupToggleBrand: (id) => toggleIdInList(id, setSelectedBrandIds),
-    onGroupToggleScale: (id) => toggleIdInList(id, setSelectedScaleIds),
+    onGroupToggleCategory: onToggleCategory,
+    onGroupToggleBrand: onToggleBrand,
+    onGroupToggleScale: onToggleScale,
     createGroupModalVisible,
     setCreateGroupModalVisible,
     createGroupLoading,

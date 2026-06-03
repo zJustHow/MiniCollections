@@ -1,13 +1,13 @@
 -- KILOworks brand_objects (brand_id=17). 11 products; image_source: https://ig-model.com/
 INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_price_cny, release_price_usd, release_date, brand_id, category_id, scale_id) VALUES
-('1/18 2021 Audi RS6 C8 Avant Black', '1/18 2021 奥迪 RS6 C8 Avant 黑色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000101.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 12),
-('1/18 2021 Audi RS6 C8 Avant Red', '1/18 2021 奥迪 RS6 C8 Avant 红色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000102.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 12),
-('1/18 2021 Audi RS6 C8 Avant Gray', '1/18 2021 奥迪 RS6 C8 Avant 灰色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000103.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 12),
-('1/18 Mercedes AMG A45 S Grey', '1/18 奔驰 AMG A45 S 灰色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000301.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 12),
-('1/18 Mercedes AMG A45 S Black', '1/18 奔驰 AMG A45 S 黑色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000302.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 12),
-('1/18 Mercedes AMG A45 S White', '1/18 奔驰 AMG A45 S 白色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000303.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 12),
-('1/18 Mercedes AMG A45 S Yellow', '1/18 奔驰 AMG A45 S 黄色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000304.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 12),
-('1/64 Mercedes AMG A45 S Grey', '1/64 奔驰 AMG A45 S 灰色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000501.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 27),
-('1/64 Mercedes AMG A45 S Black', '1/64 奔驰 AMG A45 S 黑色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000502.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 27),
-('1/64 Mercedes AMG A45 S White', '1/64 奔驰 AMG A45 S 白色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000503.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 27),
-('1/64 Mercedes AMG A45 S Yellow', '1/64 奔驰 AMG A45 S 黄色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000504.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 27);
+('1/18 2021 Audi RS6 C8 Avant Black', '1/18 2021 奥迪 RS6 C8 Avant 黑色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000101.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 18),
+('1/18 2021 Audi RS6 C8 Avant Red', '1/18 2021 奥迪 RS6 C8 Avant 红色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000102.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 18),
+('1/18 2021 Audi RS6 C8 Avant Gray', '1/18 2021 奥迪 RS6 C8 Avant 灰色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000103.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 18),
+('1/18 Mercedes AMG A45 S Grey', '1/18 奔驰 AMG A45 S 灰色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000301.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 18),
+('1/18 Mercedes AMG A45 S Black', '1/18 奔驰 AMG A45 S 黑色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000302.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 18),
+('1/18 Mercedes AMG A45 S White', '1/18 奔驰 AMG A45 S 白色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000303.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 18),
+('1/18 Mercedes AMG A45 S Yellow', '1/18 奔驰 AMG A45 S 黄色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000304.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 18),
+('1/64 Mercedes AMG A45 S Grey', '1/64 奔驰 AMG A45 S 灰色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000501.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 64),
+('1/64 Mercedes AMG A45 S Black', '1/64 奔驰 AMG A45 S 黑色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000502.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 64),
+('1/64 Mercedes AMG A45 S White', '1/64 奔驰 AMG A45 S 白色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000503.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 64),
+('1/64 Mercedes AMG A45 S Yellow', '1/64 奔驰 AMG A45 S 黄色', 'http://localhost:9000/minicollections-media/kiloworks/tk-klw000504.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 17, 1, 64);

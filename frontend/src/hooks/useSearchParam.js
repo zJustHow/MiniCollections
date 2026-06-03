@@ -6,11 +6,18 @@ export default function useSearchParam(key = "q") {
   const value = searchParams.get(key) || "";
 
   const setValue = (newValue) => {
-    if (newValue) {
-      setSearchParams({ [key]: newValue }, { replace: true });
-    } else {
-      setSearchParams({}, { replace: true });
-    }
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (newValue) {
+          next.set(key, newValue);
+        } else {
+          next.delete(key);
+        }
+        return next;
+      },
+      { replace: true },
+    );
   };
 
   return [value, setValue];

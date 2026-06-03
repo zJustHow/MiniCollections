@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { App, Button, Form, Grid, Spin } from "antd";
-import { ArrowLeftOutlined, DeleteOutlined, EditOutlined, PictureOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import DetailImage from "../components/DetailImage";
+import RelatedModelCard from "../components/RelatedModelCard";
 import EditUserObjectModal from "../components/ObjectList/modals/EditUserObjectModal";
 import { useLocale } from "../LocaleContext";
-import { radius } from "../theme/radius";
 import { useHeader } from "../HeaderContext";
 import {
   getGroupById,
@@ -221,23 +222,7 @@ export default function GroupObjectDetailPage() {
     <div>
       <div style={{ display: "flex", gap: 32, alignItems: "flex-start", flexWrap: screens.md ? "nowrap" : "wrap" }}>
         <div style={{ flex: screens.md ? "0 0 45%" : "1 1 100%", maxWidth: screens.md ? "45%" : "100%" }}>
-          <div className="neu-detail-image">
-            <div className="neu-detail-image-well">
-              <div className="neu-card-image-frame">
-                {imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={userObject?.name ?? ""}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="neu-card-image-placeholder">
-                    <PictureOutlined style={{ fontSize: 48, color: "var(--neu-text-2)" }} />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <DetailImage imageUrl={imageUrl} alt={userObject?.name ?? ""} />
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -249,48 +234,16 @@ export default function GroupObjectDetailPage() {
             <div style={{ color: "var(--neu-text-2)", fontSize: 13, marginBottom: 8 }}>{t("brandModelLabel")}</div>
             <Spin spinning={loadingBrandDetail}>
               {brandObjectDetail ? (
-                <button
-                  type="button"
-                  className="neu-clickable"
-                  style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 12px", borderRadius: radius.md }}
+                <RelatedModelCard
+                  brandObject={brandObjectDetail}
                   onClick={() => {
-                    const bId = brandObjectDetail.brand_id ?? brandObjectDetail.brandId;
+                    const bId =
+                      brandObjectDetail.brand_id ?? brandObjectDetail.brandId;
                     navigate(`/brands/${bId}/objects/${brandObjectDetail.id}`, {
                       state: { brandObject: brandObjectDetail },
                     });
                   }}
-                >
-                  {brandObjectDetail.image_url ? (
-                    <div className="neu-related-model-thumb">
-                      <div className="neu-related-model-thumb-well">
-                        <div className="neu-card-image-frame">
-                          <img
-                            src={brandObjectDetail.image_url}
-                            alt={brandObjectDetail.name}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="neu-related-model-thumb">
-                      <div className="neu-related-model-thumb-well">
-                        <div className="neu-card-image-frame">
-                          <div className="neu-card-image-placeholder">
-                            <PictureOutlined style={{ color: "var(--neu-text-2)" }} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: "var(--neu-text)" }}>{brandObjectDetail.name}</div>
-                    {(brandObjectDetail.category || brandObjectDetail.scale) && (
-                      <div style={{ fontSize: 12, color: "var(--neu-text-2)", marginTop: 2 }}>
-                        {[brandObjectDetail.category, brandObjectDetail.scale].filter(Boolean).join(" · ")}
-                      </div>
-                    )}
-                  </div>
-                </button>
+                />
               ) : (
                 !loadingBrandDetail && (
                   <div style={{ color: "var(--neu-text-2)", fontSize: 13 }}>{t("noRelatedBrandModel")}</div>

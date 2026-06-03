@@ -40,7 +40,7 @@ log "Elasticsearch is ready."
 
 log "Uploading seed brand logos to MinIO..."
 if ! "$ROOT/scripts/upload-brand-logos.sh"; then
-  warn "Brand logo upload failed (is MinIO up on :9000?). Logos may 404 until you run scripts/upload-brand-logos.sh"
+  warn "Brand logo upload failed (see message above). Logos may 404 until you run scripts/upload-brand-logos.sh"
 fi
 # FrontiArt product images (like other brands): upload once when MinIO is empty:
 #   python3 scripts/import-frontiart-products.py --upload-only

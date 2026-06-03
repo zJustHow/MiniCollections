@@ -100,51 +100,52 @@ CREATE TABLE scales
     CONSTRAINT uq_scales_code UNIQUE (code)
 );
 
+-- id matches denominator (scale ratio) for stable FK references in seeds and APIs
 INSERT INTO scales (id, code, denominator, sort_order) VALUES
 (1, '1:1', 1, 1),
 (2, '1:2', 2, 2),
-(3, '1:4', 4, 3),
-(4, '1:5', 5, 4),
-(5, '1:6', 6, 5),
-(6, '1:8', 8, 6),
-(7, '1:10', 10, 7),
-(8, '1:12', 12, 8),
-(9, '1:15', 15, 9),
-(10, '1:16', 16, 10),
-(11, '1:17', 17, 11),
-(12, '1:18', 18, 12),
-(13, '1:20', 20, 13),
-(14, '1:21', 21, 14),
-(15, '1:24', 24, 15),
-(16, '1:32', 32, 16),
-(17, '1:34', 34, 17),
-(40, '1:35', 35, 18),
-(18, '1:40', 40, 19),
-(19, '1:41', 41, 20),
-(20, '1:42', 42, 21),
-(21, '1:43', 43, 22),
-(22, '1:50', 50, 23),
-(23, '1:54', 54, 24),
-(24, '1:57', 57, 25),
-(25, '1:58', 58, 26),
-(26, '1:60', 60, 27),
-(27, '1:64', 64, 28),
-(41, '1:66', 66, 29),
-(28, '1:67', 67, 30),
-(29, '1:72', 72, 31),
-(30, '1:76', 76, 32),
-(31, '1:80', 80, 33),
-(32, '1:86', 86, 34),
-(33, '1:87', 87, 35),
-(34, '1:102', 102, 36),
-(42, '1:120', 120, 37),
-(35, '1:140', 140, 38),
-(36, '1:148', 148, 39),
-(37, '1:150', 150, 40),
-(43, '1:160', 160, 41),
-(44, '1:220', 220, 42),
-(38, '1:240', 240, 43),
-(39, '1:400', 400, 44);
+(4, '1:4', 4, 3),
+(5, '1:5', 5, 4),
+(6, '1:6', 6, 5),
+(8, '1:8', 8, 6),
+(10, '1:10', 10, 7),
+(12, '1:12', 12, 8),
+(15, '1:15', 15, 9),
+(16, '1:16', 16, 10),
+(17, '1:17', 17, 11),
+(18, '1:18', 18, 12),
+(20, '1:20', 20, 13),
+(21, '1:21', 21, 14),
+(24, '1:24', 24, 15),
+(32, '1:32', 32, 16),
+(34, '1:34', 34, 17),
+(35, '1:35', 35, 18),
+(40, '1:40', 40, 19),
+(41, '1:41', 41, 20),
+(42, '1:42', 42, 21),
+(43, '1:43', 43, 22),
+(50, '1:50', 50, 23),
+(54, '1:54', 54, 24),
+(57, '1:57', 57, 25),
+(58, '1:58', 58, 26),
+(60, '1:60', 60, 27),
+(64, '1:64', 64, 28),
+(66, '1:66', 66, 29),
+(67, '1:67', 67, 30),
+(72, '1:72', 72, 31),
+(76, '1:76', 76, 32),
+(80, '1:80', 80, 33),
+(86, '1:86', 86, 34),
+(87, '1:87', 87, 35),
+(102, '1:102', 102, 36),
+(120, '1:120', 120, 37),
+(140, '1:140', 140, 38),
+(148, '1:148', 148, 39),
+(150, '1:150', 150, 40),
+(160, '1:160', 160, 41),
+(220, '1:220', 220, 42),
+(240, '1:240', 240, 43),
+(400, '1:400', 400, 44);
 
 SELECT setval(pg_get_serial_sequence('scales', 'id'), (SELECT COALESCE(MAX(id), 1) FROM scales));
 
@@ -277,7 +278,7 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Inno Models: 559 products in inno-models/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (8, 'Inno Models', NULL, 'http://localhost:9000/minicollections-media/brands/inno-models/logo.png');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (8, 'Inno Models', NULL, 'http://localhost:9000/minicollections-media/brands/inno-models/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -305,7 +306,7 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- MOTORHELIX: 30 products in motorhelix/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (12, 'MOTORHELIX', NULL, 'http://localhost:9000/minicollections-media/brands/motorhelix/logo.gif');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (12, 'MOTORHELIX', NULL, 'http://localhost:9000/minicollections-media/brands/motorhelix/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -354,7 +355,7 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- AUTO WORLD: 1 products in autoworld/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (19, 'AUTO WORLD', NULL, 'http://localhost:9000/minicollections-media/brands/autoworld/logo.gif');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (19, 'AUTO WORLD', NULL, 'http://localhost:9000/minicollections-media/brands/autoworld/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -459,7 +460,7 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Welly: 1295 products in welly/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (34, 'Welly', NULL, 'http://localhost:9000/minicollections-media/brands/welly/logo.jpg');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (34, 'Welly', NULL, 'http://localhost:9000/minicollections-media/brands/welly/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -480,7 +481,7 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- MR Collection: 1610 products in mr-collection/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (37, 'MR Collection', NULL, 'http://localhost:9000/minicollections-media/brands/mr-collection/logo.jpg');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (37, 'MR Collection', NULL, 'http://localhost:9000/minicollections-media/brands/mr-collection/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));

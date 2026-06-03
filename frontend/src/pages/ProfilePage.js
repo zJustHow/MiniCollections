@@ -119,7 +119,10 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   const handlePasswordSave = async (values) => {
     setPwLoading(true);
     try {
-      await updatePassword({ currentPassword: values.currentPassword, newPassword: values.newPassword });
+      await updatePassword({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      });
       pwForm.resetFields();
       message.success(t("passwordUpdated"));
     } catch (err) {
@@ -131,14 +134,23 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
 
   const handleEmailSendCode = async () => {
     const email = emailForm.getFieldValue("email");
-    if (!email) { emailForm.validateFields(["email"]); return; }
+    if (!email) {
+      emailForm.validateFields(["email"]);
+      return;
+    }
     setEmailCodeLoading(true);
     try {
       await sendCode(email, "EMAIL");
       message.success(t("codeSent"));
       setEmailCodeCountdown(60);
       const timer = setInterval(() => {
-        setEmailCodeCountdown((c) => { if (c <= 1) { clearInterval(timer); return 0; } return c - 1; });
+        setEmailCodeCountdown((c) => {
+          if (c <= 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return c - 1;
+        });
       }, 1000);
     } catch (err) {
       message.error(err?.message || t("sendCodeFailed"));
@@ -150,7 +162,11 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   const handleEmailSave = async (values) => {
     setEmailLoading(true);
     try {
-      const updated = await updateIdentifier({ type: "email", identifier: values.email, code: values.emailCode });
+      const updated = await updateIdentifier({
+        type: "email",
+        identifier: values.email,
+        code: values.emailCode,
+      });
       onProfileChange(updated);
       emailForm.resetFields(["emailCode"]);
       setEmailCodeCountdown(0);
@@ -255,7 +271,6 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
         }}
       >
         <div style={{ maxWidth: 480, margin: "0 auto" }}>
-
           {/* Avatar + name card */}
           <div
             style={{
@@ -272,37 +287,61 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               beforeUpload={() => false}
               onChange={({ file }) => handleAvatarUpload({ file })}
             >
-              <div className="avatar-upload-trigger" style={{ position: "relative", display: "inline-block", cursor: "pointer" }}>
+              <div
+                className="avatar-upload-trigger"
+                style={{
+                  position: "relative",
+                  display: "inline-block",
+                  cursor: "pointer",
+                }}
+              >
                 <Avatar
                   size={96}
                   src={profile.avatar_url}
                   icon={!profile.avatar_url && <UserOutlined />}
                   style={{
-                    background: profile.avatar_url ? "transparent" : "var(--neu-accent)",
+                    background: profile.avatar_url
+                      ? "transparent"
+                      : "var(--neu-accent)",
                   }}
                 />
                 {avatarLoading && (
-                  <div style={{
-                    position: "absolute",
-                    inset: 0,
-                    borderRadius: radius.round,
-                    background: "rgba(0,0,0,0.35)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#fff",
-                    fontSize: 20,
-                  }}>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      borderRadius: radius.round,
+                      background: "rgba(0,0,0,0.35)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#fff",
+                      fontSize: 20,
+                    }}
+                  >
                     <LoadingOutlined />
                   </div>
                 )}
               </div>
             </Upload>
-            <div style={{ marginTop: 12, fontWeight: 700, fontSize: 18, color: "var(--neu-text)" }}>
+            <div
+              style={{
+                marginTop: 12,
+                fontWeight: 700,
+                fontSize: 18,
+                color: "var(--neu-text)",
+              }}
+            >
               {profile.display_name}
             </div>
             {profile.email && (
-              <div style={{ fontSize: 13, color: "var(--neu-text-2)", marginTop: 3 }}>
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "var(--neu-text-2)",
+                  marginTop: 3,
+                }}
+              >
                 {profile.email}
               </div>
             )}
@@ -327,10 +366,18 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 ]}
                 style={{ marginBottom: 12 }}
               >
-                <Input prefix={<UserOutlined />} placeholder={t("displayName")} />
+                <Input
+                  prefix={<UserOutlined />}
+                  placeholder={t("displayName")}
+                />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button type="primary" htmlType="submit" loading={nameLoading} style={{ width: "100%" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={nameLoading}
+                  style={{ width: "100%" }}
+                >
                   {t("saveDisplayName")}
                 </Button>
               </Form.Item>
@@ -343,10 +390,15 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             <Form form={pwForm} onFinish={handlePasswordSave} layout="vertical">
               <Form.Item
                 name="currentPassword"
-                rules={[{ required: true, message: t("currentPasswordRequired") }]}
+                rules={[
+                  { required: true, message: t("currentPasswordRequired") },
+                ]}
                 style={{ marginBottom: 10 }}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder={t("currentPassword")} />
+                <Input.Password
+                  prefix={<LockOutlined />}
+                  placeholder={t("currentPassword")}
+                />
               </Form.Item>
               <Form.Item
                 name="newPassword"
@@ -356,7 +408,10 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 ]}
                 style={{ marginBottom: 10 }}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder={t("newPassword")} />
+                <Input.Password
+                  prefix={<LockOutlined />}
+                  placeholder={t("newPassword")}
+                />
               </Form.Item>
               <Form.Item
                 name="confirmPassword"
@@ -365,17 +420,26 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   { required: true, message: t("confirmPasswordRequired") },
                   ({ getFieldValue }) => ({
                     validator(_, value) {
-                      if (!value || getFieldValue("newPassword") === value) return Promise.resolve();
+                      if (!value || getFieldValue("newPassword") === value)
+                        return Promise.resolve();
                       return Promise.reject(new Error(t("passwordMismatch")));
                     },
                   }),
                 ]}
                 style={{ marginBottom: 12 }}
               >
-                <Input.Password prefix={<LockOutlined />} placeholder={t("confirmPassword")} />
+                <Input.Password
+                  prefix={<LockOutlined />}
+                  placeholder={t("confirmPassword")}
+                />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button type="primary" htmlType="submit" loading={pwLoading} style={{ width: "100%" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={pwLoading}
+                  style={{ width: "100%" }}
+                >
                   {t("updatePassword")}
                 </Button>
               </Form.Item>
@@ -399,7 +463,10 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 ]}
                 style={{ marginBottom: 10 }}
               >
-                <Input prefix={<MailOutlined />} placeholder={t("emailAddress")} />
+                <Input
+                  prefix={<MailOutlined />}
+                  placeholder={t("emailAddress")}
+                />
               </Form.Item>
               <Form.Item style={{ marginBottom: 12 }}>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -408,20 +475,34 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                     noStyle
                     rules={[{ required: true, message: t("codeRequired") }]}
                   >
-                    <Input style={{ width: "100%" }} placeholder={t("verificationCode")} />
+                    <Input
+                      style={{ width: "100%" }}
+                      placeholder={t("verificationCode")}
+                    />
                   </Form.Item>
                   <Button
                     loading={emailCodeLoading}
-                    onClick={emailCodeCountdown > 0 ? undefined : handleEmailSendCode}
-                    className={emailCodeCountdown > 0 ? "btn-counting-down" : ""}
+                    onClick={
+                      emailCodeCountdown > 0 ? undefined : handleEmailSendCode
+                    }
+                    className={
+                      emailCodeCountdown > 0 ? "btn-counting-down" : ""
+                    }
                     style={{ flexShrink: 0 }}
                   >
-                    {emailCodeCountdown > 0 ? `${emailCodeCountdown}s` : t("sendCode")}
+                    {emailCodeCountdown > 0
+                      ? `${emailCodeCountdown}s`
+                      : t("sendCode")}
                   </Button>
                 </div>
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button type="primary" htmlType="submit" loading={emailLoading} style={{ width: "100%" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={emailLoading}
+                  style={{ width: "100%" }}
+                >
                   {t("updateEmail")}
                 </Button>
               </Form.Item>
@@ -443,7 +524,11 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   <Form.Item name="countryCode" noStyle>
                     <Select style={{ width: 110 }} optionLabelProp="label">
                       {COUNTRIES.map((c) => (
-                        <Select.Option key={c.code} value={c.code} label={c.code}>
+                        <Select.Option
+                          key={c.code}
+                          value={c.code}
+                          label={c.code}
+                        >
                           {locale === "zh-CN" ? c.zh : c.en} {c.code}
                         </Select.Option>
                       ))}
@@ -458,13 +543,21 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                         { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
                       ]}
                     >
-                      <Input style={{ width: "100%" }} placeholder={t("phoneNumber")} />
+                      <Input
+                        style={{ width: "100%" }}
+                        placeholder={t("phoneNumber")}
+                      />
                     </Form.Item>
                   </div>
                 </div>
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button type="primary" htmlType="submit" loading={phoneLoading} style={{ width: "100%" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={phoneLoading}
+                  style={{ width: "100%" }}
+                >
                   {profile.phone ? t("updatePhone") : t("bindPhone")}
                 </Button>
               </Form.Item>
@@ -474,8 +567,22 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
           {/* WeChat */}
           <SectionCard>
             <SectionLabel title={t("wechatAccount")} />
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-              <span style={{ fontSize: 13, color: profile.wechat_bound ? "var(--neu-accent)" : "var(--neu-text-2)" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 13,
+                  color: profile.wechat_bound
+                    ? "var(--neu-accent)"
+                    : "var(--neu-text-2)",
+                }}
+              >
                 {profile.wechat_bound ? t("wechatBound") : t("wechatNotBound")}
               </span>
               <Button
@@ -494,7 +601,9 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             <Form
               form={localeForm}
               onFinish={handleLocaleSave}
-              initialValues={{ preferredLocale: profile.preferred_locale || locale }}
+              initialValues={{
+                preferredLocale: profile.preferred_locale || locale,
+              }}
               key={profile.preferred_locale}
               layout="vertical"
             >
@@ -505,13 +614,17 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 </Radio.Group>
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button type="primary" htmlType="submit" loading={localeLoading} style={{ width: "100%" }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={localeLoading}
+                  style={{ width: "100%" }}
+                >
                   {t("saveLanguage")}
                 </Button>
               </Form.Item>
             </Form>
           </SectionCard>
-
         </div>
       </Content>
     </Layout>

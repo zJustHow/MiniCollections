@@ -1,6 +1,6 @@
 import { Card, Grid, Input, Spin } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import AddCardCover from "./AddCardCover";
 import CardCover from "./CardCover";
 import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
 import { useLocale } from "../../LocaleContext";
@@ -52,22 +52,7 @@ export default function GroupsTab({
         key="__add__"
         hoverable
         className="neu-model-card"
-        cover={
-          <>
-            <div className="neu-card-cover">
-              <div className="neu-card-image-well">
-                <div className="neu-card-image-frame">
-                  <div className="neu-card-image-placeholder">
-                    <PlusOutlined
-                      style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="neu-nameplate">{t("addGroup")}</div>
-          </>
-        }
+        cover={<AddCardCover label={t("addGroup")} />}
         onClick={onCreateGroup}
         bodyStyle={{ padding: 0 }}
       />

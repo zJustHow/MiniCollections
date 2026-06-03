@@ -3,10 +3,12 @@ export function appendIdListParams(params, key, ids) {
   ids.forEach((id) => params.append(key, String(id)));
 }
 
+export function toggleInList(id, list) {
+  return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
+}
+
 export function toggleIdInList(id, setList) {
-  setList((prev) =>
-    prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-  );
+  setList((prev) => toggleInList(id, prev));
 }
 
 export function filterKeyFromIds(categoryIds, brandIds, scaleIds) {

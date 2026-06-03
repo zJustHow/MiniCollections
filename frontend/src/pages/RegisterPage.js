@@ -1,7 +1,11 @@
-import {
-  App, Button, Form, Input, Select, Layout } from "antd";
+import { App, Button, Form, Input, Select, Layout } from "antd";
 import { useRef, useState } from "react";
-import { LockOutlined, MailOutlined, PhoneOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  LockOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { signup, sendCode, COUNTRIES } from "../utils";
 import { useLocale } from "../LocaleContext";
@@ -52,7 +56,10 @@ export default function RegisterPage() {
       setCodeCountdown(60);
       countdownTimer.current = setInterval(() => {
         setCodeCountdown((prev) => {
-          if (prev <= 1) { clearInterval(countdownTimer.current); return 0; }
+          if (prev <= 1) {
+            clearInterval(countdownTimer.current);
+            return 0;
+          }
           return prev - 1;
         });
       }, 1000);
@@ -157,7 +164,10 @@ export default function RegisterPage() {
           <Form
             form={form}
             name="register"
-            initialValues={{ preferred_locale: detectBrowserLocale(), countryCode: "+86" }}
+            initialValues={{
+              preferred_locale: detectBrowserLocale(),
+              countryCode: "+86",
+            }}
             onFinish={onFinish}
           >
             {/* Email */}

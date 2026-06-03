@@ -1,26 +1,27 @@
 import React from "react";
-import { PictureOutlined } from "@ant-design/icons";
+import GroovedImage from "../GroovedImage";
 
-const CardCover = ({ image_url, name, objectFit = "cover" }) => (
+const CardCover = ({
+  image_url,
+  name,
+  objectFit = "contain",
+  fixedGroove = false,
+  logoShadow = false,
+}) => (
   <>
     <div className="neu-card-cover">
-      <div
-        className={`neu-card-image-well${
-          objectFit === "contain" ? " neu-card-image-well--contain" : ""
-        }`}
-      >
-        {image_url ? (
-          <div className="neu-card-image-frame">
-            <img src={image_url} alt={name} loading="lazy" />
-          </div>
-        ) : (
-          <div className="neu-card-image-frame">
-            <div className="neu-card-image-placeholder">
-              <PictureOutlined style={{ fontSize: 36, color: "var(--neu-text-2)" }} />
-            </div>
-          </div>
-        )}
-      </div>
+      <GroovedImage
+        imageUrl={image_url}
+        alt={name}
+        wellClassName={
+          logoShadow
+            ? "neu-card-image-well neu-card-image-well--logo"
+            : "neu-card-image-well"
+        }
+        coverMode={objectFit === "cover"}
+        fixedGroove={fixedGroove}
+        placeholderSize={36}
+      />
     </div>
     <div className="neu-nameplate">{name}</div>
   </>

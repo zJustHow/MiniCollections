@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
+import useObjectFilterParams from "../hooks/useObjectFilterParams";
 import useInfiniteSlice from "../hooks/useInfiniteSlice";
 import { App, Button, Card, Grid, Input, Popconfirm, Spin } from "antd";
 import {
   ArrowLeftOutlined,
   DeleteOutlined,
   EditOutlined,
-  PlusOutlined,
 } from "@ant-design/icons";
+import AddCardCover from "../components/ObjectList/AddCardCover";
 import CardCover from "../components/ObjectList/CardCover";
 import InfiniteSliceFooter from "../components/InfiniteSliceFooter";
 import ObjectSearchFilterPanel from "../components/ObjectSearchFilterPanel";
-import { filterKeyFromIds, toggleIdInList } from "../utils/filterParams";
+import { filterKeyFromIds } from "../utils/filterParams";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import BrandModal from "../components/ObjectList/modals/BrandModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
@@ -41,6 +42,13 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const cols = screens.lg ? 4 : screens.md ? 3 : 2;
 
   const [searchValue, setSearchParam] = useSearchParam();
+  const {
+    selectedCategoryIds,
+    selectedScaleIds,
+    clearObjectFilters,
+    onToggleCategory,
+    onToggleScale,
+  } = useObjectFilterParams({ includeBrands: false });
   const [brand, setBrand] = useState(location.state?.brand ?? null);
   const [searchActive, setSearchActive] = useState(
     Boolean((searchValue ?? "").trim()),
@@ -49,8 +57,6 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     (searchValue ?? "").trim(),
   );
   const [draftQuery, setDraftQuery] = useState(searchValue);
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
-  const [selectedScaleIds, setSelectedScaleIds] = useState([]);
   const [searchFacets, setSearchFacets] = useState(null);
   const [facetsLoading, setFacetsLoading] = useState(false);
   const syncedKeywordRef = useRef(searchKeyword);
@@ -120,8 +126,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     const keyword = (searchValue ?? "").trim();
     if (keyword) {
       if (keyword !== syncedKeywordRef.current) {
-        setSelectedCategoryIds([]);
-        setSelectedScaleIds([]);
+        clearObjectFilters();
         syncedKeywordRef.current = keyword;
       }
       setDraftQuery(keyword);
@@ -240,22 +245,20 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         setSearchActive(false);
         setSearchKeyword("");
         setSearchParam("");
-        setSelectedCategoryIds([]);
-        setSelectedScaleIds([]);
+        clearObjectFilters();
         setSearchFacets(null);
         syncedKeywordRef.current = "";
         return;
       }
       if (trimmed !== syncedKeywordRef.current) {
-        setSelectedCategoryIds([]);
-        setSelectedScaleIds([]);
+        clearObjectFilters();
         syncedKeywordRef.current = trimmed;
       }
       setSearchParam(trimmed);
       setSearchKeyword(trimmed);
       setSearchActive(true);
     },
-    [setSearchParam],
+    [setSearchParam, clearObjectFilters],
   );
 
   return (
@@ -278,8 +281,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
               setSearchActive(false);
               setSearchKeyword("");
               setSearchParam("");
-              setSelectedCategoryIds([]);
-              setSelectedScaleIds([]);
+              clearObjectFilters();
               setSearchFacets(null);
             }
           }}
@@ -304,11 +306,9 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                     selectedCategoryIds={selectedCategoryIds}
                     selectedBrandIds={[]}
                     selectedScaleIds={selectedScaleIds}
-                    onToggleCategory={(id) =>
-                      toggleIdInList(id, setSelectedCategoryIds)
-                    }
+                    onToggleCategory={onToggleCategory}
                     onToggleBrand={() => {}}
-                    onToggleScale={(id) => toggleIdInList(id, setSelectedScaleIds)}
+                    onToggleScale={onToggleScale}
                   />
                 )}
                 <div
@@ -373,22 +373,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                     key="__add__"
                     hoverable
                     className="neu-model-card"
-                    cover={
-                      <>
-                        <div className="neu-card-cover">
-                          <div className="neu-card-image-well">
-                            <div className="neu-card-image-frame">
-                              <div className="neu-card-image-placeholder">
-                                <PlusOutlined
-                                  style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="neu-nameplate">{t("addBrandObject")}</div>
-                      </>
-                    }
+                    cover={<AddCardCover label={t("addBrandObject")} />}
                     onClick={() => {
                       setEditingBrandObject(null);
                       setBrandObjectModalOpen(true);

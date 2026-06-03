@@ -1,6 +1,13 @@
 import { Layout, Avatar, Tooltip } from "antd";
 import { useState, useEffect, useRef } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation, Outlet } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+  Outlet,
+} from "react-router-dom";
 import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
@@ -31,22 +38,25 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
   useEffect(() => {
     if (!menuOpen) return;
     const handler = (e) => {
-      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+      if (menuRef.current && !menuRef.current.contains(e.target))
+        setMenuOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [menuOpen]);
 
-  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
   const activeTab =
     location.pathname === "/groups"
       ? "groups"
       : location.pathname === "/feedback"
-      ? "feedback"
-      : location.pathname === "/admin"
-      ? "admin"
-      : "brands";
+        ? "feedback"
+        : location.pathname === "/admin"
+          ? "admin"
+          : "brands";
 
   const goToLogin = () => navigate("/login");
 
@@ -80,7 +90,14 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
 
         {/* Center slot: either custom page content or default nav tabs */}
         {headerSlot ? (
-          <div style={{ display: "flex", alignItems: "center", flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
             {headerSlot}
           </div>
         ) : (
@@ -115,9 +132,20 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
         )}
 
         {/* Right slot — hidden when page has its own header slot */}
-        <div className="header-right" style={{ flexShrink: 0, display: headerSlot ? "none" : "flex", alignItems: "center", gap: 12 }}>
+        <div
+          className="header-right"
+          style={{
+            flexShrink: 0,
+            display: headerSlot ? "none" : "flex",
+            alignItems: "center",
+            gap: 12,
+          }}
+        >
           {authed ? (
-            <Tooltip title={profile?.display_name || t("profile")} placement="bottomRight">
+            <Tooltip
+              title={profile?.display_name || t("profile")}
+              placement="bottomRight"
+            >
               <Avatar
                 src={profile?.avatar_url}
                 icon={!profile?.avatar_url && <UserOutlined />}
@@ -126,7 +154,9 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
                 style={{
                   cursor: "pointer",
                   boxShadow: "var(--raised-sm)",
-                  background: profile?.avatar_url ? "transparent" : "var(--neu-accent)",
+                  background: profile?.avatar_url
+                    ? "transparent"
+                    : "var(--neu-accent)",
                   flexShrink: 0,
                   transition: "box-shadow 0.15s ease",
                 }}
@@ -195,9 +225,9 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
           <div className="mobile-menu-divider" />
           <button
             className="mobile-menu-item"
-            onClick={() => authed ? navigate("/profile") : navigate("/login")}
+            onClick={() => (authed ? navigate("/profile") : navigate("/login"))}
           >
-            {authed ? (profile?.display_name || t("profile")) : t("signIn")}
+            {authed ? profile?.display_name || t("profile") : t("signIn")}
           </button>
         </div>
       )}
@@ -205,7 +235,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
       <Content
         style={{
           padding: "clamp(12px, 3vw, 32px) clamp(12px, 4vw, 48px)",
-          maxHeight: "calc(100% - 64px)",
+          maxHeight: "calc(100% - var(--header-height))",
           overflowY: "auto",
           overflowX: "hidden",
           scrollbarGutter: "stable",
@@ -288,58 +318,99 @@ export default function App() {
       <Route
         path="/login"
         element={
-          authed ? <Navigate to="/" replace /> : <LoginPage onSuccess={handleLoginSuccess} />
+          authed ? (
+            <Navigate to="/" replace />
+          ) : (
+            <LoginPage onSuccess={handleLoginSuccess} />
+          )
         }
       />
       <Route
         path="/register"
-        element={
-          authed ? <Navigate to="/" replace /> : <RegisterPage />
-        }
+        element={authed ? <Navigate to="/" replace /> : <RegisterPage />}
       />
       <Route
         path="/wechat-callback"
         element={
-          authed && localStorage.getItem("wechat_intent") !== "bind"
-            ? <Navigate to="/" replace />
-            : <WechatCallbackPage onSuccess={handleLoginSuccess} onBind={handleWechatBind} />
+          authed && localStorage.getItem("wechat_intent") !== "bind" ? (
+            <Navigate to="/" replace />
+          ) : (
+            <WechatCallbackPage
+              onSuccess={handleLoginSuccess}
+              onBind={handleWechatBind}
+            />
+          )
         }
       />
       <Route
         path="/profile"
         element={
-          !authed ? <Navigate to="/login" replace /> :
-          <ProfilePage
-            profile={profile}
-            onProfileChange={handleProfileChange}
-            onLogout={handleLogout}
-          />
+          !authed ? (
+            <Navigate to="/login" replace />
+          ) : (
+            <ProfilePage
+              profile={profile}
+              onProfileChange={handleProfileChange}
+              onLogout={handleLogout}
+            />
+          )
         }
       />
-      <Route element={<MainLayout authed={authed} profile={profile} isAdmin={isAdmin} />}>
+      <Route
+        element={
+          <MainLayout authed={authed} profile={profile} isAdmin={isAdmin} />
+        }
+      >
         <Route
           index
-          element={authed ? <ObjectList activeTab="brands" isAdmin={isAdmin} /> : <GuestBrandsView />}
+          element={
+            authed ? (
+              <ObjectList activeTab="brands" isAdmin={isAdmin} />
+            ) : (
+              <GuestBrandsView />
+            )
+          }
         />
         <Route
           path="groups"
-          element={authed ? <ObjectList activeTab="groups" isAdmin={isAdmin} /> : <Navigate to="/login" replace />}
+          element={
+            authed ? (
+              <ObjectList activeTab="groups" isAdmin={isAdmin} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
         <Route
           path="brands/:brandId"
-          element={<BrandObjectsPage isAdmin={isAdmin && authed} authed={authed} />}
+          element={
+            <BrandObjectsPage isAdmin={isAdmin && authed} authed={authed} />
+          }
         />
         <Route
           path="brands/:brandId/objects/:objectId"
-          element={<BrandObjectDetailPage isAdmin={isAdmin && authed} authed={authed} />}
+          element={
+            <BrandObjectDetailPage
+              isAdmin={isAdmin && authed}
+              authed={authed}
+            />
+          }
         />
         <Route
           path="groups/:groupId"
-          element={authed ? <GroupObjectsPage /> : <Navigate to="/login" replace />}
+          element={
+            authed ? <GroupObjectsPage /> : <Navigate to="/login" replace />
+          }
         />
         <Route
           path="groups/:groupId/objects/:objectId"
-          element={authed ? <GroupObjectDetailPage /> : <Navigate to="/login" replace />}
+          element={
+            authed ? (
+              <GroupObjectDetailPage />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
         <Route
           path="feedback"
@@ -348,9 +419,13 @@ export default function App() {
         <Route
           path="admin"
           element={
-            !authed ? <Navigate to="/login" replace /> :
-            !isAdmin ? <Navigate to="/" replace /> :
-            <AdminPage />
+            !authed ? (
+              <Navigate to="/login" replace />
+            ) : !isAdmin ? (
+              <Navigate to="/" replace />
+            ) : (
+              <AdminPage />
+            )
           }
         />
       </Route>

@@ -248,7 +248,7 @@ const en = {
     'Delete "{name}"? This cannot be undone. All brand objects will also be deleted.',
   viewObjects: "Objects",
   brandObjects: "Models",
-  addBrandObject: "Add Object",
+  addBrandObject: "Add Model",
   editBrandObject: "Edit Object",
   brandObjectCreated: "Brand object created",
   brandObjectUpdated: "Brand object updated",

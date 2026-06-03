@@ -6,8 +6,8 @@ import {
   ArrowLeftOutlined,
   DeleteOutlined,
   EditOutlined,
-  PlusOutlined,
 } from "@ant-design/icons";
+import AddCardCover from "../components/ObjectList/AddCardCover";
 import CardCover from "../components/ObjectList/CardCover";
 import AddUserObjectInGroupModal from "../components/ObjectList/modals/AddUserObjectInGroupModal";
 import EditGroupModal from "../components/ObjectList/modals/EditGroupModal";
@@ -320,22 +320,7 @@ export default function GroupObjectsPage() {
                 key="__add__"
                 hoverable
                 className="neu-model-card"
-                cover={
-                  <>
-                    <div className="neu-card-cover">
-                      <div className="neu-card-image-well">
-                        <div className="neu-card-image-frame">
-                          <div className="neu-card-image-placeholder">
-                            <PlusOutlined
-                              style={{ fontSize: 36, color: "var(--neu-text-2)" }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="neu-nameplate">{t("addModel")}</div>
-                  </>
-                }
+                cover={<AddCardCover label={t("addModel")} />}
                 onClick={openAddUserObject}
                 bodyStyle={{ padding: 0 }}
               />
