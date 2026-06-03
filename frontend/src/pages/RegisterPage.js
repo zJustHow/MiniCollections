@@ -103,16 +103,8 @@ export default function RegisterPage() {
           paddingRight: 32,
         }}
       >
-        <span
-          style={{
-            fontSize: 20,
-            fontWeight: 700,
-            letterSpacing: 2.5,
-            textTransform: "uppercase",
-            color: "#3c4f68",
-          }}
-        >
-          Mini <span style={{ color: "#5592cc" }}>Collections</span>
+        <span className="header-logo">
+          Mini <span className="header-logo-accent">Collections</span>
         </span>
       </Header>
       <Content

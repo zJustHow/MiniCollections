@@ -128,6 +128,13 @@ export default function BrandsTab({
       showObjectFilters ||
       objectsSearchSlice?.loading);
 
+  const spinning = searchActive
+    ? (brandsSearchSlice?.loading || objectsSearchSlice?.loading) &&
+      searchResultBrands.length === 0 &&
+      searchResultObjects.length === 0 &&
+      !showObjectFilters
+    : brandsListSlice?.loading && brands.length === 0;
+
   return (
     <>
       <div
@@ -149,7 +156,7 @@ export default function BrandsTab({
         />
       </div>
 
-      <Spin spinning={loading}>
+      <Spin spinning={spinning}>
         {searchActive ? (
           <>
             {searchResultBrands.length > 0 && (

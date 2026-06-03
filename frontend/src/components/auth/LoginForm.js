@@ -86,9 +86,9 @@ function LoginForm({ onSuccess }) {
             {wechatLoading ? t("wechatLoggingIn") : t("loginWithWechat")}
           </button>
           <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "12px 0" }}>
-            <div style={{ flex: 1, height: 1, background: "var(--neu-border, #d0d8e4)" }} />
+            <div style={{ flex: 1, height: 1, background: "var(--neu-border)" }} />
             <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>or</span>
-            <div style={{ flex: 1, height: 1, background: "var(--neu-border, #d0d8e4)" }} />
+            <div style={{ flex: 1, height: 1, background: "var(--neu-border)" }} />
           </div>
         </>
       )}
@@ -238,9 +238,9 @@ function LoginForm({ onSuccess }) {
       {!inWeChat && (
         <>
           <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 0 8px" }}>
-            <div style={{ flex: 1, height: 1, background: "var(--neu-border, #d0d8e4)" }} />
+            <div style={{ flex: 1, height: 1, background: "var(--neu-border)" }} />
             <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>or</span>
-            <div style={{ flex: 1, height: 1, background: "var(--neu-border, #d0d8e4)" }} />
+            <div style={{ flex: 1, height: 1, background: "var(--neu-border)" }} />
           </div>
           {inMobileNonWeChat ? (
             // 手机普通浏览器：提示在微信内打开

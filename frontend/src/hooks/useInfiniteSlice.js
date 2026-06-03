@@ -96,7 +96,7 @@ export default function useInfiniteSlice(fetchSlice, options = {}) {
       reset();
       return;
     }
-    reset();
+    // Keep showing current items while refetching (e.g. filter change) to avoid card flash.
     loadInitial();
   }, [resetKey, enabled]); // eslint-disable-line react-hooks/exhaustive-deps
 

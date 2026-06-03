@@ -35,14 +35,21 @@ export function LocaleProvider({ children }) {
         locale={antdLocaleMap[locale] ?? enUS}
         theme={{
           token: {
+            fontFamily:         '"Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             colorPrimary:       "#5592cc",
             colorPrimaryHover:  "#6aa8dc",
             colorPrimaryActive: "#3d78b8",
+            colorSuccess:       "#00BF9A",
+            colorWarning:       "#F5B759",
+            colorError:         "#FA5252",
+            colorInfo:          "#1E90FF",
+            colorText:          "#44476A",
+            colorTextSecondary: "#66799e",
             colorBgContainer:   "#fcfbf8",
             colorBgElevated:    "#fcfbf8",
             colorBgLayout:      "#fcfbf8",
-            borderRadius:       10,
-            borderRadiusSM:     10,
+            borderRadius:       9,
+            borderRadiusSM:     9,
             borderRadiusLG:     14,
             borderRadiusXS:     6,
           },
