@@ -1,4 +1,6 @@
-import { App, Form, Input, Modal } from "antd";
+import { App, Form } from "antd";
+import NeuFormDrawer from "../../components/NeuFormDrawer";
+import { NeuInput } from "../../components/NeuFormControl";
 import { useState } from "react";
 import { rejectSubmission } from "../../utils";
 import { useLocale } from "../../LocaleContext";
@@ -27,23 +29,23 @@ export default function RejectModal({ open, submission, onClose, onSuccess }) {
   };
 
   return (
-    <Modal
+    <NeuFormDrawer
       title={isMissingModel ? t("rejectTitle") : t("closeTitle")}
       open={open}
       onOk={handleOk}
-      onCancel={() => { setReason(""); onClose(); }}
+      onClose={() => { setReason(""); onClose(); }}
       okText={isMissingModel ? t("rejectSubmission") : t("closeSubmission")}
       okButtonProps={{ danger: true }}
       cancelText={t("cancel")}
       confirmLoading={loading}
-      centered
       destroyOnClose
+      zIndex={1100}
     >
       <Form layout="vertical">
         <Form.Item label={isMissingModel ? t("rejectReason") : t("closeReason")}>
-          <Input.TextArea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
+          <NeuInput.TextArea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
         </Form.Item>
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

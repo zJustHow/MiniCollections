@@ -1,4 +1,5 @@
-import { App, Button, Form, Input, Select, Layout } from "antd";
+import { App, Button, Form, Layout } from "antd";
+import { NeuInput, NeuSelect } from "../components/NeuFormControl";
 import { useRef, useState } from "react";
 import {
   LockOutlined,
@@ -137,7 +138,7 @@ export default function RegisterPage() {
               gap: 8,
               borderRadius: radius.card,
               padding: 5,
-              boxShadow: "var(--inset-sm)",
+              boxShadow: "var(--inset)",
               marginBottom: 24,
             }}
           >
@@ -183,7 +184,7 @@ export default function RegisterPage() {
                   : []
               }
             >
-              <Input
+              <NeuInput
                 prefix={<MailOutlined />}
                 placeholder={t("email")}
                 size="large"
@@ -199,17 +200,18 @@ export default function RegisterPage() {
             >
               <div style={{ display: "flex", gap: 10 }}>
                 <Form.Item name="countryCode" noStyle>
-                  <Select
+                  <NeuSelect
+                    fullWidth={false}
                     style={{ width: 115 }}
                     optionLabelProp="label"
                     size="large"
                   >
                     {COUNTRIES.map((c) => (
-                      <Select.Option key={c.code} value={c.code} label={c.code}>
+                      <NeuSelect.Option key={c.code} value={c.code} label={c.code}>
                         {locale === "zh-CN" ? c.zh : c.en} {c.code}
-                      </Select.Option>
+                      </NeuSelect.Option>
                     ))}
-                  </Select>
+                  </NeuSelect>
                 </Form.Item>
                 <Form.Item
                   name="phoneNumber"
@@ -223,7 +225,8 @@ export default function RegisterPage() {
                       : []
                   }
                 >
-                  <Input
+                  <NeuInput
+                    fullWidth={false}
                     placeholder={t("phoneNumber")}
                     size="large"
                     style={{ flex: 1, minWidth: 0 }}
@@ -240,7 +243,8 @@ export default function RegisterPage() {
                   noStyle
                   rules={[{ required: true, message: t("codeRequired") }]}
                 >
-                  <Input
+                  <NeuInput
+                    fullWidth={false}
                     placeholder={t("verificationCode")}
                     size="large"
                     style={{ flex: 1 }}
@@ -267,7 +271,7 @@ export default function RegisterPage() {
                 { min: 6, message: t("newPasswordMin") },
               ]}
             >
-              <Input.Password
+              <NeuInput.Password
                 prefix={<LockOutlined />}
                 placeholder={t("password")}
                 size="large"
@@ -279,7 +283,7 @@ export default function RegisterPage() {
               name="name"
               rules={[{ required: true, message: t("signupNameRequired") }]}
             >
-              <Input
+              <NeuInput
                 prefix={<UserOutlined />}
                 placeholder={t("username")}
                 size="large"
@@ -288,7 +292,7 @@ export default function RegisterPage() {
 
             {/* Language toggle */}
             <Form.Item name="preferred_locale" hidden>
-              <Input />
+              <NeuInput />
             </Form.Item>
             <div style={{ marginBottom: 24 }}>
               <div
@@ -309,7 +313,7 @@ export default function RegisterPage() {
                   gap: 8,
                   borderRadius: radius.card,
                   padding: 5,
-                  boxShadow: "var(--inset-sm)",
+                  boxShadow: "var(--inset)",
                 }}
               >
                 <button

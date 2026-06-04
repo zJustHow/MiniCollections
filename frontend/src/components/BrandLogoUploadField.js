@@ -21,6 +21,7 @@ export default function BrandLogoUploadField({ brandId, value, onChange, onPendi
 
   return (
     <ImageUploadField
+      logoShadow
       value={displayValue}
       onChange={(url) => {
         if (previewUrl) {

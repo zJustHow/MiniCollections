@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
-import { App, Button, Card, Form, Grid, Input, Spin } from "antd";
+import { App, Button, Card, Form, Grid, Spin } from "antd";
+import { NeuInput } from "../components/NeuFormControl";
 import {
   ArrowLeftOutlined,
   DeleteOutlined,
@@ -24,7 +25,7 @@ import {
   purchasePriceFromFormValue,
 } from "../utils";
 
-const { Search } = Input;
+const { Search } = NeuInput;
 const { useBreakpoint } = Grid;
 
 const normalizeList = (data) =>
@@ -319,7 +320,7 @@ export default function GroupObjectsPage() {
               <Card
                 key="__add__"
                 hoverable
-                className="neu-model-card"
+                className="neu-card"
                 cover={<AddCardCover label={t("addModel")} />}
                 onClick={openAddUserObject}
                 bodyStyle={{ padding: 0 }}
@@ -328,7 +329,7 @@ export default function GroupObjectsPage() {
               <Card
                 key={item.id}
                 hoverable
-                className="neu-model-card"
+                className="neu-card"
                 cover={
                   <CardCover
                     image_url={item.image_url}

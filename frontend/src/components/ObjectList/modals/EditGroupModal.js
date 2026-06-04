@@ -1,4 +1,6 @@
-import { Form, Input, Modal } from "antd";
+import { Form } from "antd";
+import NeuFormDrawer from "../../NeuFormDrawer";
+import { NeuInput } from "../../NeuFormControl";
 import { useLocale } from "../../../LocaleContext";
 import ImageUploadField from "../../ImageUploadField";
 
@@ -13,12 +15,12 @@ export default function EditGroupModal({ visible,
 }) {
   const { t } = useLocale();
   return (
-    <Modal
+    <NeuFormDrawer
       title={t("editGroup")}
       open={visible}
       onOk={onOk}
       confirmLoading={confirmLoading}
-      onCancel={onCancel}
+      onClose={onCancel}
       destroyOnClose
     >
       <Form layout="vertical" form={form}>
@@ -27,12 +29,12 @@ export default function EditGroupModal({ visible,
           name="name"
           rules={[{ required: true, message: t("groupNameRequired") }]}
         >
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("image")}>
           <ImageUploadField value={imageData || selectedGroup?.image_url} onChange={onImageChange} />
         </Form.Item>
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

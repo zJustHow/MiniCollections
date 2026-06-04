@@ -1,4 +1,11 @@
-import { DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
+import { Form } from "antd";
+import NeuFormDrawer from "../../components/NeuFormDrawer";
+import {
+  NeuDatePicker,
+  NeuInput,
+  NeuInputNumber,
+  NeuSelect,
+} from "../../components/NeuFormControl";
 import { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { approveSubmission, getCategories, getScales, getSeriesByBrandId } from "../../utils";
@@ -80,21 +87,21 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
   }, [open, submission, form]);
 
   return (
-    <Modal
+    <NeuFormDrawer
       title={t("approveTitle")}
       open={open}
       onOk={handleOk}
-      onCancel={onClose}
+      onClose={onClose}
       okText={t("approveSubmission")}
       cancelText={t("cancel")}
       confirmLoading={loading}
       width={600}
-      centered
       destroyOnClose
+      zIndex={1100}
     >
       <Form layout="vertical" form={form}>
         <Form.Item label={t("brand")} name="brandId" rules={[{ required: true, message: t("brandRequired") }]}>
-          <Select
+          <NeuSelect
             showSearch
             optionFilterProp="children"
             onChange={(brandId) => {
@@ -103,21 +110,21 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
             }}
           >
             {brands.map((b) => (
-              <Select.Option key={b.id} value={b.id}>{b.name}</Select.Option>
+              <NeuSelect.Option key={b.id} value={b.id}>{b.name}</NeuSelect.Option>
             ))}
-          </Select>
+          </NeuSelect>
         </Form.Item>
         <Form.Item label={t("nameEn")} name="nameEn" rules={[{ required: true, message: t("nameRequired") }]}>
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("nameZh")} name="nameZh">
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("image")} name="imageUrl">
-          <Input placeholder="https://..." />
+          <NeuInput placeholder="https://..." />
         </Form.Item>
         <Form.Item label={t("scale")} name="scaleId">
-          <Select
+          <NeuSelect
             allowClear
             placeholder={t("scale")}
             options={scaleOptions.map((s) => ({
@@ -127,7 +134,7 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
           />
         </Form.Item>
         <Form.Item label={t("category")} name="categoryId">
-          <Select
+          <NeuSelect
             allowClear
             placeholder={t("category")}
             options={categoryOptions.map((c) => ({
@@ -137,10 +144,10 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
           />
         </Form.Item>
         <Form.Item label={t("releaseDate")} name="releaseDate">
-          <DatePicker style={{ width: "100%" }} />
+          <NeuDatePicker />
         </Form.Item>
         <Form.Item label={t("series")} name="seriesId">
-          <Select
+          <NeuSelect
             allowClear
             placeholder={t("selectSeries")}
             options={seriesOptions.map((s) => ({
@@ -150,12 +157,12 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
           />
         </Form.Item>
         <Form.Item label={t("priceCNY")} name="releasePriceCny">
-          <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+          <NeuInputNumber min={0} step={0.01} stringMode />
         </Form.Item>
         <Form.Item label={t("priceUSD")} name="releasePriceUsd">
-          <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+          <NeuInputNumber min={0} step={0.01} stringMode />
         </Form.Item>
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

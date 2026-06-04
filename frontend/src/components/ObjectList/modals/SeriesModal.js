@@ -1,4 +1,6 @@
-import { Form, Input, Modal } from "antd";
+import { Form } from "antd";
+import NeuFormDrawer from "../../NeuFormDrawer";
+import { NeuInput } from "../../NeuFormControl";
 import { useEffect } from "react";
 import { adminCreateSeries, adminUpdateSeries } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
@@ -38,25 +40,24 @@ export default function SeriesModal({ open, series, brandId, onClose, onSuccess 
   }, [open, series, form]);
 
   return (
-    <Modal
+    <NeuFormDrawer
       title={isEdit ? t("editSeries") : t("addSeries")}
       open={open}
       onOk={handleOk}
-      onCancel={onClose}
+      onClose={onClose}
       okText={isEdit ? t("edit") : t("addSeries")}
       cancelText={t("cancel")}
       confirmLoading={loading}
-      centered
       destroyOnClose
     >
       <Form layout="vertical" form={form}>
         <Form.Item label={t("nameEn")} name="nameEn" rules={[{ required: true, message: t("nameRequired") }]}>
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("nameZh")} name="nameZh">
-          <Input />
+          <NeuInput />
         </Form.Item>
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

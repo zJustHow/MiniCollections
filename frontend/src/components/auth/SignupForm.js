@@ -1,6 +1,6 @@
-import {
-  App, Button, Form, Input, Radio, Select, Modal,
-} from "antd";
+import { App, Button, Form, Radio } from "antd";
+import NeuFormDrawer from "../NeuFormDrawer";
+import { NeuInput, NeuSelect } from "../NeuFormControl";
 import { useState } from "react";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { signup, COUNTRIES } from "../../utils";
@@ -54,12 +54,13 @@ function SignupForm({ linkMode = false }) {
       >
         {t("register")}
       </Button>
-      <Modal
+      <NeuFormDrawer
         title={t("register")}
         open={displayModal}
-        onCancel={handleCancel}
+        onClose={handleCancel}
         footer={null}
-        destroyOnClose={true}
+        destroyOnClose
+        width={420}
       >
         <div style={{ marginBottom: 16, textAlign: "center" }}>
           <Radio.Group
@@ -87,7 +88,7 @@ function SignupForm({ linkMode = false }) {
               { type: "email", message: t("emailInvalid") },
             ] : []}
           >
-            <Input prefix={<UserOutlined />} placeholder={t("email")} />
+            <NeuInput prefix={<UserOutlined />} placeholder={t("email")} />
           </Form.Item>
 
           <Form.Item
@@ -95,13 +96,13 @@ function SignupForm({ linkMode = false }) {
           >
             <div style={{ display: "flex", gap: 8 }}>
               <Form.Item name="countryCode" noStyle>
-                <Select style={{ width: 110 }} optionLabelProp="label">
+                <NeuSelect fullWidth={false} style={{ width: 110 }} optionLabelProp="label">
                   {COUNTRIES.map((c) => (
-                    <Select.Option key={c.code} value={c.code} label={c.code}>
+                    <NeuSelect.Option key={c.code} value={c.code} label={c.code}>
                       {locale === "zh-CN" ? c.zh : c.en} {c.code}
-                    </Select.Option>
+                    </NeuSelect.Option>
                   ))}
-                </Select>
+                </NeuSelect>
               </Form.Item>
               <div style={{ flex: 1 }}>
                 <Form.Item
@@ -112,7 +113,7 @@ function SignupForm({ linkMode = false }) {
                     { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
                   ] : []}
                 >
-                  <Input style={{ width: "100%" }} placeholder={t("phoneNumber")} />
+                  <NeuInput placeholder={t("phoneNumber")} />
                 </Form.Item>
               </div>
             </div>
@@ -125,13 +126,13 @@ function SignupForm({ linkMode = false }) {
               { min: 6, message: t("newPasswordMin") },
             ]}
           >
-            <Input.Password prefix={<LockOutlined />} placeholder={t("password")} />
+            <NeuInput.Password prefix={<LockOutlined />} placeholder={t("password")} />
           </Form.Item>
           <Form.Item
             name="name"
             rules={[{ required: true, message: t("signupNameRequired") }]}
           >
-            <Input prefix={<UserOutlined />} placeholder={t("username")} />
+            <NeuInput prefix={<UserOutlined />} placeholder={t("username")} />
           </Form.Item>
           <Form.Item name="preferred_locale" label={t("language")}>
             <Radio.Group>
@@ -145,7 +146,7 @@ function SignupForm({ linkMode = false }) {
             </Button>
           </Form.Item>
         </Form>
-      </Modal>
+      </NeuFormDrawer>
     </>
   );
 }

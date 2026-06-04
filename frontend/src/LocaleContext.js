@@ -3,6 +3,7 @@ import { App, ConfigProvider } from "antd";
 import zhCN from "antd/locale/zh_CN";
 import enUS from "antd/locale/en_US";
 import { detectBrowserLocale, translations, translateError } from "./i18n";
+import { neuFormControlTheme } from "./components/NeuFormControl";
 import { RADIUS_PX } from "./theme/radius";
 import { setCurrentLocale } from "./utils";
 
@@ -36,6 +37,7 @@ export function LocaleProvider({ children }) {
         locale={antdLocaleMap[locale] ?? enUS}
         theme={{
           token: {
+            ...neuFormControlTheme.token,
             fontFamily:         '"Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             colorPrimary:       "#5592cc",
             colorPrimaryHover:  "#6aa8dc",
@@ -72,21 +74,7 @@ export function LocaleProvider({ children }) {
               dangerColor:         "#fff",
               fontWeight:          600,
             },
-            DatePicker: {
-              colorBgContainer:    "#fcfbf8",
-              colorBgElevated:     "#fcfbf8",
-              colorText:           "#44476A",
-              colorTextHeading:    "#2a354f",
-              colorTextDisabled:   "#66799e",
-              colorIcon:           "#66799e",
-              colorIconHover:      "#5592cc",
-              colorBorder:         "#fcfbf8",
-              hoverBorderColor:    "#fcfbf8",
-              activeBorderColor:   "#fcfbf8",
-              activeShadow:        "none",
-              cellHoverBg:         "rgba(230, 231, 238, 0.1)",
-              cellActiveWithRangeBg: "rgba(85, 146, 204, 0.12)",
-            },
+            ...neuFormControlTheme.components,
           },
         }}
       >

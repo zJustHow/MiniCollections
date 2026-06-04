@@ -1,18 +1,18 @@
 import { App, Button, Popconfirm, Space, Table } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined, TagsOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { adminDeleteBrand } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import { radius } from "../../theme/radius";
 import BrandModal from "../../components/ObjectList/modals/BrandModal";
-import BrandObjectsDrawer from "./BrandObjectsDrawer";
 
 export default function BrandsPanel({ brands, onBrandsChanged }) {
   const { message } = App.useApp();
   const { t } = useLocale();
+  const navigate = useNavigate();
   const [brandModalOpen, setBrandModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
-  const [selectedBrand, setSelectedBrand] = useState(null);
 
   const handleDeleteBrand = async (brand) => {
     try {
@@ -45,7 +45,9 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
           <Button
             size="small"
             icon={<TagsOutlined />}
-            onClick={() => setSelectedBrand(record)}
+            onClick={() =>
+              navigate(`/admin/brands/${record.id}`, { state: { brand: record } })
+            }
           >
             {t("viewObjects")}
           </Button>
@@ -92,11 +94,6 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
         brand={editingBrand}
         onClose={() => { setBrandModalOpen(false); setEditingBrand(null); }}
         onSuccess={() => { onBrandsChanged(); }}
-      />
-      <BrandObjectsDrawer
-        brand={selectedBrand}
-        onClose={() => setSelectedBrand(null)}
-        onBrandObjectsChanged={() => {}}
       />
     </>
   );

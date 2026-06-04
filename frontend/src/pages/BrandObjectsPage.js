@@ -3,7 +3,8 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useObjectFilterParams from "../hooks/useObjectFilterParams";
 import useInfiniteSlice from "../hooks/useInfiniteSlice";
-import { App, Button, Card, Grid, Input, Popconfirm, Spin } from "antd";
+import { App, Button, Card, Grid, Popconfirm, Spin } from "antd";
+import { NeuInput } from "../components/NeuFormControl";
 import {
   ArrowLeftOutlined,
   DeleteOutlined,
@@ -28,7 +29,7 @@ import {
   SLICE_SIZE,
 } from "../utils";
 
-const { Search } = Input;
+const { Search } = NeuInput;
 const { useBreakpoint } = Grid;
 
 export default function BrandObjectsPage({ isAdmin, authed = true }) {
@@ -321,7 +322,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                     <Card
                       key={item.id}
                       hoverable
-                      className="neu-model-card"
+                      className="neu-card"
                       cover={
                         <CardCover image_url={item.image_url} name={item.name} />
                       }
@@ -372,7 +373,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                   <Card
                     key="__add__"
                     hoverable
-                    className="neu-model-card"
+                    className="neu-card"
                     cover={<AddCardCover label={t("addBrandObject")} />}
                     onClick={() => {
                       setEditingBrandObject(null);
@@ -384,7 +385,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                   <Card
                     key={item.id}
                     hoverable
-                    className="neu-model-card"
+                    className="neu-card"
                     cover={
                       <CardCover image_url={item.image_url} name={item.name} />
                     }

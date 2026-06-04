@@ -149,7 +149,7 @@ function SubmissionDrawer({ item, onClose, t }) {
       )}
 
       {item.admin_note && (
-        <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset-sm)", borderLeft: "3px solid var(--neu-accent)" }}>
+        <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset)", borderLeft: "3px solid var(--neu-accent)" }}>
           <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, fontWeight: 600, letterSpacing: "0.3px" }}>
             {t("adminReply")}
           </Text>
@@ -158,7 +158,7 @@ function SubmissionDrawer({ item, onClose, t }) {
       )}
 
       {item.reject_reason && (
-        <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset-sm)", borderLeft: "3px solid var(--neu-danger)" }}>
+        <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset)", borderLeft: "3px solid var(--neu-danger)" }}>
           <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, fontWeight: 600, letterSpacing: "0.3px" }}>
             {t("rejectionReason")}
           </Text>

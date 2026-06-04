@@ -47,10 +47,9 @@
   --raised: 6px 6px 12px var(--neu-sd), -6px -6px 12px var(--neu-sl);
   --raised-lg: 8px 8px 16px var(--neu-sd), -8px -8px 16px var(--neu-sl);
   --raised-sm: 3px 3px 6px var(--neu-sd), -3px -3px 6px var(--neu-sl);
+  --raised-xs: 1px 1px 3px var(--neu-sd), -1px -1px 3px var(--neu-sl);
 
   --inset: inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
-  --inset-sm:
-    inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
   /* tinted inset for colored surfaces (avoid white highlight on accent/danger) */
   --inset-accent:
     inset 2px 2px 5px var(--neu-accent-dark),
@@ -239,7 +238,7 @@ a:hover {
 }
 
 .ant-tabs-tab.ant-tabs-tab-active {
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
   background: var(--neu-bg);
 }
 
@@ -341,7 +340,7 @@ a:hover {
 
 .ant-card-hoverable:active {
   transform: translateY(0);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
 }
 
 .ant-card-body {
@@ -350,30 +349,41 @@ a:hover {
   color: var(--neu-text);
 }
 
-/* ── MODEL CARD (neumorphic pill style) ───────────────────── */
-.neu-model-card.ant-card {
+/* ── NEU CARD (grid tiles + picture-card upload) ──────────── */
+.neu-card.ant-card {
   border-radius: var(--r-card);
-  box-shadow: var(--raised-lg);
-}
-
-.neu-model-card.ant-card-hoverable:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow:
-    10px 10px 20px var(--neu-sd),
-    -10px -10px 20px var(--neu-sl);
-}
-
-.neu-model-card.ant-card-hoverable:active {
-  transform: translateY(0) scale(0.99);
   box-shadow: var(--raised-sm);
 }
 
-.neu-model-card .ant-card-cover {
+.neu-card.ant-card-hoverable:hover,
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover,
+.neu-image-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover {
+  transform: scale(1.01);
+  box-shadow: var(--raised-lg);
+}
+
+.neu-card.ant-card-hoverable:active,
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active,
+.neu-image-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active {
+  transform: scale(0.99);
+  box-shadow: var(--raised-xs);
+}
+
+.neu-card .ant-card-cover {
   padding-bottom: 10px;
 }
 
+/* Cover pad % = relative to card width (≈4px @ 168px, scales with tile size) */
 .neu-card-cover {
-  padding: 10px 10px 8px;
+  --neu-card-cover-pad-x: 2.5%;
+  --neu-card-cover-pad-y: 2.5%;
+  --neu-card-cover-pad-bottom: 2%;
+  padding: var(--neu-card-cover-pad-y) var(--neu-card-cover-pad-x)
+    var(--neu-card-cover-pad-bottom);
 }
 
 .neu-card-image-well,
@@ -505,14 +515,14 @@ a:hover {
   z-index: 2;
   border-radius: inherit;
   pointer-events: none;
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
   background: transparent;
 }
 
 .neu-image-groove-well .neu-card-image-frame--fill {
   position: absolute;
   inset: var(--neu-card-well-inset);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
 }
 
 .neu-image-groove-well .neu-card-image-frame img {
@@ -753,9 +763,11 @@ a:hover {
 .ant-input-affix-wrapper:focus-within,
 .ant-input-affix-wrapper-focused,
 .ant-input:focus,
-.ant-input-number-focused {
+.ant-input-number:focus-within,
+.ant-input-number-focused,
+.ant-input-number.ant-input-number-focused {
   border: none;
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
   outline: none;
 }
 
@@ -849,7 +861,32 @@ textarea.ant-input {
 }
 
 textarea.ant-input:focus {
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
+}
+
+/* NeuFormControl — disabled: inset (antd default removes shadow) */
+.ant-input[disabled],
+.ant-input-disabled,
+textarea.ant-input[disabled],
+.ant-input-affix-wrapper-disabled,
+.ant-input-affix-wrapper.ant-input-disabled,
+.ant-input-number-disabled,
+.ant-input-number.ant-input-number-disabled,
+.ant-select.ant-select-disabled:not(.ant-select-customize-input)
+  .ant-select-selector,
+.ant-picker.ant-picker-disabled {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  box-shadow: var(--inset) !important;
+  color: var(--neu-text-2);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.ant-input-number-disabled .ant-input-number-input,
+.ant-input-number.ant-input-number-disabled .ant-input-number-input {
+  color: var(--neu-text-2);
+  cursor: not-allowed;
 }
 
 /* ── SELECT ───────────────────────────────────────────────── */
@@ -857,8 +894,22 @@ textarea.ant-input:focus {
   background: var(--neu-bg);
   border: none;
   border-radius: var(--r-md);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--raised-sm);
   color: var(--neu-text);
+  transition: box-shadow 0.3s;
+}
+
+.ant-select.ant-select-focused:not(.ant-select-disabled):not(
+    .ant-select-customize-input
+  )
+  .ant-select-selector,
+.ant-select.ant-select-open:not(.ant-select-disabled):not(
+    .ant-select-customize-input
+  )
+  .ant-select-selector {
+  border: none;
+  box-shadow: var(--inset);
+  outline: none;
 }
 
 .ant-select-arrow {
@@ -890,20 +941,14 @@ textarea.ant-input:focus {
 
 /* ── DATE PICKER ──────────────────────────────────────────── */
 
-/* trigger — inset like Select */
+/* trigger — raised → inset on focus/open (same as Input) */
 .ant-picker {
   background: var(--neu-bg);
   border: none;
   border-radius: var(--r-md);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--raised-sm);
   color: var(--neu-text);
   transition: box-shadow 0.3s;
-}
-
-.ant-picker:hover:not(.ant-picker-disabled):not(.ant-picker-focused):not(
-    .ant-picker-open
-  ) {
-  box-shadow: var(--inset);
 }
 
 .ant-picker-focused,
@@ -1005,8 +1050,12 @@ textarea.ant-input:focus {
 /* nav arrows — beat antd `.ant-picker-header > button { min-width: 1.6em }` */
 .ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn,
 .ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-prev-btn,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-next-btn {
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-prev-btn,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-next-btn {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -1027,10 +1076,22 @@ textarea.ant-input:focus {
   width: 28px;
 }
 
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn > span,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn > span,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-prev-btn > span,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-next-btn > span {
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-prev-btn
+  > span,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-next-btn
+  > span,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-prev-btn
+  > span,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-next-btn
+  > span {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -1069,10 +1130,18 @@ textarea.ant-input:focus {
   transform: translate(calc(-50% - 1px), -50%) rotate(135deg);
 }
 
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn:hover,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn:hover,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-prev-btn:hover,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-next-btn:hover,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-prev-btn:hover,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-next-btn:hover,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-prev-btn:hover,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-next-btn:hover,
 .ant-picker-dropdown .ant-picker-header-view button:hover,
 .ant-picker-dropdown .ant-picker-header-view .ant-picker-month-btn:hover,
 .ant-picker-dropdown .ant-picker-header-view .ant-picker-year-btn:hover {
@@ -1081,10 +1150,18 @@ textarea.ant-input:focus {
   box-shadow: var(--inset);
 }
 
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn:active,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn:active,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-prev-btn:active,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-next-btn:active,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-prev-btn:active,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-next-btn:active,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-prev-btn:active,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-next-btn:active,
 .ant-picker-dropdown .ant-picker-header-view button:active,
 .ant-picker-dropdown .ant-picker-header-view .ant-picker-month-btn:active,
 .ant-picker-dropdown .ant-picker-header-view .ant-picker-year-btn:active {
@@ -1233,6 +1310,35 @@ textarea.ant-input:focus {
 }
 
 /* ── DRAWER ───────────────────────────────────────────────── */
+/* No dimmed backdrop — drawer floats above the page with edge shadow */
+.ant-drawer-mask {
+  background: transparent !important;
+}
+
+.ant-drawer-right > .ant-drawer-content-wrapper {
+  box-shadow:
+    -10px 0 36px rgba(68, 71, 106, 0.16),
+    -4px 0 14px rgba(140, 138, 132, 0.12);
+}
+
+.ant-drawer-left > .ant-drawer-content-wrapper {
+  box-shadow:
+    10px 0 36px rgba(68, 71, 106, 0.16),
+    4px 0 14px rgba(140, 138, 132, 0.12);
+}
+
+.ant-drawer-top > .ant-drawer-content-wrapper {
+  box-shadow:
+    0 10px 36px rgba(68, 71, 106, 0.16),
+    0 4px 14px rgba(140, 138, 132, 0.12);
+}
+
+.ant-drawer-bottom > .ant-drawer-content-wrapper {
+  box-shadow:
+    0 -10px 36px rgba(68, 71, 106, 0.16),
+    0 -4px 14px rgba(140, 138, 132, 0.12);
+}
+
 .ant-drawer-content {
   background: var(--neu-bg);
 }
@@ -1306,12 +1412,81 @@ textarea.ant-input:focus {
   font-size: 12px;
 }
 
-/* ── UPLOAD ───────────────────────────────────────────────── */
-.ant-upload.ant-upload-select-picture-card {
-  background: var(--neu-bg);
-  border: none;
+/* ── UPLOAD (picture-card select — neu-card motion above) ─── */
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select,
+.neu-image-upload .ant-upload.ant-upload-select {
+  background: var(--neu-bg) !important;
+  border: none !important;
   border-radius: var(--r-lg);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--raised-sm);
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover,
+.neu-image-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover,
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active,
+.neu-image-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active {
+  border: none !important;
+}
+
+.neu-image-upload.ant-upload-picture-card-wrapper {
+  display: inline-block;
+  width: 168px;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+.neu-image-upload-body {
+  display: block;
+  width: 100%;
+}
+
+.neu-image-upload .ant-upload.ant-upload-select {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.neu-image-upload .neu-card-cover {
+  position: relative;
+}
+
+.neu-image-upload-loading {
+  position: absolute;
+  inset: var(--neu-card-cover-pad-y) var(--neu-card-cover-pad-x)
+    var(--neu-card-cover-pad-bottom);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--r-card-well);
+  background: rgba(230, 231, 238, 0.72);
+  pointer-events: none;
+  font-size: 36px;
+  color: var(--neu-text-2);
+}
+
+.neu-image-upload-remove {
+  position: absolute;
+  top: calc(var(--neu-card-cover-pad-y) + 0.5%);
+  right: calc(var(--neu-card-cover-pad-x) + 0.5%);
+  z-index: 4;
+  padding: 4px;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
+  border-radius: var(--r-round, 50%);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 /* ── SPIN ─────────────────────────────────────────────────── */
@@ -1369,6 +1544,22 @@ textarea.ant-input:focus {
   transition: none;
 }
 
+/* Beat antd css-injs focus ring (0 0 0 0) — same specificity as outlined variants */
+.ant-select-outlined:not(.ant-select-disabled):not(
+    .ant-select-customize-input
+  ):not(.ant-pagination-size-changer).ant-select-focused.ant-select
+  .ant-select-selector,
+.ant-select-outlined:not(.ant-select-disabled):not(
+    .ant-select-customize-input
+  ):not(.ant-pagination-size-changer).ant-select-open.ant-select
+  .ant-select-selector,
+.ant-input-number-outlined.ant-input-number:focus-within,
+.ant-input-number-outlined.ant-input-number-focused {
+  border: none !important;
+  box-shadow: var(--inset) !important;
+  outline: none !important;
+}
+
 /* ── SCROLLBAR ────────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 8px;
@@ -1378,7 +1569,7 @@ textarea.ant-input:focus {
 ::-webkit-scrollbar-track {
   background: var(--neu-bg);
   border-radius: var(--r-sm);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
 }
 
 ::-webkit-scrollbar-thumb {
@@ -1428,7 +1619,7 @@ textarea.ant-input:focus {
 }
 
 .neu-clickable:active {
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
 }
 
 /* ── CARD ADD BUTTON (image overlay) ─────────────────────── */
@@ -1593,7 +1784,7 @@ textarea.ant-input:focus {
   flex-shrink: 0;
   border-radius: var(--r-round);
   background: var(--neu-bg);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
   transition:
     box-shadow 0.15s ease,
     background 0.15s ease;
@@ -1691,7 +1882,7 @@ textarea.ant-input:focus {
   text-transform: uppercase;
   padding: 2px 8px;
   line-height: 20px;
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
   color: var(--neu-text-2);
 }
 
@@ -1816,7 +2007,7 @@ textarea.ant-input:focus {
 .ant-segmented {
   background: var(--neu-bg);
   border-radius: var(--r-md);
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
   padding: 3px;
   border: none;
 }
@@ -1858,7 +2049,7 @@ textarea.ant-input:focus {
 .ant-checkbox-inner {
   background: var(--neu-bg);
   border: none;
-  box-shadow: var(--inset-sm);
+  box-shadow: var(--inset);
 }
 
 .ant-radio-checked .ant-radio-inner,

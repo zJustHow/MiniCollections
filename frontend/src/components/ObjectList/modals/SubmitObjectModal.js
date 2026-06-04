@@ -1,5 +1,11 @@
+import { App, Form } from "antd";
+import NeuFormDrawer from "../../NeuFormDrawer";
 import {
-  App, DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
+  NeuDatePicker,
+  NeuInput,
+  NeuInputNumber,
+  NeuSelect,
+} from "../../NeuFormControl";
 import { BugOutlined, EditOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { useLocale } from "../../../LocaleContext";
 import { radius } from "../../../theme/radius";
@@ -14,7 +20,7 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSerie
   return (
     <>
       <Form.Item label={t("brand")} name="brandId">
-        <Select
+        <NeuSelect
           showSearch
           optionFilterProp="children"
           placeholder={t("brand")}
@@ -30,32 +36,32 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSerie
           }}
         >
           {(brands || []).map((b) => (
-            <Select.Option key={b.id} value={b.id}>
+            <NeuSelect.Option key={b.id} value={b.id}>
               {b.name}
-            </Select.Option>
+            </NeuSelect.Option>
           ))}
-          <Select.Option key={OTHER_BRAND} value={OTHER_BRAND}>
+          <NeuSelect.Option key={OTHER_BRAND} value={OTHER_BRAND}>
             {t("brandOther")}
-          </Select.Option>
-        </Select>
+          </NeuSelect.Option>
+        </NeuSelect>
       </Form.Item>
 
       {brandValue === OTHER_BRAND && (
         <Form.Item label={t("brandOtherName")} name="customBrandName">
-          <Input />
+          <NeuInput />
         </Form.Item>
       )}
 
       <Form.Item label={t("nameEn")} name="nameEn">
-        <Input />
+        <NeuInput />
       </Form.Item>
 
       <Form.Item label={t("nameZh")} name="nameZh">
-        <Input />
+        <NeuInput />
       </Form.Item>
 
       <Form.Item label={t("scale")} name="scaleId">
-        <Select
+        <NeuSelect
           allowClear
           placeholder={t("scale")}
           options={scaleOptions.map((s) => ({
@@ -66,7 +72,7 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSerie
       </Form.Item>
 
       <Form.Item label={t("category")} name="categoryId">
-        <Select
+        <NeuSelect
           allowClear
           placeholder={t("category")}
           options={categoryOptions.map((c) => ({
@@ -77,11 +83,11 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSerie
       </Form.Item>
 
       <Form.Item label={t("releaseDate")} name="releaseDate">
-        <DatePicker style={{ width: "100%" }} />
+        <NeuDatePicker />
       </Form.Item>
 
       <Form.Item label={t("series")} name="seriesId">
-        <Select
+        <NeuSelect
           allowClear
           placeholder={t("selectSeries")}
           disabled={!brandValue || brandValue === OTHER_BRAND}
@@ -93,15 +99,15 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSerie
       </Form.Item>
 
       <Form.Item label={t("priceCNY")} name="releasePriceCny">
-        <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+        <NeuInputNumber min={0} step={0.01} stringMode />
       </Form.Item>
 
       <Form.Item label={t("priceUSD")} name="releasePriceUsd">
-        <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+        <NeuInputNumber min={0} step={0.01} stringMode />
       </Form.Item>
 
       <Form.Item label={t("additionalNotes")} name="notes">
-        <Input.TextArea rows={3} />
+        <NeuInput.TextArea rows={3} />
       </Form.Item>
       <Form.Item label={t("image")}>
         <ImageUploadField value={imageValue} onChange={onImageChange} onRemove={onImageRemove} />
@@ -119,10 +125,10 @@ function BugReportForm({ imageValue, onImageChange, onImageRemove }) {
         name="nameEn"
         rules={[{ required: true, message: t("bugSubjectRequired") }]}
       >
-        <Input placeholder={t("bugSubjectPlaceholder")} />
+        <NeuInput placeholder={t("bugSubjectPlaceholder")} />
       </Form.Item>
       <Form.Item label={t("bugDescription")} name="notes">
-        <Input.TextArea rows={5} placeholder={t("bugDescriptionPlaceholder")} />
+        <NeuInput.TextArea rows={5} placeholder={t("bugDescriptionPlaceholder")} />
       </Form.Item>
       <Form.Item label={t("image")}>
         <ImageUploadField value={imageValue} onChange={onImageChange} onRemove={onImageRemove} />
@@ -136,7 +142,7 @@ function DataCorrectionForm({ form, brands, brandValue, onBrandChange, imageValu
   return (
     <>
       <Form.Item label={t("brand")} name="brandId">
-        <Select
+        <NeuSelect
           showSearch
           optionFilterProp="children"
           placeholder={t("brand")}
@@ -147,24 +153,24 @@ function DataCorrectionForm({ form, brands, brandValue, onBrandChange, imageValu
           allowClear
         >
           {(brands || []).map((b) => (
-            <Select.Option key={b.id} value={b.id}>
+            <NeuSelect.Option key={b.id} value={b.id}>
               {b.name}
-            </Select.Option>
+            </NeuSelect.Option>
           ))}
-          <Select.Option key={OTHER_BRAND} value={OTHER_BRAND}>
+          <NeuSelect.Option key={OTHER_BRAND} value={OTHER_BRAND}>
             {t("brandOther")}
-          </Select.Option>
-        </Select>
+          </NeuSelect.Option>
+        </NeuSelect>
       </Form.Item>
 
       {brandValue === OTHER_BRAND && (
         <Form.Item label={t("brandOtherName")} name="customBrandName">
-          <Input />
+          <NeuInput />
         </Form.Item>
       )}
 
       <Form.Item label={t("correctionModelName")} name="nameEn">
-        <Input placeholder={t("correctionModelNamePlaceholder")} />
+        <NeuInput placeholder={t("correctionModelNamePlaceholder")} />
       </Form.Item>
 
       <Form.Item
@@ -172,7 +178,7 @@ function DataCorrectionForm({ form, brands, brandValue, onBrandChange, imageValu
         name="notes"
         rules={[{ required: true, message: t("bugSubjectRequired") }]}
       >
-        <Input.TextArea rows={4} placeholder={t("correctionDescriptionPlaceholder")} />
+        <NeuInput.TextArea rows={4} placeholder={t("correctionDescriptionPlaceholder")} />
       </Form.Item>
       <Form.Item label={t("image")}>
         <ImageUploadField value={imageValue} onChange={onImageChange} onRemove={onImageRemove} />
@@ -296,16 +302,16 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
   const imageProps = { imageValue: imageUrl, onImageChange: setImageUrl, onImageRemove: () => setImageUrl(null) };
 
   return (
-    <Modal
+    <NeuFormDrawer
       title={t(MODAL_TITLE_KEY[submissionType])}
       open={visible}
       onOk={handleOk}
-      onCancel={handleCancel}
+      onClose={handleCancel}
       okText={t("submitReport")}
       cancelText={t("cancel")}
       confirmLoading={loading}
       destroyOnClose
-      centered
+      width={560}
     >
       <div
         style={{
@@ -313,7 +319,7 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
           gap: 8,
           borderRadius: radius.card,
           padding: 5,
-          boxShadow: "var(--inset-sm)",
+          boxShadow: "var(--inset)",
           marginBottom: 20,
         }}
       >
@@ -360,6 +366,6 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
           />
         )}
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

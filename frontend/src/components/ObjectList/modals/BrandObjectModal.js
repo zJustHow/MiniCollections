@@ -1,4 +1,11 @@
-import { DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
+import { Form } from "antd";
+import NeuFormDrawer from "../../NeuFormDrawer";
+import {
+  NeuDatePicker,
+  NeuInput,
+  NeuInputNumber,
+  NeuSelect,
+} from "../../NeuFormControl";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
 import { adminCreateBrandObject, adminUpdateBrandObject, getCategories, getScales, getSeriesByBrandId } from "../../../utils";
@@ -105,27 +112,26 @@ export default function BrandObjectModal({
   }, [open, brandObject, form, loadSeries, loadCategories, loadScales, seriesRefreshKey]);
 
   return (
-    <Modal
+    <NeuFormDrawer
       title={isEdit ? t("editBrandObject") : t("addBrandObject")}
       open={open}
       onOk={handleOk}
-      onCancel={onClose}
+      onClose={onClose}
       okText={isEdit ? t("edit") : t("addBrandObject")}
       cancelText={t("cancel")}
       confirmLoading={loading}
       width={600}
-      centered
       destroyOnClose
     >
       <Form layout="vertical" form={form}>
         <Form.Item label={t("nameEn")} name="nameEn" rules={[{ required: true, message: t("nameRequired") }]}>
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("nameZh")} name="nameZh">
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("scale")} name="scaleId">
-          <Select
+          <NeuSelect
             allowClear
             placeholder={t("scale")}
             options={scaleOptions.map((s) => ({
@@ -135,7 +141,7 @@ export default function BrandObjectModal({
           />
         </Form.Item>
         <Form.Item label={t("category")} name="categoryId">
-          <Select
+          <NeuSelect
             allowClear
             placeholder={t("category")}
             options={categoryOptions.map((c) => ({
@@ -145,10 +151,10 @@ export default function BrandObjectModal({
           />
         </Form.Item>
         <Form.Item label={t("releaseDate")} name="releaseDate">
-          <DatePicker style={{ width: "100%" }} />
+          <NeuDatePicker />
         </Form.Item>
         <Form.Item label={t("series")} name="seriesId">
-          <Select
+          <NeuSelect
             allowClear
             placeholder={t("selectSeries")}
             options={seriesOptions.map((s) => ({
@@ -158,18 +164,18 @@ export default function BrandObjectModal({
           />
         </Form.Item>
         <Form.Item label={t("priceCNY")} name="releasePriceCny">
-          <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+          <NeuInputNumber min={0} step={0.01} stringMode />
         </Form.Item>
         <Form.Item label={t("priceUSD")} name="releasePriceUsd">
-          <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode />
+          <NeuInputNumber min={0} step={0.01} stringMode />
         </Form.Item>
         <Form.Item label={t("image")}>
           <ImageUploadField value={imageUrl} onChange={setImageUrl} />
         </Form.Item>
         <Form.Item label={t("imageSource")} name="imageSource">
-          <Input placeholder={t("imageSource")} />
+          <NeuInput placeholder={t("imageSource")} />
         </Form.Item>
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

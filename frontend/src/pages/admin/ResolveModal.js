@@ -1,4 +1,6 @@
-import { App, Form, Input, Modal } from "antd";
+import { App, Form } from "antd";
+import NeuFormDrawer from "../../components/NeuFormDrawer";
+import { NeuInput } from "../../components/NeuFormControl";
 import { useState } from "react";
 import { approveSubmission } from "../../utils";
 import { useLocale } from "../../LocaleContext";
@@ -30,22 +32,22 @@ export default function ResolveModal({ open, submission, onClose, onSuccess }) {
   };
 
   return (
-    <Modal
+    <NeuFormDrawer
       title={t("resolveTitle")}
       open={open}
       onOk={handleOk}
-      onCancel={() => { setAdminNote(""); onClose(); }}
+      onClose={() => { setAdminNote(""); onClose(); }}
       okText={t("resolveSubmission")}
       cancelText={t("cancel")}
       confirmLoading={loading}
-      centered
       destroyOnClose
+      zIndex={1100}
     >
       <Form layout="vertical">
         <Form.Item label={t("adminNote")}>
-          <Input.TextArea rows={3} value={adminNote} onChange={(e) => setAdminNote(e.target.value)} />
+          <NeuInput.TextArea rows={3} value={adminNote} onChange={(e) => setAdminNote(e.target.value)} />
         </Form.Item>
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

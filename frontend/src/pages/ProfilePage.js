@@ -4,12 +4,11 @@ import {
   Button,
   Divider,
   Form,
-  Input,
   Layout,
   Radio,
-  Select,
   Upload,
 } from "antd";
+import { NeuInput, NeuSelect } from "../components/NeuFormControl";
 import {
   ArrowLeftOutlined,
   LoadingOutlined,
@@ -366,7 +365,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 ]}
                 style={{ marginBottom: 12 }}
               >
-                <Input
+                <NeuInput
                   prefix={<UserOutlined />}
                   placeholder={t("displayName")}
                 />
@@ -395,7 +394,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 ]}
                 style={{ marginBottom: 10 }}
               >
-                <Input.Password
+                <NeuInput.Password
                   prefix={<LockOutlined />}
                   placeholder={t("currentPassword")}
                 />
@@ -408,7 +407,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 ]}
                 style={{ marginBottom: 10 }}
               >
-                <Input.Password
+                <NeuInput.Password
                   prefix={<LockOutlined />}
                   placeholder={t("newPassword")}
                 />
@@ -428,7 +427,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 ]}
                 style={{ marginBottom: 12 }}
               >
-                <Input.Password
+                <NeuInput.Password
                   prefix={<LockOutlined />}
                   placeholder={t("confirmPassword")}
                 />
@@ -463,7 +462,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 ]}
                 style={{ marginBottom: 10 }}
               >
-                <Input
+                <NeuInput
                   prefix={<MailOutlined />}
                   placeholder={t("emailAddress")}
                 />
@@ -475,10 +474,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                     noStyle
                     rules={[{ required: true, message: t("codeRequired") }]}
                   >
-                    <Input
-                      style={{ width: "100%" }}
-                      placeholder={t("verificationCode")}
-                    />
+                    <NeuInput placeholder={t("verificationCode")} />
                   </Form.Item>
                   <Button
                     loading={emailCodeLoading}
@@ -522,17 +518,17 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               <Form.Item style={{ marginBottom: 12 }}>
                 <div style={{ display: "flex", gap: 8 }}>
                   <Form.Item name="countryCode" noStyle>
-                    <Select style={{ width: 110 }} optionLabelProp="label">
+                    <NeuSelect fullWidth={false} style={{ width: 110 }} optionLabelProp="label">
                       {COUNTRIES.map((c) => (
-                        <Select.Option
+                        <NeuSelect.Option
                           key={c.code}
                           value={c.code}
                           label={c.code}
                         >
                           {locale === "zh-CN" ? c.zh : c.en} {c.code}
-                        </Select.Option>
+                        </NeuSelect.Option>
                       ))}
-                    </Select>
+                    </NeuSelect>
                   </Form.Item>
                   <div style={{ flex: 1 }}>
                     <Form.Item
@@ -543,10 +539,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                         { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
                       ]}
                     >
-                      <Input
-                        style={{ width: "100%" }}
-                        placeholder={t("phoneNumber")}
-                      />
+                      <NeuInput placeholder={t("phoneNumber")} />
                     </Form.Item>
                   </div>
                 </div>

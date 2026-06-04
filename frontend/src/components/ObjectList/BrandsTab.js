@@ -1,4 +1,5 @@
-import { Card, Grid, Input, Spin } from "antd";
+import { Card, Grid, Spin } from "antd";
+import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
 import AddCardCover from "./AddCardCover";
 import CardCover from "./CardCover";
@@ -6,7 +7,7 @@ import InfiniteSliceFooter from "../InfiniteSliceFooter";
 import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
 import { useLocale } from "../../LocaleContext";
 
-const { Search } = Input;
+const { Search } = NeuInput;
 const { useBreakpoint } = Grid;
 
 export default function BrandsTab({
@@ -56,7 +57,7 @@ export default function BrandsTab({
       <Card
         key="__add__"
         hoverable
-        className="neu-model-card"
+        className="neu-card"
         cover={<AddCardCover label={t("addBrand")} />}
         onClick={onCreateBrand}
         bodyStyle={{ padding: 0 }}
@@ -65,7 +66,7 @@ export default function BrandsTab({
       <Card
         key={brand.id}
         hoverable
-        className="neu-model-card"
+        className="neu-card"
         cover={
           <CardCover
             image_url={brand.image_url}
@@ -83,7 +84,7 @@ export default function BrandsTab({
     <Card
       key={obj.id}
       hoverable
-      className="neu-model-card"
+      className="neu-card"
       cover={<CardCover image_url={obj.image_url} name={obj.name} />}
       onClick={() =>
         navigate(`/brands/${obj.brand_id}/objects/${obj.id}`, {

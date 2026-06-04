@@ -1,18 +1,29 @@
 import { App, Upload } from "antd";
-import { DeleteOutlined, LoadingOutlined, PictureOutlined } from "@ant-design/icons";
+import { DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { uploadImage } from "../utils";
 import { useLocale } from "../LocaleContext";
-import { radius } from "../theme/radius";
+import GroovedImage from "./GroovedImage";
 
-export default function ImageUploadField({ value, onChange, onRemove, uploadFn }) {
+export default function ImageUploadField({
+  value,
+  onChange,
+  onRemove,
+  uploadFn,
+  logoShadow = false,
+}) {
   const { message } = App.useApp();
   const { t } = useLocale();
   const [uploading, setUploading] = useState(false);
 
+  const wellClassName = logoShadow
+    ? "neu-card-image-well neu-card-image-well--logo"
+    : "neu-card-image-well";
+
   return (
     <Upload
       listType="picture-card"
+      rootClassName="neu-image-upload"
       showUploadList={false}
       accept="image/*"
       beforeUpload={async (file) => {
@@ -28,31 +39,30 @@ export default function ImageUploadField({ value, onChange, onRemove, uploadFn }
         return false;
       }}
     >
-      <div style={{ width: 120 }}>
-        {uploading ? (
-          <LoadingOutlined style={{ fontSize: 32, color: "var(--neu-text-2)", marginBottom: 8, display: "block" }} />
-        ) : value ? (
-          <div style={{ position: "relative", marginBottom: 8 }}>
-            <img
-              src={value}
-              alt="preview"
-              style={{ width: "100%", maxHeight: 120, objectFit: "contain", display: "block" }}
+      <div className="neu-image-upload-body">
+        <div className="neu-card-cover">
+          <GroovedImage
+            imageUrl={value}
+            alt=""
+            wellClassName={wellClassName}
+            fixedGroove={logoShadow}
+            placeholderSize={36}
+          />
+          {uploading && (
+            <div className="neu-image-upload-loading" aria-hidden="true">
+              <LoadingOutlined />
+            </div>
+          )}
+          {onRemove && value && !uploading && (
+            <DeleteOutlined
+              className="neu-image-upload-remove"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemove();
+              }}
             />
-            {onRemove && (
-              <DeleteOutlined
-                onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                style={{
-                  position: "absolute", top: 4, right: 4,
-                  background: "rgba(0,0,0,0.45)", color: "#fff",
-                  borderRadius: radius.round, padding: 4, fontSize: 12, cursor: "pointer",
-                }}
-              />
-            )}
-          </div>
-        ) : (
-          <PictureOutlined style={{ fontSize: 32, color: "var(--neu-text-2)", marginBottom: 8, display: "block" }} />
-        )}
-        <div style={{ fontSize: 12 }}>{t("selectImage")}</div>
+          )}
+        </div>
       </div>
     </Upload>
   );

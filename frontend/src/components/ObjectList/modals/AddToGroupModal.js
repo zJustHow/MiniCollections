@@ -1,4 +1,11 @@
-import { DatePicker, Form, Input, InputNumber, Modal, Select } from "antd";
+import { Form } from "antd";
+import NeuFormDrawer from "../../NeuFormDrawer";
+import {
+  NeuDatePicker,
+  NeuInput,
+  NeuInputNumber,
+  NeuSelect,
+} from "../../NeuFormControl";
 import { useLocale } from "../../../LocaleContext";
 import ImageUploadField from "../../ImageUploadField";
 
@@ -14,13 +21,14 @@ export default function AddToGroupModal({ visible,
 }) {
   const { t } = useLocale();
   return (
-    <Modal
+    <NeuFormDrawer
       title={t("addToMyGroup")}
       open={visible}
       onOk={onOk}
       confirmLoading={confirmLoading}
-      onCancel={onCancel}
+      onClose={onCancel}
       destroyOnClose
+      width={520}
     >
       <Form form={form} layout="vertical">
         <Form.Item
@@ -28,34 +36,34 @@ export default function AddToGroupModal({ visible,
           name="name"
           rules={[{ required: true, message: t("nameRequired") }]}
         >
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("image")}>
           <ImageUploadField value={customImageData || selectedBrandObject?.image_url} onChange={onImageChange} />
         </Form.Item>
         <Form.Item label={t("purchasePrice")} name="purchasePrice">
-          <InputNumber style={{ width: "100%" }} min={0} step={0.01} stringMode controls={false} />
+          <NeuInputNumber min={0} step={0.01} stringMode controls={false} />
         </Form.Item>
         <Form.Item label={t("purchaseDate")} name="purchaseDate">
-          <DatePicker style={{ width: "100%" }} />
+          <NeuDatePicker />
         </Form.Item>
         <Form.Item label={t("otherNote")} name="otherNotes">
-          <Input.TextArea rows={3} />
+          <NeuInput.TextArea rows={3} />
         </Form.Item>
         <Form.Item
           label={t("group")}
           name="groupId"
           rules={[{ required: true, message: t("groupRequired") }]}
         >
-          <Select placeholder={t("groupSelectPlaceholder")}>
+          <NeuSelect placeholder={t("groupSelectPlaceholder")}>
             {groups.map((g) => (
-              <Select.Option key={g.id} value={g.id}>
+              <NeuSelect.Option key={g.id} value={g.id}>
                 {g.name}
-              </Select.Option>
+              </NeuSelect.Option>
             ))}
-          </Select>
+          </NeuSelect>
         </Form.Item>
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

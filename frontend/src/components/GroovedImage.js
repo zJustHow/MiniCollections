@@ -37,7 +37,7 @@ export default function GroovedImage({
   );
 
   const renderFrame = () => {
-    if (!imageUrl || !imageDisplayable) return placeholder;
+    if (!imageUrl) return placeholder;
     if (fixedGroove) {
       return (
         <div className="neu-card-image-frame neu-card-image-frame--fill">
@@ -46,11 +46,14 @@ export default function GroovedImage({
             src={imageUrl}
             alt={alt}
             loading="eager"
+            onLoad={onImageLoad}
+            onError={onImageError}
           />
           <div className="neu-card-image-groove" aria-hidden="true" />
         </div>
       );
     }
+    if (!imageDisplayable) return placeholder;
     return (
       <div
         className="neu-card-image-frame"
@@ -84,7 +87,7 @@ export default function GroovedImage({
   return (
     <div ref={wellRef} className={wellClasses}>
       <div className="neu-card-image-slot">
-        {imageUrl && !imageDisplayable && (
+        {imageUrl && !fixedGroove && !imageDisplayable && (
           <img
             className="neu-card-image-preload"
             src={imageUrl}

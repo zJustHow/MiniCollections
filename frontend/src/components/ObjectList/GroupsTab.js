@@ -1,11 +1,12 @@
-import { Card, Grid, Input, Spin } from "antd";
+import { Card, Grid, Spin } from "antd";
+import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
 import AddCardCover from "./AddCardCover";
 import CardCover from "./CardCover";
 import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
 import { useLocale } from "../../LocaleContext";
 
-const { Search } = Input;
+const { Search } = NeuInput;
 const { useBreakpoint } = Grid;
 
 export default function GroupsTab({
@@ -51,7 +52,7 @@ export default function GroupsTab({
       <Card
         key="__add__"
         hoverable
-        className="neu-model-card"
+        className="neu-card"
         cover={<AddCardCover label={t("addGroup")} />}
         onClick={onCreateGroup}
         bodyStyle={{ padding: 0 }}
@@ -60,7 +61,7 @@ export default function GroupsTab({
       <Card
         key={group.id}
         hoverable
-        className="neu-model-card"
+        className="neu-card"
         cover={<CardCover image_url={group.image_url} name={group.name} />}
         onClick={() => onGroupClick(group)}
         bodyStyle={{ padding: 0 }}
@@ -87,7 +88,7 @@ export default function GroupsTab({
     <Card
       key={obj.id}
       hoverable
-      className="neu-model-card"
+      className="neu-card"
       cover={
         <CardCover image_url={obj.imageUrl ?? obj.image_url} name={obj.name} />
       }

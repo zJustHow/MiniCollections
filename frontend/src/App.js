@@ -14,6 +14,7 @@ import GuestBrandsView from "./components/GuestBrandsView";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import AdminPage from "./pages/AdminPage";
+import AdminBrandObjectsPage from "./pages/admin/AdminBrandObjectsPage";
 import FeedbackPage from "./pages/FeedbackPage";
 import ProfilePage from "./pages/ProfilePage";
 import BrandObjectsPage from "./pages/BrandObjectsPage";
@@ -54,7 +55,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
       ? "groups"
       : location.pathname === "/feedback"
         ? "feedback"
-        : location.pathname === "/admin"
+        : location.pathname.startsWith("/admin")
           ? "admin"
           : "brands";
 
@@ -415,6 +416,18 @@ export default function App() {
         <Route
           path="feedback"
           element={authed ? <FeedbackPage /> : <Navigate to="/login" replace />}
+        />
+        <Route
+          path="admin/brands/:brandId"
+          element={
+            !authed ? (
+              <Navigate to="/login" replace />
+            ) : !isAdmin ? (
+              <Navigate to="/" replace />
+            ) : (
+              <AdminBrandObjectsPage />
+            )
+          }
         />
         <Route
           path="admin"

@@ -1,4 +1,6 @@
-import { Form, Input, Modal } from "antd";
+import { Form } from "antd";
+import NeuFormDrawer from "../../NeuFormDrawer";
+import { NeuInput } from "../../NeuFormControl";
 import { useEffect, useState } from "react";
 import { adminCreateBrand, adminUpdateBrand, uploadBrandLogo } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
@@ -50,23 +52,22 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
   }, [open, brand, form]);
 
   return (
-    <Modal
+    <NeuFormDrawer
       title={isEdit ? t("editBrand") : t("addBrand")}
       open={open}
       onOk={handleOk}
-      onCancel={onClose}
+      onClose={onClose}
       okText={isEdit ? t("edit") : t("addBrand")}
       cancelText={t("cancel")}
       confirmLoading={loading}
-      centered
       destroyOnClose
     >
       <Form layout="vertical" form={form}>
         <Form.Item label={t("nameEn")} name="nameEn" rules={[{ required: true, message: t("nameRequired") }]}>
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("nameZh")} name="nameZh">
-          <Input />
+          <NeuInput />
         </Form.Item>
         <Form.Item label={t("image")}>
           <BrandLogoUploadField
@@ -77,6 +78,6 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
           />
         </Form.Item>
       </Form>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

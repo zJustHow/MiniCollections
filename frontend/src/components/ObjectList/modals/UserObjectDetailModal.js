@@ -1,5 +1,6 @@
-import { Button, Modal, Spin, Tooltip } from "antd";
+import { Button, Spin } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import NeuFormDrawer from "../../NeuFormDrawer";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
 import { radius } from "../../../theme/radius";
@@ -24,30 +25,19 @@ export default function UserObjectDetailModal({
   const otherNotes = userObject.otherNotes ?? userObject.other_notes ?? "—";
 
   return (
-    <Modal
+    <NeuFormDrawer
       zIndex={Z_INDEX.MODAL_USER_OBJECT_DETAIL}
-      title={
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 16,
-            width: "100%",
-            paddingRight: 48,
-          }}
-        >
-          <span>{name}</span>
-          <div style={{ display: "flex", gap: 8 }}>
-            <Button size="small" icon={<EditOutlined />} onClick={onEdit} />
-            <Button size="small" danger icon={<DeleteOutlined />} onClick={onDelete} />
-          </div>
-        </div>
-      }
+      title={name}
       open={visible}
-      onCancel={onCancel}
+      onClose={onCancel}
       footer={null}
       width={600}
+      extra={
+        <div style={{ display: "flex", gap: 8 }}>
+          <Button size="small" icon={<EditOutlined />} onClick={onEdit} />
+          <Button size="small" danger icon={<DeleteOutlined />} onClick={onDelete} />
+        </div>
+      }
     >
       <img
         src={image_url}
@@ -116,6 +106,6 @@ export default function UserObjectDetailModal({
           )}
         </Spin>
       </div>
-    </Modal>
+    </NeuFormDrawer>
   );
 }

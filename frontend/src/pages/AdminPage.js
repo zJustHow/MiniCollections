@@ -7,6 +7,7 @@ import {
   UnorderedListOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { getAdminSubmissions, getBrands } from "../utils";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
@@ -20,9 +21,12 @@ import BrandsPanel from "./admin/BrandsPanel";
 export default function AdminPage() {
   const { message } = App.useApp();
   const { t } = useLocale();
+  const location = useLocation();
   const getTypeLabel = useTypeLabel(t);
   const getStatusLabel = useStatusLabel(t);
-  const [activeView, setActiveView] = useState("submissions");
+  const [activeView, setActiveView] = useState(
+    () => (location.state?.adminView === "brands" ? "brands" : "submissions")
+  );
   const [activeStatus, setActiveStatus] = useState("PENDING");
 
   const [submissions, setSubmissions] = useState([]);
@@ -59,6 +63,12 @@ export default function AdminPage() {
     fetchSubmissions(activeStatus);
     fetchBrands();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (location.state?.adminView === "brands") {
+      setActiveView("brands");
+    }
+  }, [location.state?.adminView]);
 
   const handleTabChange = (key) => {
     setActiveStatus(key);
@@ -117,7 +127,7 @@ export default function AdminPage() {
             gap: 8,
             borderRadius: radius.card,
             padding: 5,
-            boxShadow: "var(--inset-sm)",
+            boxShadow: "var(--inset)",
             width: 160,
             flexShrink: 0,
           }}
