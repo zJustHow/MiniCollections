@@ -566,7 +566,7 @@ a:hover {
   box-shadow: var(--inset);
 }
 
-/* Shared interactive controls */
+/* Shared interactive controls — unlayered so they beat @layer antd (StyleProvider) */
 .ant-btn,
 .ant-input-group-addon .ant-btn,
 .ant-input-search-button,
@@ -578,7 +578,7 @@ a:hover {
 .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
 .ant-pagination .ant-pagination-next .ant-pagination-item-link {
   position: relative;
-  transition: var(--neu-btn-transition) !important;
+  transition: var(--neu-btn-transition);
 }
 
 .ant-btn {
@@ -599,10 +599,14 @@ a:hover {
   border-radius: var(--r-md);
 }
 
-/* Hover: inset shadow */
-.ant-btn:hover:not([disabled]):not(:active) {
+/* Default buttons — accent text on hover; border stays invisible */
+.ant-btn-default:hover:not([disabled]):not(:active) {
   color: var(--neu-accent);
-  box-shadow: var(--inset) !important;
+  border-color: var(--neu-bg);
+}
+
+.ant-btn:hover:not([disabled]):not(:active) {
+  box-shadow: var(--inset);
 }
 
 .ant-btn:active:not([disabled]),
@@ -610,19 +614,27 @@ a:hover {
 .ant-btn.btn-counting-down:hover,
 .ant-btn.btn-counting-down:focus,
 .ant-btn.btn-counting-down:focus-visible {
-  color: var(--neu-text-2) !important;
-  box-shadow: var(--inset) !important;
+  box-shadow: var(--inset);
+}
+
+.ant-btn-default:active:not([disabled]),
+.ant-btn.btn-counting-down,
+.ant-btn.btn-counting-down:hover,
+.ant-btn.btn-counting-down:focus,
+.ant-btn.btn-counting-down:focus-visible {
+  color: var(--neu-text-2);
+  border-color: var(--neu-bg);
 }
 
 .ant-btn:focus:not(:active),
 .ant-btn:focus-visible:not(:active) {
-  outline: none !important;
-  box-shadow: var(--inset) !important;
+  outline: none;
+  box-shadow: var(--inset);
 }
 
 .ant-btn:focus,
 .ant-btn:focus-visible {
-  outline: none !important;
+  outline: none;
 }
 
 .ant-btn.ant-btn-default {
@@ -640,7 +652,7 @@ a:hover {
   background: var(--neu-accent-light);
   color: #fff;
   border-color: var(--neu-accent-light);
-  box-shadow: var(--inset-accent) !important;
+  box-shadow: var(--inset-accent);
 }
 
 .ant-btn-primary:active:not([disabled]),
@@ -649,7 +661,7 @@ a:hover {
   background: var(--neu-accent-dark);
   color: rgba(255, 255, 255, 0.95);
   border-color: var(--neu-accent-dark);
-  box-shadow: var(--inset-accent) !important;
+  box-shadow: var(--inset-accent);
 }
 
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous {
@@ -665,7 +677,7 @@ a:hover {
   background: var(--neu-danger-light);
   color: #fff;
   border-color: var(--neu-danger-light);
-  box-shadow: var(--inset-danger) !important;
+  box-shadow: var(--inset-danger);
 }
 
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not([disabled]),
@@ -674,13 +686,13 @@ a:hover {
   background: var(--neu-danger-dark);
   color: rgba(255, 255, 255, 0.95);
   border-color: var(--neu-danger-dark);
-  box-shadow: var(--inset-danger) !important;
+  box-shadow: var(--inset-danger);
 }
 
 .ant-btn[disabled],
 .ant-btn-disabled {
-  transform: none !important;
-  box-shadow: var(--raised-sm) !important;
+  transform: none;
+  box-shadow: var(--raised-sm);
   opacity: 0.55;
   cursor: not-allowed;
 }
@@ -688,10 +700,10 @@ a:hover {
 /* Link buttons — no neumorphic shadow / lift */
 .ant-btn-link,
 .ant-btn-text {
-  box-shadow: none !important;
-  background: transparent !important;
-  border-color: transparent !important;
-  transform: none !important;
+  box-shadow: none;
+  background: transparent;
+  border-color: transparent;
+  transform: none;
 }
 
 .ant-btn-link:hover:not([disabled]),
@@ -700,8 +712,8 @@ a:hover {
 .ant-btn-text:hover:not([disabled]),
 .ant-btn-text:active:not([disabled]),
 .ant-btn-text:focus {
-  box-shadow: none !important;
-  transform: none !important;
+  box-shadow: none;
+  transform: none;
   color: var(--neu-accent);
 }
 
@@ -722,8 +734,7 @@ a:hover {
 }
 
 .ant-input-affix-wrapper,
-.ant-input-number,
-.ant-picker {
+.ant-input-number {
   background: var(--neu-bg);
   border: none;
   border-radius: var(--r-md);
@@ -742,11 +753,10 @@ a:hover {
 .ant-input-affix-wrapper:focus-within,
 .ant-input-affix-wrapper-focused,
 .ant-input:focus,
-.ant-input-number-focused,
-.ant-picker-focused {
-  border: none !important;
-  box-shadow: var(--inset-sm) !important;
-  outline: none !important;
+.ant-input-number-focused {
+  border: none;
+  box-shadow: var(--inset-sm);
+  outline: none;
 }
 
 .ant-input-prefix,
@@ -782,6 +792,26 @@ a:hover {
   box-shadow: var(--raised-sm);
 }
 
+.ant-input-group-addon .ant-btn:hover:not([disabled]):not(:active),
+.ant-input-search-button:hover:not([disabled]):not(:active),
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:hover:not([disabled]):not(:active) {
+  color: var(--neu-accent);
+  box-shadow: var(--inset);
+}
+
+.ant-input-group-addon .ant-btn:active:not([disabled]),
+.ant-input-search-button:active:not([disabled]),
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:active:not([disabled]) {
+  color: var(--neu-text-2);
+  box-shadow: var(--inset);
+}
+
 .ant-input-group-addon .ant-btn:focus,
 .ant-input-group-addon .ant-btn:focus-visible,
 .ant-input-search-button:focus,
@@ -794,8 +824,8 @@ a:hover {
   > .ant-input-group
   > .ant-input-group-addon:last-child
   .ant-input-search-button:focus-visible {
-  outline: none !important;
-  border-color: transparent !important;
+  outline: none;
+  border-color: transparent;
 }
 
 .ant-input-group-addon .ant-btn:focus:not(:active),
@@ -810,7 +840,7 @@ a:hover {
   > .ant-input-group
   > .ant-input-group-addon:last-child
   .ant-input-search-button:focus-visible:not(:active) {
-  box-shadow: var(--inset) !important;
+  box-shadow: var(--inset);
 }
 
 /* textarea */
@@ -859,19 +889,347 @@ textarea.ant-input:focus {
 }
 
 /* ── DATE PICKER ──────────────────────────────────────────── */
+
+/* trigger — inset like Select */
+.ant-picker {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: var(--r-md);
+  box-shadow: var(--inset-sm);
+  color: var(--neu-text);
+  transition: box-shadow 0.3s;
+}
+
+.ant-picker:hover:not(.ant-picker-disabled):not(.ant-picker-focused):not(
+    .ant-picker-open
+  ) {
+  box-shadow: var(--inset);
+}
+
+.ant-picker-focused,
+.ant-picker-open {
+  border: none;
+  box-shadow: var(--inset);
+  outline: none;
+}
+
 .ant-picker-input > input {
   color: var(--neu-text);
 }
 
-.ant-picker-suffix {
+.ant-picker-input > input::placeholder {
   color: var(--neu-text-2);
 }
 
-.ant-picker-panel-container {
+.ant-picker-suffix,
+.ant-picker-separator {
+  color: var(--neu-text-2);
+}
+
+.ant-picker-clear {
+  color: var(--neu-text-2);
+  background: transparent;
+  transition: color 0.15s ease;
+}
+
+.ant-picker-clear:hover {
+  color: var(--neu-accent);
+}
+
+.ant-picker-active-bar {
+  display: none;
+}
+
+/* dropdown panel — flat floating shell (inset only on trigger) */
+.ant-picker-dropdown .ant-picker-panel-container {
   background: var(--neu-bg);
-  border-radius: var(--r-lg);
-  box-shadow: 0 6px 24px rgba(140, 138, 132, 0.25);
   border: none;
+  border-radius: var(--r-lg);
+  box-shadow: var(--inset);
+  padding: 8px;
+}
+
+.ant-picker-panel {
+  background: transparent;
+  border: none;
+}
+
+.ant-picker-panel-layout {
+  background: transparent;
+}
+
+/* header */
+.ant-picker-dropdown .ant-picker-header {
+  border-bottom: none;
+  color: var(--neu-text);
+  padding: 0 12px 8px;
+}
+
+.ant-picker-dropdown .ant-picker-header-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  font-weight: 700;
+  color: var(--neu-dark);
+}
+
+/* top bar tab motion — month/year buttons */
+.ant-picker-dropdown .ant-picker-header-view button,
+.ant-picker-dropdown .ant-picker-header-view .ant-picker-month-btn,
+.ant-picker-dropdown .ant-picker-header-view .ant-picker-year-btn {
+  background: transparent;
+  border: none;
+  border-radius: var(--r-md);
+  box-shadow: none;
+  color: var(--neu-dark);
+  cursor: pointer;
+  transition: var(--neu-btn-transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: unset;
+  height: auto;
+  line-height: 1.4;
+  padding: 6px 6px;
+  margin: 0;
+  font-weight: 700;
+}
+
+/* antd adds margin-inline-start on the second month/year button */
+.ant-picker-dropdown .ant-picker-header-view > button:not(:first-child) {
+  margin-inline-start: 0;
+}
+
+/* nav arrows — beat antd `.ant-picker-header > button { min-width: 1.6em }` */
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-prev-btn,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-next-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: var(--r-md);
+  background: transparent;
+  box-shadow: none;
+  color: var(--neu-text-2);
+  cursor: pointer;
+  vertical-align: top;
+  transition: var(--neu-btn-transition);
+  flex: none;
+  width: 28px;
+}
+
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn > span,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn > span,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-prev-btn > span,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-next-btn > span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-prev-btn
+  .ant-picker-prev-icon {
+  transform: translate(calc(-50% + 1px), -50%) rotate(-45deg);
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-next-btn
+  .ant-picker-next-icon {
+  transform: translate(calc(-50% - 1px), -50%) rotate(135deg);
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-prev-btn
+  .ant-picker-super-prev-icon {
+  width: 11px;
+  height: 11px;
+  transform: translate(calc(-50% + 1px), -50%) rotate(-45deg);
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-next-btn
+  .ant-picker-super-next-icon {
+  width: 11px;
+  height: 11px;
+  transform: translate(calc(-50% - 1px), -50%) rotate(135deg);
+}
+
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn:hover,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn:hover,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-prev-btn:hover,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-next-btn:hover,
+.ant-picker-dropdown .ant-picker-header-view button:hover,
+.ant-picker-dropdown .ant-picker-header-view .ant-picker-month-btn:hover,
+.ant-picker-dropdown .ant-picker-header-view .ant-picker-year-btn:hover {
+  color: var(--neu-dark);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn:active,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn:active,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-prev-btn:active,
+.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-super-next-btn:active,
+.ant-picker-dropdown .ant-picker-header-view button:active,
+.ant-picker-dropdown .ant-picker-header-view .ant-picker-month-btn:active,
+.ant-picker-dropdown .ant-picker-header-view .ant-picker-year-btn:active {
+  color: var(--neu-dark);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+/* calendar grid */
+.ant-picker-content th {
+  color: var(--neu-text-2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.ant-picker-cell {
+  color: var(--neu-text-2);
+}
+
+.ant-picker-cell-in-view {
+  color: var(--neu-text);
+}
+
+.ant-picker-cell-inner {
+  border-radius: var(--r-md);
+  transition: var(--neu-btn-transition);
+}
+
+.ant-picker-cell-in-view.ant-picker-cell:not(.ant-picker-cell-selected):not(
+    .ant-picker-cell-disabled
+  ):hover
+  .ant-picker-cell-inner {
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+.ant-picker-cell-selected .ant-picker-cell-inner,
+.ant-picker-cell-range-start .ant-picker-cell-inner,
+.ant-picker-cell-range-end .ant-picker-cell-inner {
+  background: var(--neu-accent);
+  color: #fff;
+  box-shadow: var(--inset-accent);
+}
+
+.ant-picker-cell-in-range::before {
+  background: rgba(85, 146, 204, 0.12);
+}
+
+.ant-picker-cell-range-hover-start .ant-picker-cell-inner,
+.ant-picker-cell-range-hover-end .ant-picker-cell-inner,
+.ant-picker-cell-range-hover .ant-picker-cell-inner {
+  background: rgba(85, 146, 204, 0.1);
+}
+
+.ant-picker-cell-today .ant-picker-cell-inner::before {
+  border-color: var(--neu-accent);
+  border-radius: var(--r-md);
+}
+
+.ant-picker-cell-disabled {
+  opacity: 0.45;
+}
+
+.ant-picker-cell-disabled .ant-picker-cell-inner {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* month / year / decade panels */
+.ant-picker-month-panel .ant-picker-cell-inner,
+.ant-picker-year-panel .ant-picker-cell-inner,
+.ant-picker-decade-panel .ant-picker-cell-inner {
+  border-radius: var(--r-md);
+}
+
+/* time panel */
+.ant-picker-time-panel-column {
+  scrollbar-width: thin;
+  scrollbar-color: #93a5be var(--neu-bg);
+}
+
+.ant-picker-time-panel-column > li .ant-picker-time-panel-cell-inner {
+  border-radius: var(--r-md);
+  transition: var(--neu-btn-transition);
+}
+
+.ant-picker-time-panel-column
+  > li.ant-picker-time-panel-cell-selected
+  .ant-picker-time-panel-cell-inner {
+  background: var(--neu-accent);
+  color: #fff;
+  box-shadow: var(--inset-accent);
+}
+
+.ant-picker-time-panel-column > li .ant-picker-time-panel-cell-inner:hover {
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+/* footer */
+.ant-picker-footer {
+  border-top: none;
+  padding-top: 8px;
+}
+
+.ant-picker-dropdown .ant-picker-footer .ant-picker-today-btn,
+.ant-picker-dropdown .ant-picker-footer .ant-picker-now-btn {
+  color: var(--neu-accent);
+  font-weight: 600;
+  padding: 6px 12px;
+  border: none;
+  border-radius: var(--r-md);
+  background: transparent;
+  cursor: pointer;
+  transition: var(--neu-btn-transition);
+}
+
+.ant-picker-dropdown .ant-picker-footer .ant-picker-today-btn:hover,
+.ant-picker-dropdown .ant-picker-footer .ant-picker-now-btn:hover {
+  color: var(--neu-accent-light);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+.ant-picker-dropdown .ant-picker-footer .ant-picker-today-btn:active,
+.ant-picker-dropdown .ant-picker-footer .ant-picker-now-btn:active {
+  color: var(--neu-accent-light);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+.ant-picker-ranges .ant-picker-preset > .ant-tag {
+  background: transparent;
+  border: none;
+  border-radius: var(--r-md);
+  box-shadow: none;
+  color: var(--neu-text);
+  transition: var(--neu-btn-transition);
+}
+
+.ant-picker-ranges .ant-picker-preset > .ant-tag:hover {
+  color: var(--neu-dark);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
 }
 
 /* ── DRAWER ───────────────────────────────────────────────── */
@@ -1048,6 +1406,7 @@ textarea.ant-input:focus {
 
 .neu-fab:active {
   background: var(--neu-accent-dark);
+  color: #fff;
   box-shadow: var(--inset-accent);
 }
 
@@ -1087,6 +1446,7 @@ textarea.ant-input:focus {
 
 .neu-add-btn:active {
   background: var(--neu-accent-dark);
+  color: #fff;
   box-shadow: var(--inset-accent);
 }
 
@@ -1510,7 +1870,7 @@ textarea.ant-input:focus {
 
 .ant-radio-button-wrapper {
   background: var(--neu-bg);
-  border: none !important;
+  border: none;
   color: var(--neu-text-2);
   font-weight: 600;
   box-shadow: var(--raised-sm);
