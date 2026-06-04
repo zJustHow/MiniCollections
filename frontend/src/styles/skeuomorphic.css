@@ -356,6 +356,7 @@ a:hover {
 }
 
 .neu-card.ant-card-hoverable:hover,
+.neu-related-model-btn:hover,
 .ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover,
 .neu-image-upload
@@ -365,6 +366,7 @@ a:hover {
 }
 
 .neu-card.ant-card-hoverable:active,
+.neu-related-model-btn:active,
 .ant-upload-wrapper.ant-upload-picture-card-wrapper
   .ant-upload.ant-upload-select:not(.ant-upload-disabled):active,
 .neu-image-upload
@@ -428,6 +430,32 @@ a:hover {
   width: 100%;
 }
 
+.neu-panel {
+  border-radius: var(--r-card);
+  box-shadow: var(--raised-sm);
+  background: var(--neu-bg);
+  padding: 14px 16px;
+}
+
+.neu-panel-label {
+  font-size: 13px;
+  color: var(--neu-text-2);
+  margin: 0 0 8px;
+}
+
+.neu-panel-body {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--neu-text);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.neu-panel-section {
+  margin-top: 16px;
+}
+
 .neu-related-model-btn {
   display: flex;
   align-items: center;
@@ -437,24 +465,12 @@ a:hover {
   border: none;
   border-radius: var(--r-md);
   background: var(--neu-bg);
-  box-shadow: var(--raised-lg);
+  box-shadow: var(--raised-sm);
   cursor: pointer;
   text-align: left;
   transition:
     box-shadow 0.2s ease,
     transform 0.2s ease;
-}
-
-.neu-related-model-btn:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow:
-    10px 10px 20px var(--neu-sd),
-    -10px -10px 20px var(--neu-sl);
-}
-
-.neu-related-model-btn:active {
-  transform: translateY(0) scale(0.99);
-  box-shadow: var(--raised-sm);
 }
 
 .neu-related-model-btn-text {
@@ -1668,10 +1684,6 @@ textarea.ant-input[disabled],
 
 /* ── SEARCH FILTER PANEL (matches model card width in 4-col grid) ── */
 .neu-filter-panel {
-  background: var(--neu-bg);
-  border: none;
-  border-radius: var(--r-card);
-  box-shadow: var(--raised-lg);
   padding: 18px 14px;
   width: 100%;
   min-width: 0;

@@ -49,7 +49,7 @@ export default function ObjectSearchFilterPanel({
   if (!facets) {
     if (!loading) return null;
     return (
-      <aside className="neu-filter-panel">
+      <aside className="neu-panel neu-filter-panel">
         <Spin spinning>
           <div className="neu-filter-panel-title">{t("searchFilters")}</div>
         </Spin>
@@ -63,7 +63,7 @@ export default function ObjectSearchFilterPanel({
   if (!hasCategories && !hasBrands && !hasScales) return null;
 
   return (
-    <aside className="neu-filter-panel">
+    <aside className="neu-panel neu-filter-panel">
       <Spin spinning={loading}>
         <div className="neu-filter-panel-title">{t("searchFilters")}</div>
 

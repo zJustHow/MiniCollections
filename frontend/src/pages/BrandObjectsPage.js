@@ -108,8 +108,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     ((searchFacets.categories?.length ?? 0) > 0 ||
       (searchFacets.scales?.length ?? 0) > 0);
 
-  const showFilterColumn =
-    showObjectFilters || (searchActive && facetsLoading);
+  const showFilterColumn = showObjectFilters || (searchActive && facetsLoading);
 
   const showSearchObjectsSection =
     searchActive &&
@@ -189,7 +188,10 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         }}
       >
         <div>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/")} />
+          <Button
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate({ pathname: "/", search: location.search })}
+          />
         </div>
         <span
           style={{
@@ -324,7 +326,10 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                       hoverable
                       className="neu-card"
                       cover={
-                        <CardCover image_url={item.image_url} name={item.name} />
+                        <CardCover
+                          image_url={item.image_url}
+                          name={item.name}
+                        />
                       }
                       onClick={() =>
                         navigate(`/brands/${brandId}/objects/${item.id}`, {

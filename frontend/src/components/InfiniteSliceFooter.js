@@ -38,14 +38,20 @@ export default function InfiniteSliceFooter({
   const countLabel =
     totalElements != null && !(totalElements === 0 && itemCount > 0)
       ? totalExact
-        ? t("showingCountOfTotal").replace("{shown}", itemCount).replace("{total}", totalElements)
-        : t("showingCountOfTotalPlus").replace("{shown}", itemCount).replace("{total}", totalElements)
+        ? t("showingCountOfTotal")
+            .replace("{shown}", itemCount)
+            .replace("{total}", totalElements)
+        : t("showingCountOfTotalPlus")
+            .replace("{shown}", itemCount)
+            .replace("{total}", totalElements)
       : t("showingCount").replace("{shown}", itemCount);
 
   return (
     <div style={{ marginTop: 24, textAlign: "center" }}>
       {itemCount > 0 && (
-        <div style={{ marginBottom: 12, color: "var(--neu-text-2)", fontSize: 13 }}>
+        <div
+          style={{ marginBottom: 12, color: "var(--neu-text-2)", fontSize: 13 }}
+        >
           {countLabel}
         </div>
       )}
@@ -57,7 +63,9 @@ export default function InfiniteSliceFooter({
           <div ref={sentinelRef} style={{ height: 1 }} />
         </>
       ) : itemCount > 0 ? (
-        <div style={{ color: "var(--neu-text-2)", fontSize: 13 }}>{t("allLoaded")}</div>
+        <div style={{ color: "var(--neu-text-2)", fontSize: 13 }}>
+          {t("allLoaded")}
+        </div>
       ) : null}
       {loadingMore && (
         <div style={{ marginTop: 12 }}>

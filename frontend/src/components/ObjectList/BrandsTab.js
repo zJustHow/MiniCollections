@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Card, Grid, Spin } from "antd";
 import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
@@ -37,6 +38,11 @@ export default function BrandsTab({
   const { t } = useLocale();
   const navigate = useNavigate();
   const screens = useBreakpoint();
+  const [draftQuery, setDraftQuery] = useState(searchValue ?? "");
+
+  useEffect(() => {
+    setDraftQuery(searchValue ?? "");
+  }, [searchValue]);
   const browseCols = screens.lg ? 4 : screens.md ? 3 : 2;
 
   const browseGridStyle = {
@@ -124,10 +130,12 @@ export default function BrandsTab({
         <Search
           placeholder={t("searchBrandsAndObjects")}
           allowClear
-          defaultValue={searchValue}
+          value={draftQuery}
           onSearch={onSearch}
           onChange={(e) => {
-            if (e.target.value === "") onSearch("");
+            const v = e.target.value;
+            setDraftQuery(v);
+            if (v === "") onSearch("");
           }}
           style={{ width: screens.md ? 260 : "100%" }}
         />

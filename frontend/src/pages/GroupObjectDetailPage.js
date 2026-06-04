@@ -4,6 +4,7 @@ import { App, Button, Form, Grid, Spin } from "antd";
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import DetailImage from "../components/DetailImage";
+import { DetailPanel, PanelText } from "../components/DetailPanel";
 import RelatedModelCard from "../components/RelatedModelCard";
 import EditUserObjectModal from "../components/ObjectList/modals/EditUserObjectModal";
 import { useLocale } from "../LocaleContext";
@@ -226,12 +227,18 @@ export default function GroupObjectDetailPage() {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <DetailRow label={t("purchasePrice")} value={purchasePrice} />
-          <DetailRow label={t("purchaseDate")} value={purchaseDate} />
-          <DetailRow label={t("notes")} value={otherNotes} />
+          <DetailPanel>
+            <DetailRow label={t("purchasePrice")} value={purchasePrice} />
+            <DetailRow label={t("purchaseDate")} value={purchaseDate} />
+            <PanelText
+              label={t("notes")}
+              text={otherNotes}
+              className="neu-panel-section"
+            />
+          </DetailPanel>
 
-          <div style={{ marginTop: 16 }}>
-            <div style={{ color: "var(--neu-text-2)", fontSize: 13, marginBottom: 8 }}>{t("brandModelLabel")}</div>
+          <div style={{ marginTop: 24 }}>
+            <div className="neu-panel-label">{t("brandModelLabel")}</div>
             <Spin spinning={loadingBrandDetail}>
               {brandObjectDetail ? (
                 <RelatedModelCard
@@ -246,7 +253,7 @@ export default function GroupObjectDetailPage() {
                 />
               ) : (
                 !loadingBrandDetail && (
-                  <div style={{ color: "var(--neu-text-2)", fontSize: 13 }}>{t("noRelatedBrandModel")}</div>
+                  <div className="neu-panel-body">{t("noRelatedBrandModel")}</div>
                 )
               )}
             </Spin>

@@ -85,6 +85,9 @@ export default function useBrandsState() {
       setSearchActive(true);
     } else {
       syncedKeywordRef.current = "";
+      setSearchKeyword("");
+      setSearchActive(false);
+      setSearchFacets(null);
     }
   }, [location.pathname, searchValue, clearObjectFilters]);
 
@@ -119,7 +122,10 @@ export default function useBrandsState() {
   }, [searchKeyword, searchActive, clearObjectFilters]);
 
   const handleBrandClick = (brand) => {
-    navigate(`/brands/${brand.id}`, { state: { brand } });
+    navigate(
+      { pathname: `/brands/${brand.id}`, search: location.search },
+      { state: { brand } },
+    );
   };
 
   const handleBrandSearch = useCallback(

@@ -65,7 +65,8 @@ export default function useInfiniteSlice(fetchSlice, options = {}) {
   }, [fetchSlice, pageSize, getArgs, applySlice]);
 
   const loadMore = useCallback(async () => {
-    if (inFlightRef.current || !hasMoreRef.current || !nextCursorRef.current) return;
+    if (inFlightRef.current || !hasMoreRef.current || !nextCursorRef.current)
+      return;
     inFlightRef.current = true;
     setLoadingMore(true);
     try {

@@ -8,6 +8,7 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import DetailImage from "../components/DetailImage";
+import { DetailPanel, PanelText } from "../components/DetailPanel";
 import AddToGroupModal from "../components/ObjectList/modals/AddToGroupModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
 import { useLocale } from "../LocaleContext";
@@ -171,6 +172,12 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
     setAddToGroupVisible(true);
   };
 
+  const description =
+    brandObject?.description ??
+    brandObject?.description_en ??
+    brandObject?.description_zh ??
+    null;
+
   const handleCreateUserObject = async () => {
     try {
       const values = await addToGroupForm.validateFields();
@@ -223,22 +230,29 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <DetailRow label={t("brand")} value={brandObject?.brand} />
-          <DetailRow label={t("series")} value={brandObject?.series} />
-          <DetailRow label={t("category")} value={brandObject?.category} />
-          <DetailRow label={t("scale")} value={brandObject?.scale} />
-          <DetailRow
-            label={t("releasePrice")}
-            value={formatReleasePrice(brandObject)}
-          />
-          <DetailRow
-            label={t("releaseDate")}
-            value={brandObject?.release_date ?? brandObject?.releaseDate}
-          />
-          <DetailRow
-            label={t("imageSource")}
-            value={brandObject?.image_source ?? brandObject?.imageSource}
-          />
+          <DetailPanel>
+            <DetailRow label={t("brand")} value={brandObject?.brand} />
+            <DetailRow label={t("series")} value={brandObject?.series} />
+            <DetailRow label={t("category")} value={brandObject?.category} />
+            <DetailRow label={t("scale")} value={brandObject?.scale} />
+            <DetailRow
+              label={t("releasePrice")}
+              value={formatReleasePrice(brandObject)}
+            />
+            <DetailRow
+              label={t("releaseDate")}
+              value={brandObject?.release_date ?? brandObject?.releaseDate}
+            />
+            <DetailRow
+              label={t("imageSource")}
+              value={brandObject?.image_source ?? brandObject?.imageSource}
+            />
+            <PanelText
+              label={t("description")}
+              text={description}
+              className="neu-panel-section"
+            />
+          </DetailPanel>
           <div style={{ marginTop: 24 }}>
             <Button
               type="primary"
