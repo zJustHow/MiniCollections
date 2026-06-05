@@ -5,8 +5,8 @@ import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
 import com.zjusthow.minicollections.model.BrandObjectBody;
 import com.zjusthow.minicollections.model.BrandObjectSearchFacetsDto;
+import com.zjusthow.minicollections.model.PageResponse;
 import com.zjusthow.minicollections.model.SeriesDto;
-import com.zjusthow.minicollections.model.SliceResponse;
 import com.zjusthow.minicollections.service.BrandService;
 import com.zjusthow.minicollections.service.SeriesService;
 import org.springframework.http.HttpHeaders;
@@ -40,24 +40,24 @@ public class BrandController {
     }
 
     @GetMapping
-    public ResponseEntity<SliceResponse<BrandDto>> getBrands(
+    public ResponseEntity<PageResponse<BrandDto>> getBrands(
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size,
-            @RequestParam(required = false) String cursor,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.getBrandsSlice(
-                effectiveLocale(acceptLanguage, user), size, cursor));
+        return ResponseEntity.ok(brandService.getBrandsPage(
+                effectiveLocale(acceptLanguage, user), page, size));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<SliceResponse<BrandDto>> searchBrands(
+    public ResponseEntity<PageResponse<BrandDto>> searchBrands(
             @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size,
-            @RequestParam(required = false) String cursor,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.searchBrandsSlice(
-                keyword, effectiveLocale(acceptLanguage, user), size, cursor));
+        return ResponseEntity.ok(brandService.searchBrandsPage(
+                keyword, effectiveLocale(acceptLanguage, user), page, size));
     }
 
     @GetMapping("/{brandId}")
@@ -78,14 +78,14 @@ public class BrandController {
     }
 
     @GetMapping("/{brandId}/objects")
-    public ResponseEntity<SliceResponse<BrandObjectDto>> getBrandObjectsByBrandId(
+    public ResponseEntity<PageResponse<BrandObjectDto>> getBrandObjectsByBrandId(
             @PathVariable Long brandId,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size,
-            @RequestParam(required = false) String cursor,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.getBrandObjectsSlice(
-                brandId, effectiveLocale(acceptLanguage, user), size, cursor));
+        return ResponseEntity.ok(brandService.getBrandObjectsPage(
+                brandId, effectiveLocale(acceptLanguage, user), page, size));
     }
 
     @GetMapping("/{brandId}/objects/search/facets")
@@ -99,23 +99,23 @@ public class BrandController {
     }
 
     @GetMapping("/{brandId}/objects/search")
-    public ResponseEntity<SliceResponse<BrandObjectDto>> searchBrandObjectsByBrandId(
+    public ResponseEntity<PageResponse<BrandObjectDto>> searchBrandObjectsByBrandId(
             @PathVariable Long brandId,
             @RequestParam String keyword,
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size,
-            @RequestParam(required = false) String cursor,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.searchBrandObjectsByBrandIdSlice(
+        return ResponseEntity.ok(brandService.searchBrandObjectsByBrandIdPage(
                 keyword,
                 brandId,
                 categoryIds,
                 scaleIds,
                 effectiveLocale(acceptLanguage, user),
-                size,
-                cursor));
+                page,
+                size));
     }
 
     @GetMapping("/objects/search/facets")
@@ -128,23 +128,23 @@ public class BrandController {
     }
 
     @GetMapping("/objects/search")
-    public ResponseEntity<SliceResponse<BrandObjectDto>> searchBrandObjects(
+    public ResponseEntity<PageResponse<BrandObjectDto>> searchBrandObjects(
             @RequestParam String keyword,
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> brandIds,
             @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "24") int size,
-            @RequestParam(required = false) String cursor,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(brandService.searchBrandObjectsSlice(
+        return ResponseEntity.ok(brandService.searchBrandObjectsPage(
                 keyword,
                 categoryIds,
                 brandIds,
                 scaleIds,
                 effectiveLocale(acceptLanguage, user),
-                size,
-                cursor));
+                page,
+                size));
     }
 
     @GetMapping("/objects/{id}")

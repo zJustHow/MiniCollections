@@ -51,7 +51,8 @@ cd "$BACKEND"
 if [ -f ".env" ]; then
   set -a; source .env; set +a
 fi
-./gradlew bootRun --console=plain > "$ROOT/backend.log" 2>&1 &
+# Refresh resources so new seed/*.sql dirs are on the classpath (Gradle can skip unchanged outputs).
+./gradlew cleanProcessResources processResources bootRun --console=plain > "$ROOT/backend.log" 2>&1 &
 BACKEND_PID=$!
 log "Backend PID: $BACKEND_PID  (logs → backend.log)"
 

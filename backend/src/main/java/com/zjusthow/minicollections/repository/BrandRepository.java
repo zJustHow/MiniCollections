@@ -11,33 +11,23 @@ import java.util.List;
 @Repository
 public interface BrandRepository extends ListCrudRepository<BrandEntity, Long> {
 
-    @Query("SELECT * FROM brands ORDER BY id ASC LIMIT :limit")
-    List<BrandEntity> findFirstPage(@Param("limit") int limit);
+    @Query("SELECT COUNT(*) FROM brands")
+    long countAll();
 
-    @Query("SELECT * FROM brands WHERE id > :afterId ORDER BY id ASC LIMIT :limit")
-    List<BrandEntity> findAfterId(@Param("afterId") Long afterId, @Param("limit") int limit);
+    @Query("SELECT * FROM brands ORDER BY id ASC LIMIT :limit OFFSET :offset")
+    List<BrandEntity> findPage(@Param("limit") int limit, @Param("offset") int offset);
 
     @Query("""
             SELECT * FROM brands
             WHERE LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
             ORDER BY id ASC
-            LIMIT :limit
+            LIMIT :limit OFFSET :offset
             """)
-    List<BrandEntity> searchFirstPage(@Param("keyword") String keyword, @Param("limit") int limit);
-
-    @Query("""
-            SELECT * FROM brands
-            WHERE id > :afterId
-              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
-            ORDER BY id ASC
-            LIMIT :limit
-            """)
-    List<BrandEntity> searchAfterId(
+    List<BrandEntity> searchPage(
             @Param("keyword") String keyword,
-            @Param("afterId") Long afterId,
-            @Param("limit") int limit);
+            @Param("limit") int limit,
+            @Param("offset") int offset);
 
     @Query("""
             SELECT COUNT(*) FROM brands

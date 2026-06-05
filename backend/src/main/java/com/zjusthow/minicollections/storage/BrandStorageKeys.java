@@ -58,6 +58,11 @@ public final class BrandStorageKeys {
             case 43 -> "bmc";
             case 44 -> "tomica";
             case 45 -> "matchbox";
+            case 46 -> "maisto";
+            case 47 -> "hobby-japan";
+            case 48 -> "time-micro";
+            case 49 -> "rhino-models";
+            case 50 -> "pop-race";
             default -> slugify(nameEn);
         };
     }

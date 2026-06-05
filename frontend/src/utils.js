@@ -137,31 +137,30 @@ export const signup = async (data) => {
   return handleResponse(response);
 };
 
-export const SLICE_SIZE = 24;
+export const PAGE_SIZE = 24;
 
-async function fetchAllFromSlice(fetchPage) {
+async function fetchAllPages(fetchPage) {
   const all = [];
-  let cursor = null;
-  let hasMore = true;
-  while (hasMore) {
-    const slice = await fetchPage({ size: 48, cursor });
-    all.push(...(slice?.content ?? []));
-    hasMore = Boolean(slice?.has_more && slice?.next_cursor);
-    cursor = slice?.next_cursor ?? null;
+  let page = 0;
+  let totalPages = 1;
+  while (page < totalPages) {
+    const response = await fetchPage({ size: 48, page });
+    all.push(...(response?.content ?? []));
+    totalPages = response?.total_pages ?? 0;
+    page += 1;
   }
   return all;
 }
 
-function buildSliceParams({
-  size = SLICE_SIZE,
-  cursor = null,
+function buildPageParams({
+  size = PAGE_SIZE,
+  page = 0,
   keyword = null,
   categoryIds = null,
   brandIds = null,
   scaleIds = null,
 } = {}) {
-  const params = new URLSearchParams({ size: String(size) });
-  if (cursor) params.set("cursor", cursor);
+  const params = new URLSearchParams({ size: String(size), page: String(page) });
   if (keyword) params.set("keyword", keyword);
   appendIdListParams(params, "categoryIds", categoryIds);
   appendIdListParams(params, "brandIds", brandIds);
@@ -169,23 +168,23 @@ function buildSliceParams({
   return params;
 }
 
-export const getBrandsSlice = async ({ size = SLICE_SIZE, cursor = null } = {}) => {
-  const params = buildSliceParams({ size, cursor });
+export const getBrandsPage = async ({ size = PAGE_SIZE, page = 0 } = {}) => {
+  const params = buildPageParams({ size, page });
   const response = await fetch(`/brands?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const getBrands = async () =>
-  fetchAllFromSlice(({ size, cursor }) => getBrandsSlice({ size, cursor }));
+  fetchAllPages(({ size, page }) => getBrandsPage({ size, page }));
 
-export const searchBrandsSlice = async (keyword, { size = SLICE_SIZE, cursor = null } = {}) => {
-  const params = buildSliceParams({ size, cursor, keyword });
+export const searchBrandsPage = async (keyword, { size = PAGE_SIZE, page = 0 } = {}) => {
+  const params = buildPageParams({ size, page, keyword });
   const response = await fetch(`/brands/search?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const searchBrands = async (keyword) =>
-  fetchAllFromSlice(({ size, cursor }) => searchBrandsSlice(keyword, { size, cursor }));
+  fetchAllPages(({ size, page }) => searchBrandsPage(keyword, { size, page }));
 
 export const getGroups = async () => {
   const response = await fetch("/groups", { headers: authHeaders() });
@@ -196,7 +195,7 @@ export const searchGroups = async (
   keyword,
   { categoryIds = null, brandIds = null, scaleIds = null } = {},
 ) => {
-  const params = buildSliceParams({ keyword, categoryIds, brandIds, scaleIds });
+  const params = buildPageParams({ keyword, categoryIds, brandIds, scaleIds });
   const response = await fetch(`/groups/search?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
@@ -259,14 +258,14 @@ export const getScales = async () => {
   return handleResponse(response);
 };
 
-export const getBrandObjectsSlice = async (brandId, { size = SLICE_SIZE, cursor = null } = {}) => {
-  const params = buildSliceParams({ size, cursor });
+export const getBrandObjectsPage = async (brandId, { size = PAGE_SIZE, page = 0 } = {}) => {
+  const params = buildPageParams({ size, page });
   const response = await fetch(`/brands/${brandId}/objects?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
 export const getBrandObjectsByBrandId = async (brandId) =>
-  fetchAllFromSlice(({ size, cursor }) => getBrandObjectsSlice(brandId, { size, cursor }));
+  fetchAllPages(({ size, page }) => getBrandObjectsPage(brandId, { size, page }));
 
 export const getGroupById = async (groupId) => {
   const response = await fetch(`/groups/${groupId}`, { headers: authHeaders() });
@@ -278,11 +277,11 @@ export const getBrandObjectById = async (id) => {
   return handleResponse(response);
 };
 
-export const searchBrandObjectsSlice = async (
+export const searchBrandObjectsPage = async (
   keyword,
-  { size = SLICE_SIZE, cursor = null, categoryIds = null, brandIds = null, scaleIds = null } = {},
+  { size = PAGE_SIZE, page = 0, categoryIds = null, brandIds = null, scaleIds = null } = {},
 ) => {
-  const params = buildSliceParams({ size, cursor, keyword, categoryIds, brandIds, scaleIds });
+  const params = buildPageParams({ size, page, keyword, categoryIds, brandIds, scaleIds });
   const response = await fetch(`/brands/objects/search?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
@@ -296,14 +295,14 @@ export const searchBrandObjectsFacets = async (keyword) => {
 };
 
 export const searchBrandObjects = async (keyword) =>
-  fetchAllFromSlice(({ size, cursor }) => searchBrandObjectsSlice(keyword, { size, cursor }));
+  fetchAllPages(({ size, page }) => searchBrandObjectsPage(keyword, { size, page }));
 
-export const searchBrandObjectsByBrandIdSlice = async (
+export const searchBrandObjectsByBrandIdPage = async (
   brandId,
   keyword,
-  { size = SLICE_SIZE, cursor = null, categoryIds = null, scaleIds = null } = {},
+  { size = PAGE_SIZE, page = 0, categoryIds = null, scaleIds = null } = {},
 ) => {
-  const params = buildSliceParams({ size, cursor, keyword, categoryIds, scaleIds });
+  const params = buildPageParams({ size, page, keyword, categoryIds, scaleIds });
   const response = await fetch(`/brands/${brandId}/objects/search?${params}`, {
     headers: authHeaders(),
   });
@@ -320,18 +319,18 @@ export const searchBrandObjectsByBrandIdFacets = async (brandId, keyword) => {
 };
 
 export const searchBrandObjectsByBrandId = async (brandId, keyword) =>
-  fetchAllFromSlice(({ size, cursor }) =>
-    searchBrandObjectsByBrandIdSlice(brandId, keyword, { size, cursor }),
+  fetchAllPages(({ size, page }) =>
+    searchBrandObjectsByBrandIdPage(brandId, keyword, { size, page }),
   );
 
 export const searchBrandsCombined = async (keyword) => {
-  const [brandsSlice, objectsSlice] = await Promise.all([
-    searchBrandsSlice(keyword),
-    searchBrandObjectsSlice(keyword),
+  const [brandsPage, objectsPage] = await Promise.all([
+    searchBrandsPage(keyword),
+    searchBrandObjectsPage(keyword),
   ]);
   return {
-    brands: brandsSlice?.content ?? [],
-    objects: objectsSlice?.content ?? [],
+    brands: brandsPage?.content ?? [],
+    objects: objectsPage?.content ?? [],
   };
 };
 

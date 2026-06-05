@@ -4,9 +4,10 @@ import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
 import AddCardCover from "./AddCardCover";
 import CardCover from "./CardCover";
-import InfiniteSliceFooter from "../InfiniteSliceFooter";
+import ListPagination from "../ListPagination";
 import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
 import { useLocale } from "../../LocaleContext";
+import { PAGE_SIZE } from "../../utils";
 
 const { Search } = NeuInput;
 const { useBreakpoint } = Grid;
@@ -22,9 +23,9 @@ export default function BrandsTab({
   searchResultBrands,
   searchResultObjects,
   searchValue,
-  brandsListSlice,
-  brandsSearchSlice,
-  objectsSearchSlice,
+  brandsListPage,
+  brandsSearchPage,
+  objectsSearchPage,
   showObjectFilters,
   searchFacets,
   facetsLoading,
@@ -109,14 +110,14 @@ export default function BrandsTab({
     searchActive &&
     (searchResultObjects.length > 0 ||
       showFilterColumn ||
-      objectsSearchSlice?.loading);
+      objectsSearchPage?.loading);
 
   const spinning = searchActive
-    ? (brandsSearchSlice?.loading || objectsSearchSlice?.loading) &&
+    ? (brandsSearchPage?.loading || objectsSearchPage?.loading) &&
       searchResultBrands.length === 0 &&
       searchResultObjects.length === 0 &&
       !showFilterColumn
-    : brandsListSlice?.loading && brands.length === 0;
+    : brandsListPage?.loading && brands.length === 0;
 
   return (
     <>
@@ -150,14 +151,14 @@ export default function BrandsTab({
                 <div style={browseGridStyle}>
                   {searchResultBrands.map(renderBrandCard)}
                 </div>
-                <InfiniteSliceFooter
-                  hasMore={brandsSearchSlice?.hasMore}
-                  loading={brandsSearchSlice?.loading}
-                  loadingMore={brandsSearchSlice?.loadingMore}
-                  onLoadMore={brandsSearchSlice?.loadMore}
-                  itemCount={searchResultBrands.length}
-                  totalElements={brandsSearchSlice?.totalElements}
-                  totalExact={brandsSearchSlice?.totalExact}
+                <ListPagination
+                  page={brandsSearchPage?.page ?? 0}
+                  totalElements={brandsSearchPage?.totalElements ?? 0}
+                  totalPages={brandsSearchPage?.totalPages ?? 0}
+                  totalExact={brandsSearchPage?.totalExact}
+                  loading={brandsSearchPage?.loading}
+                  onPageChange={brandsSearchPage?.onPageChange}
+                  pageSize={PAGE_SIZE}
                 />
               </>
             )}
@@ -194,22 +195,22 @@ export default function BrandsTab({
                     {searchResultObjects.map(renderObjectCard)}
                   </div>
                 </div>
-                <InfiniteSliceFooter
-                  hasMore={objectsSearchSlice?.hasMore}
-                  loading={objectsSearchSlice?.loading}
-                  loadingMore={objectsSearchSlice?.loadingMore}
-                  onLoadMore={objectsSearchSlice?.loadMore}
-                  itemCount={searchResultObjects.length}
-                  totalElements={objectsSearchSlice?.totalElements}
-                  totalExact={objectsSearchSlice?.totalExact}
+                <ListPagination
+                  page={objectsSearchPage?.page ?? 0}
+                  totalElements={objectsSearchPage?.totalElements ?? 0}
+                  totalPages={objectsSearchPage?.totalPages ?? 0}
+                  totalExact={objectsSearchPage?.totalExact}
+                  loading={objectsSearchPage?.loading}
+                  onPageChange={objectsSearchPage?.onPageChange}
+                  pageSize={PAGE_SIZE}
                 />
               </>
             )}
 
             {searchResultBrands.length === 0 &&
               !showObjectsSection &&
-              !brandsSearchSlice?.loading &&
-              !objectsSearchSlice?.loading && (
+              !brandsSearchPage?.loading &&
+              !objectsSearchPage?.loading && (
                 <div
                   style={{
                     textAlign: "center",
@@ -224,12 +225,14 @@ export default function BrandsTab({
         ) : (
           <>
             <div style={browseGridStyle}>{dataSource.map(renderBrandCard)}</div>
-            <InfiniteSliceFooter
-              hasMore={brandsListSlice?.hasMore}
-              loading={brandsListSlice?.loading}
-              loadingMore={brandsListSlice?.loadingMore}
-              onLoadMore={brandsListSlice?.loadMore}
-              itemCount={brands.length}
+            <ListPagination
+              page={brandsListPage?.page ?? 0}
+              totalElements={brandsListPage?.totalElements ?? 0}
+              totalPages={brandsListPage?.totalPages ?? 0}
+              totalExact={brandsListPage?.totalExact}
+              loading={brandsListPage?.loading}
+              onPageChange={brandsListPage?.onPageChange}
+              pageSize={PAGE_SIZE}
             />
           </>
         )}

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useObjectFilterParams from "../hooks/useObjectFilterParams";
-import useInfiniteSlice from "../hooks/useInfiniteSlice";
+import usePagedList from "../hooks/usePagedList";
 import { App, Button, Card, Grid, Popconfirm, Spin } from "antd";
 import { NeuInput } from "../components/NeuFormControl";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@ant-design/icons";
 import AddCardCover from "../components/ObjectList/AddCardCover";
 import CardCover from "../components/ObjectList/CardCover";
-import InfiniteSliceFooter from "../components/InfiniteSliceFooter";
+import ListPagination from "../components/ListPagination";
 import ObjectSearchFilterPanel from "../components/ObjectSearchFilterPanel";
 import { filterKeyFromIds } from "../utils/filterParams";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
@@ -22,11 +22,11 @@ import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import {
   getBrandByBrandId,
-  getBrandObjectsSlice,
-  searchBrandObjectsByBrandIdSlice,
+  getBrandObjectsPage,
+  searchBrandObjectsByBrandIdPage,
   searchBrandObjectsByBrandIdFacets,
   adminDeleteBrand,
-  SLICE_SIZE,
+  PAGE_SIZE,
 } from "../utils";
 
 const { Search } = NeuInput;
@@ -61,6 +61,13 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const [searchFacets, setSearchFacets] = useState(null);
   const [facetsLoading, setFacetsLoading] = useState(false);
   const syncedKeywordRef = useRef(searchKeyword);
+  const returnSearchRef = useRef(location.state?.returnSearch ?? "");
+
+  useEffect(() => {
+    if (location.state?.returnSearch != null) {
+      returnSearchRef.current = location.state.returnSearch;
+    }
+  }, [location.state?.returnSearch]);
 
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
 
@@ -70,32 +77,34 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const [brandObjectModalOpen, setBrandObjectModalOpen] = useState(false);
   const [editingBrandObject, setEditingBrandObject] = useState(null);
 
-  const objectsList = useInfiniteSlice(
-    ({ size, cursor }) => getBrandObjectsSlice(brandId, { size, cursor }),
+  const objectsList = usePagedList(
+    ({ size, page }) => getBrandObjectsPage(brandId, { size, page }),
     {
       resetKey: `brand-objects:${brandId}`,
       enabled: !searchActive,
-      pageSize: SLICE_SIZE,
+      pageSize: PAGE_SIZE,
+      pageParamKey: "page",
     },
   );
 
-  const objectsSearch = useInfiniteSlice(
-    ({ size, cursor }) =>
-      searchBrandObjectsByBrandIdSlice(brandId, searchKeyword, {
+  const objectsSearch = usePagedList(
+    ({ size, page }) =>
+      searchBrandObjectsByBrandIdPage(brandId, searchKeyword, {
         size,
-        cursor,
+        page,
         categoryIds: selectedCategoryIds,
         scaleIds: selectedScaleIds,
       }),
     {
       resetKey: `brand-objects-search:${brandId}:${searchKeyword}:${filterKeyFromIds(selectedCategoryIds, [], selectedScaleIds)}`,
       enabled: searchActive && Boolean(searchKeyword),
-      pageSize: SLICE_SIZE,
+      pageSize: PAGE_SIZE,
+      pageParamKey: "page",
     },
   );
 
-  const activeSlice = searchActive ? objectsSearch : objectsList;
-  const displayObjects = activeSlice.items;
+  const activePage = searchActive ? objectsSearch : objectsList;
+  const displayObjects = activePage.items;
   const showAddCard = isAdmin && !searchActive;
   const listData = showAddCard
     ? [{ id: "__add__" }, ...displayObjects]
@@ -190,7 +199,12 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         <div>
           <Button
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate({ pathname: "/", search: location.search })}
+            onClick={() =>
+              navigate({
+                pathname: "/",
+                search: returnSearchRef.current,
+              })
+            }
           />
         </div>
         <span
@@ -238,8 +252,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   }, [brand, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshObjects = useCallback(() => {
-    activeSlice.loadInitial();
-  }, [activeSlice]);
+    activePage.loadPage(activePage.page);
+  }, [activePage]);
 
   const runSearch = useCallback(
     (keyword) => {
@@ -297,7 +311,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         />
       </div>
 
-      <Spin spinning={activeSlice.loading && displayObjects.length === 0}>
+      <Spin spinning={activePage.loading && displayObjects.length === 0}>
         {searchActive ? (
           <>
             {showSearchObjectsSection ? (
@@ -354,14 +368,14 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 </div>
               )
             )}
-            <InfiniteSliceFooter
-              hasMore={activeSlice.hasMore}
-              loading={activeSlice.loading}
-              loadingMore={activeSlice.loadingMore}
-              onLoadMore={activeSlice.loadMore}
-              itemCount={displayObjects.length}
-              totalElements={activeSlice.totalElements}
-              totalExact={activeSlice.totalExact}
+            <ListPagination
+              page={activePage.page}
+              totalElements={activePage.totalElements}
+              totalPages={activePage.totalPages}
+              totalExact={activePage.totalExact}
+              loading={activePage.loading}
+              onPageChange={activePage.onPageChange}
+              pageSize={PAGE_SIZE}
             />
           </>
         ) : (
@@ -404,12 +418,14 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 ),
               )}
             </div>
-            <InfiniteSliceFooter
-              hasMore={activeSlice.hasMore}
-              loading={activeSlice.loading}
-              loadingMore={activeSlice.loadingMore}
-              onLoadMore={activeSlice.loadMore}
-              itemCount={displayObjects.length}
+            <ListPagination
+              page={activePage.page}
+              totalElements={activePage.totalElements}
+              totalPages={activePage.totalPages}
+              totalExact={activePage.totalExact}
+              loading={activePage.loading}
+              onPageChange={activePage.onPageChange}
+              pageSize={PAGE_SIZE}
             />
           </>
         )}

@@ -5,6 +5,7 @@ import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
@@ -25,12 +26,13 @@ public class BrandElasticsearchQueryService {
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
-    public EsSearchSliceResult searchSlice(String keyword, List<Object> searchAfter, int size, boolean countTotal) {
+    public EsSearchPageResult searchPage(String keyword, int page, int size) {
         if (keyword == null || keyword.isBlank()) {
-            return new EsSearchSliceResult(List.of(), null, 0L, true, false);
+            return new EsSearchPageResult(List.of(), 0L, true);
         }
         String q = keyword.trim();
-        var builder = NativeQuery.builder()
+        int safePage = Math.max(page, 0);
+        var nativeQuery = NativeQuery.builder()
                 .withQuery(sq -> sq.multiMatch(m -> m
                         .query(q)
                         .fields("name_en^2", "name_zh^2")
@@ -38,38 +40,24 @@ public class BrandElasticsearchQueryService {
                         .operator(Operator.Or)))
                 .withSort(s -> s.score(sc -> sc.order(SortOrder.Desc)))
                 .withSort(s -> s.field(f -> f.field("id").order(SortOrder.Asc)))
-                .withMaxResults(size);
-        if (searchAfter != null && !searchAfter.isEmpty()) {
-            builder.withSearchAfter(searchAfter);
-        }
-        if (countTotal) {
-            builder.withTrackTotalHitsUpTo(10_000);
-        } else {
-            builder.withTrackTotalHitsUpTo(0);
-        }
-        return executeSlice(builder.build(), size, countTotal);
+                .withPageable(PageRequest.of(safePage, size))
+                .withTrackTotalHitsUpTo(10_000)
+                .build();
+        return executePage(nativeQuery);
     }
 
-    private EsSearchSliceResult executeSlice(NativeQuery nativeQuery, int size, boolean countTotal) {
+    private EsSearchPageResult executePage(NativeQuery nativeQuery) {
         try {
             SearchHits<BrandDocument> hits = elasticsearchOperations.search(nativeQuery, BrandDocument.class);
             List<Long> ids = new ArrayList<>();
-            List<Object> lastSort = null;
             for (SearchHit<BrandDocument> hit : hits) {
                 if (hit.getContent() != null && hit.getContent().id() != null) {
                     ids.add(hit.getContent().id());
-                    lastSort = hit.getSortValues();
                 }
             }
-            boolean hasMore = ids.size() == size;
-            List<Object> nextSort = hasMore ? lastSort : null;
-            Long totalElements = null;
-            boolean totalExact = true;
-            if (countTotal && hits.getTotalHits() >= 0) {
-                totalElements = hits.getTotalHits();
-                totalExact = hits.getTotalHitsRelation().name().equals("EQUAL_TO");
-            }
-            return new EsSearchSliceResult(ids, nextSort, totalElements, totalExact, hasMore);
+            long totalElements = hits.getTotalHits() >= 0 ? hits.getTotalHits() : ids.size();
+            boolean totalExact = hits.getTotalHitsRelation().name().equals("EQUAL_TO");
+            return new EsSearchPageResult(ids, totalElements, totalExact);
         } catch (Exception e) {
             log.warn("Elasticsearch brand query failed: {}", e.getMessage());
             throw e;

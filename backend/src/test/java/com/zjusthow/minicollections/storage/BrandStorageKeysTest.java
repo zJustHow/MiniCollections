@@ -40,6 +40,11 @@ class BrandStorageKeysTest {
                 assertEquals("brands/bmc/logo.png", BrandStorageKeys.logoObjectKey(43, "BMC", ".png"));
         assertEquals("brands/tomica/logo.png", BrandStorageKeys.logoObjectKey(44, "Tomica", ".png"));
         assertEquals("brands/matchbox/logo.png", BrandStorageKeys.logoObjectKey(45, "Matchbox", ".png"));
+        assertEquals("brands/maisto/logo.png", BrandStorageKeys.logoObjectKey(46, "Maisto", ".png"));
+        assertEquals("brands/hobby-japan/logo.png", BrandStorageKeys.logoObjectKey(47, "Hobby Japan", ".png"));
+        assertEquals("brands/time-micro/logo.jpg", BrandStorageKeys.logoObjectKey(48, "Time Micro (TM)", ".jpg"));
+        assertEquals("brands/rhino-models/logo.jpg", BrandStorageKeys.logoObjectKey(49, "Rhino Models", ".jpg"));
+        assertEquals("brands/pop-race/logo.png", BrandStorageKeys.logoObjectKey(50, "Pop Race", ".png"));
         assertEquals("brands/exoto/logo.png", BrandStorageKeys.logoObjectKey(28, "Exoto", ".png"));
         assertEquals("brands/amalgam/logo.png", BrandStorageKeys.logoObjectKey(29, "Amalgam", ".png"));
         assertEquals("brands/cmc/logo.png", BrandStorageKeys.logoObjectKey(30, "CMC", ".png"));

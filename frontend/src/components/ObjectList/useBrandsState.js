@@ -2,13 +2,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useSearchParam from "../../hooks/useSearchParam";
 import useObjectFilterParams from "../../hooks/useObjectFilterParams";
-import useInfiniteSlice from "../../hooks/useInfiniteSlice";
+import usePagedList from "../../hooks/usePagedList";
 import {
-  getBrandsSlice,
-  searchBrandsSlice,
-  searchBrandObjectsSlice,
+  getBrandsPage,
+  searchBrandsPage,
+  searchBrandObjectsPage,
   searchBrandObjectsFacets,
-  SLICE_SIZE,
+  PAGE_SIZE,
 } from "../../utils";
 import { filterKeyFromIds } from "../../utils/filterParams";
 
@@ -33,21 +33,23 @@ export default function useBrandsState() {
   const [brandModalOpen, setBrandModalOpen] = useState(false);
   const syncedKeywordRef = useRef((searchValue ?? "").trim());
 
-  const brandsList = useInfiniteSlice(
-    ({ size, cursor }) => getBrandsSlice({ size, cursor }),
+  const brandsList = usePagedList(
+    ({ size, page }) => getBrandsPage({ size, page }),
     {
       resetKey: "brands-list",
       enabled: !searchActive,
-      pageSize: SLICE_SIZE,
+      pageSize: PAGE_SIZE,
+      pageParamKey: "page",
     },
   );
 
-  const brandsSearch = useInfiniteSlice(
-    ({ size, cursor }) => searchBrandsSlice(searchKeyword, { size, cursor }),
+  const brandsSearch = usePagedList(
+    ({ size, page }) => searchBrandsPage(searchKeyword, { size, page }),
     {
       resetKey: `brands-search:${searchKeyword}`,
       enabled: searchActive && Boolean(searchKeyword),
-      pageSize: SLICE_SIZE,
+      pageSize: PAGE_SIZE,
+      pageParamKey: "brandPage",
     },
   );
 
@@ -57,11 +59,11 @@ export default function useBrandsState() {
     selectedScaleIds,
   );
 
-  const objectsSearch = useInfiniteSlice(
-    ({ size, cursor }) =>
-      searchBrandObjectsSlice(searchKeyword, {
+  const objectsSearch = usePagedList(
+    ({ size, page }) =>
+      searchBrandObjectsPage(searchKeyword, {
         size,
-        cursor,
+        page,
         categoryIds: selectedCategoryIds,
         brandIds: selectedBrandIds,
         scaleIds: selectedScaleIds,
@@ -69,7 +71,8 @@ export default function useBrandsState() {
     {
       resetKey: `objects-search:${searchKeyword}:${objectFilterKey}`,
       enabled: searchActive && Boolean(searchKeyword),
-      pageSize: SLICE_SIZE,
+      pageSize: PAGE_SIZE,
+      pageParamKey: "objectPage",
     },
   );
 
@@ -122,9 +125,13 @@ export default function useBrandsState() {
   }, [searchKeyword, searchActive, clearObjectFilters]);
 
   const handleBrandClick = (brand) => {
+    const returnSearch = location.search;
+    const nextSearch = new URLSearchParams(location.search);
+    nextSearch.delete("page");
+    const search = nextSearch.toString();
     navigate(
-      { pathname: `/brands/${brand.id}`, search: location.search },
-      { state: { brand } },
+      { pathname: `/brands/${brand.id}`, search: search ? `?${search}` : "" },
+      { state: { brand, returnSearch } },
     );
   };
 
@@ -153,10 +160,10 @@ export default function useBrandsState() {
 
   const refreshBrands = useCallback(() => {
     if (searchActive) {
-      brandsSearch.loadInitial();
-      objectsSearch.loadInitial();
+      brandsSearch.loadPage(0);
+      objectsSearch.loadPage(0);
     } else {
-      brandsList.loadInitial();
+      brandsList.loadPage(0);
     }
   }, [searchActive, brandsList, brandsSearch, objectsSearch]);
 
@@ -185,9 +192,9 @@ export default function useBrandsState() {
       searchResultBrands: brandsSearch.items,
       searchResultObjects: objectsSearch.items,
       searchValue,
-      brandsListSlice: brandsList,
-      brandsSearchSlice: brandsSearch,
-      objectsSearchSlice: objectsSearch,
+      brandsListPage: brandsList,
+      brandsSearchPage: brandsSearch,
+      objectsSearchPage: objectsSearch,
       showObjectFilters,
       searchFacets,
       facetsLoading,

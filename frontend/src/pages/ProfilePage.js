@@ -287,11 +287,9 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               onChange={({ file }) => handleAvatarUpload({ file })}
             >
               <div
-                className="avatar-upload-trigger"
+                className={`neu-avatar-btn${profile.avatar_url ? "" : " neu-avatar-btn--accent"}`}
                 style={{
                   position: "relative",
-                  display: "inline-block",
-                  cursor: "pointer",
                 }}
               >
                 <Avatar
@@ -518,7 +516,11 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               <Form.Item style={{ marginBottom: 12 }}>
                 <div style={{ display: "flex", gap: 8 }}>
                   <Form.Item name="countryCode" noStyle>
-                    <NeuSelect fullWidth={false} style={{ width: 110 }} optionLabelProp="label">
+                    <NeuSelect
+                      fullWidth={false}
+                      style={{ width: 110 }}
+                      optionLabelProp="label"
+                    >
                       {COUNTRIES.map((c) => (
                         <NeuSelect.Option
                           key={c.code}

@@ -50,6 +50,8 @@
   --raised-xs: 1px 1px 3px var(--neu-sd), -1px -1px 3px var(--neu-sl);
 
   --inset: inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
+  /* circular avatars / photos — dark inset only (no white highlight) */
+  --inset-avatar: inset 2px 2px 6px var(--neu-sd);
   /* tinted inset for colored surfaces (avoid white highlight on accent/danger) */
   --inset-accent:
     inset 2px 2px 5px var(--neu-accent-dark),
@@ -579,17 +581,33 @@ a:hover {
 }
 
 /* ── BUTTONS (raised → inset on hover) ─────────── */
-.avatar-upload-trigger .ant-avatar {
+.neu-avatar-btn {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+  flex-shrink: 0;
+  transition: var(--neu-btn-transition);
+}
+
+.neu-avatar-btn .ant-avatar {
   box-shadow: var(--raised-sm);
   transition: var(--neu-btn-transition);
 }
 
-.avatar-upload-trigger:hover .ant-avatar {
-  box-shadow: var(--inset);
+.neu-avatar-btn:hover:not(:active) .ant-avatar {
+  box-shadow: var(--inset-avatar);
 }
 
-.avatar-upload-trigger:active .ant-avatar {
-  box-shadow: var(--inset);
+.neu-avatar-btn:active .ant-avatar {
+  box-shadow: var(--inset-avatar);
+}
+
+.neu-avatar-btn--accent:hover:not(:active) .ant-avatar,
+.neu-avatar-btn--accent:active .ant-avatar {
+  box-shadow: var(--inset-accent);
 }
 
 /* Shared interactive controls — unlayered so they beat @layer antd (StyleProvider) */
@@ -792,19 +810,48 @@ a:hover {
   color: var(--neu-text-2);
 }
 
-/* search layout */
-.ant-input-search .ant-input-affix-wrapper,
-.ant-input-search .ant-input-affix-wrapper:not(:last-child) {
-  border-radius: var(--r-md);
+/* search — flex layout (antd group defaults to display:table, gap has no effect) */
+.ant-input-search > .ant-input-group {
+  display: inline-flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 6px;
 }
 
-/* search button */
+.ant-input-search > .ant-input-group > .ant-input-affix-wrapper {
+  display: inline-flex;
+  width: auto;
+}
+
+.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child {
+  display: flex;
+  align-items: center;
+  width: auto;
+  white-space: nowrap;
+  inset-inline-start: 0;
+}
+
+.ant-input-search .ant-input-affix-wrapper,
+.ant-input-search .ant-input-affix-wrapper:not(:last-child) {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  border-radius: var(--r-md);
+  box-shadow: var(--raised-sm);
+}
+
+.ant-input-search .ant-input-affix-wrapper:focus,
+.ant-input-search .ant-input-affix-wrapper:focus-within,
+.ant-input-search .ant-input-affix-wrapper-focused {
+  box-shadow: var(--inset);
+}
+
 .ant-input-group-addon,
 .ant-input-search > .ant-input-group > .ant-input-group-addon:last-child {
   background: transparent;
   border: none;
   padding: 0;
-  padding-left: 6px;
 }
 
 .ant-input-group-addon .ant-btn,
@@ -818,6 +865,15 @@ a:hover {
   color: var(--neu-text);
   border-radius: var(--r-md);
   box-shadow: var(--raised-sm);
+}
+
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button {
+  margin-inline-end: 0;
+  border-start-start-radius: var(--r-md);
+  border-end-start-radius: var(--r-md);
 }
 
 .ant-input-group-addon .ant-btn:hover:not([disabled]):not(:active),
@@ -1331,28 +1387,8 @@ textarea.ant-input[disabled],
   background: transparent !important;
 }
 
-.ant-drawer-right > .ant-drawer-content-wrapper {
-  box-shadow:
-    -10px 0 36px rgba(68, 71, 106, 0.16),
-    -4px 0 14px rgba(140, 138, 132, 0.12);
-}
-
-.ant-drawer-left > .ant-drawer-content-wrapper {
-  box-shadow:
-    10px 0 36px rgba(68, 71, 106, 0.16),
-    4px 0 14px rgba(140, 138, 132, 0.12);
-}
-
-.ant-drawer-top > .ant-drawer-content-wrapper {
-  box-shadow:
-    0 10px 36px rgba(68, 71, 106, 0.16),
-    0 4px 14px rgba(140, 138, 132, 0.12);
-}
-
-.ant-drawer-bottom > .ant-drawer-content-wrapper {
-  box-shadow:
-    0 -10px 36px rgba(68, 71, 106, 0.16),
-    0 -4px 14px rgba(140, 138, 132, 0.12);
+.ant-drawer-content-wrapper {
+  box-shadow: var(--raised-lg);
 }
 
 .ant-drawer-content {
@@ -2280,6 +2316,32 @@ textarea.ant-input[disabled],
     color: var(--neu-accent);
     background: var(--neu-item-hover-bg);
     box-shadow: var(--inset);
+  }
+
+  .mobile-menu-profile-btn {
+    width: calc(100% - 16px);
+    margin: 4px 8px 8px;
+    text-align: center;
+    padding: 10px 16px;
+    border: none;
+    border-radius: var(--r-md);
+    background: var(--neu-bg);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--neu-text);
+    cursor: pointer;
+    box-shadow: var(--raised-sm);
+    transition: var(--neu-btn-transition);
+  }
+
+  .mobile-menu-profile-btn:hover:not(:active) {
+    box-shadow: var(--inset);
+    color: var(--neu-accent);
+  }
+
+  .mobile-menu-profile-btn:active {
+    box-shadow: var(--inset);
+    color: var(--neu-accent);
   }
 
   .mobile-menu-divider {

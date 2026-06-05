@@ -147,37 +147,41 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
               title={profile?.display_name || t("profile")}
               placement="bottomRight"
             >
-              <Avatar
-                src={profile?.avatar_url}
-                icon={!profile?.avatar_url && <UserOutlined />}
-                size={36}
+              <button
+                type="button"
+                className={`neu-avatar-btn${profile?.avatar_url ? "" : " neu-avatar-btn--accent"}`}
+                aria-label={profile?.display_name || t("profile")}
                 onClick={() => navigate("/profile")}
-                style={{
-                  cursor: "pointer",
-                  boxShadow: "var(--raised-sm)",
-                  background: profile?.avatar_url
-                    ? "transparent"
-                    : "var(--neu-accent)",
-                  flexShrink: 0,
-                  transition: "box-shadow 0.15s ease",
-                }}
-              />
+              >
+                <Avatar
+                  src={profile?.avatar_url}
+                  icon={!profile?.avatar_url && <UserOutlined />}
+                  size={36}
+                  style={{
+                    background: profile?.avatar_url
+                      ? "transparent"
+                      : "var(--neu-accent)",
+                  }}
+                />
+              </button>
             </Tooltip>
           ) : (
             <Tooltip title={t("signIn")} placement="bottomRight">
-              <Avatar
-                icon={<UserOutlined />}
-                size={36}
+              <button
+                type="button"
+                className="neu-avatar-btn"
+                aria-label={t("signIn")}
                 onClick={goToLogin}
-                style={{
-                  cursor: "pointer",
-                  boxShadow: "var(--raised-sm)",
-                  background: "var(--neu-bg)",
-                  color: "var(--neu-text-2)",
-                  flexShrink: 0,
-                  transition: "box-shadow 0.15s ease",
-                }}
-              />
+              >
+                <Avatar
+                  icon={<UserOutlined />}
+                  size={36}
+                  style={{
+                    background: "var(--neu-bg)",
+                    color: "var(--neu-text-2)",
+                  }}
+                />
+              </button>
             </Tooltip>
           )}
         </div>
@@ -225,7 +229,8 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
           )}
           <div className="mobile-menu-divider" />
           <button
-            className="mobile-menu-item"
+            type="button"
+            className="mobile-menu-profile-btn"
             onClick={() => (authed ? navigate("/profile") : navigate("/login"))}
           >
             {authed ? profile?.display_name || t("profile") : t("signIn")}

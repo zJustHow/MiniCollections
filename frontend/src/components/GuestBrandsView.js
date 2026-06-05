@@ -11,9 +11,9 @@ export default function GuestBrandsView() {
     searchResultBrands,
     searchResultObjects,
     searchValue,
-    brandsListSlice,
-    brandsSearchSlice,
-    objectsSearchSlice,
+    brandsListPage,
+    brandsSearchPage,
+    objectsSearchPage,
     showObjectFilters,
     searchFacets,
     facetsLoading,
@@ -35,9 +35,9 @@ export default function GuestBrandsView() {
       searchResultBrands={searchResultBrands}
       searchResultObjects={searchResultObjects}
       searchValue={searchValue}
-      brandsListSlice={brandsListSlice}
-      brandsSearchSlice={brandsSearchSlice}
-      objectsSearchSlice={objectsSearchSlice}
+      brandsListPage={brandsListPage}
+      brandsSearchPage={brandsSearchPage}
+      objectsSearchPage={objectsSearchPage}
       showObjectFilters={showObjectFilters}
       searchFacets={searchFacets}
       facetsLoading={facetsLoading}
