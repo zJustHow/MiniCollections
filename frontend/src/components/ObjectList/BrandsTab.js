@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import AddCardCover from "./AddCardCover";
 import CardCover from "./CardCover";
 import ListPagination from "../ListPagination";
-import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
+import ObjectSearchFilterLayout from "../ObjectSearchFilterLayout";
 import { useLocale } from "../../LocaleContext";
 import { PAGE_SIZE } from "../../utils";
 
@@ -24,8 +24,7 @@ export default function BrandsTab({
   searchResultObjects,
   searchValue,
   brandsListPage,
-  brandsSearchPage,
-  objectsSearchPage,
+  combinedSearchPage,
   showObjectFilters,
   searchFacets,
   facetsLoading,
@@ -50,13 +49,6 @@ export default function BrandsTab({
     display: "grid",
     gridTemplateColumns: `repeat(${browseCols}, 1fr)`,
     gap: 16,
-  };
-
-  const sectionLabelStyle = {
-    fontSize: 13,
-    fontWeight: 600,
-    color: "var(--neu-text-2)",
-    marginBottom: 10,
   };
 
   const renderBrandCard = (brand) =>
@@ -110,10 +102,16 @@ export default function BrandsTab({
     searchActive &&
     (searchResultObjects.length > 0 ||
       showFilterColumn ||
-      objectsSearchPage?.loading);
+      combinedSearchPage?.loading ||
+      (combinedSearchPage?.totalObjects ?? 0) > 0);
+
+  const hasBrandResults = (combinedSearchPage?.totalBrands ?? 0) > 0;
+  const showBrandCards = searchResultBrands.length > 0;
+  const showObjectCards =
+    searchResultObjects.length > 0 || showFilterColumn || combinedSearchPage?.loading;
 
   const spinning = searchActive
-    ? (brandsSearchPage?.loading || objectsSearchPage?.loading) &&
+    ? combinedSearchPage?.loading &&
       searchResultBrands.length === 0 &&
       searchResultObjects.length === 0 &&
       !showFilterColumn
@@ -145,72 +143,53 @@ export default function BrandsTab({
       <Spin spinning={spinning}>
         {searchActive ? (
           <>
-            {searchResultBrands.length > 0 && (
+            {(hasBrandResults || showObjectsSection) && (
               <>
-                <div style={sectionLabelStyle}>{t("brands")}</div>
-                <div style={browseGridStyle}>
-                  {searchResultBrands.map(renderBrandCard)}
-                </div>
-                <ListPagination
-                  page={brandsSearchPage?.page ?? 0}
-                  totalElements={brandsSearchPage?.totalElements ?? 0}
-                  totalPages={brandsSearchPage?.totalPages ?? 0}
-                  totalExact={brandsSearchPage?.totalExact}
-                  loading={brandsSearchPage?.loading}
-                  onPageChange={brandsSearchPage?.onPageChange}
-                  pageSize={PAGE_SIZE}
-                />
-              </>
-            )}
-
-            {showObjectsSection && (
-              <>
-                <div
-                  style={{
-                    ...sectionLabelStyle,
-                    marginTop: searchResultBrands.length > 0 ? 24 : 0,
-                  }}
+                <ObjectSearchFilterLayout
+                  showFilterColumn={showFilterColumn}
+                  facets={searchFacets}
+                  loading={facetsLoading}
+                  selectedCategoryIds={selectedCategoryIds}
+                  selectedBrandIds={selectedBrandIds}
+                  selectedScaleIds={selectedScaleIds}
+                  onToggleCategory={onToggleCategory}
+                  onToggleBrand={onToggleBrand}
+                  onToggleScale={onToggleScale}
                 >
-                  {t("brandObjects")}
-                </div>
-                <div className="neu-search-objects-layout">
-                  {showFilterColumn && (
-                    <ObjectSearchFilterPanel
-                      facets={searchFacets}
-                      loading={facetsLoading}
-                      selectedCategoryIds={selectedCategoryIds}
-                      selectedBrandIds={selectedBrandIds}
-                      selectedScaleIds={selectedScaleIds}
-                      onToggleCategory={onToggleCategory}
-                      onToggleBrand={onToggleBrand}
-                      onToggleScale={onToggleScale}
-                    />
+                  {showBrandCards && (
+                    <>
+                      <div className="neu-search-section-label">{t("brands")}</div>
+                      {searchResultBrands.map(renderBrandCard)}
+                    </>
                   )}
-                  <div
-                    className="neu-search-objects-cards"
-                    style={
-                      showFilterColumn ? undefined : { gridColumn: "1 / -1" }
-                    }
-                  >
-                    {searchResultObjects.map(renderObjectCard)}
-                  </div>
-                </div>
+                  {showObjectsSection && showObjectCards && (
+                    <>
+                      <div
+                        className={`neu-search-section-label${
+                          showBrandCards
+                            ? " neu-search-section-label--spaced"
+                            : ""
+                        }`}
+                      >
+                        {t("brandObjects")}
+                      </div>
+                      {searchResultObjects.map(renderObjectCard)}
+                    </>
+                  )}
+                </ObjectSearchFilterLayout>
                 <ListPagination
-                  page={objectsSearchPage?.page ?? 0}
-                  totalElements={objectsSearchPage?.totalElements ?? 0}
-                  totalPages={objectsSearchPage?.totalPages ?? 0}
-                  totalExact={objectsSearchPage?.totalExact}
-                  loading={objectsSearchPage?.loading}
-                  onPageChange={objectsSearchPage?.onPageChange}
+                  page={combinedSearchPage?.page ?? 0}
+                  totalPages={combinedSearchPage?.totalPages ?? 0}
+                  loading={combinedSearchPage?.loading}
+                  onPageChange={combinedSearchPage?.onPageChange}
                   pageSize={PAGE_SIZE}
                 />
               </>
             )}
 
-            {searchResultBrands.length === 0 &&
+            {!hasBrandResults &&
               !showObjectsSection &&
-              !brandsSearchPage?.loading &&
-              !objectsSearchPage?.loading && (
+              !combinedSearchPage?.loading && (
                 <div
                   style={{
                     textAlign: "center",

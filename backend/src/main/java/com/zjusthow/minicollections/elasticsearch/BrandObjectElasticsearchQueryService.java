@@ -49,6 +49,28 @@ public class BrandObjectElasticsearchQueryService {
         return searchPageInternal(keyword, filter, page, size);
     }
 
+    public EsSearchPageResult searchSlice(
+            String keyword,
+            BrandObjectSearchFilter filter,
+            int offset,
+            int size) {
+        if (keyword == null || keyword.isBlank() || size <= 0) {
+            return new EsSearchPageResult(List.of(), 0L, true);
+        }
+        int safeOffset = Math.max(offset, 0);
+        int fetchSize = Math.min(safeOffset + size, 10_000);
+        EsSearchPageResult pageResult = searchPageInternal(keyword, filter, 0, fetchSize);
+        List<Long> ids = pageResult.ids();
+        if (safeOffset >= ids.size()) {
+            return new EsSearchPageResult(List.of(), pageResult.totalElements(), pageResult.totalExact());
+        }
+        int end = Math.min(safeOffset + size, ids.size());
+        return new EsSearchPageResult(
+                ids.subList(safeOffset, end),
+                pageResult.totalElements(),
+                pageResult.totalExact());
+    }
+
     public EsSearchFacetsResult searchFacets(String keyword, Long scopeBrandId) {
         if (keyword == null || keyword.isBlank()) {
             return new EsSearchFacetsResult(0L, List.of(), List.of(), List.of());

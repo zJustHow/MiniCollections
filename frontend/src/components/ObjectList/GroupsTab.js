@@ -4,7 +4,7 @@ import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
 import AddCardCover from "./AddCardCover";
 import CardCover from "./CardCover";
-import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
+import ObjectSearchFilterLayout from "../ObjectSearchFilterLayout";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = NeuInput;
@@ -157,28 +157,19 @@ export default function GroupsTab({
                 >
                   {t("myObjects")}
                 </div>
-                <div className="neu-search-objects-layout">
-                  {showFilterColumn && (
-                    <ObjectSearchFilterPanel
-                      facets={searchFacets}
-                      loading={facetsLoading}
-                      selectedCategoryIds={selectedCategoryIds}
-                      selectedBrandIds={selectedBrandIds}
-                      selectedScaleIds={selectedScaleIds}
-                      onToggleCategory={onToggleCategory}
-                      onToggleBrand={onToggleBrand}
-                      onToggleScale={onToggleScale}
-                    />
-                  )}
-                  <div
-                    className="neu-search-objects-cards"
-                    style={
-                      showFilterColumn ? undefined : { gridColumn: "1 / -1" }
-                    }
-                  >
-                    {searchResultObjects.map(renderObjectCard)}
-                  </div>
-                </div>
+                <ObjectSearchFilterLayout
+                  showFilterColumn={showFilterColumn}
+                  facets={searchFacets}
+                  loading={facetsLoading}
+                  selectedCategoryIds={selectedCategoryIds}
+                  selectedBrandIds={selectedBrandIds}
+                  selectedScaleIds={selectedScaleIds}
+                  onToggleCategory={onToggleCategory}
+                  onToggleBrand={onToggleBrand}
+                  onToggleScale={onToggleScale}
+                >
+                  {searchResultObjects.map(renderObjectCard)}
+                </ObjectSearchFilterLayout>
               </>
             )}
             {searchResultGroups.length === 0 &&

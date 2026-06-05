@@ -72,7 +72,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
   };
 
   return (
-    <Layout style={{ height: "100vh" }}>
+    <Layout style={{ height: "100vh", overflow: "hidden" }}>
       <Header
         style={{
           display: "flex",
@@ -239,9 +239,11 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
       )}
 
       <Content
+        id="main-content"
         style={{
+          flex: 1,
+          minHeight: 0,
           padding: "clamp(12px, 3vw, 32px) clamp(12px, 4vw, 48px)",
-          maxHeight: "calc(100% - var(--header-height))",
           overflowY: "auto",
           overflowX: "hidden",
           scrollbarGutter: "stable",

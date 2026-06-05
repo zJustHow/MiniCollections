@@ -46,6 +46,24 @@ public class BrandElasticsearchQueryService {
         return executePage(nativeQuery);
     }
 
+    public EsSearchPageResult searchSlice(String keyword, int offset, int size) {
+        if (keyword == null || keyword.isBlank() || size <= 0) {
+            return new EsSearchPageResult(List.of(), 0L, true);
+        }
+        int safeOffset = Math.max(offset, 0);
+        int fetchSize = Math.min(safeOffset + size, 10_000);
+        EsSearchPageResult pageResult = searchPage(keyword, 0, fetchSize);
+        List<Long> ids = pageResult.ids();
+        if (safeOffset >= ids.size()) {
+            return new EsSearchPageResult(List.of(), pageResult.totalElements(), pageResult.totalExact());
+        }
+        int end = Math.min(safeOffset + size, ids.size());
+        return new EsSearchPageResult(
+                ids.subList(safeOffset, end),
+                pageResult.totalElements(),
+                pageResult.totalExact());
+    }
+
     private EsSearchPageResult executePage(NativeQuery nativeQuery) {
         try {
             SearchHits<BrandDocument> hits = elasticsearchOperations.search(nativeQuery, BrandDocument.class);

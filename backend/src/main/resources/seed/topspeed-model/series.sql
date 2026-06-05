@@ -1,0 +1,32 @@
+-- TopSpeed Model series (brand_id=38). 28 series; id range 38001-38028 (brand_id * 1000 + ordinal).
+INSERT INTO series (id, brand_id, name_en, name_zh) VALUES
+(38001, 38, 'IMSA 2025', NULL),
+(38002, 38, 'IMSA 2024', NULL),
+(38003, 38, 'IMSA 2023', NULL),
+(38004, 38, 'IMSA 2022', NULL),
+(38005, 38, 'IMSA 2021', NULL),
+(38006, 38, 'IMSA Historical', NULL),
+(38007, 38, 'Abarth', NULL),
+(38008, 38, 'Acura', NULL),
+(38009, 38, 'Aston Martin', NULL),
+(38010, 38, 'Bentley', NULL),
+(38011, 38, 'BMW', NULL),
+(38012, 38, 'Bugatti', NULL),
+(38013, 38, 'Cadillac', NULL),
+(38014, 38, 'Chevrolet', NULL),
+(38015, 38, 'Ford', NULL),
+(38016, 38, 'Honda', NULL),
+(38017, 38, 'Hyundai', NULL),
+(38018, 38, 'Lamborghini', NULL),
+(38019, 38, 'LB Works', NULL),
+(38020, 38, 'Lotus', NULL),
+(38021, 38, 'Mazda', NULL),
+(38022, 38, 'McLaren', NULL),
+(38023, 38, 'Mercedes-Benz', NULL),
+(38024, 38, 'Nissan', NULL),
+(38025, 38, 'Pagani', NULL),
+(38026, 38, 'Pandem', NULL),
+(38027, 38, 'Porsche', NULL),
+(38028, 38, 'SUBARU', NULL);
+
+SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));

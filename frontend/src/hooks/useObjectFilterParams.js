@@ -5,6 +5,8 @@ import { toggleInList } from "../utils/filterParams";
 const CATEGORY_KEY = "categoryIds";
 const BRAND_KEY = "brandIds";
 const SCALE_KEY = "scaleIds";
+const SEARCH_KEY = "q";
+const PAGE_KEYS = ["page", "searchPage", "brandPage", "objectPage"];
 
 function parseIds(searchParams, key) {
   return searchParams.getAll(key).map((value) => {
@@ -57,6 +59,41 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
     );
   }, [setSearchParams]);
 
+  const clearSearchAndFilters = useCallback(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete(SEARCH_KEY);
+        next.delete(CATEGORY_KEY);
+        next.delete(BRAND_KEY);
+        next.delete(SCALE_KEY);
+        PAGE_KEYS.forEach((key) => next.delete(key));
+        return next;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
+
+  const setSearchQueryClearingFilters = useCallback((query) => {
+    const trimmed = (query ?? "").trim();
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete(CATEGORY_KEY);
+        next.delete(BRAND_KEY);
+        next.delete(SCALE_KEY);
+        PAGE_KEYS.forEach((key) => next.delete(key));
+        if (trimmed) {
+          next.set(SEARCH_KEY, trimmed);
+        } else {
+          next.delete(SEARCH_KEY);
+        }
+        return next;
+      },
+      { replace: true },
+    );
+  }, [setSearchParams]);
+
   const onToggleCategory = useCallback(
     (id) => {
       setFilterIds(CATEGORY_KEY, toggleInList(id, selectedCategoryIds));
@@ -84,6 +121,8 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
     selectedBrandIds,
     selectedScaleIds,
     clearObjectFilters,
+    clearSearchAndFilters,
+    setSearchQueryClearingFilters,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,

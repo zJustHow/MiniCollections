@@ -183,6 +183,15 @@ export const searchBrandsPage = async (keyword, { size = PAGE_SIZE, page = 0 } =
   return handleResponse(response);
 };
 
+export const searchBrandsCombinedPage = async (
+  keyword,
+  { size = PAGE_SIZE, page = 0, categoryIds = null, brandIds = null, scaleIds = null } = {},
+) => {
+  const params = buildPageParams({ size, page, keyword, categoryIds, brandIds, scaleIds });
+  const response = await fetch(`/brands/search/combined?${params}`, { headers: authHeaders() });
+  return handleResponse(response);
+};
+
 export const searchBrands = async (keyword) =>
   fetchAllPages(({ size, page }) => searchBrandsPage(keyword, { size, page }));
 
@@ -324,13 +333,10 @@ export const searchBrandObjectsByBrandId = async (brandId, keyword) =>
   );
 
 export const searchBrandsCombined = async (keyword) => {
-  const [brandsPage, objectsPage] = await Promise.all([
-    searchBrandsPage(keyword),
-    searchBrandObjectsPage(keyword),
-  ]);
+  const response = await searchBrandsCombinedPage(keyword);
   return {
-    brands: brandsPage?.content ?? [],
-    objects: objectsPage?.content ?? [],
+    brands: response?.brands ?? [],
+    objects: response?.objects ?? [],
   };
 };
 

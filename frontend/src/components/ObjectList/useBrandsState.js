@@ -3,10 +3,10 @@ import { useNavigate, useLocation } from "react-router-dom";
 import useSearchParam from "../../hooks/useSearchParam";
 import useObjectFilterParams from "../../hooks/useObjectFilterParams";
 import usePagedList from "../../hooks/usePagedList";
+import useCombinedBrandSearch from "../../hooks/useCombinedBrandSearch";
 import {
   getBrandsPage,
-  searchBrandsPage,
-  searchBrandObjectsPage,
+  searchBrandsCombinedPage,
   searchBrandObjectsFacets,
   PAGE_SIZE,
 } from "../../utils";
@@ -15,12 +15,14 @@ import { filterKeyFromIds } from "../../utils/filterParams";
 export default function useBrandsState() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchValue, setSearchParam] = useSearchParam();
+  const [searchValue] = useSearchParam();
   const {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
     clearObjectFilters,
+    clearSearchAndFilters,
+    setSearchQueryClearingFilters,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,
@@ -43,25 +45,15 @@ export default function useBrandsState() {
     },
   );
 
-  const brandsSearch = usePagedList(
-    ({ size, page }) => searchBrandsPage(searchKeyword, { size, page }),
-    {
-      resetKey: `brands-search:${searchKeyword}`,
-      enabled: searchActive && Boolean(searchKeyword),
-      pageSize: PAGE_SIZE,
-      pageParamKey: "brandPage",
-    },
-  );
-
   const objectFilterKey = filterKeyFromIds(
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
   );
 
-  const objectsSearch = usePagedList(
+  const combinedSearch = useCombinedBrandSearch(
     ({ size, page }) =>
-      searchBrandObjectsPage(searchKeyword, {
+      searchBrandsCombinedPage(searchKeyword, {
         size,
         page,
         categoryIds: selectedCategoryIds,
@@ -69,10 +61,10 @@ export default function useBrandsState() {
         scaleIds: selectedScaleIds,
       }),
     {
-      resetKey: `objects-search:${searchKeyword}:${objectFilterKey}`,
+      resetKey: `combined-search:${searchKeyword}:${objectFilterKey}`,
       enabled: searchActive && Boolean(searchKeyword),
       pageSize: PAGE_SIZE,
-      pageParamKey: "objectPage",
+      pageParamKey: "searchPage",
     },
   );
 
@@ -128,6 +120,9 @@ export default function useBrandsState() {
     const returnSearch = location.search;
     const nextSearch = new URLSearchParams(location.search);
     nextSearch.delete("page");
+    nextSearch.delete("searchPage");
+    nextSearch.delete("brandPage");
+    nextSearch.delete("objectPage");
     const search = nextSearch.toString();
     navigate(
       { pathname: `/brands/${brand.id}`, search: search ? `?${search}` : "" },
@@ -139,37 +134,32 @@ export default function useBrandsState() {
     async (value) => {
       const keyword = value.trim();
       if (!keyword) {
-        setSearchParam("");
+        clearSearchAndFilters();
         setSearchKeyword("");
         setSearchActive(false);
-        clearObjectFilters();
         setSearchFacets(null);
         syncedKeywordRef.current = "";
         return;
       }
       if (keyword !== syncedKeywordRef.current) {
-        clearObjectFilters();
+        setSearchQueryClearingFilters(keyword);
         syncedKeywordRef.current = keyword;
       }
-      setSearchParam(keyword);
       setSearchKeyword(keyword);
       setSearchActive(true);
     },
-    [setSearchParam, clearObjectFilters],
+    [clearSearchAndFilters, setSearchQueryClearingFilters],
   );
 
   const refreshBrands = useCallback(() => {
     if (searchActive) {
-      brandsSearch.loadPage(0);
-      objectsSearch.loadPage(0);
+      combinedSearch.loadPage(0);
     } else {
       brandsList.loadPage(0);
     }
-  }, [searchActive, brandsList, brandsSearch, objectsSearch]);
+  }, [searchActive, brandsList, combinedSearch]);
 
-  const loadingBrands = searchActive
-    ? brandsSearch.loading || objectsSearch.loading
-    : brandsList.loading;
+  const loadingBrands = searchActive ? combinedSearch.loading : brandsList.loading;
 
   const showObjectFilters =
     searchActive &&
@@ -189,12 +179,11 @@ export default function useBrandsState() {
       brandModalOpen,
       setBrandModalOpen,
       searchActive,
-      searchResultBrands: brandsSearch.items,
-      searchResultObjects: objectsSearch.items,
+      searchResultBrands: combinedSearch.brands,
+      searchResultObjects: combinedSearch.objects,
       searchValue,
       brandsListPage: brandsList,
-      brandsSearchPage: brandsSearch,
-      objectsSearchPage: objectsSearch,
+      combinedSearchPage: combinedSearch,
       showObjectFilters,
       searchFacets,
       facetsLoading,
@@ -207,8 +196,7 @@ export default function useBrandsState() {
     }),
     [
       brandsList,
-      brandsSearch,
-      objectsSearch,
+      combinedSearch,
       loadingBrands,
       handleBrandSearch,
       refreshBrands,

@@ -25,6 +25,7 @@ import com.zjusthow.minicollections.exception.SeriesNotFoundException;
 import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.BrandBody;
+import com.zjusthow.minicollections.model.BrandCombinedSearchDto;
 import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
 import com.zjusthow.minicollections.model.BrandObjectBody;
@@ -162,6 +163,60 @@ public class BrandService {
         }
 
         return searchBrandsSqlPage(trimmed, preferZh, safePage, pageSize);
+    }
+
+    public BrandCombinedSearchDto searchCombinedPage(
+            String keyword,
+            List<Long> categoryIds,
+            List<Long> brandIds,
+            List<Long> scaleIds,
+            String effectiveLocale,
+            int page,
+            int size) {
+        int pageSize = clampSize(size);
+        int safePage = clampPage(page);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return BrandCombinedSearchDto.empty(safePage, pageSize);
+        }
+        String trimmed = keyword.trim();
+        boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        BrandObjectSearchFilter filter = BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds);
+
+        BrandSearchTotals brandTotals = resolveBrandSearchTotals(trimmed);
+        ObjectSearchTotals objectTotals = resolveObjectSearchTotals(trimmed, filter);
+        long totalBrands = brandTotals.total();
+        long totalObjects = objectTotals.total();
+        long totalElements = totalBrands + totalObjects;
+        boolean totalExact = brandTotals.totalExact() && objectTotals.totalExact();
+        int totalPages = pageSize <= 0 ? 0 : (int) Math.ceil((double) totalElements / pageSize);
+
+        long globalStart = (long) safePage * pageSize;
+        List<BrandDto> brands = List.of();
+        List<BrandObjectDto> objects = List.of();
+        int remaining = pageSize;
+
+        if (globalStart < totalBrands && remaining > 0) {
+            int brandOffset = (int) globalStart;
+            int brandLimit = (int) Math.min(remaining, totalBrands - globalStart);
+            brands = fetchBrandSearchSlice(trimmed, preferZh, brandOffset, brandLimit);
+            remaining -= brands.size();
+        }
+
+        if (remaining > 0) {
+            int objectOffset = (int) Math.max(0L, globalStart - totalBrands);
+            objects = fetchBrandObjectSearchSlice(trimmed, filter, preferZh, objectOffset, remaining);
+        }
+
+        return new BrandCombinedSearchDto(
+                brands,
+                objects,
+                safePage,
+                pageSize,
+                totalBrands,
+                totalObjects,
+                totalElements,
+                totalPages,
+                totalExact);
     }
 
     public PageResponse<BrandObjectDto> getBrandObjectsPage(
@@ -543,6 +598,115 @@ public class BrandService {
                 brandObjectRepository::findAllById,
                 e -> toBrandObjectDto(e, preferZh));
         return PageResponse.of(content, page, pageSize, esResult.totalElements(), esResult.totalExact());
+    }
+
+    private record BrandSearchTotals(long total, boolean totalExact) {}
+
+    private record ObjectSearchTotals(long total, boolean totalExact) {}
+
+    private BrandSearchTotals resolveBrandSearchTotals(String keyword) {
+        if (brandEsEnabled()) {
+            try {
+                EsSearchPageResult esResult = brandElasticsearchQueryService.searchPage(keyword, 0, 1);
+                if (esResult.totalElements() > 0) {
+                    return new BrandSearchTotals(esResult.totalElements(), esResult.totalExact());
+                }
+            } catch (Exception e) {
+                log.warn("Elasticsearch brand count failed, using SQL fallback: {}", e.getMessage());
+            }
+        }
+        return new BrandSearchTotals(brandRepository.countSearch(keyword), true);
+    }
+
+    private ObjectSearchTotals resolveObjectSearchTotals(String keyword, BrandObjectSearchFilter filter) {
+        if (esEnabled()) {
+            try {
+                EsSearchPageResult esResult =
+                        brandObjectElasticsearchQueryService.searchPage(keyword, filter, 0, 1);
+                if (esResult.totalElements() > 0) {
+                    return new ObjectSearchTotals(esResult.totalElements(), esResult.totalExact());
+                }
+            } catch (Exception e) {
+                log.warn("Elasticsearch object count failed, using SQL fallback: {}", e.getMessage());
+            }
+        }
+        return new ObjectSearchTotals(countSearch(keyword, filter), true);
+    }
+
+    private List<BrandDto> fetchBrandSearchSlice(
+            String keyword,
+            boolean preferZh,
+            int offset,
+            int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+        if (brandEsEnabled()) {
+            try {
+                EsSearchPageResult esResult =
+                        brandElasticsearchQueryService.searchSlice(keyword, offset, limit);
+                if (!esResult.ids().isEmpty() || offset > 0) {
+                    return loadByIdsInOrder(
+                            esResult.ids(),
+                            brandRepository::findAllById,
+                            e -> BrandDto.from(e, preferZh));
+                }
+            } catch (Exception e) {
+                log.warn("Elasticsearch brand slice failed, using SQL fallback: {}", e.getMessage());
+            }
+        }
+        return brandRepository.searchPage(keyword, limit, offset).stream()
+                .map(e -> BrandDto.from(e, preferZh))
+                .toList();
+    }
+
+    private List<BrandObjectDto> fetchBrandObjectSearchSlice(
+            String keyword,
+            BrandObjectSearchFilter filter,
+            boolean preferZh,
+            int offset,
+            int limit) {
+        if (limit <= 0) {
+            return List.of();
+        }
+        if (esEnabled()) {
+            try {
+                EsSearchPageResult esResult =
+                        brandObjectElasticsearchQueryService.searchSlice(keyword, filter, offset, limit);
+                if (!esResult.ids().isEmpty() || offset > 0) {
+                    return loadByIdsInOrder(
+                            esResult.ids(),
+                            brandObjectRepository::findAllById,
+                            e -> toBrandObjectDto(e, preferZh));
+                }
+            } catch (Exception e) {
+                log.warn("Elasticsearch object slice failed, using SQL fallback: {}", e.getMessage());
+            }
+        }
+        List<BrandObjectEntity> entities;
+        if (filter.scopeBrandId() != null) {
+            entities = brandObjectRepository.searchPageWithinBrand(
+                    keyword,
+                    filter.scopeBrandId(),
+                    filter.filterCategories(),
+                    filter.categoryIdsParam(),
+                    filter.filterScales(),
+                    filter.scaleIdsParam(),
+                    limit,
+                    offset);
+        } else {
+            entities = brandObjectRepository.searchPage(
+                    keyword,
+                    filter.filterBrands(),
+                    filter.brandIdsParam(),
+                    filter.filterCategories(),
+                    filter.categoryIdsParam(),
+                    filter.filterScales(),
+                    filter.scaleIdsParam(),
+                    limit,
+                    offset);
+        }
+        return toBrandObjectDtos(entities, preferZh);
     }
 
     private <T, E> List<T> loadByIdsInOrder(

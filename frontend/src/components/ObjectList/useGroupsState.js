@@ -12,12 +12,14 @@ export default function useGroupsState() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchValue, setSearchParam] = useSearchParam();
+  const [searchValue] = useSearchParam();
   const {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
     clearObjectFilters,
+    clearSearchAndFilters,
+    setSearchQueryClearingFilters,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,
@@ -154,11 +156,10 @@ export default function useGroupsState() {
   const handleGroupSearch = useCallback(
     async (value) => {
       const keyword = value.trim();
-      setSearchParam(keyword);
       if (!keyword) {
+        clearSearchAndFilters();
         setGroupSearchKeyword("");
         setGroupSearchActive(false);
-        clearObjectFilters();
         setSearchFacets(null);
         syncedKeywordRef.current = "";
         fetchKeywordRef.current = "";
@@ -173,13 +174,13 @@ export default function useGroupsState() {
         return;
       }
       if (keyword !== syncedKeywordRef.current) {
-        clearObjectFilters();
+        setSearchQueryClearingFilters(keyword);
         syncedKeywordRef.current = keyword;
       }
       setGroupSearchKeyword(keyword);
       setGroupSearchActive(true);
     },
-    [setSearchParam, clearObjectFilters, loadBrowseGroups, message, t],
+    [clearSearchAndFilters, setSearchQueryClearingFilters, loadBrowseGroups, message, t],
   );
 
   const handleCreateGroup = async () => {

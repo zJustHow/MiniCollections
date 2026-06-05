@@ -12,8 +12,7 @@ export default function GuestBrandsView() {
     searchResultObjects,
     searchValue,
     brandsListPage,
-    brandsSearchPage,
-    objectsSearchPage,
+    combinedSearchPage,
     showObjectFilters,
     searchFacets,
     facetsLoading,
@@ -36,8 +35,7 @@ export default function GuestBrandsView() {
       searchResultObjects={searchResultObjects}
       searchValue={searchValue}
       brandsListPage={brandsListPage}
-      brandsSearchPage={brandsSearchPage}
-      objectsSearchPage={objectsSearchPage}
+      combinedSearchPage={combinedSearchPage}
       showObjectFilters={showObjectFilters}
       searchFacets={searchFacets}
       facetsLoading={facetsLoading}

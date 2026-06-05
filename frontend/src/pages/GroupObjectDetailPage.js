@@ -198,7 +198,7 @@ export default function GroupObjectDetailPage() {
         <div>
           <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
         </div>
-        <span style={{ fontSize: 15, fontWeight: 600, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "center" }}>
+        <span className="header-slot-title">
           {userObject?.name ?? "…"}
         </span>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>

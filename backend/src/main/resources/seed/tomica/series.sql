@@ -11,6 +11,6 @@ INSERT INTO series (id, brand_id, name_en, name_zh) VALUES
 (44009, 44, 'Disney Tomica', '迪士尼多美卡'),
 (44010, 44, 'Cars Tomica', '赛车总动员多美卡'),
 (44011, 44, 'First Tomica', '初试多美卡'),
-(44012, 44, 'Special', NULL);
+(44012, 44, 'Special', '特别的');
 
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));

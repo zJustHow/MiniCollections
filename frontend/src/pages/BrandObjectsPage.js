@@ -13,7 +13,7 @@ import {
 import AddCardCover from "../components/ObjectList/AddCardCover";
 import CardCover from "../components/ObjectList/CardCover";
 import ListPagination from "../components/ListPagination";
-import ObjectSearchFilterPanel from "../components/ObjectSearchFilterPanel";
+import ObjectSearchFilterLayout from "../components/ObjectSearchFilterLayout";
 import { filterKeyFromIds } from "../utils/filterParams";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import BrandModal from "../components/ObjectList/modals/BrandModal";
@@ -42,11 +42,13 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const screens = useBreakpoint();
   const cols = screens.lg ? 4 : screens.md ? 3 : 2;
 
-  const [searchValue, setSearchParam] = useSearchParam();
+  const [searchValue] = useSearchParam();
   const {
     selectedCategoryIds,
     selectedScaleIds,
     clearObjectFilters,
+    clearSearchAndFilters,
+    setSearchQueryClearingFilters,
     onToggleCategory,
     onToggleScale,
   } = useObjectFilterParams({ includeBrands: false });
@@ -207,17 +209,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
             }
           />
         </div>
-        <span
-          style={{
-            fontSize: 15,
-            fontWeight: 700,
-            color: "var(--neu-text)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            textAlign: "center",
-          }}
-        >
+        <span className="header-slot-title">
           {brand?.name ?? "…"}
         </span>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
@@ -259,23 +251,21 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     (keyword) => {
       const trimmed = keyword.trim();
       if (!trimmed) {
+        clearSearchAndFilters();
         setSearchActive(false);
         setSearchKeyword("");
-        setSearchParam("");
-        clearObjectFilters();
         setSearchFacets(null);
         syncedKeywordRef.current = "";
         return;
       }
       if (trimmed !== syncedKeywordRef.current) {
-        clearObjectFilters();
+        setSearchQueryClearingFilters(trimmed);
         syncedKeywordRef.current = trimmed;
       }
-      setSearchParam(trimmed);
       setSearchKeyword(trimmed);
       setSearchActive(true);
     },
-    [setSearchParam, clearObjectFilters],
+    [clearSearchAndFilters, setSearchQueryClearingFilters],
   );
 
   return (
@@ -295,11 +285,11 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
             const v = e.target.value;
             setDraftQuery(v);
             if (v === "") {
+              clearSearchAndFilters();
               setSearchActive(false);
               setSearchKeyword("");
-              setSearchParam("");
-              clearObjectFilters();
               setSearchFacets(null);
+              syncedKeywordRef.current = "";
             }
           }}
           onSearch={(v) => {
@@ -315,46 +305,37 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         {searchActive ? (
           <>
             {showSearchObjectsSection ? (
-              <div className="neu-search-objects-layout">
-                {showFilterColumn && (
-                  <ObjectSearchFilterPanel
-                    facets={searchFacets}
-                    loading={facetsLoading}
-                    selectedCategoryIds={selectedCategoryIds}
-                    selectedBrandIds={[]}
-                    selectedScaleIds={selectedScaleIds}
-                    onToggleCategory={onToggleCategory}
-                    onToggleBrand={() => {}}
-                    onToggleScale={onToggleScale}
+              <ObjectSearchFilterLayout
+                showFilterColumn={showFilterColumn}
+                facets={searchFacets}
+                loading={facetsLoading}
+                selectedCategoryIds={selectedCategoryIds}
+                selectedBrandIds={[]}
+                selectedScaleIds={selectedScaleIds}
+                onToggleCategory={onToggleCategory}
+                onToggleBrand={() => {}}
+                onToggleScale={onToggleScale}
+              >
+                {displayObjects.map((item) => (
+                  <Card
+                    key={item.id}
+                    hoverable
+                    className="neu-card"
+                    cover={
+                      <CardCover
+                        image_url={item.image_url}
+                        name={item.name}
+                      />
+                    }
+                    onClick={() =>
+                      navigate(`/brands/${brandId}/objects/${item.id}`, {
+                        state: { brandObject: item, brand },
+                      })
+                    }
+                    bodyStyle={{ padding: 0 }}
                   />
-                )}
-                <div
-                  className="neu-search-objects-cards"
-                  style={
-                    showFilterColumn ? undefined : { gridColumn: "1 / -1" }
-                  }
-                >
-                  {displayObjects.map((item) => (
-                    <Card
-                      key={item.id}
-                      hoverable
-                      className="neu-card"
-                      cover={
-                        <CardCover
-                          image_url={item.image_url}
-                          name={item.name}
-                        />
-                      }
-                      onClick={() =>
-                        navigate(`/brands/${brandId}/objects/${item.id}`, {
-                          state: { brandObject: item, brand },
-                        })
-                      }
-                      bodyStyle={{ padding: 0 }}
-                    />
-                  ))}
-                </div>
-              </div>
+                ))}
+              </ObjectSearchFilterLayout>
             ) : (
               !objectsSearch.loading && (
                 <div

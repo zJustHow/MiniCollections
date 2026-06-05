@@ -1,6 +1,7 @@
 package com.zjusthow.minicollections.controller;
 
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
+import com.zjusthow.minicollections.model.BrandCombinedSearchDto;
 import com.zjusthow.minicollections.model.BrandDto;
 import com.zjusthow.minicollections.model.BrandObjectDto;
 import com.zjusthow.minicollections.model.BrandObjectBody;
@@ -47,6 +48,26 @@ public class BrandController {
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.getBrandsPage(
                 effectiveLocale(acceptLanguage, user), page, size));
+    }
+
+    @GetMapping("/search/combined")
+    public ResponseEntity<BrandCombinedSearchDto> searchBrandsCombined(
+            @RequestParam String keyword,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<Long> brandIds,
+            @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "24") int size,
+            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(brandService.searchCombinedPage(
+                keyword,
+                categoryIds,
+                brandIds,
+                scaleIds,
+                effectiveLocale(acceptLanguage, user),
+                page,
+                size));
     }
 
     @GetMapping("/search")

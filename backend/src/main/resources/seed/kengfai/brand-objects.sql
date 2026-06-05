@@ -30,7 +30,7 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('1/64 Audi 2021 R8 Black Open', '1/64 奥迪 2021 R8 黑色 Open', 'http://localhost:9000/minicollections-media/kengfai/tk-kf036-4.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64),
 ('1/64 Audi 2021 R8 White Open', '1/64 奥迪 2021 R8 白色 Open', 'http://localhost:9000/minicollections-media/kengfai/tk-kf036-5.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64),
 ('1/64 Audi 2021 R8 Gray Open', '1/64 奥迪 2021 R8 灰色 Open', 'http://localhost:9000/minicollections-media/kengfai/tk-kf036-6.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64),
-('1/64 Scania V8 730S 4x2 Black ※トレーラーヘッド', '1/64 斯堪尼亚 V8 730S 4x2 黑色 ※拖车车头版', 'http://localhost:9000/minicollections-media/kengfai/tk-kf037-1.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64),
-('1/64 Scania V8 730S 4x2 White ※トレーラーヘッド', '1/64 斯堪尼亚 V8 730S 4x2 白色 ※拖车车头版', 'http://localhost:9000/minicollections-media/kengfai/tk-kf037-2.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64),
+('1/64 Scania V8 730S 4x2 Black *Trailer head', '1/64 斯堪尼亚 V8 730S 4x2 黑色 ※拖车车头版', 'http://localhost:9000/minicollections-media/kengfai/tk-kf037-1.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64),
+('1/64 Scania V8 730S 4x2 White *Trailer head', '1/64 斯堪尼亚 V8 730S 4x2 白色 ※拖车车头版', 'http://localhost:9000/minicollections-media/kengfai/tk-kf037-2.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64),
 ('1/64 Scania transport vehicle Green', '1/64 斯堪尼亚 transport vehicle 绿色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf037-6.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64),
 ('1/64 Scania transport vehicle Silver', '1/64 斯堪尼亚 transport vehicle 银色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf037-7.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 10, 1, 64);

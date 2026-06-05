@@ -10,19 +10,21 @@ function parsePageParam(searchParams, key) {
   return parsed - 1;
 }
 
-export default function usePagedList(fetchPage, options = {}) {
+export default function useCombinedBrandSearch(fetchPage, options = {}) {
   const {
     resetKey = "",
     enabled = true,
     pageSize = 24,
-    pageParamKey = null,
-    allowEmptyPage = false,
+    pageParamKey = "searchPage",
   } = options;
 
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [items, setItems] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [objects, setObjects] = useState([]);
   const [page, setPage] = useState(0);
+  const [totalBrands, setTotalBrands] = useState(0);
+  const [totalObjects, setTotalObjects] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalExact, setTotalExact] = useState(true);
@@ -31,8 +33,11 @@ export default function usePagedList(fetchPage, options = {}) {
   const pendingScrollRef = useRef(false);
 
   const applyPage = useCallback((response) => {
-    setItems(Array.isArray(response?.content) ? response.content : []);
+    setBrands(Array.isArray(response?.brands) ? response.brands : []);
+    setObjects(Array.isArray(response?.objects) ? response.objects : []);
     setPage(response?.page ?? 0);
+    setTotalBrands(response?.total_brands ?? 0);
+    setTotalObjects(response?.total_objects ?? 0);
     setTotalElements(response?.total_elements ?? 0);
     setTotalPages(response?.total_pages ?? 0);
     setTotalExact(response?.total_exact !== false);
@@ -55,18 +60,17 @@ export default function usePagedList(fetchPage, options = {}) {
       setLoading(true);
       try {
         const response = await fetchPage({ page: targetPage, size: pageSize });
-        const totalPages = response?.total_pages ?? 0;
-        const totalElements = response?.total_elements ?? 0;
-        const contentLength = Array.isArray(response?.content)
-          ? response.content.length
-          : 0;
+        const responseTotalPages = response?.total_pages ?? 0;
+        const responseTotalElements = response?.total_elements ?? 0;
+        const brandCount = Array.isArray(response?.brands) ? response.brands.length : 0;
+        const objectCount = Array.isArray(response?.objects) ? response.objects.length : 0;
         if (
-          !allowEmptyPage &&
-          contentLength === 0 &&
-          totalElements > 0 &&
+          brandCount === 0 &&
+          objectCount === 0 &&
+          responseTotalElements > 0 &&
           targetPage > 0 &&
-          totalPages > 0 &&
-          targetPage >= totalPages
+          responseTotalPages > 0 &&
+          targetPage >= responseTotalPages
         ) {
           clearPageParam();
           const retry = await fetchPage({ page: 0, size: pageSize });
@@ -78,12 +82,15 @@ export default function usePagedList(fetchPage, options = {}) {
         setLoading(false);
       }
     },
-    [fetchPage, pageSize, applyPage, clearPageParam, allowEmptyPage],
+    [fetchPage, pageSize, applyPage, clearPageParam],
   );
 
   const reset = useCallback(() => {
-    setItems([]);
+    setBrands([]);
+    setObjects([]);
     setPage(0);
+    setTotalBrands(0);
+    setTotalObjects(0);
     setTotalElements(0);
     setTotalPages(0);
     setTotalExact(true);
@@ -137,7 +144,7 @@ export default function usePagedList(fetchPage, options = {}) {
     requestAnimationFrame(() => {
       scrollAppToTop();
     });
-  }, [loading, page, items]);
+  }, [loading, page, brands, objects]);
 
   const onPageChange = useCallback(
     (nextPageOneBased) => {
@@ -150,8 +157,11 @@ export default function usePagedList(fetchPage, options = {}) {
   );
 
   return {
-    items,
+    brands,
+    objects,
     page,
+    totalBrands,
+    totalObjects,
     totalElements,
     totalPages,
     totalExact,

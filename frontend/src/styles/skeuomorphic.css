@@ -194,6 +194,16 @@ a:hover {
   font-weight: 400;
 }
 
+.header-slot-title {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--neu-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
 .neu-tab-btn:hover:not(.active) {
   color: var(--neu-dark);
   background: var(--neu-item-hover-bg);
@@ -736,9 +746,38 @@ a:hover {
 .ant-btn[disabled],
 .ant-btn-disabled {
   transform: none;
-  box-shadow: var(--raised-sm);
-  opacity: 0.55;
   cursor: not-allowed;
+  opacity: 1;
+}
+
+.ant-btn-default[disabled],
+.ant-btn-default.ant-btn-disabled,
+.ant-btn-default[disabled]:hover,
+.ant-btn-default.ant-btn-disabled:hover {
+  box-shadow: var(--inset);
+  background: var(--neu-bg);
+  color: var(--neu-text-2);
+  border-color: var(--neu-bg);
+}
+
+.ant-btn-primary[disabled],
+.ant-btn-primary.ant-btn-disabled,
+.ant-btn-primary[disabled]:hover,
+.ant-btn-primary.ant-btn-disabled:hover {
+  box-shadow: var(--inset-accent);
+  background: var(--neu-accent-light);
+  color: #fff;
+  border-color: var(--neu-accent-light);
+}
+
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous[disabled],
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous.ant-btn-disabled,
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous[disabled]:hover,
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous.ant-btn-disabled:hover {
+  box-shadow: var(--inset-danger);
+  background: var(--neu-danger-light);
+  color: #fff;
+  border-color: var(--neu-danger-light);
 }
 
 /* Link buttons — no neumorphic shadow / lift */
@@ -759,6 +798,21 @@ a:hover {
   box-shadow: none;
   transform: none;
   color: var(--neu-accent);
+}
+
+.ant-btn-link[disabled],
+.ant-btn-link.ant-btn-disabled,
+.ant-btn-text[disabled],
+.ant-btn-text.ant-btn-disabled,
+.ant-btn-link[disabled]:hover,
+.ant-btn-link.ant-btn-disabled:hover,
+.ant-btn-text[disabled]:hover,
+.ant-btn-text.ant-btn-disabled:hover {
+  opacity: 1;
+  box-shadow: none;
+  color: var(--neu-text-2);
+  background: transparent;
+  border-color: transparent;
 }
 
 /* ── INPUTS ───────────────────────────────────────────────── */
@@ -1728,6 +1782,18 @@ textarea.ant-input[disabled],
   top: 16px;
 }
 
+.neu-filter-panel--drawer {
+  padding: 0;
+  position: static;
+  top: auto;
+}
+
+.neu-filter-mobile-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
 .neu-filter-panel-title {
   font-size: 14px;
   font-weight: 700;
@@ -1888,6 +1954,18 @@ textarea.ant-input[disabled],
   min-width: 0;
 }
 
+.neu-search-section-label {
+  grid-column: 1 / -1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--neu-text-2);
+  margin-bottom: -4px;
+}
+
+.neu-search-section-label--spaced {
+  margin-top: 8px;
+}
+
 @media (max-width: 992px) {
   .neu-search-objects-layout {
     grid-template-columns: 1fr;
@@ -1897,11 +1975,14 @@ textarea.ant-input[disabled],
     grid-column: span 1;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
 
-@media (max-width: 576px) {
-  .neu-search-objects-cards {
-    grid-template-columns: 1fr;
+  .neu-search-objects-layout--mobile {
+    display: block;
+  }
+
+  .neu-search-objects-layout--mobile .neu-search-objects-cards {
+    grid-column: unset;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1910,7 +1991,7 @@ textarea.ant-input[disabled],
   padding: 2px 10px 0;
   background: transparent;
   color: var(--neu-text);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 13px;
   letter-spacing: 0.3px;
   white-space: nowrap;
@@ -2140,7 +2221,58 @@ textarea.ant-input[disabled],
   border-radius: 0 var(--r-md) var(--r-md) 0;
 }
 
-/* ── PAGINATION ───────────────────────────────────────────── */
+/* ── LIST PAGINATION ──────────────────────────────────────── */
+.neu-pagination-row {
+  --neu-grid-cols: 4;
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(var(--neu-grid-cols), minmax(0, 1fr));
+  gap: 16px;
+}
+
+.neu-pagination-controls {
+  grid-column: -1;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-pagination-controls .ant-btn.neu-pagination-btn {
+  box-sizing: border-box;
+  height: 36px;
+  min-width: 36px;
+  padding-inline: 12px;
+}
+
+.neu-pagination-controls .ant-btn.neu-pagination-btn.ant-btn-icon-only {
+  width: 36px;
+  padding-inline: 0;
+}
+
+.neu-pagination-controls .ant-btn.neu-pagination-btn-current {
+  color: var(--neu-accent);
+  box-shadow: var(--inset);
+}
+
+.neu-pagination-ellipsis {
+  min-width: 24px;
+  text-align: center;
+  color: var(--neu-text-2);
+  font-size: 13px;
+  user-select: none;
+}
+
+@media (max-width: 992px) {
+  .neu-pagination-controls {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── PAGINATION (antd table) ──────────────────────────────── */
 .ant-pagination .ant-pagination-item {
   background: var(--neu-bg);
   border: none;

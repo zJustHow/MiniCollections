@@ -256,7 +256,7 @@ CREATE TABLE object_submissions
     CONSTRAINT fk_submission_scale FOREIGN KEY (scale_id) REFERENCES scales (id) ON DELETE SET NULL
 );
 
--- MINI GT (MGT): 1056 products in minigt/brand-objects.sql
+-- MINI GT (MGT): 1242 products in minigt/brand-objects.sql
 INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (1, 'MINI GT (MGT)', NULL, 'http://localhost:9000/minicollections-media/brands/minigt/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
@@ -348,7 +348,7 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- MODELCOLLECT: 16 products in modelcollect/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (14, 'MODELCOLLECT', NULL, 'http://localhost:9000/minicollections-media/brands/modelcollect/logo.gif');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (14, 'MODELCOLLECT', NULL, 'http://localhost:9000/minicollections-media/brands/modelcollect/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -733,13 +733,13 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Time Micro (TM): 153 products in time-micro/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (48, 'Time Micro (TM)', NULL, 'http://localhost:9000/minicollections-media/brands/time-micro/logo.jpg');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (48, 'Time Micro (TM)', NULL, 'http://localhost:9000/minicollections-media/brands/time-micro/logo.png');
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Rhino Models: 37 products in rhino-models/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (49, 'Rhino Models', NULL, 'http://localhost:9000/minicollections-media/brands/rhino-models/logo.jpg');
+INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (49, 'Rhino Models', NULL, 'http://localhost:9000/minicollections-media/brands/rhino-models/logo.png');
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));

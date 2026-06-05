@@ -140,17 +140,7 @@ export default function GroupObjectsPage() {
             onClick={() => navigate("/groups")}
           />
         </div>
-        <span
-          style={{
-            fontSize: 15,
-            fontWeight: 700,
-            color: "var(--neu-text)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            textAlign: "center",
-          }}
-        >
+        <span className="header-slot-title">
           {group?.name ?? "…"}
         </span>
         <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>

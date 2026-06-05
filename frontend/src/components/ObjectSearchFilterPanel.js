@@ -34,6 +34,82 @@ function FilterOption({ label, count, selected, onClick }) {
   );
 }
 
+function FilterContent({
+  facets,
+  loading,
+  selectedCategoryIds,
+  selectedBrandIds,
+  selectedScaleIds,
+  onToggleCategory,
+  onToggleBrand,
+  onToggleScale,
+  showTitle,
+}) {
+  const { t } = useLocale();
+
+  if (!facets) {
+    if (!loading) return null;
+    return showTitle ? (
+      <div className="neu-filter-panel-title">{t("searchFilters")}</div>
+    ) : null;
+  }
+
+  const hasCategories = facets.categories?.length > 0;
+  const hasBrands = facets.brands?.length > 0;
+  const hasScales = facets.scales?.length > 0;
+  if (!hasCategories && !hasBrands && !hasScales) return null;
+
+  return (
+    <>
+      {showTitle && (
+        <div className="neu-filter-panel-title">{t("searchFilters")}</div>
+      )}
+
+      {hasCategories && (
+        <FilterSection title={t("category")}>
+          {facets.categories.map((item) => (
+            <FilterOption
+              key={item.id}
+              label={item.name}
+              count={item.count}
+              selected={selectedCategoryIds.includes(item.id)}
+              onClick={() => onToggleCategory(item.id)}
+            />
+          ))}
+        </FilterSection>
+      )}
+
+      {hasBrands && (
+        <FilterSection title={t("brands")}>
+          {facets.brands.map((item) => (
+            <FilterOption
+              key={item.id}
+              label={item.name}
+              count={item.count}
+              selected={selectedBrandIds.includes(item.id)}
+              onClick={() => onToggleBrand(item.id)}
+            />
+          ))}
+        </FilterSection>
+      )}
+
+      {hasScales && (
+        <FilterSection title={t("scale")}>
+          {facets.scales.map((item) => (
+            <FilterOption
+              key={item.id}
+              label={item.code}
+              count={item.count}
+              selected={selectedScaleIds.includes(item.id)}
+              onClick={() => onToggleScale(item.id)}
+            />
+          ))}
+        </FilterSection>
+      )}
+    </>
+  );
+}
+
 export default function ObjectSearchFilterPanel({
   facets,
   loading,
@@ -43,72 +119,37 @@ export default function ObjectSearchFilterPanel({
   onToggleCategory,
   onToggleBrand,
   onToggleScale,
+  variant = "sidebar",
 }) {
-  const { t } = useLocale();
+  const isDrawer = variant === "drawer";
+  const Tag = isDrawer ? "div" : "aside";
+  const panelClass = isDrawer
+    ? "neu-filter-panel neu-filter-panel--drawer"
+    : "neu-panel neu-filter-panel";
 
-  if (!facets) {
-    if (!loading) return null;
-    return (
-      <aside className="neu-panel neu-filter-panel">
-        <Spin spinning>
-          <div className="neu-filter-panel-title">{t("searchFilters")}</div>
-        </Spin>
-      </aside>
-    );
-  }
+  const hasFacets =
+    facets &&
+    ((facets.categories?.length ?? 0) > 0 ||
+      (facets.brands?.length ?? 0) > 0 ||
+      (facets.scales?.length ?? 0) > 0);
 
-  const hasCategories = facets.categories?.length > 0;
-  const hasBrands = facets.brands?.length > 0;
-  const hasScales = facets.scales?.length > 0;
-  if (!hasCategories && !hasBrands && !hasScales) return null;
+  if (!hasFacets && !loading) return null;
 
   return (
-    <aside className="neu-panel neu-filter-panel">
+    <Tag className={panelClass}>
       <Spin spinning={loading}>
-        <div className="neu-filter-panel-title">{t("searchFilters")}</div>
-
-        {hasCategories && (
-          <FilterSection title={t("category")}>
-            {facets.categories.map((item) => (
-              <FilterOption
-                key={item.id}
-                label={item.name}
-                count={item.count}
-                selected={selectedCategoryIds.includes(item.id)}
-                onClick={() => onToggleCategory(item.id)}
-              />
-            ))}
-          </FilterSection>
-        )}
-
-        {hasBrands && (
-          <FilterSection title={t("brands")}>
-            {facets.brands.map((item) => (
-              <FilterOption
-                key={item.id}
-                label={item.name}
-                count={item.count}
-                selected={selectedBrandIds.includes(item.id)}
-                onClick={() => onToggleBrand(item.id)}
-              />
-            ))}
-          </FilterSection>
-        )}
-
-        {hasScales && (
-          <FilterSection title={t("scale")}>
-            {facets.scales.map((item) => (
-              <FilterOption
-                key={item.id}
-                label={item.code}
-                count={item.count}
-                selected={selectedScaleIds.includes(item.id)}
-                onClick={() => onToggleScale(item.id)}
-              />
-            ))}
-          </FilterSection>
-        )}
+        <FilterContent
+          facets={facets}
+          loading={loading}
+          selectedCategoryIds={selectedCategoryIds}
+          selectedBrandIds={selectedBrandIds}
+          selectedScaleIds={selectedScaleIds}
+          onToggleCategory={onToggleCategory}
+          onToggleBrand={onToggleBrand}
+          onToggleScale={onToggleScale}
+          showTitle={!isDrawer}
+        />
       </Spin>
-    </aside>
+    </Tag>
   );
 }
