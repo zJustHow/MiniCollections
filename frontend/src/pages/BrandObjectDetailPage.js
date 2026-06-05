@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { App, Button, Form, Grid, Popconfirm } from "antd";
+import HeaderActionButton from "../components/HeaderActionButton";
 import {
   ArrowLeftOutlined,
   DeleteOutlined,
@@ -45,7 +46,7 @@ function DetailRow({ label, value }) {
       >
         {label}
       </span>
-      <span style={{ color: "var(--neu-text)", fontSize: 13, fontWeight: 500 }}>
+      <span style={{ color: "var(--neu-text)", fontSize: 13 }}>
         {value}
       </span>
     </div>
@@ -101,25 +102,15 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
 
   useEffect(() => {
     setHeaderSlot(
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
-          alignItems: "center",
-          width: "100%",
-          gap: 8,
-        }}
-      >
-        <div>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
-        </div>
-        <span className="header-slot-title">
-          {brandObject?.name ?? "…"}
-        </span>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+      <div className="header-slot-bar">
+        <div className="header-slot-actions">
+          <HeaderActionButton
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+          />
           {isAdmin && brandObject && (
             <>
-              <Button
+              <HeaderActionButton
                 icon={<EditOutlined />}
                 onClick={() => setBrandObjectModalOpen(true)}
               />
@@ -134,11 +125,14 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
                 okButtonProps={{ danger: true }}
                 cancelText={t("cancel")}
               >
-                <Button danger icon={<DeleteOutlined />} />
+                <HeaderActionButton danger icon={<DeleteOutlined />} />
               </Popconfirm>
             </>
           )}
         </div>
+        <span className="header-slot-title">
+          {brandObject?.name ?? "…"}
+        </span>
       </div>,
     );
     return () => setHeaderSlot(null);

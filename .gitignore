@@ -81,4 +81,4 @@ backend/src/main/resources/static/images/
 backend/src/main/resources/public/
 
 # Claude Code
-.claude/settings.local.json
+.claude/

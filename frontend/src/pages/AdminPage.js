@@ -132,14 +132,14 @@ export default function AdminPage() {
             flexShrink: 0,
           }}
         >
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--neu-text-2)", padding: "4px 10px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ fontSize: 11, color: "var(--neu-text-2)", padding: "4px 10px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("adminSubmissions")}
           </div>
           {statusOptions.map(({ key, label, icon }) => (
             <button
               key={key}
               type="button"
-              className={`neu-tab-btn${activeView === "submissions" && activeStatus === key ? " active" : ""}`}
+              className={`neu-pressable-btn neu-panel-tab-btn${activeView === "submissions" && activeStatus === key ? " active" : ""}`}
               style={{
                 width: "100%",
                 padding: "10px 14px",
@@ -163,7 +163,6 @@ export default function AdminPage() {
                     color: "#fff",
                     borderRadius: radius.md,
                     fontSize: 11,
-                    fontWeight: 700,
                     padding: "1px 7px",
                     lineHeight: "18px",
                     minWidth: 20,
@@ -178,12 +177,12 @@ export default function AdminPage() {
 
           <div style={{ height: 1, background: "rgba(184,182,176,0.25)", margin: "4px 8px" }} />
 
-          <div style={{ fontSize: 11, fontWeight: 600, color: "var(--neu-text-2)", padding: "0 10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ fontSize: 11, color: "var(--neu-text-2)", padding: "0 10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("adminBrands")}
           </div>
           <button
             type="button"
-            className={`neu-tab-btn${activeView === "brands" ? " active" : ""}`}
+            className={`neu-pressable-btn neu-panel-tab-btn${activeView === "brands" ? " active" : ""}`}
             style={{
               width: "100%",
               padding: "10px 14px",

@@ -91,39 +91,30 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
 
         {/* Center slot: either custom page content or default nav tabs */}
         {headerSlot ? (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              flex: 1,
-              minWidth: 0,
-            }}
-          >
-            {headerSlot}
-          </div>
+          <div className="header-slot-wrap">{headerSlot}</div>
         ) : (
           <div className="header-tabs">
             <button
-              className={`neu-tab-btn${activeTab === "brands" ? " active" : ""}`}
+              className={`neu-pressable-btn neu-header-bar-btn${activeTab === "brands" ? " active" : ""}`}
               onClick={() => handleTabChange("brands")}
             >
               {t("brands")}
             </button>
             <button
-              className={`neu-tab-btn${activeTab === "groups" ? " active" : ""}`}
+              className={`neu-pressable-btn neu-header-bar-btn${activeTab === "groups" ? " active" : ""}`}
               onClick={() => handleTabChange("groups")}
             >
               {t("groups")}
             </button>
             <button
-              className={`neu-tab-btn${activeTab === "feedback" ? " active" : ""}`}
+              className={`neu-pressable-btn neu-header-bar-btn${activeTab === "feedback" ? " active" : ""}`}
               onClick={() => handleTabChange("feedback")}
             >
               {t("feedback")}
             </button>
             {isAdmin && (
               <button
-                className={`neu-tab-btn${activeTab === "admin" ? " active" : ""}`}
+                className={`neu-pressable-btn neu-header-bar-btn${activeTab === "admin" ? " active" : ""}`}
                 onClick={() => navigate("/admin")}
               >
                 {t("adminPanel")}
@@ -189,9 +180,11 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
         {/* Mobile hamburger button — only visible on small screens */}
         {!headerSlot && (
           <button
-            className="mobile-menu-btn"
+            type="button"
+            className={`neu-pressable-btn neu-header-bar-btn mobile-menu-btn${menuOpen ? " active" : ""}`}
             onClick={() => setMenuOpen((v) => !v)}
-            aria-label="menu"
+            aria-label={menuOpen ? "close menu" : "menu"}
+            aria-expanded={menuOpen}
           >
             {menuOpen ? <CloseOutlined /> : <MenuOutlined />}
           </button>

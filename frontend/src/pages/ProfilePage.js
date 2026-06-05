@@ -8,6 +8,7 @@ import {
   Radio,
   Upload,
 } from "antd";
+import HeaderActionButton from "../components/HeaderActionButton";
 import { NeuInput, NeuSelect } from "../components/NeuFormControl";
 import {
   ArrowLeftOutlined,
@@ -40,7 +41,6 @@ function SectionLabel({ title }) {
     <div
       style={{
         fontSize: 11,
-        fontWeight: 700,
         letterSpacing: 1.4,
         textTransform: "uppercase",
         color: "var(--neu-text-2)",
@@ -229,38 +229,21 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
         style={{
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between",
           paddingLeft: 24,
           paddingRight: 24,
-          position: "relative",
         }}
       >
-        <Button
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate(-1)}
-          style={{ flexShrink: 0 }}
-        />
-        <span
-          style={{
-            fontSize: 16,
-            fontWeight: 700,
-            letterSpacing: 1,
-            color: "var(--neu-text)",
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        >
-          {t("profileTitle")}
-        </span>
-        <Button
-          danger
-          icon={<LogoutOutlined />}
-          onClick={onLogout}
-          style={{ flexShrink: 0 }}
-        >
-          {t("logout")}
-        </Button>
+        <div className="header-slot-wrap">
+          <div className="header-slot-bar">
+            <div className="header-slot-actions">
+              <HeaderActionButton
+                icon={<ArrowLeftOutlined />}
+                onClick={() => navigate(-1)}
+              />
+            </div>
+            <span className="header-slot-title">{t("profileTitle")}</span>
+          </div>
+        </div>
       </Header>
 
       <Content
@@ -324,7 +307,6 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             <div
               style={{
                 marginTop: 12,
-                fontWeight: 700,
                 fontSize: 18,
                 color: "var(--neu-text)",
               }}
@@ -620,6 +602,15 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               </Form.Item>
             </Form>
           </SectionCard>
+
+          <Button
+            danger
+            icon={<LogoutOutlined />}
+            onClick={onLogout}
+            style={{ width: "100%", marginTop: 8 }}
+          >
+            {t("logout")}
+          </Button>
         </div>
       </Content>
     </Layout>

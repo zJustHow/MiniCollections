@@ -80,6 +80,8 @@ const en = {
   // Brands / Groups
   searchBrandsAndObjects: "Search brands & models",
   noSearchResults: "No results found",
+  searchResultsSummary: 'Found {count} results for "{query}"',
+  searchResultsSummaryPlus: 'Found {count}+ results for "{query}"',
   searchBrands: "Search brands",
   searchGroups: "Search groups & models",
   searchModels: "Search models",
@@ -399,6 +401,8 @@ const zh = {
   // Brands / Groups
   searchBrandsAndObjects: "搜索品牌和模型",
   noSearchResults: "未找到结果",
+  searchResultsSummary: "找到 {count} 条与「{query}」相关的结果",
+  searchResultsSummaryPlus: "找到 {count}+ 条与「{query}」相关的结果",
   searchBrands: "搜索品牌",
   searchGroups: "搜索分组和收藏",
   myObjects: "模型",

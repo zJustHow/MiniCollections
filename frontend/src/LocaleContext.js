@@ -35,13 +35,14 @@ export function LocaleProvider({ children }) {
     <LocaleContext.Provider value={{ locale, setLocale, t }}>
       <ConfigProvider
         locale={antdLocaleMap[locale] ?? enUS}
+        wave={{ disabled: true }}
         theme={{
           token: {
             ...neuFormControlTheme.token,
             fontFamily:         '"Nunito Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
             colorPrimary:       "#5592cc",
             colorPrimaryHover:  "#6aa8dc",
-            colorPrimaryActive: "#3d78b8",
+            colorPrimaryActive: "#6aa8dc",
             colorSuccess:       "#00BF9A",
             colorWarning:       "#F5B759",
             colorError:         "#FA5252",
@@ -51,6 +52,7 @@ export function LocaleProvider({ children }) {
             colorBgContainer:   "#fcfbf8",
             colorBgElevated:    "#fcfbf8",
             colorBgLayout:      "#fcfbf8",
+            fontWeightStrong:   400,
             borderRadius:       RADIUS_PX.md,
             borderRadiusSM:     RADIUS_PX.md,
             borderRadiusLG:     RADIUS_PX.lg,
@@ -60,7 +62,7 @@ export function LocaleProvider({ children }) {
             Button: {
               colorPrimary:        "#5592cc",
               colorPrimaryHover:   "#6aa8dc",
-              colorPrimaryActive:  "#3d78b8",
+              colorPrimaryActive:  "#6aa8dc",
               primaryColor:        "#fff",
               defaultColor:        "#44476A",
               defaultHoverColor:   "#5592cc",
@@ -70,9 +72,9 @@ export function LocaleProvider({ children }) {
               defaultActiveBorderColor:"#fcfbf8",
               colorError:          "#FA5252",
               colorErrorHover:     "#fb6b6b",
-              colorErrorActive:    "#d93636",
+              colorErrorActive:    "#fb6b6b",
               dangerColor:         "#fff",
-              fontWeight:          600,
+              fontWeight:          400,
             },
             ...neuFormControlTheme.components,
           },

@@ -8,7 +8,13 @@ import {
 } from "../../NeuFormControl";
 import dayjs from "dayjs";
 import { useCallback, useEffect, useState } from "react";
-import { adminCreateBrandObject, adminUpdateBrandObject, getCategories, getScales, getSeriesByBrandId } from "../../../utils";
+import {
+  adminCreateBrandObject,
+  adminUpdateBrandObject,
+  getCategories,
+  getScales,
+  getSeriesByBrandId,
+} from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
 import ImageUploadField from "../../ImageUploadField";
 import useModalForm from "../../../hooks/useModalForm";
@@ -68,7 +74,9 @@ export default function BrandObjectModal({
         image_source: values.imageSource || null,
         scale_id: values.scaleId ?? null,
         category_id: values.categoryId ?? null,
-        release_date: values.releaseDate ? values.releaseDate.format("YYYY-MM-DD") : null,
+        release_date: values.releaseDate
+          ? values.releaseDate.format("YYYY-MM-DD")
+          : null,
         series_id: values.seriesId ?? null,
         release_price_cny: values.releasePriceCny ?? null,
         release_price_usd: values.releasePriceUsd ?? null,
@@ -80,7 +88,9 @@ export default function BrandObjectModal({
       }
     },
     successMessage: isEdit ? t("brandObjectUpdated") : t("brandObjectCreated"),
-    errorMessage: isEdit ? t("failedToUpdateBrandObject") : t("failedToCreateBrandObject"),
+    errorMessage: isEdit
+      ? t("failedToUpdateBrandObject")
+      : t("failedToCreateBrandObject"),
     onSuccess,
     onClose,
   });
@@ -90,26 +100,44 @@ export default function BrandObjectModal({
       loadSeries();
       loadCategories();
       loadScales();
-      form.setFieldsValue(brandObject ? {
-        nameEn: brandObject.name_en,
-        nameZh: brandObject.name_zh,
-        scaleId: brandObject.scale_id ?? undefined,
-        categoryId: brandObject.category_id ?? undefined,
-        releaseDate: brandObject.release_date ? dayjs(brandObject.release_date) : null,
-        seriesId: brandObject.series_id ?? undefined,
-        releasePriceCny: brandObject.release_price_cny,
-        releasePriceUsd: brandObject.release_price_usd,
-        imageSource: brandObject.image_source,
-      } : {
-        nameEn: "", nameZh: "", scaleId: undefined,
-        categoryId: undefined, releaseDate: null,
-        seriesId: undefined,
-        releasePriceCny: null, releasePriceUsd: null,
-        imageSource: "",
-      });
+      form.setFieldsValue(
+        brandObject
+          ? {
+              nameEn: brandObject.name_en,
+              nameZh: brandObject.name_zh,
+              scaleId: brandObject.scale_id ?? undefined,
+              categoryId: brandObject.category_id ?? undefined,
+              releaseDate: brandObject.release_date
+                ? dayjs(brandObject.release_date)
+                : null,
+              seriesId: brandObject.series_id ?? undefined,
+              releasePriceCny: brandObject.release_price_cny,
+              releasePriceUsd: brandObject.release_price_usd,
+              imageSource: brandObject.image_source,
+            }
+          : {
+              nameEn: "",
+              nameZh: "",
+              scaleId: undefined,
+              categoryId: undefined,
+              releaseDate: null,
+              seriesId: undefined,
+              releasePriceCny: null,
+              releasePriceUsd: null,
+              imageSource: "",
+            },
+      );
       setImageUrl(brandObject?.image_url || null);
     }
-  }, [open, brandObject, form, loadSeries, loadCategories, loadScales, seriesRefreshKey]);
+  }, [
+    open,
+    brandObject,
+    form,
+    loadSeries,
+    loadCategories,
+    loadScales,
+    seriesRefreshKey,
+  ]);
 
   return (
     <NeuFormDrawer
@@ -124,7 +152,11 @@ export default function BrandObjectModal({
       destroyOnClose
     >
       <Form layout="vertical" form={form}>
-        <Form.Item label={t("nameEn")} name="nameEn" rules={[{ required: true, message: t("nameRequired") }]}>
+        <Form.Item
+          label={t("nameEn")}
+          name="nameEn"
+          rules={[{ required: true, message: t("nameRequired") }]}
+        >
           <NeuInput />
         </Form.Item>
         <Form.Item label={t("nameZh")} name="nameZh">

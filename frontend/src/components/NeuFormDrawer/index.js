@@ -1,6 +1,7 @@
-import { Button, Drawer, Space } from "antd";
+import { Drawer } from "antd";
 import { useLocale as useAntdLocale } from "antd/es/locale";
-import { useLocale } from "../../LocaleContext";
+import DrawerHeaderTitle from "../DrawerHeaderTitle";
+import { NeuDrawerBody } from "../drawerStyles";
 
 /**
  * Form/detail drawer — Modal-like API (footer actions, width, destroyOnClose).
@@ -11,7 +12,6 @@ export default function NeuFormDrawer({
   onClose,
   onOk,
   okText,
-  cancelText,
   confirmLoading = false,
   width = 480,
   destroyOnClose,
@@ -24,30 +24,19 @@ export default function NeuFormDrawer({
   maskClosable = true,
   children,
 }) {
-  const { t } = useLocale();
   const [antdLocale] = useAntdLocale();
   const defaultOkText = antdLocale?.Modal?.okText ?? "OK";
+  const resolvedOkText = okText ?? defaultOkText;
 
   let resolvedFooter = footer;
   if (resolvedFooter === undefined && onOk) {
-    resolvedFooter = (
-      <Space>
-        <Button onClick={onClose}>{cancelText ?? t("cancel")}</Button>
-        <Button
-          type="primary"
-          onClick={onOk}
-          loading={confirmLoading}
-          {...okButtonProps}
-        >
-          {okText ?? defaultOkText}
-        </Button>
-      </Space>
-    );
+    resolvedFooter = null;
   }
 
   return (
     <Drawer
-      title={title}
+      title={null}
+      closable={false}
       open={open}
       onClose={onClose}
       width={width}
@@ -59,7 +48,15 @@ export default function NeuFormDrawer({
       mask={mask}
       maskClosable={maskClosable}
     >
-      {children}
+      <DrawerHeaderTitle
+        title={title}
+        onClose={onClose}
+        onOk={onOk}
+        okText={resolvedOkText}
+        confirmLoading={confirmLoading}
+        okButtonProps={okButtonProps}
+      />
+      <NeuDrawerBody>{children}</NeuDrawerBody>
     </Drawer>
   );
 }

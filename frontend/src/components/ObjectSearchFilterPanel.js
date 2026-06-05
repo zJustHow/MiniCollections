@@ -21,11 +21,10 @@ function FilterOption({ label, count, selected, onClick }) {
   return (
     <button
       type="button"
-      className={`neu-filter-option${selected ? " selected" : ""}`}
+      className={`neu-pressable-btn neu-panel-tab-btn neu-filter-tab-option${selected ? " active" : ""}`}
       onClick={onClick}
       aria-pressed={selected}
     >
-      <span className="neu-filter-dot" aria-hidden />
       <span className="neu-filter-option-body">
         <span className="neu-filter-option-label">{label}</span>
         <span className="neu-filter-option-count">{formatFacetCount(count)}</span>

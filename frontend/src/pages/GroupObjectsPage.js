@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
-import { App, Button, Card, Form, Grid, Spin } from "antd";
+import { App, Card, Form, Grid, Spin } from "antd";
+import HeaderActionButton from "../components/HeaderActionButton";
 import { NeuInput } from "../components/NeuFormControl";
 import {
   ArrowLeftOutlined,
@@ -11,6 +12,7 @@ import {
 import AddCardCover from "../components/ObjectList/AddCardCover";
 import CardCover from "../components/ObjectList/CardCover";
 import AddUserObjectInGroupModal from "../components/ObjectList/modals/AddUserObjectInGroupModal";
+import ObjectListSearchToolbar from "../components/ObjectListSearchToolbar";
 import EditGroupModal from "../components/ObjectList/modals/EditGroupModal";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
@@ -125,32 +127,22 @@ export default function GroupObjectsPage() {
 
   useEffect(() => {
     setHeaderSlot(
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
-          alignItems: "center",
-          width: "100%",
-          gap: 8,
-        }}
-      >
-        <div>
-          <Button
+      <div className="header-slot-bar">
+        <div className="header-slot-actions">
+          <HeaderActionButton
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate("/groups")}
           />
-        </div>
-        <span className="header-slot-title">
-          {group?.name ?? "…"}
-        </span>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          <Button icon={<EditOutlined />} onClick={openEditGroup} />
-          <Button
+          <HeaderActionButton icon={<EditOutlined />} onClick={openEditGroup} />
+          <HeaderActionButton
             danger
             icon={<DeleteOutlined />}
             onClick={handleDeleteGroup}
           />
         </div>
+        <span className="header-slot-title">
+          {group?.name ?? "…"}
+        </span>
       </div>,
     );
     return () => setHeaderSlot(null);
@@ -262,12 +254,11 @@ export default function GroupObjectsPage() {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginBottom: 16,
-        }}
+      <ObjectListSearchToolbar
+        searchActive={searchActive}
+        keyword={searchValue}
+        resultCount={searchResults.length}
+        resultsLoading={searchActive && loading}
       >
         <Search
           placeholder={t("searchModels")}
@@ -293,9 +284,9 @@ export default function GroupObjectsPage() {
               setSearchParam("");
             }
           }}
-          style={{ width: screens.md ? 260 : "100%" }}
+          style={{ width: "100%" }}
         />
-      </div>
+      </ObjectListSearchToolbar>
 
       <Spin spinning={loading}>
         <div

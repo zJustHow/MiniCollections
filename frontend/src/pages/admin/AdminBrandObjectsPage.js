@@ -131,7 +131,6 @@ export default function AdminBrandObjectsPage() {
             style={{
               margin: 0,
               fontSize: 20,
-              fontWeight: 700,
               color: "var(--neu-text)",
             }}
           >

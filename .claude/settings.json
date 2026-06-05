@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(grep -E \"[0-9]{2,}\")",
-      "Bash(python3 -c \"import boto3\")"
-    ]
-  }
-}

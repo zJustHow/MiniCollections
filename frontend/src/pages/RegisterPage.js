@@ -144,7 +144,7 @@ export default function RegisterPage() {
           >
             <button
               type="button"
-              className={`neu-tab-btn${registerType === "email" ? " active" : ""}`}
+              className={`neu-pressable-btn neu-panel-tab-btn${registerType === "email" ? " active" : ""}`}
               style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
               onClick={() => handleTypeChange("email")}
             >
@@ -153,7 +153,7 @@ export default function RegisterPage() {
             </button>
             <button
               type="button"
-              className={`neu-tab-btn${registerType === "phone" ? " active" : ""}`}
+              className={`neu-pressable-btn neu-panel-tab-btn${registerType === "phone" ? " active" : ""}`}
               style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
               onClick={() => handleTypeChange("phone")}
             >
@@ -299,7 +299,6 @@ export default function RegisterPage() {
                 style={{
                   fontSize: 12,
                   color: "var(--neu-text-2)",
-                  fontWeight: 600,
                   letterSpacing: 0.5,
                   textTransform: "uppercase",
                   marginBottom: 8,
@@ -318,7 +317,7 @@ export default function RegisterPage() {
               >
                 <button
                   type="button"
-                  className={`neu-tab-btn${selectedLocale === "en-US" ? " active" : ""}`}
+                  className={`neu-pressable-btn neu-panel-tab-btn${selectedLocale === "en-US" ? " active" : ""}`}
                   style={{ flex: 1, padding: "7px 0", fontSize: 13 }}
                   onClick={() => handleLocaleChange("en-US")}
                 >
@@ -326,7 +325,7 @@ export default function RegisterPage() {
                 </button>
                 <button
                   type="button"
-                  className={`neu-tab-btn${selectedLocale === "zh-CN" ? " active" : ""}`}
+                  className={`neu-pressable-btn neu-panel-tab-btn${selectedLocale === "zh-CN" ? " active" : ""}`}
                   style={{ flex: 1, padding: "7px 0", fontSize: 13 }}
                   onClick={() => handleLocaleChange("zh-CN")}
                 >

@@ -47,7 +47,7 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('Audi R8 - The autobiography of R8-405 (Limited Edition)', '奥迪 R8 - The autobiography of R8-405 (限量 Edition)', 'http://localhost:9000/minicollections-media/amalgam/M6250.jpg', 'https://www.amalgamcollection.com/', NULL, NULL, NULL, 29, 1, 8),
 ('Audi Sport ABT Schaeffler	Audi e-tron FE04 (2017) - Gen1 Season 4', '奥迪 Sport ABT Schaeffler	奥迪 e-tron FE04 (2017) - Gen1 赛季 4', 'http://localhost:9000/minicollections-media/amalgam/M5948-AB3.jpg', 'https://www.amalgamcollection.com/', NULL, NULL, NULL, 29, 1, 8),
 ('Automotive Art Project (Collector''s Edition)', '汽车艺术项目（珍藏版）', 'http://localhost:9000/minicollections-media/amalgam/M6251.jpg', 'https://www.amalgamcollection.com/', NULL, NULL, NULL, 29, 1, 8),
-('B-17F Flying Fortress - ''Memphis Belle'''''', ', 'B-17F 飞行堡垒 - ''孟菲斯美女'''''',', NULL, NULL, NULL, 29, 1, 8),
+('B-17F Flying Fortress - ''Memphis Belle''', 'B-17F 飞行堡垒 - ''孟菲斯美女''', 'http://localhost:9000/minicollections-media/amalgam/M6239.jpg', 'https://www.amalgamcollection.com/', NULL, NULL, NULL, 29, 1, 8),
 ('BAR-Honda 007 - 2005 Season Livery - Button', 'BAR-本田 007 - 2005 赛季 Livery - Button', 'http://localhost:9000/minicollections-media/amalgam/M5011.jpg', 'https://www.amalgamcollection.com/', NULL, NULL, NULL, 29, 1, 8),
 ('BAR-Honda 007 - 2005 Season Livery - Sato', 'BAR-本田 007 - 2005 赛季 Livery - Sato', 'http://localhost:9000/minicollections-media/amalgam/M5050.jpg', 'https://www.amalgamcollection.com/', NULL, NULL, NULL, 29, 1, 8),
 ('Bizzarrini 5300GT (1964)', '比扎里尼 5300GT (1964)', 'http://localhost:9000/minicollections-media/amalgam/M5812-RED.jpg', 'https://www.amalgamcollection.com/', NULL, NULL, NULL, 29, 1, 8),

@@ -3,7 +3,8 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useObjectFilterParams from "../hooks/useObjectFilterParams";
 import usePagedList from "../hooks/usePagedList";
-import { App, Button, Card, Grid, Popconfirm, Spin } from "antd";
+import { App, Card, Grid, Popconfirm, Spin } from "antd";
+import HeaderActionButton from "../components/HeaderActionButton";
 import { NeuInput } from "../components/NeuFormControl";
 import {
   ArrowLeftOutlined,
@@ -14,6 +15,7 @@ import AddCardCover from "../components/ObjectList/AddCardCover";
 import CardCover from "../components/ObjectList/CardCover";
 import ListPagination from "../components/ListPagination";
 import ObjectSearchFilterLayout from "../components/ObjectSearchFilterLayout";
+import ObjectListSearchToolbar from "../components/ObjectListSearchToolbar";
 import { filterKeyFromIds } from "../utils/filterParams";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import BrandModal from "../components/ObjectList/modals/BrandModal";
@@ -189,17 +191,9 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
 
   useEffect(() => {
     setHeaderSlot(
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr auto 1fr",
-          alignItems: "center",
-          width: "100%",
-          gap: 8,
-        }}
-      >
-        <div>
-          <Button
+      <div className="header-slot-bar">
+        <div className="header-slot-actions">
+          <HeaderActionButton
             icon={<ArrowLeftOutlined />}
             onClick={() =>
               navigate({
@@ -208,14 +202,9 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
               })
             }
           />
-        </div>
-        <span className="header-slot-title">
-          {brand?.name ?? "…"}
-        </span>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
           {isAdmin && brand && (
             <>
-              <Button
+              <HeaderActionButton
                 icon={<EditOutlined />}
                 onClick={() => {
                   setEditingBrand(brand);
@@ -233,11 +222,14 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 okButtonProps={{ danger: true }}
                 cancelText={t("cancel")}
               >
-                <Button danger icon={<DeleteOutlined />} />
+                <HeaderActionButton danger icon={<DeleteOutlined />} />
               </Popconfirm>
             </>
           )}
         </div>
+        <span className="header-slot-title">
+          {brand?.name ?? "…"}
+        </span>
       </div>,
     );
     return () => setHeaderSlot(null);
@@ -270,12 +262,12 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginBottom: 16,
-        }}
+      <ObjectListSearchToolbar
+        searchActive={searchActive}
+        keyword={searchKeyword}
+        resultCount={activePage.totalElements}
+        totalExact={activePage.totalExact}
+        resultsLoading={searchActive && activePage.loading}
       >
         <Search
           placeholder={t("searchModels")}
@@ -297,9 +289,9 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
             setDraftQuery(keyword);
             runSearch(keyword);
           }}
-          style={{ width: screens.md ? 260 : "100%" }}
+          style={{ width: "100%" }}
         />
-      </div>
+      </ObjectListSearchToolbar>
 
       <Spin spinning={activePage.loading && displayObjects.length === 0}>
         {searchActive ? (

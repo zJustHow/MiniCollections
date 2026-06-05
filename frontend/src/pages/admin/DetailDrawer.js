@@ -1,6 +1,8 @@
 import { Button, Drawer, Space, Tag } from "antd";
 import { useState } from "react";
 import { useLocale } from "../../LocaleContext";
+import DrawerHeaderTitle from "../../components/DrawerHeaderTitle";
+import { NeuDrawerBody } from "../../components/drawerStyles";
 import { radius } from "../../theme/radius";
 import { STATUS_COLOR, TYPE_COLOR, useStatusLabel, useTypeLabel } from "./constants";
 
@@ -42,7 +44,7 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
 
   return (
     <Drawer
-      title={`#${submission.id} — ${submission.name_en || submission.notes?.slice(0, 40) || "—"}`}
+      closable={false}
       open={!!submission}
       onClose={onClose}
       width={480}
@@ -61,6 +63,11 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
         ) : null
       }
     >
+      <DrawerHeaderTitle
+        title={`#${submission.id} — ${submission.name_en || submission.notes?.slice(0, 40) || "—"}`}
+        onClose={onClose}
+      />
+      <NeuDrawerBody>
       {submission.image_url && (
         <div
           onClick={() => window.open(submission.image_url, "_blank")}
@@ -100,7 +107,6 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
             transition: "opacity 0.2s",
             color: "#fff",
             fontSize: 13,
-            fontWeight: 500,
             letterSpacing: "0.5px",
             lineHeight: 1,
           }}>
@@ -119,10 +125,11 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
             style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}
           >
             <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 120, flexShrink: 0 }}>{label}</span>
-            <span style={{ color: "var(--neu-text)", fontSize: 13, whiteSpace: "pre-wrap", fontWeight: 500 }}>{String(value)}</span>
+            <span style={{ color: "var(--neu-text)", fontSize: 13, whiteSpace: "pre-wrap" }}>{String(value)}</span>
           </div>
         ) : null
       )}
+      </NeuDrawerBody>
     </Drawer>
   );
 }

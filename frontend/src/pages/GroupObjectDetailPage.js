@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { App, Button, Form, Grid, Spin } from "antd";
+import { App, Form, Grid, Spin } from "antd";
+import HeaderActionButton from "../components/HeaderActionButton";
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import DetailImage from "../components/DetailImage";
@@ -27,7 +28,7 @@ function DetailRow({ label, value }) {
   return (
     <div style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
       <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 100, flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "var(--neu-text)", fontSize: 13, fontWeight: 500 }}>{value}</span>
+      <span style={{ color: "var(--neu-text)", fontSize: 13 }}>{value}</span>
     </div>
   );
 }
@@ -194,21 +195,26 @@ export default function GroupObjectDetailPage() {
 
   useEffect(() => {
     setHeaderSlot(
-      <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", alignItems: "center", width: "100%", gap: 8 }}>
-        <div>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)} />
+      <div className="header-slot-bar">
+        <div className="header-slot-actions">
+          <HeaderActionButton
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+          />
+          {userObject && (
+            <>
+              <HeaderActionButton icon={<EditOutlined />} onClick={openEdit} />
+              <HeaderActionButton
+                danger
+                icon={<DeleteOutlined />}
+                onClick={handleDelete}
+              />
+            </>
+          )}
         </div>
         <span className="header-slot-title">
           {userObject?.name ?? "…"}
         </span>
-        <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
-          {userObject && (
-            <>
-              <Button icon={<EditOutlined />} onClick={openEdit} />
-              <Button danger icon={<DeleteOutlined />} onClick={handleDelete} />
-            </>
-          )}
-        </div>
       </div>
     );
     return () => setHeaderSlot(null);

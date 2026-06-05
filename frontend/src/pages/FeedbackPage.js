@@ -6,6 +6,8 @@ import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
 import { getBrands, getMySubmissions } from "../utils";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
+import DrawerHeaderTitle from "../components/DrawerHeaderTitle";
+import { NeuDrawerBody } from "../components/drawerStyles";
 import dayjs from "dayjs";
 
 const { Text } = Typography;
@@ -45,7 +47,7 @@ function DetailRow({ label, value }) {
   return (
     <div style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
       <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 110, flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "var(--neu-text)", fontSize: 13, fontWeight: 500 }}>{value}</span>
+      <span style={{ color: "var(--neu-text)", fontSize: 13 }}>{value}</span>
     </div>
   );
 }
@@ -106,12 +108,14 @@ function SubmissionDrawer({ item, onClose, t }) {
 
   return (
     <Drawer
+      closable={false}
       open={!!item}
       onClose={onClose}
       width={400}
-      title={<span style={{ fontSize: 14, fontWeight: 500, color: "var(--neu-text)" }}>{title}</span>}
       destroyOnClose
     >
+      <DrawerHeaderTitle title={title} onClose={onClose} />
+      <NeuDrawerBody>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <Tag color={TYPE_COLOR[item.submission_type] || "default"} style={{ margin: 0 }}>
@@ -150,7 +154,7 @@ function SubmissionDrawer({ item, onClose, t }) {
 
       {item.admin_note && (
         <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset)", borderLeft: "3px solid var(--neu-accent)" }}>
-          <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, fontWeight: 600, letterSpacing: "0.3px" }}>
+          <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, letterSpacing: "0.3px" }}>
             {t("adminReply")}
           </Text>
           <Text style={{ fontSize: 13, color: "var(--neu-text)" }}>{item.admin_note}</Text>
@@ -159,12 +163,13 @@ function SubmissionDrawer({ item, onClose, t }) {
 
       {item.reject_reason && (
         <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset)", borderLeft: "3px solid var(--neu-danger)" }}>
-          <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, fontWeight: 600, letterSpacing: "0.3px" }}>
+          <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, letterSpacing: "0.3px" }}>
             {t("rejectionReason")}
           </Text>
           <Text style={{ fontSize: 13, color: "var(--neu-text)" }}>{item.reject_reason}</Text>
         </div>
       )}
+      </NeuDrawerBody>
     </Drawer>
   );
 }

@@ -70,7 +70,7 @@ function LoginForm({ onSuccess }) {
         <>
           <button
             type="button"
-            className="neu-tab-btn"
+            className="neu-pressable-btn neu-panel-tab-btn"
             onClick={handleWechatLogin}
             disabled={wechatLoading}
             style={{
@@ -81,7 +81,6 @@ function LoginForm({ onSuccess }) {
               marginBottom: 8,
               background: "#07C160",
               color: "#fff",
-              fontWeight: 600,
             }}
           >
             <WechatOutlined style={{ marginRight: 8, fontSize: 20 }} />
@@ -108,7 +107,7 @@ function LoginForm({ onSuccess }) {
       >
         <button
           type="button"
-          className={`neu-tab-btn${loginType === "email" ? " active" : ""}`}
+          className={`neu-pressable-btn neu-panel-tab-btn${loginType === "email" ? " active" : ""}`}
           style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
           onClick={() => handleTypeChange("email")}
         >
@@ -117,7 +116,7 @@ function LoginForm({ onSuccess }) {
         </button>
         <button
           type="button"
-          className={`neu-tab-btn${loginType === "phone" ? " active" : ""}`}
+          className={`neu-pressable-btn neu-panel-tab-btn${loginType === "phone" ? " active" : ""}`}
           style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
           onClick={() => handleTypeChange("phone")}
         >
@@ -267,7 +266,7 @@ function LoginForm({ onSuccess }) {
             // PC 浏览器：微信扫码按钮
             <button
               type="button"
-              className="neu-tab-btn"
+              className="neu-pressable-btn neu-panel-tab-btn"
               onClick={handleWechatLogin}
               disabled={wechatLoading}
               style={{ width: "100%", padding: "10px 0", fontSize: 14, borderRadius: radius.md }}

@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Badge, Button, Drawer, Grid } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import ObjectSearchFilterPanel from "./ObjectSearchFilterPanel";
+import DrawerHeaderTitle from "./DrawerHeaderTitle";
+import { NeuDrawerBody } from "./drawerStyles";
 import { useLocale } from "../LocaleContext";
 
 const { useBreakpoint } = Grid;
@@ -80,14 +82,20 @@ export default function ObjectSearchFilterLayout({
 
       {showMobileFilter && (
         <Drawer
-          title={t("searchFilters")}
+          closable={false}
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           placement="right"
           width={320}
           destroyOnClose={false}
         >
-          <ObjectSearchFilterPanel {...filterProps} variant="drawer" />
+          <DrawerHeaderTitle
+            title={t("searchFilters")}
+            onClose={() => setDrawerOpen(false)}
+          />
+          <NeuDrawerBody>
+            <ObjectSearchFilterPanel {...filterProps} variant="drawer" />
+          </NeuDrawerBody>
         </Drawer>
       )}
     </>

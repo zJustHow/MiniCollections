@@ -327,7 +327,7 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
           <button
             key={value}
             type="button"
-            className={`neu-tab-btn${submissionType === value ? " active" : ""}`}
+            className={`neu-pressable-btn neu-panel-tab-btn${submissionType === value ? " active" : ""}`}
             style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
             onClick={() => handleTypeChange(value)}
           >

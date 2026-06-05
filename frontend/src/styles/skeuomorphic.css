@@ -50,18 +50,35 @@
   --raised-xs: 1px 1px 3px var(--neu-sd), -1px -1px 3px var(--neu-sl);
 
   --inset: inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
+  --inset-sm:
+    inset 1px 1px 3px var(--neu-sd), inset -2px -2px 4px var(--neu-sl);
+  --inset-lg:
+    inset 4px 4px 10px var(--neu-sd), inset -5px -5px 12px var(--neu-sl);
   /* circular avatars / photos — dark inset only (no white highlight) */
   --inset-avatar: inset 2px 2px 6px var(--neu-sd);
   /* tinted inset for colored surfaces (avoid white highlight on accent/danger) */
   --inset-accent:
     inset 2px 2px 5px var(--neu-accent-dark),
     inset -3px -3px 7px var(--neu-accent-light);
+  --inset-accent-sm:
+    inset 1px 1px 3px var(--neu-accent-dark),
+    inset -2px -2px 4px var(--neu-accent-light);
   --inset-danger:
     inset 2px 2px 5px var(--neu-danger-dark),
     inset -3px -3px 7px var(--neu-danger-light);
+  --inset-danger-sm:
+    inset 1px 1px 3px var(--neu-danger-dark),
+    inset -2px -2px 4px var(--neu-danger-light);
+  --inset-accent-lg:
+    inset 4px 4px 10px var(--neu-accent-dark),
+    inset -5px -5px 12px var(--neu-accent-light);
+  --inset-danger-lg:
+    inset 4px 4px 10px var(--neu-danger-dark),
+    inset -5px -5px 12px var(--neu-danger-light);
 
   /* Button motion ($transition-base) */
   --neu-btn-transition: all 0.2s ease;
+  --neu-btn-scale-hover: 0.98;
 
   /* navbar dropdown-item hover tint (rgba(230,231,238,.1)) */
   --neu-item-hover-bg: rgba(230, 231, 238, 0.1);
@@ -91,6 +108,7 @@ body {
     "Helvetica Neue",
     Arial,
     sans-serif;
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
@@ -108,7 +126,25 @@ h6,
 .ant-typography h5,
 .ant-typography h6 {
   color: var(--neu-dark);
-  font-weight: 700;
+}
+
+strong,
+b,
+th,
+.ant-typography strong {
+  font-weight: 400;
+}
+
+.ant-btn,
+.ant-modal-title,
+.ant-drawer-title,
+.ant-form-item-label > label,
+.ant-tabs-tab-btn,
+.ant-menu-title-content,
+.ant-table-thead > tr > th,
+.ant-select-selection-item,
+.ant-pagination-item a {
+  font-weight: 400;
 }
 
 a {
@@ -123,7 +159,7 @@ a:hover {
 
 .header-logo {
   font-size: 20px;
-  font-weight: 800;
+  font-weight: 400;
   letter-spacing: 2.5px;
   text-transform: uppercase;
   color: var(--neu-dark);
@@ -163,63 +199,132 @@ a:hover {
   min-width: 0;
 }
 
-/* ── HEADER TAB BUTTONS (navbar dropdown-item motion) ── */
-.neu-tab-btn {
+/* ── Layer 1: pressable base (shared reset + interaction) ── */
+.neu-pressable-btn {
   position: relative;
   background: transparent;
   border: none;
-  border-radius: var(--r-md);
-  padding: 10px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.4;
   color: var(--neu-dark);
   box-shadow: none;
   cursor: pointer;
   transition: var(--neu-btn-transition);
+}
+
+.neu-pressable-btn:hover:not(:disabled):not(.active):not(:active) {
+  box-shadow: var(--inset);
+}
+
+.neu-pressable-btn:focus {
+  outline: none;
+}
+
+.neu-pressable-btn:focus-visible:not(:active):not(.active):not(
+    .neu-pressable-btn--danger
+  ) {
+  color: var(--neu-accent);
+  box-shadow: var(--inset);
+}
+
+.neu-pressable-btn:active:not(:disabled):not(.neu-pressable-btn--danger),
+.neu-pressable-btn.active:not(.neu-pressable-btn--danger) {
+  background: var(--neu-accent);
+  color: #fff;
+  box-shadow: var(--inset-accent-lg);
+}
+
+.neu-pressable-btn--danger {
+  color: var(--neu-danger);
+}
+
+.neu-pressable-btn--danger:active:not(:disabled),
+.neu-pressable-btn--danger.active {
+  background: var(--neu-danger);
+  color: #fff;
+  box-shadow: var(--inset-danger-lg);
+}
+
+/* ── Layer 2: panel tab (login, admin, filters, modals) ── */
+.neu-panel-tab-btn {
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
   letter-spacing: 0.2px;
 }
 
-.header-tabs .neu-tab-btn {
-  flex: 0 0 var(--header-tab-width);
-  width: var(--header-tab-width);
-  height: 100%;
+/* ── Layer 2: header bar variant (full-height top bar) ── */
+.neu-header-bar-btn,
+.header-slot-title,
+.neu-drawer-toolbar-title {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.neu-header-bar-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
   border-radius: 0;
+}
+
+.header-tabs .neu-header-bar-btn {
+  flex: 0 0 var(--header-tab-width);
+  width: var(--header-tab-width);
   padding: 0;
   margin: 0;
-  font-size: 16px;
-  font-weight: 400;
+}
+
+.header-slot-actions .neu-header-bar-btn {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 16px;
+}
+
+.ant-layout-header > .mobile-menu-btn.neu-header-bar-btn {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 16px;
+}
+
+.header-slot-wrap {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  align-items: stretch;
+}
+
+.header-slot-bar {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 6px;
+  height: 100%;
 }
 
 .header-slot-title {
-  font-size: 16px;
-  font-weight: 400;
+  position: absolute;
+  left: 0;
+  right: 0;
   color: var(--neu-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
+  align-self: center;
+  pointer-events: none;
 }
 
-.neu-tab-btn:hover:not(.active) {
-  color: var(--neu-dark);
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
-}
-
-.neu-tab-btn.active {
-  color: var(--neu-accent);
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
-}
-
-.neu-tab-btn:active:not(.active) {
-  color: var(--neu-dark);
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
+.header-slot-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+  flex-shrink: 0;
 }
 
 /* ── TABS (antd — kept for compatibility) ─────────────────── */
@@ -239,7 +344,7 @@ a:hover {
   padding: 10px 24px;
   margin-right: 6px;
   color: var(--neu-text-2);
-  font-weight: 600;
+  font-weight: 400;
   box-shadow: var(--raised-sm);
   transition: all 0.18s ease;
   position: relative;
@@ -296,7 +401,7 @@ a:hover {
   border-bottom: 1px solid var(--neu-border);
   color: var(--neu-text-2);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: 0.6px;
   text-transform: uppercase;
 }
@@ -457,7 +562,7 @@ a:hover {
 
 .neu-panel-body {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--neu-text);
   line-height: 1.6;
   white-space: pre-wrap;
@@ -492,7 +597,7 @@ a:hover {
 
 .neu-related-model-btn-name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--neu-text);
 }
 
@@ -615,7 +720,10 @@ a:hover {
   box-shadow: var(--inset-avatar);
 }
 
-.neu-avatar-btn--accent:hover:not(:active) .ant-avatar,
+.neu-avatar-btn--accent:hover:not(:active) .ant-avatar {
+  box-shadow: var(--inset-accent-sm);
+}
+
 .neu-avatar-btn--accent:active .ant-avatar {
   box-shadow: var(--inset-accent);
 }
@@ -626,19 +734,19 @@ a:hover {
 .ant-input-search-button,
 .neu-fab,
 .neu-add-btn,
-.mobile-menu-btn,
 .ant-radio-button-wrapper,
 .ant-pagination .ant-pagination-item,
 .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
 .ant-pagination .ant-pagination-next .ant-pagination-item-link {
   position: relative;
   transition: var(--neu-btn-transition);
+  transform: scale(1);
 }
 
 .ant-btn {
   border: 1px solid var(--neu-bg);
   border-radius: var(--r-md);
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.025em;
   background: var(--neu-bg);
   color: var(--neu-text);
@@ -660,7 +768,8 @@ a:hover {
 }
 
 .ant-btn:hover:not([disabled]):not(:active) {
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-btn:active:not([disabled]),
@@ -669,6 +778,7 @@ a:hover {
 .ant-btn.btn-counting-down:focus,
 .ant-btn.btn-counting-down:focus-visible {
   box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-btn-default:active:not([disabled]),
@@ -683,7 +793,8 @@ a:hover {
 .ant-btn:focus:not(:active),
 .ant-btn:focus-visible:not(:active) {
   outline: none;
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-btn:focus,
@@ -706,16 +817,25 @@ a:hover {
   background: var(--neu-accent-light);
   color: #fff;
   border-color: var(--neu-accent-light);
-  box-shadow: var(--inset-accent);
+  box-shadow: var(--inset-accent-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
-.ant-btn-primary:active:not([disabled]),
+.ant-btn-primary:active:not([disabled]) {
+  background: var(--neu-accent-light);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: var(--neu-accent-light);
+  box-shadow: var(--inset-accent);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
 .ant-btn-primary:focus:not(:active),
 .ant-btn-primary:focus-visible:not(:active) {
-  background: var(--neu-accent-dark);
-  color: rgba(255, 255, 255, 0.95);
-  border-color: var(--neu-accent-dark);
-  box-shadow: var(--inset-accent);
+  background: var(--neu-accent);
+  color: #fff;
+  border-color: var(--neu-accent);
+  box-shadow: var(--inset-accent-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous {
@@ -731,16 +851,25 @@ a:hover {
   background: var(--neu-danger-light);
   color: #fff;
   border-color: var(--neu-danger-light);
-  box-shadow: var(--inset-danger);
+  box-shadow: var(--inset-danger-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
-.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not([disabled]),
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not([disabled]) {
+  background: var(--neu-danger-light);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: var(--neu-danger-light);
+  box-shadow: var(--inset-danger);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:focus:not(:active),
 .ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:focus-visible:not(:active) {
-  background: var(--neu-danger-dark);
-  color: rgba(255, 255, 255, 0.95);
-  border-color: var(--neu-danger-dark);
-  box-shadow: var(--inset-danger);
+  background: var(--neu-danger);
+  color: #fff;
+  border-color: var(--neu-danger);
+  box-shadow: var(--inset-danger-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-btn[disabled],
@@ -816,14 +945,33 @@ a:hover {
 }
 
 /* ── INPUTS ───────────────────────────────────────────────── */
+/* Shared form control motion — mirrors buttons (raised → inset-sm → inset) */
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select:not(.ant-select-customize-input) .ant-select-selector,
+.ant-picker,
+textarea.ant-input,
+input.ant-input {
+  transition: var(--neu-btn-transition);
+  transform: scale(1);
+}
+
 .ant-input,
 .ant-input-number-input {
   background: var(--neu-bg);
   border: none;
   border-radius: var(--r-md);
   color: var(--neu-text);
+}
+
+input.ant-input,
+textarea.ant-input {
   box-shadow: var(--raised-sm);
-  transition: box-shadow 0.3s;
+}
+
+/* Outlined class lives on standalone inputs; affix/search inner inputs omit it */
+input.ant-input.ant-input-outlined {
+  box-shadow: var(--raised-sm);
 }
 
 .ant-input::placeholder,
@@ -837,26 +985,65 @@ a:hover {
   border: none;
   border-radius: var(--r-md);
   box-shadow: var(--raised-sm);
-  transition: box-shadow 0.3s;
 }
 
-.ant-input-affix-wrapper .ant-input {
+.ant-input-affix-wrapper .ant-input,
+.ant-input-number .ant-input-number-input {
   background: transparent;
   box-shadow: none;
   border: none;
   transition: none;
+  transform: none;
+}
+
+.ant-input-affix-wrapper .ant-input:hover,
+.ant-input-affix-wrapper .ant-input:focus,
+.ant-input-number .ant-input-number-input:hover,
+.ant-input-number .ant-input-number-input:focus {
+  box-shadow: none;
+  transform: none;
+  outline: none;
+}
+
+.ant-input-affix-wrapper:hover:not(.ant-input-affix-wrapper-disabled):not(
+    .ant-input-affix-wrapper-focused
+  ):not(:focus-within),
+.ant-input-number:hover:not(.ant-input-number-disabled):not(
+    .ant-input-number-focused
+  ):not(:focus-within),
+.ant-select:not(.ant-select-disabled):not(.ant-select-customize-input):not(
+    .ant-select-focused
+  ):not(.ant-select-open):hover
+  .ant-select-selector,
+.ant-picker:hover:not(.ant-picker-disabled):not(.ant-picker-focused):not(
+    .ant-picker-open
+  ),
+textarea.ant-input:hover:not(:disabled):not([disabled]):not(:focus) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+/* Standalone input only — affix inner inputs omit ant-input-outlined */
+input.ant-input.ant-input-outlined:hover:not(:disabled):not([disabled]):not(
+    :focus
+  ) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-input-affix-wrapper:focus,
 .ant-input-affix-wrapper:focus-within,
 .ant-input-affix-wrapper-focused,
-.ant-input:focus,
+input.ant-input.ant-input-outlined:focus:not(:disabled):not([disabled]),
+textarea.ant-input:focus:not(:disabled):not([disabled]),
 .ant-input-number:focus-within,
 .ant-input-number-focused,
-.ant-input-number.ant-input-number-focused {
+.ant-input-number.ant-input-number-focused,
+.ant-picker.ant-picker-focused,
+.ant-picker.ant-picker-open {
   border: none;
-  box-shadow: var(--inset);
   outline: none;
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-input-prefix,
@@ -892,13 +1079,6 @@ a:hover {
   flex: 1;
   min-width: 0;
   border-radius: var(--r-md);
-  box-shadow: var(--raised-sm);
-}
-
-.ant-input-search .ant-input-affix-wrapper:focus,
-.ant-input-search .ant-input-affix-wrapper:focus-within,
-.ant-input-search .ant-input-affix-wrapper-focused {
-  box-shadow: var(--inset);
 }
 
 .ant-input-group-addon,
@@ -937,7 +1117,8 @@ a:hover {
   > .ant-input-group-addon:last-child
   .ant-input-search-button:hover:not([disabled]):not(:active) {
   color: var(--neu-accent);
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-input-group-addon .ant-btn:active:not([disabled]),
@@ -948,6 +1129,7 @@ a:hover {
   .ant-input-search-button:active:not([disabled]) {
   color: var(--neu-text-2);
   box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-input-group-addon .ant-btn:focus,
@@ -978,16 +1160,13 @@ a:hover {
   > .ant-input-group
   > .ant-input-group-addon:last-child
   .ant-input-search-button:focus-visible:not(:active) {
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 /* textarea */
 textarea.ant-input {
   border-radius: var(--r-md);
-}
-
-textarea.ant-input:focus {
-  box-shadow: var(--inset);
 }
 
 /* NeuFormControl — disabled: inset (antd default removes shadow) */
@@ -1007,6 +1186,7 @@ textarea.ant-input[disabled],
   color: var(--neu-text-2);
   cursor: not-allowed;
   opacity: 0.65;
+  transform: none !important;
 }
 
 .ant-input-number-disabled .ant-input-number-input,
@@ -1022,7 +1202,6 @@ textarea.ant-input[disabled],
   border-radius: var(--r-md);
   box-shadow: var(--raised-sm);
   color: var(--neu-text);
-  transition: box-shadow 0.3s;
 }
 
 .ant-select.ant-select-focused:not(.ant-select-disabled):not(
@@ -1034,8 +1213,8 @@ textarea.ant-input[disabled],
   )
   .ant-select-selector {
   border: none;
-  box-shadow: var(--inset);
   outline: none;
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-select-arrow {
@@ -1062,30 +1241,24 @@ textarea.ant-input[disabled],
 .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
   background: rgba(85, 146, 204, 0.18);
   color: var(--neu-accent-dark);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 /* ── DATE PICKER ──────────────────────────────────────────── */
 
-/* trigger — raised → inset on focus/open (same as Input) */
+/* trigger — raised → inset-sm → inset (same as Input) */
 .ant-picker {
   background: var(--neu-bg);
   border: none;
   border-radius: var(--r-md);
   box-shadow: var(--raised-sm);
   color: var(--neu-text);
-  transition: box-shadow 0.3s;
-}
-
-.ant-picker-focused,
-.ant-picker-open {
-  border: none;
-  box-shadow: var(--inset);
-  outline: none;
 }
 
 .ant-picker-input > input {
   color: var(--neu-text);
+  background: transparent;
+  box-shadow: none;
 }
 
 .ant-picker-input > input::placeholder {
@@ -1140,66 +1313,34 @@ textarea.ant-input[disabled],
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  font-weight: 700;
+  gap: 6px;
+  font-weight: 400;
   color: var(--neu-dark);
 }
 
-/* top bar tab motion — month/year buttons */
-.ant-picker-dropdown .ant-picker-header-view button,
-.ant-picker-dropdown .ant-picker-header-view .ant-picker-month-btn,
-.ant-picker-dropdown .ant-picker-header-view .ant-picker-year-btn {
-  background: transparent;
-  border: none;
-  border-radius: var(--r-md);
-  box-shadow: none;
-  color: var(--neu-dark);
-  cursor: pointer;
-  transition: var(--neu-btn-transition);
+/* header + footer tab buttons — neu-pressable-btn + neu-panel-tab-btn via NeuDatePicker */
+.ant-picker-dropdown .ant-picker-header-view .neu-panel-tab-btn,
+.ant-picker-dropdown .ant-picker-footer .neu-panel-tab-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: auto;
   min-width: unset;
   height: auto;
-  line-height: 1.4;
-  padding: 6px 6px;
   margin: 0;
-  font-weight: 700;
+  border-radius: var(--r-md);
 }
 
-/* antd adds margin-inline-start on the second month/year button */
-.ant-picker-dropdown .ant-picker-header-view > button:not(:first-child) {
-  margin-inline-start: 0;
-}
-
-/* nav arrows — beat antd `.ant-picker-header > button { min-width: 1.6em }` */
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-prev-btn,
-.ant-picker-dropdown .ant-picker-header > button.ant-picker-header-next-btn,
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-super-prev-btn,
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-super-next-btn {
+/* nav arrows — compact square; beat antd `.ant-picker-header > button { min-width: 1.6em }` */
+.ant-picker-dropdown .ant-picker-header > button.neu-panel-tab-btn {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 28px;
   height: 28px;
   min-width: 0;
   padding: 0;
-  margin: 0;
-  border: none;
-  border-radius: var(--r-md);
-  background: transparent;
-  box-shadow: none;
-  color: var(--neu-text-2);
-  cursor: pointer;
-  vertical-align: top;
-  transition: var(--neu-btn-transition);
   flex: none;
-  width: 28px;
+  vertical-align: top;
+  color: var(--neu-text-2);
 }
 
 .ant-picker-dropdown
@@ -1256,51 +1397,11 @@ textarea.ant-input[disabled],
   transform: translate(calc(-50% - 1px), -50%) rotate(135deg);
 }
 
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-prev-btn:hover,
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-next-btn:hover,
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-super-prev-btn:hover,
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-super-next-btn:hover,
-.ant-picker-dropdown .ant-picker-header-view button:hover,
-.ant-picker-dropdown .ant-picker-header-view .ant-picker-month-btn:hover,
-.ant-picker-dropdown .ant-picker-header-view .ant-picker-year-btn:hover {
-  color: var(--neu-dark);
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
-}
-
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-prev-btn:active,
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-next-btn:active,
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-super-prev-btn:active,
-.ant-picker-dropdown
-  .ant-picker-header
-  > button.ant-picker-header-super-next-btn:active,
-.ant-picker-dropdown .ant-picker-header-view button:active,
-.ant-picker-dropdown .ant-picker-header-view .ant-picker-month-btn:active,
-.ant-picker-dropdown .ant-picker-header-view .ant-picker-year-btn:active {
-  color: var(--neu-dark);
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
-}
-
 /* calendar grid */
 .ant-picker-content th {
   color: var(--neu-text-2);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: 0.4px;
 }
 
@@ -1312,25 +1413,32 @@ textarea.ant-input[disabled],
   color: var(--neu-text);
 }
 
-.ant-picker-cell-inner {
+/* calendar grid — layout; colors via pickerCellStyles.js runtime injection */
+.ant-picker-dropdown .neu-picker-date-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0 auto;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1;
   border-radius: var(--r-md);
-  transition: var(--neu-btn-transition);
 }
 
-.ant-picker-cell-in-view.ant-picker-cell:not(.ant-picker-cell-selected):not(
-    .ant-picker-cell-disabled
-  ):hover
-  .ant-picker-cell-inner {
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
+.ant-picker-month-panel .neu-picker-date-cell,
+.ant-picker-year-panel .neu-picker-date-cell,
+.ant-picker-decade-panel .neu-picker-date-cell {
+  min-width: unset;
+  width: auto;
+  height: auto;
+  padding: 6px 12px;
 }
 
-.ant-picker-cell-selected .ant-picker-cell-inner,
-.ant-picker-cell-range-start .ant-picker-cell-inner,
-.ant-picker-cell-range-end .ant-picker-cell-inner {
-  background: var(--neu-accent);
-  color: #fff;
-  box-shadow: var(--inset-accent);
+.ant-picker-dropdown .ant-picker-cell-disabled .neu-picker-date-cell {
+  box-shadow: none;
 }
 
 .ant-picker-cell-in-range::before {
@@ -1343,25 +1451,8 @@ textarea.ant-input[disabled],
   background: rgba(85, 146, 204, 0.1);
 }
 
-.ant-picker-cell-today .ant-picker-cell-inner::before {
-  border-color: var(--neu-accent);
-  border-radius: var(--r-md);
-}
-
 .ant-picker-cell-disabled {
   opacity: 0.45;
-}
-
-.ant-picker-cell-disabled .ant-picker-cell-inner {
-  background: transparent;
-  box-shadow: none;
-}
-
-/* month / year / decade panels */
-.ant-picker-month-panel .ant-picker-cell-inner,
-.ant-picker-year-panel .ant-picker-cell-inner,
-.ant-picker-decade-panel .ant-picker-cell-inner {
-  border-radius: var(--r-md);
 }
 
 /* time panel */
@@ -1394,32 +1485,6 @@ textarea.ant-input[disabled],
   padding-top: 8px;
 }
 
-.ant-picker-dropdown .ant-picker-footer .ant-picker-today-btn,
-.ant-picker-dropdown .ant-picker-footer .ant-picker-now-btn {
-  color: var(--neu-accent);
-  font-weight: 600;
-  padding: 6px 12px;
-  border: none;
-  border-radius: var(--r-md);
-  background: transparent;
-  cursor: pointer;
-  transition: var(--neu-btn-transition);
-}
-
-.ant-picker-dropdown .ant-picker-footer .ant-picker-today-btn:hover,
-.ant-picker-dropdown .ant-picker-footer .ant-picker-now-btn:hover {
-  color: var(--neu-accent-light);
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
-}
-
-.ant-picker-dropdown .ant-picker-footer .ant-picker-today-btn:active,
-.ant-picker-dropdown .ant-picker-footer .ant-picker-now-btn:active {
-  color: var(--neu-accent-light);
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
-}
-
 .ant-picker-ranges .ant-picker-preset > .ant-tag {
   background: transparent;
   border: none;
@@ -1449,21 +1514,64 @@ textarea.ant-input[disabled],
   background: var(--neu-bg);
 }
 
-.ant-drawer-header {
+.neu-drawer-toolbar {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  min-height: var(--header-height);
+  padding-inline-start: 6px;
   background: var(--neu-bg);
-  border-bottom: none;
-  box-shadow: 0 4px 12px rgba(184, 185, 190, 0.4);
-  padding: 16px 24px;
+  border-bottom: 1px solid var(--neu-border);
+  flex-shrink: 0;
 }
 
-.ant-drawer-title {
+.neu-drawer-body-content {
+  padding: 24px;
+}
+
+.ant-drawer-body:has(.neu-drawer-toolbar) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ant-drawer-body:has(.neu-drawer-toolbar) .neu-drawer-body-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.neu-drawer-toolbar-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+  flex-shrink: 0;
+}
+
+.neu-drawer-toolbar-title {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
   color: var(--neu-text);
-  font-weight: 700;
-  font-size: 17px;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
 }
 
-.ant-drawer-close {
-  color: var(--neu-text-2);
+.neu-drawer-toolbar .neu-header-bar-btn {
+  flex: 0 0 auto;
+  align-self: stretch;
+  height: auto;
+  padding: 0 16px;
 }
 
 .ant-drawer-body {
@@ -1488,7 +1596,7 @@ textarea.ant-input[disabled],
 
 .ant-modal-title {
   color: var(--neu-text);
-  font-weight: 700;
+  font-weight: 400;
   font-size: 17px;
 }
 
@@ -1508,7 +1616,7 @@ textarea.ant-input[disabled],
 /* ── FORM ─────────────────────────────────────────────────── */
 .ant-form-item-label > label {
   color: var(--neu-text);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 13px;
   letter-spacing: 0.3px;
 }
@@ -1698,13 +1806,15 @@ textarea.ant-input[disabled],
 
 .neu-fab:hover:not(:active) {
   background: var(--neu-accent-light);
-  box-shadow: var(--inset-accent);
+  box-shadow: var(--inset-accent-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .neu-fab:active {
-  background: var(--neu-accent-dark);
+  background: var(--neu-accent-light);
   color: #fff;
   box-shadow: var(--inset-accent);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 /* ── CLICKABLE CARD (generic interactive surface) ────────── */
@@ -1738,13 +1848,15 @@ textarea.ant-input[disabled],
 
 .neu-add-btn:hover:not(:active) {
   background: var(--neu-accent-light);
-  box-shadow: var(--inset-accent);
+  box-shadow: var(--inset-accent-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .neu-add-btn:active {
-  background: var(--neu-accent-dark);
+  background: var(--neu-accent-light);
   color: #fff;
   box-shadow: var(--inset-accent);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 /* ── LOGIN PANEL ──────────────────────────────────────────── */
@@ -1762,7 +1874,7 @@ textarea.ant-input[disabled],
   text-align: center;
   color: var(--neu-text);
   font-size: 22px;
-  font-weight: 700;
+  font-weight: 400;
   margin-bottom: 32px;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -1796,7 +1908,7 @@ textarea.ant-input[disabled],
 
 .neu-filter-panel-title {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--neu-text);
   margin-bottom: 14px;
   letter-spacing: 0.3px;
@@ -1804,7 +1916,7 @@ textarea.ant-input[disabled],
 
 .neu-filter-section-title {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--neu-text-2);
   margin-bottom: 8px;
   text-transform: uppercase;
@@ -1850,68 +1962,28 @@ textarea.ant-input[disabled],
   border: 1px solid var(--neu-bg);
 }
 
-.neu-filter-option {
+.neu-filter-options-inset .neu-panel-tab-btn.neu-filter-tab-option {
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
   padding: 8px;
   margin-bottom: 5px;
-  border: none;
-  border-radius: var(--r-md);
-  background: transparent;
-  color: var(--neu-text);
   font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
+  font-weight: 400;
   text-align: left;
-  box-shadow: none;
   flex-shrink: 0;
-  position: relative;
-  transition: var(--neu-btn-transition);
 }
 
-.neu-filter-option:last-child {
+.neu-filter-options-inset .neu-filter-tab-option:last-child {
   margin-bottom: 0;
 }
 
-.neu-filter-option:hover:not(.selected) {
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
+.neu-filter-options-inset .neu-filter-tab-option.active,
+.neu-filter-options-inset .neu-filter-tab-option:active {
+  font-weight: 400;
 }
 
-.neu-filter-option.selected {
-  color: var(--neu-accent);
-  font-weight: 600;
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
-}
-
-.neu-filter-option:active:not(.selected) {
-  background: var(--neu-item-hover-bg);
-  box-shadow: var(--inset);
-}
-
-.neu-filter-dot {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  border-radius: var(--r-round);
-  background: var(--neu-bg);
-  box-shadow: var(--inset);
-  transition:
-    box-shadow 0.15s ease,
-    background 0.15s ease;
-}
-
-.neu-filter-option.selected .neu-filter-dot {
-  box-shadow:
-    var(--raised-sm),
-    inset 0 0 0 4px var(--neu-accent);
-  background: var(--neu-bg);
-}
-
-.neu-filter-option-body {
+.neu-filter-tab-option .neu-filter-option-body {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1920,22 +1992,51 @@ textarea.ant-input[disabled],
   gap: 8px;
 }
 
-.neu-filter-option-label {
+.neu-filter-tab-option .neu-filter-option-label {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.neu-filter-option-count {
+.neu-filter-tab-option .neu-filter-option-count {
   color: var(--neu-text-2);
   flex-shrink: 0;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 400;
 }
 
-.neu-filter-option.selected .neu-filter-option-count {
-  color: var(--neu-accent);
-  opacity: 0.85;
+.neu-filter-tab-option.active .neu-filter-option-count {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.neu-search-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.neu-search-toolbar-input {
+  flex-shrink: 0;
+  width: 260px;
+  margin-left: auto;
+}
+
+.neu-search-toolbar--stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.neu-search-toolbar--stacked .neu-search-toolbar-input {
+  width: 100%;
+  margin-left: 0;
+}
+
+.neu-search-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--neu-text-2);
 }
 
 /* 4-col search layout: 1 filter + 3 cards per row */
@@ -1957,7 +2058,7 @@ textarea.ant-input[disabled],
 .neu-search-section-label {
   grid-column: 1 / -1;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--neu-text-2);
   margin-bottom: -4px;
 }
@@ -2006,7 +2107,7 @@ textarea.ant-input[disabled],
   border: none;
   border-radius: var(--r-sm);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   padding: 2px 8px;
@@ -2144,7 +2245,7 @@ textarea.ant-input[disabled],
 .ant-segmented-item {
   color: var(--neu-text-2);
   border-radius: var(--r-md);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 13px;
   transition: var(--neu-btn-transition);
 }
@@ -2192,7 +2293,7 @@ textarea.ant-input[disabled],
   background: var(--neu-bg);
   border: none;
   color: var(--neu-text-2);
-  font-weight: 600;
+  font-weight: 400;
   box-shadow: var(--raised-sm);
 }
 
@@ -2204,7 +2305,15 @@ textarea.ant-input[disabled],
     .ant-radio-button-wrapper-disabled
   ) {
   color: var(--neu-text);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-radio-button-wrapper:active:not(.ant-radio-button-wrapper-checked):not(
+    .ant-radio-button-wrapper-disabled
+  ) {
   box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
@@ -2286,7 +2395,13 @@ textarea.ant-input[disabled],
 }
 
 .ant-pagination .ant-pagination-item:hover:not(.ant-pagination-item-active) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-pagination .ant-pagination-item:active:not(.ant-pagination-item-active) {
   box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-pagination .ant-pagination-item-active {
@@ -2296,7 +2411,7 @@ textarea.ant-input[disabled],
 
 .ant-pagination .ant-pagination-item-active a {
   color: var(--neu-accent);
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .ant-pagination .ant-pagination-prev .ant-pagination-item-link,
@@ -2311,12 +2426,14 @@ textarea.ant-input[disabled],
 .ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
 .ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
   color: var(--neu-accent);
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 .ant-pagination .ant-pagination-prev:active .ant-pagination-item-link,
 .ant-pagination .ant-pagination-next:active .ant-pagination-item-link {
   box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
 }
 
 /* ── TOOLTIP ──────────────────────────────────────────────── */
@@ -2324,7 +2441,7 @@ textarea.ant-input[disabled],
   background: var(--neu-dark);
   border-radius: var(--r-md);
   box-shadow: var(--raised-sm);
-  font-weight: 600;
+  font-weight: 400;
 }
 
 /* ── EMPTY ────────────────────────────────────────────────── */
@@ -2378,32 +2495,14 @@ textarea.ant-input[disabled],
     display: none !important;
   }
 
-  /* Hamburger button */
+  /* Hamburger button — visibility only; styles from neu-pressable-btn + neu-header-bar-btn */
   .mobile-menu-btn {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: var(--neu-bg);
-    border-radius: var(--r-md);
-    box-shadow: var(--raised-sm);
-    color: var(--neu-text-2);
-    font-size: 16px;
-    cursor: pointer;
     flex-shrink: 0;
-    transition: var(--neu-btn-transition);
   }
 
-  .mobile-menu-btn:hover:not(:active) {
-    box-shadow: var(--inset);
-    color: var(--neu-accent);
-  }
-
-  .mobile-menu-btn:active {
-    box-shadow: var(--inset);
-    color: var(--neu-accent);
+  .ant-layout-header > .mobile-menu-btn.neu-header-bar-btn {
+    padding: 0 12px;
   }
 
   /* Dropdown overlay */
@@ -2445,9 +2544,9 @@ textarea.ant-input[disabled],
   }
 
   .mobile-menu-item.active {
-    color: var(--neu-accent);
-    background: var(--neu-item-hover-bg);
-    box-shadow: var(--inset);
+    background: var(--neu-accent-light);
+    color: #fff;
+    box-shadow: var(--inset-accent);
   }
 
   .mobile-menu-profile-btn {
@@ -2459,7 +2558,7 @@ textarea.ant-input[disabled],
     border-radius: var(--r-md);
     background: var(--neu-bg);
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 400;
     color: var(--neu-text);
     cursor: pointer;
     box-shadow: var(--raised-sm);
@@ -2482,16 +2581,28 @@ textarea.ant-input[disabled],
     margin: 6px 0;
   }
 
-  .neu-tab-btn {
+  .neu-panel-tab-btn {
     flex-shrink: 0;
     padding: 7px 12px;
     font-size: 12px;
     white-space: nowrap;
   }
 
-  .header-tabs .neu-tab-btn {
+  .header-tabs .neu-header-bar-btn {
     height: auto;
     padding: 7px 12px;
+  }
+
+  .header-slot-actions .neu-header-bar-btn {
+    padding: 0 12px;
+  }
+
+  .neu-drawer-toolbar {
+    min-height: var(--header-height-mobile);
+  }
+
+  .neu-drawer-toolbar .neu-header-bar-btn {
+    padding: 0 12px;
   }
 
   /* Login panel */

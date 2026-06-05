@@ -48,7 +48,7 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('CMC Bundle Ferrari Bartoletti + D50 Collins', 'CMC Bundle 法拉利 Bartoletti + D50 Collins', 'http://localhost:9000/minicollections-media/cmc/BU-005.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
 ('CMC Bundle Ferrari Bartoletti + D50 Long nose', 'CMC Bundle 法拉利 Bartoletti + D50 Long nose', 'http://localhost:9000/minicollections-media/cmc/BU-006.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
 ('CMC Bundle Bartoletti + 250 GTO „clear finish“', 'CMC 捆绑包 Bartoletti + 250 GTO “透明饰面”', 'http://localhost:9000/minicollections-media/cmc/BU-004_1.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
-('Diorama Classic Gala Schwetzingen , Jubiläumsmodell 20 Jahre', 'Diorama Classic Gala Schwetzingen , Jubiläumsmodell 20 Jahre', 'http://localhost:9000/minicollections-media/cmc/front_2.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
+('Diorama Classic Gala Schwetzingen , Jubiläumsmodell 20 Jahre', 'Diorama Classic Gala Schwetzingen，周年纪念模型 20 周年', 'http://localhost:9000/minicollections-media/cmc/front_2.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
 ('CMC Porsche 904 Carrera GTS, silber', 'CMC 保时捷 904 Carrera GTS, silber', 'http://localhost:9000/minicollections-media/cmc/Front-1.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
 ('CMC Porsche 904 Carrera GTS, rot', 'CMC 保时捷 904 Carrera GTS, rot', 'http://localhost:9000/minicollections-media/cmc/Front.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
 ('CMC Porsche 904 Carrera GTS, delfingrau', 'CMC 保时捷 904 Carrera GTS, delfingrau', 'http://localhost:9000/minicollections-media/cmc/Front_L-scaled.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
@@ -153,7 +153,7 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('CMC Auto Union Typ C, 1936-1937', 'CMC 汽车联盟 C 型，1936-1937 年', 'http://localhost:9000/minicollections-media/cmc/M-034-1.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
 ('CMC Mercedes-Benz W 154, 1938', 'CMC 奔驰 W 154, 1938', 'http://localhost:9000/minicollections-media/cmc/M-025_05.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
 ('CMC Mercedes-Benz W 165, 1939', 'CMC 奔驰 W 165, 1939', 'http://localhost:9000/minicollections-media/cmc/M-018_01.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 18),
-('CMC Horch 853, 1937 rot/schwarz Maßstab 1:12', 'CMC Horch 853, 1937 rot/schwarz Maßstab 1:12', 'http://localhost:9000/minicollections-media/cmc/C-010-14.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 12),
+('CMC Horch 853, 1937 rot/schwarz Maßstab 1:12', 'CMC Horch 853，1937 年红/黑比例 1:12', 'http://localhost:9000/minicollections-media/cmc/C-010-14.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 12),
 ('CMC Alfa-Romeo 8C 2900 B Speciale Touring Coupe, 1938, Maßstab 1:12', 'CMC Alfa-Romeo 8C 2900 B Speciale 旅行轿跑车，1938 年，Maßstab 1:12', 'http://localhost:9000/minicollections-media/cmc/C-009.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 1, 12),
 ('CMC Alfa Romeo 8C 2900 B, 1938, Motor mit Vitrine', 'CMC 阿尔法·罗密欧 8C 2900 B, 1938, Motor mit Vitrine', 'http://localhost:9000/minicollections-media/cmc/m-131-04.jpg', 'https://www.cmc-modelcars.de/', NULL, NULL, NULL, 30, 10, NULL),
 

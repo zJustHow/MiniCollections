@@ -6,6 +6,7 @@ import AddCardCover from "./AddCardCover";
 import CardCover from "./CardCover";
 import ListPagination from "../ListPagination";
 import ObjectSearchFilterLayout from "../ObjectSearchFilterLayout";
+import ObjectListSearchToolbar from "../ObjectListSearchToolbar";
 import { useLocale } from "../../LocaleContext";
 import { PAGE_SIZE } from "../../utils";
 
@@ -119,12 +120,12 @@ export default function BrandsTab({
 
   return (
     <>
-      <div
-        style={{
-          display: screens.md ? "flex" : "block",
-          justifyContent: "flex-end",
-          marginBottom: 16,
-        }}
+      <ObjectListSearchToolbar
+        searchActive={searchActive}
+        keyword={searchValue}
+        resultCount={combinedSearchPage?.totalElements ?? 0}
+        totalExact={combinedSearchPage?.totalExact}
+        resultsLoading={searchActive && combinedSearchPage?.loading}
       >
         <Search
           placeholder={t("searchBrandsAndObjects")}
@@ -136,9 +137,9 @@ export default function BrandsTab({
             setDraftQuery(v);
             if (v === "") onSearch("");
           }}
-          style={{ width: screens.md ? 260 : "100%" }}
+          style={{ width: "100%" }}
         />
-      </div>
+      </ObjectListSearchToolbar>
 
       <Spin spinning={spinning}>
         {searchActive ? (
@@ -157,24 +158,22 @@ export default function BrandsTab({
                   onToggleScale={onToggleScale}
                 >
                   {showBrandCards && (
-                    <>
-                      <div className="neu-search-section-label">{t("brands")}</div>
+                    <div className="neu-search-section-grid">
                       {searchResultBrands.map(renderBrandCard)}
-                    </>
+                    </div>
                   )}
-                  {showObjectsSection && showObjectCards && (
-                    <>
+                  {showBrandCards &&
+                    showObjectsSection &&
+                    showObjectCards && (
                       <div
-                        className={`neu-search-section-label${
-                          showBrandCards
-                            ? " neu-search-section-label--spaced"
-                            : ""
-                        }`}
-                      >
-                        {t("brandObjects")}
-                      </div>
+                        className="neu-search-section-divider"
+                        role="separator"
+                      />
+                    )}
+                  {showObjectsSection && showObjectCards && (
+                    <div className="neu-search-section-grid">
                       {searchResultObjects.map(renderObjectCard)}
-                    </>
+                    </div>
                   )}
                 </ObjectSearchFilterLayout>
                 <ListPagination

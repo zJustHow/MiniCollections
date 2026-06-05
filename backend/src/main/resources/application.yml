@@ -23,7 +23,7 @@ spring:
       schema-locations: "classpath:database-init.sql"
       data-locations:
         - "classpath:seed/minigt/series.sql"
-                - "classpath:seed/minigt/brand-objects.sql"
+        - "classpath:seed/minigt/brand-objects.sql"
         - "classpath:seed/lcd/brand-objects.sql"
         - "classpath:seed/autoart/brand-objects.sql"
         - "classpath:seed/tomica-limited-vintage/brand-objects.sql"

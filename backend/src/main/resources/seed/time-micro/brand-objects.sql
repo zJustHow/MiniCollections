@@ -47,7 +47,7 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('Cycling Couple Figurines Resin Model Set', 'Cycling Couple Figurines 树脂模型 Set', 'http://localhost:9000/minicollections-media/time-micro/微信图片_20260417161855_87_55.jpg', 'https://www.timemicrosa.co.za/', NULL, NULL, NULL, 48, 48005, 11, 64),
 ('Doll', '玩具娃娃', 'http://localhost:9000/minicollections-media/time-micro/111_Y6yb6H1.jpg', 'https://www.timemicrosa.co.za/', NULL, NULL, NULL, 48, 48009, 1, 64),
 ('DORIMONS 86 D1', '多力蒙 86 D1', 'http://localhost:9000/minicollections-media/time-micro/1.20-1.jpg', 'https://www.timemicrosa.co.za/', NULL, NULL, NULL, 48, 48004, 1, 64),
-('GTR34 GT', 'GTR34GT', 'http://localhost:9000/minicollections-media/time-micro/1.8-4.jpg', 'https://www.timemicrosa.co.za/', NULL, NULL, NULL, 48, 48009, 1, 64),
+('GTR34 GT', 'GTR34 GT', 'http://localhost:9000/minicollections-media/time-micro/1.8-4.jpg', 'https://www.timemicrosa.co.za/', NULL, NULL, NULL, 48, 48009, 1, 64),
 ('HONDA CIVIC TYPE-R FL5 - Red', '本田 CIVIC TYPE-R FL5 - 红色', 'http://localhost:9000/minicollections-media/time-micro/微信图片_20260519112009_617_55.png', 'https://www.timemicrosa.co.za/', NULL, NULL, NULL, 48, 48001, 1, 64),
 ('HONDA CIVIC TYPE-R FL5 - White', '本田 CIVIC TYPE-R FL5 - 白色', 'http://localhost:9000/minicollections-media/time-micro/微信图片_20260519112027_627_55.png', 'https://www.timemicrosa.co.za/', NULL, NULL, NULL, 48, 48001, 1, 64),
 ('IKEA Supermarket Scene — Lighting Version', '宜家超市场景——灯光版', 'http://localhost:9000/minicollections-media/time-micro/0_1_j0hQkc9.jpg', 'https://www.timemicrosa.co.za/', NULL, NULL, NULL, 48, 48005, 8, 64),
