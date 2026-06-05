@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface ScaleRepository extends ListCrudRepository<ScaleEntity, Long> {
 
-    List<ScaleEntity> findAllByOrderBySortOrderAscDenominatorAscIdAsc();
+    List<ScaleEntity> findAllByOrderByDenominatorAscIdAsc();
 }

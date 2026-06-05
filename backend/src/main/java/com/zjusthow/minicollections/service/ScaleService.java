@@ -18,7 +18,7 @@ public class ScaleService {
     }
 
     public List<ScaleDto> listAll() {
-        return scaleRepository.findAllByOrderBySortOrderAscDenominatorAscIdAsc().stream()
+        return scaleRepository.findAllByOrderByDenominatorAscIdAsc().stream()
                 .map(ScaleDto::from)
                 .toList();
     }

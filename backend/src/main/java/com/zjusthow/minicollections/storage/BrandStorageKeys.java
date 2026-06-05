@@ -53,6 +53,11 @@ public final class BrandStorageKeys {
             case 38 -> "topspeed-model";
             case 39 -> "almost-real";
             case 40 -> "gcd";
+            case 41 -> "micro-turbo";
+            case 42 -> "tiny";
+            case 43 -> "bmc";
+            case 44 -> "tomica";
+            case 45 -> "matchbox";
             default -> slugify(nameEn);
         };
     }

@@ -7,7 +7,6 @@ import org.springframework.data.relational.core.mapping.Table;
 public record ScaleEntity(
         @Id Long id,
         String code,
-        int denominator,
-        int sortOrder
+        int denominator
 ) {
 }

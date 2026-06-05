@@ -41,6 +41,7 @@ spring:
         - "classpath:seed/werk83/brand-objects.sql"
         - "classpath:seed/kiloworks/brand-objects.sql"
         - "classpath:seed/topart-collection/brand-objects.sql"
+        - "classpath:seed/autoworld/series.sql"
         - "classpath:seed/autoworld/brand-objects.sql"
         - "classpath:seed/polar-master/brand-objects.sql"
         - "classpath:seed/figart-model/brand-objects.sql"
@@ -66,6 +67,16 @@ spring:
         - "classpath:seed/almost-real/brand-objects.sql"
         - "classpath:seed/gcd/series.sql"
         - "classpath:seed/gcd/brand-objects.sql"
+        - "classpath:seed/tomica/series.sql"
+        - "classpath:seed/tomica/brand-objects.sql"
+                - "classpath:seed/micro-turbo/series.sql"
+                - "classpath:seed/micro-turbo/brand-objects.sql"
+        - "classpath:seed/tiny/series.sql"
+        - "classpath:seed/tiny/brand-objects.sql"
+                - "classpath:seed/matchbox/series.sql"
+                - "classpath:seed/matchbox/brand-objects.sql"
+                - "classpath:seed/bmc/series.sql"
+                - "classpath:seed/bmc/brand-objects.sql"
   cache:
     type: caffeine
     caffeine:
