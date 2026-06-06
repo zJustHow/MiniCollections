@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { App, Form, Grid, Spin } from "antd";
+import { App, Form, Grid } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
 import { ArrowLeftOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import DetailImage from "../components/DetailImage";
-import { DetailPanel, PanelText } from "../components/DetailPanel";
+import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";
 import RelatedModelCard from "../components/RelatedModelCard";
 import EditUserObjectModal from "../components/ObjectList/modals/EditUserObjectModal";
 import { useLocale } from "../LocaleContext";
@@ -23,16 +23,6 @@ import {
 
 const { useBreakpoint } = Grid;
 
-function DetailRow({ label, value }) {
-  if (value == null || value === "" || value === "—") return null;
-  return (
-    <div style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
-      <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 100, flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "var(--neu-text)", fontSize: 13 }}>{value}</span>
-    </div>
-  );
-}
-
 export default function GroupObjectDetailPage() {
   const { groupId, objectId } = useParams();
   const location = useLocation();
@@ -45,7 +35,6 @@ export default function GroupObjectDetailPage() {
   const [userObject, setUserObject] = useState(location.state?.userObject ?? null);
   const [group, setGroup] = useState(location.state?.group ?? null);
   const [brandObjectDetail, setBrandObjectDetail] = useState(null);
-  const [loadingBrandDetail, setLoadingBrandDetail] = useState(false);
 
   const [editVisible, setEditVisible] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
@@ -78,11 +67,9 @@ export default function GroupObjectDetailPage() {
     if (!userObject) return;
     const brandObjectId = userObject.brandObjectId ?? userObject.brand_object_id;
     if (!brandObjectId) { setBrandObjectDetail(null); return; }
-    setLoadingBrandDetail(true);
     getBrandObjectById(brandObjectId)
       .then(setBrandObjectDetail)
-      .catch(() => setBrandObjectDetail(null))
-      .finally(() => setLoadingBrandDetail(false));
+      .catch(() => setBrandObjectDetail(null));
   }, [userObject]);
 
   const handleDelete = () => {
@@ -243,27 +230,21 @@ export default function GroupObjectDetailPage() {
             />
           </DetailPanel>
 
-          <div style={{ marginTop: 24 }}>
-            <div className="neu-panel-label">{t("brandModelLabel")}</div>
-            <Spin spinning={loadingBrandDetail}>
-              {brandObjectDetail ? (
-                <RelatedModelCard
-                  brandObject={brandObjectDetail}
-                  onClick={() => {
-                    const bId =
-                      brandObjectDetail.brand_id ?? brandObjectDetail.brandId;
-                    navigate(`/brands/${bId}/objects/${brandObjectDetail.id}`, {
-                      state: { brandObject: brandObjectDetail },
-                    });
-                  }}
-                />
-              ) : (
-                !loadingBrandDetail && (
-                  <div className="neu-panel-body">{t("noRelatedBrandModel")}</div>
-                )
-              )}
-            </Spin>
-          </div>
+          {brandObjectDetail ? (
+            <div className="neu-detail-follow-on">
+              <div className="neu-panel-label">{t("brandModelLabel")}</div>
+              <RelatedModelCard
+                brandObject={brandObjectDetail}
+                onClick={() => {
+                  const bId =
+                    brandObjectDetail.brand_id ?? brandObjectDetail.brandId;
+                  navigate(`/brands/${bId}/objects/${brandObjectDetail.id}`, {
+                    state: { brandObject: brandObjectDetail },
+                  });
+                }}
+              />
+            </div>
+          ) : null}
         </div>
       </div>
 

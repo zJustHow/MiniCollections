@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -38,5 +40,14 @@ public class SubmissionController {
         Long userId = Long.parseLong(user.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(submissionService.submit(userId, body));
+    }
+
+    @DeleteMapping("/submissions/{id}")
+    public ResponseEntity<Void> deleteMySubmission(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
+        Long userId = Long.parseLong(user.getUsername());
+        submissionService.deleteByUser(userId, id);
+        return ResponseEntity.noContent().build();
     }
 }

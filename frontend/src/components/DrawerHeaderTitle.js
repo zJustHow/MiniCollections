@@ -1,9 +1,11 @@
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import { CheckOutlined, CloseOutlined, DeleteOutlined } from "@ant-design/icons";
 import HeaderActionButton from "./HeaderActionButton";
 
 export default function DrawerHeaderTitle({
   title,
   onClose,
+  onDelete,
+  deleteLabel = "Delete",
   onOk,
   okText,
   confirmLoading = false,
@@ -15,11 +17,18 @@ export default function DrawerHeaderTitle({
     <div className="neu-drawer-toolbar">
       <div className="neu-drawer-toolbar-actions">
         <HeaderActionButton
-          danger
           icon={<CloseOutlined />}
           onClick={onClose}
           aria-label="Close"
         />
+        {onDelete && (
+          <HeaderActionButton
+            danger
+            icon={<DeleteOutlined />}
+            onClick={onDelete}
+            aria-label={deleteLabel}
+          />
+        )}
         {onOk && (
           <HeaderActionButton
             icon={<CheckOutlined />}

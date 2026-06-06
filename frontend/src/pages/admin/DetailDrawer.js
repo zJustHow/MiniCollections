@@ -1,5 +1,6 @@
 import NeuButton from "../../components/NeuButton";
-import { Drawer, Space, Tag } from "antd";
+import { Drawer, Space } from "antd";
+import NeuTag from "../../components/NeuTag";
 import { useState } from "react";
 import { useLocale } from "../../LocaleContext";
 import DrawerHeaderTitle from "../../components/DrawerHeaderTitle";
@@ -116,8 +117,8 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
         </div>
       )}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <Tag color={TYPE_COLOR[submission.submission_type]}>{getTypeLabel(submission.submission_type)}</Tag>
-        <Tag color={STATUS_COLOR[submission.status]}>{getStatusLabel(submission.status)}</Tag>
+        <NeuTag color={TYPE_COLOR[submission.submission_type]}>{getTypeLabel(submission.submission_type)}</NeuTag>
+        <NeuTag color={STATUS_COLOR[submission.status]}>{getStatusLabel(submission.status)}</NeuTag>
       </div>
       {rows.map(({ label, value }) =>
         value != null && value !== "" ? (

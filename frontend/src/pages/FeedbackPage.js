@@ -1,10 +1,12 @@
-import { App, Drawer, Empty, Spin, Tag, Typography } from "antd";
+import { App, Drawer, Empty, Spin, Typography } from "antd";
+import NeuTag from "../components/NeuTag";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import NeuButton from "../components/NeuButton";
+import NeuCard, { NeuCardImageSlot } from "../components/NeuCard";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
-import { getBrands, getMySubmissions } from "../utils";
+import { deleteMySubmission, getBrands, getMySubmissions } from "../utils";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import DrawerHeaderTitle from "../components/DrawerHeaderTitle";
 import { NeuDrawerBody } from "../components/drawerStyles";
@@ -57,51 +59,44 @@ function SubmissionCard({ item, t, onClick }) {
   const brand = item.brand_name || item.custom_brand_name;
 
   return (
-    <div
-      onClick={onClick}
-      style={{
-        background: "var(--neu-bg)",
-        borderRadius: radius.card,
-        padding: "14px 18px",
-        boxShadow: "var(--raised-sm)",
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-        cursor: "pointer",
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", minWidth: 0 }}>
-          <Tag color={TYPE_COLOR[item.submission_type] || "default"} style={{ margin: 0, flexShrink: 0 }}>
-            {typeLabel(item.submission_type, t)}
-          </Tag>
-          <Text strong style={{ fontSize: 14, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {title}
-          </Text>
-          {brand && (
-            <Text style={{ fontSize: 13, color: "var(--neu-text-2)", flexShrink: 0 }}>· {brand}</Text>
-          )}
+    <NeuCard variant="row" onClick={onClick}>
+      {item.image_url ? (
+        <NeuCardImageSlot slot="thumb" imageUrl={item.image_url} alt={title} />
+      ) : null}
+      <div className="neu-card-row-body" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", minWidth: 0 }}>
+            <NeuTag color={TYPE_COLOR[item.submission_type] || "default"}>
+              {typeLabel(item.submission_type, t)}
+            </NeuTag>
+            <Text strong style={{ fontSize: 14, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {title}
+            </Text>
+            {brand && (
+              <Text style={{ fontSize: 13, color: "var(--neu-text-2)", flexShrink: 0 }}>· {brand}</Text>
+            )}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+            <NeuTag color={STATUS_COLOR[item.status] || "default"}>
+              {statusLabel(item.status, t)}
+            </NeuTag>
+            <Text style={{ fontSize: 12, color: "var(--neu-text-2)" }}>
+              {item.submitted_at ? dayjs(item.submitted_at).format("YYYY-MM-DD") : ""}
+            </Text>
+          </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
-          <Tag color={STATUS_COLOR[item.status] || "default"} style={{ margin: 0 }}>
-            {statusLabel(item.status, t)}
-          </Tag>
-          <Text style={{ fontSize: 12, color: "var(--neu-text-2)" }}>
-            {item.submitted_at ? dayjs(item.submitted_at).format("YYYY-MM-DD") : ""}
-          </Text>
-        </div>
-      </div>
 
-      {item.notes && (
-        <Text style={{ fontSize: 13, color: "var(--neu-text-2)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-          {item.notes}
-        </Text>
-      )}
-    </div>
+        {item.notes && (
+          <Text style={{ fontSize: 13, color: "var(--neu-text-2)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+            {item.notes}
+          </Text>
+        )}
+      </div>
+    </NeuCard>
   );
 }
 
-function SubmissionDrawer({ item, onClose, t }) {
+function SubmissionDrawer({ item, onClose, onDelete, t }) {
   if (!item) return null;
   const title = item.name_en || item.name_zh || item.notes?.slice(0, 60) || "—";
   const brand = item.brand_name || item.custom_brand_name;
@@ -111,19 +106,24 @@ function SubmissionDrawer({ item, onClose, t }) {
       closable={false}
       open={!!item}
       onClose={onClose}
-      width={400}
+      width={520}
       destroyOnClose
     >
-      <DrawerHeaderTitle title={title} onClose={onClose} />
+      <DrawerHeaderTitle
+        title={title}
+        onClose={onClose}
+        onDelete={() => onDelete(item)}
+        deleteLabel={t("delete")}
+      />
       <NeuDrawerBody>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          <Tag color={TYPE_COLOR[item.submission_type] || "default"} style={{ margin: 0 }}>
+          <NeuTag color={TYPE_COLOR[item.submission_type] || "default"}>
             {typeLabel(item.submission_type, t)}
-          </Tag>
-          <Tag color={STATUS_COLOR[item.status] || "default"} style={{ margin: 0 }}>
+          </NeuTag>
+          <NeuTag color={STATUS_COLOR[item.status] || "default"}>
             {statusLabel(item.status, t)}
-          </Tag>
+          </NeuTag>
         </div>
         <Text style={{ fontSize: 12, color: "var(--neu-text-2)" }}>
           {item.submitted_at ? dayjs(item.submitted_at).format("YYYY-MM-DD HH:mm") : ""}
@@ -175,7 +175,7 @@ function SubmissionDrawer({ item, onClose, t }) {
 }
 
 export default function FeedbackPage() {
-  const { message } = App.useApp(); const { t } = useLocale();
+  const { message, modal } = App.useApp(); const { t } = useLocale();
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [brands, setBrands] = useState([]);
@@ -205,6 +205,26 @@ export default function FeedbackPage() {
     load();
   };
 
+  const handleDelete = (item) => {
+    modal.confirm({
+      title: t("deleteFeedbackTitle"),
+      content: t("deleteFeedbackContent"),
+      okText: t("delete"),
+      okType: "danger",
+      cancelText: t("cancel"),
+      onOk: async () => {
+        try {
+          await deleteMySubmission(item.id);
+          message.success(t("feedbackDeleted"));
+          setSelectedItem(null);
+          setSubmissions((prev) => prev.filter((s) => s.id !== item.id));
+        } catch (err) {
+          message.error(err?.message || t("failedToDeleteFeedback"));
+        }
+      },
+    });
+  };
+
   return (
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 24 }}>
@@ -230,7 +250,12 @@ export default function FeedbackPage() {
         </div>
       )}
 
-      <SubmissionDrawer item={selectedItem} onClose={() => setSelectedItem(null)} t={t} />
+      <SubmissionDrawer
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onDelete={handleDelete}
+        t={t}
+      />
 
       <SubmitObjectModal
         visible={submitModalVisible}

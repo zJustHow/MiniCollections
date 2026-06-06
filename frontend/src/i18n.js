@@ -279,6 +279,10 @@ const en = {
   adminReply: "Admin Reply",
   rejectionReason: "Rejection Reason",
   failedToLoadMySubmissions: "Failed to load your submissions",
+  deleteFeedbackTitle: "Delete feedback",
+  deleteFeedbackContent: 'Delete this feedback? This cannot be undone.',
+  feedbackDeleted: "Feedback deleted",
+  failedToDeleteFeedback: "Failed to delete feedback",
 
   // API errors
   "error.group.limit": "Group limit reached: maximum {0} groups per user",
@@ -603,6 +607,10 @@ const zh = {
   adminReply: "管理员回复",
   rejectionReason: "拒绝原因",
   failedToLoadMySubmissions: "加载反馈记录失败",
+  deleteFeedbackTitle: "删除反馈",
+  deleteFeedbackContent: "确定要删除这条反馈吗？此操作不可撤销。",
+  feedbackDeleted: "反馈已删除",
+  failedToDeleteFeedback: "删除反馈失败",
 
   // API errors
   "error.group.limit": "已达收藏组上限：每个用户最多创建 {0} 个收藏组",

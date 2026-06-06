@@ -448,11 +448,12 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 />
               </Form.Item>
               <Form.Item style={{ marginBottom: 12 }}>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <Form.Item
                     name="emailCode"
                     noStyle
                     rules={[{ required: true, message: t("codeRequired") }]}
+                    style={{ flex: 1, minWidth: 0, marginBottom: 0 }}
                   >
                     <NeuInput placeholder={t("verificationCode")} />
                   </Form.Item>
@@ -496,7 +497,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               layout="vertical"
             >
               <Form.Item style={{ marginBottom: 12 }}>
-                <div style={{ display: "flex", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <Form.Item name="countryCode" noStyle>
                     <NeuSelect
                       fullWidth={false}

@@ -1,5 +1,6 @@
 import NeuPressableButton from "../components/NeuPressableButton";
-import { App, Table, Tag } from "antd";
+import { App, Table } from "antd";
+import NeuTag from "../components/NeuTag";
 import {
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -98,7 +99,7 @@ export default function AdminPage() {
       title: t("submissionType"),
       dataIndex: "submission_type",
       width: 140,
-      render: (type) => <Tag color={TYPE_COLOR[type]}>{getTypeLabel(type)}</Tag>,
+      render: (type) => <NeuTag color={TYPE_COLOR[type]}>{getTypeLabel(type)}</NeuTag>,
     },
     { title: t("brand"), dataIndex: "brand_name", width: 100 },
     { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },
@@ -106,7 +107,7 @@ export default function AdminPage() {
       title: t("submissionStatus"),
       dataIndex: "status",
       width: 110,
-      render: (status) => <Tag color={STATUS_COLOR[status]}>{getStatusLabel(status)}</Tag>,
+      render: (status) => <NeuTag color={STATUS_COLOR[status]}>{getStatusLabel(status)}</NeuTag>,
     },
     {
       title: t("submittedAt"),

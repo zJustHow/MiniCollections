@@ -10,7 +10,7 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import DetailImage from "../components/DetailImage";
-import { DetailPanel, PanelText } from "../components/DetailPanel";
+import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";
 import AddToGroupModal from "../components/ObjectList/modals/AddToGroupModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
 import { useLocale } from "../LocaleContext";
@@ -25,34 +25,6 @@ import {
 } from "../utils";
 
 const { useBreakpoint } = Grid;
-
-function DetailRow({ label, value }) {
-  if (value == null || value === "") return null;
-  return (
-    <div
-      style={{
-        display: "flex",
-        gap: 12,
-        padding: "10px 0",
-        borderBottom: "1px solid rgba(184,182,176,0.2)",
-      }}
-    >
-      <span
-        style={{
-          color: "var(--neu-text-2)",
-          fontSize: 13,
-          minWidth: 100,
-          flexShrink: 0,
-        }}
-      >
-        {label}
-      </span>
-      <span style={{ color: "var(--neu-text)", fontSize: 13 }}>
-        {value}
-      </span>
-    </div>
-  );
-}
 
 export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const { brandId, objectId } = useParams();
@@ -237,7 +209,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
               className="neu-panel-section"
             />
           </DetailPanel>
-          <div style={{ marginTop: 24 }}>
+          <div className="neu-detail-follow-on">
             <NeuButton
               type="primary"
               block

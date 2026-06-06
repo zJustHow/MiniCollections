@@ -496,6 +496,14 @@ export const submitFeedback = async (body) => {
   return handleResponse(response);
 };
 
+export const deleteMySubmission = async (id) => {
+  const response = await fetch(`/submissions/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  return handleResponse(response);
+};
+
 export const getAdminSubmissions = async (status) => {
   const url = status ? `/admin/submissions?status=${status}` : "/admin/submissions";
   const response = await fetch(url, { headers: authHeaders() });

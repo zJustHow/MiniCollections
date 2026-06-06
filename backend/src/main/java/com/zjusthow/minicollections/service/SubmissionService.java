@@ -9,6 +9,7 @@ import com.zjusthow.minicollections.entity.ScaleEntity;
 import com.zjusthow.minicollections.entity.SeriesEntity;
 import com.zjusthow.minicollections.exception.CategoryNotFoundException;
 import com.zjusthow.minicollections.exception.LimitExceededException;
+import com.zjusthow.minicollections.exception.NoPermissionException;
 import com.zjusthow.minicollections.exception.ScaleNotFoundException;
 import com.zjusthow.minicollections.exception.SeriesNotFoundException;
 import com.zjusthow.minicollections.exception.SubmissionAlreadyReviewedException;
@@ -47,6 +48,7 @@ public class SubmissionService {
     private final ScaleRepository scaleRepository;
     private final UserRepository userRepository;
     private final BrandObjectSearchRepository brandObjectSearchRepository;
+    private final ImageStorageService imageStorageService;
 
     @Value("${app.elasticsearch.enabled:true}")
     private boolean elasticsearchEnabled;
@@ -62,7 +64,8 @@ public class SubmissionService {
             CategoryRepository categoryRepository,
             ScaleRepository scaleRepository,
             UserRepository userRepository,
-            @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository) {
+            @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository,
+            @Autowired(required = false) ImageStorageService imageStorageService) {
         this.submissionRepository = submissionRepository;
         this.brandObjectRepository = brandObjectRepository;
         this.brandRepository = brandRepository;
@@ -71,6 +74,7 @@ public class SubmissionService {
         this.scaleRepository = scaleRepository;
         this.userRepository = userRepository;
         this.brandObjectSearchRepository = brandObjectSearchRepository;
+        this.imageStorageService = imageStorageService;
     }
 
     public ObjectSubmissionDto submit(Long userId, SubmissionBody body) {
@@ -97,6 +101,17 @@ public class SubmissionService {
     public List<ObjectSubmissionDto> listByUser(Long userId) {
         return submissionRepository.findBySubmittedByUserId(userId)
                 .stream().map(this::toDto).toList();
+    }
+
+    @Transactional
+    public void deleteByUser(Long userId, Long submissionId) {
+        ObjectSubmissionEntity submission = submissionRepository.findById(submissionId)
+                .orElseThrow(() -> new NoSuchElementException("Submission not found"));
+        if (!Objects.equals(submission.submittedByUserId(), userId)) {
+            throw new NoPermissionException("No permission to delete this submission");
+        }
+        deleteUserImage(userId, submission.imageUrl());
+        submissionRepository.deleteById(submissionId);
     }
 
     public List<ObjectSubmissionDto> listByStatus(String status) {
@@ -211,6 +226,12 @@ public class SubmissionService {
                 s.notes(), status, s.submittedAt(),
                 reviewerId, OffsetDateTime.now(), rejectReason, adminNote
         );
+    }
+
+    private void deleteUserImage(long userId, String imageUrl) {
+        if (imageStorageService != null) {
+            imageStorageService.deleteUserImageIfOwned(userId, imageUrl);
+        }
     }
 
     private ObjectSubmissionDto toDto(ObjectSubmissionEntity e) {

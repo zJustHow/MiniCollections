@@ -9,20 +9,52 @@ function isDisplayableText(value) {
   return true;
 }
 
-function hasVisibleChildren(children) {
-  return React.Children.toArray(children).some(
-    (child) => child != null && child !== false,
+function isVisiblePanelChild(child) {
+  if (!React.isValidElement(child)) return false;
+  if (child.type === DetailRow) {
+    return isDisplayableText(child.props.value);
+  }
+  if (child.type === PanelText) {
+    return isDisplayableText(child.props.text ?? child.props.children);
+  }
+  return child != null && child !== false;
+}
+
+export function DetailRow({ label, value }) {
+  if (!isDisplayableText(value)) return null;
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 12,
+        padding: "10px 0",
+        borderBottom: "1px solid rgba(184,182,176,0.2)",
+      }}
+    >
+      <span
+        style={{
+          color: "var(--neu-text-2)",
+          fontSize: 13,
+          minWidth: 100,
+          flexShrink: 0,
+        }}
+      >
+        {label}
+      </span>
+      <span style={{ color: "var(--neu-text)", fontSize: 13 }}>{value}</span>
+    </div>
   );
 }
 
 export function DetailPanel({ children, className = "", style }) {
-  if (!hasVisibleChildren(children)) return null;
+  const visibleChildren = React.Children.toArray(children).filter(isVisiblePanelChild);
+  if (visibleChildren.length === 0) return null;
   return (
     <div
       className={["neu-panel", className].filter(Boolean).join(" ")}
       style={style}
     >
-      {children}
+      {visibleChildren}
     </div>
   );
 }

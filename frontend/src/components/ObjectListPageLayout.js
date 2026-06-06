@@ -12,21 +12,28 @@ export default function ObjectListPageLayout({
   const screens = useBreakpoint();
   const withFilter = showFilterColumn && screens.lg;
   const stacked = !screens.md;
+  const withToolbar = Boolean(search || summary);
 
   return (
     <div
       className={`neu-list-page-layout${
-        withFilter ? " neu-list-page-layout--with-filter" : ""
-      }${stacked ? " neu-list-page-layout--stacked" : ""}`}
+        withToolbar ? " neu-list-page-layout--with-toolbar" : ""
+      }${withFilter ? " neu-list-page-layout--with-filter" : ""}${
+        stacked ? " neu-list-page-layout--stacked" : ""
+      }`}
     >
-      {summary ? <div className="neu-list-page-summary">{summary}</div> : null}
+      {withToolbar ? (
+        <div className="neu-list-page-toolbar">
+          {summary ? (
+            <div className="neu-list-page-summary">{summary}</div>
+          ) : null}
+          {search ? <div className="neu-list-page-search">{search}</div> : null}
+        </div>
+      ) : null}
       {withFilter && filter ? (
         <div className="neu-list-page-filter">{filter}</div>
       ) : null}
-      <div className="neu-list-page-content">
-        {search ? <div className="neu-list-page-search">{search}</div> : null}
-        {children}
-      </div>
+      <div className="neu-list-page-content">{children}</div>
     </div>
   );
 }
