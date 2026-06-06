@@ -51,6 +51,14 @@ cd "$BACKEND"
 if [ -f ".env" ]; then
   set -a; source .env; set +a
 fi
+# Keep media URLs consistent with seed SQL and MinIO on localhost:9000 (override in backend/.env if needed).
+export S3_ENDPOINT="${S3_ENDPOINT:-http://localhost:9000}"
+export S3_BUCKET="${S3_BUCKET:-minicollections-media}"
+export S3_PUBLIC_BASE_URL="${S3_PUBLIC_BASE_URL:-http://localhost:9000/minicollections-media}"
+export S3_ACCESS_KEY="${S3_ACCESS_KEY:-minioadmin}"
+export S3_SECRET_KEY="${S3_SECRET_KEY:-minioadmin}"
+export S3_ENABLED="${S3_ENABLED:-true}"
+log "S3_PUBLIC_BASE_URL=$S3_PUBLIC_BASE_URL"
 # LetsVPN (and similar tools) often leave 127.0.0.1:17891 in macOS proxy settings while the
 # local proxy is stopped, which makes Gradle fail to reach Maven Central.
 if nc -z 127.0.0.1 17891 2>/dev/null; then

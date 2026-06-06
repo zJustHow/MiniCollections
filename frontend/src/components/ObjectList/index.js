@@ -3,9 +3,10 @@ import BrandsTab from "./BrandsTab";
 import GroupsTab from "./GroupsTab";
 import BrandModal from "./modals/BrandModal";
 import CreateGroupModal from "./modals/CreateGroupModal";
+import { discardUploadedImage } from "../../utils";
 
 export default function ObjectList({ activeTab, isAdmin }) {
-  const state = useObjectListState();
+  const state = useObjectListState({ isAdmin });
 
   const {
     brands,
@@ -117,7 +118,11 @@ export default function ObjectList({ activeTab, isAdmin }) {
       <CreateGroupModal
         visible={createGroupModalVisible}
         onOk={handleCreateGroup}
-        onCancel={() => setCreateGroupModalVisible(false)}
+        onCancel={() => {
+          if (groupImageData) discardUploadedImage(groupImageData).catch(() => {});
+          setGroupImageData(null);
+          setCreateGroupModalVisible(false);
+        }}
         confirmLoading={createGroupLoading}
         form={groupForm}
         imageData={groupImageData}

@@ -11,7 +11,7 @@ export default function ObjectListPageLayout({
 }) {
   const screens = useBreakpoint();
   const withFilter = showFilterColumn && screens.lg;
-  const stacked = !screens.md;
+  const stacked = !screens.lg;
   const withToolbar = Boolean(search || summary);
 
   return (

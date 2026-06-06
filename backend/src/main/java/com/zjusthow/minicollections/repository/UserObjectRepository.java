@@ -4,6 +4,7 @@ import com.zjusthow.minicollections.entity.UserObjectEntity;
 import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +17,9 @@ public interface UserObjectRepository extends ListCrudRepository<UserObjectEntit
     Optional<List<UserObjectEntity>> findByUserId(Long userId);
 
     Optional<List<UserObjectEntity>> findByGroupId(Long groupId);
+
+    /** Detach catalog model from user collections before deleting the brand object. */
+    @Modifying
+    @Query("UPDATE user_objects SET brand_object_id = NULL WHERE brand_object_id = :brandObjectId")
+    void clearBrandObjectReference(@Param("brandObjectId") Long brandObjectId);
 }

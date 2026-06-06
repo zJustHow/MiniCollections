@@ -16,6 +16,7 @@ import com.zjusthow.minicollections.exception.SubmissionAlreadyReviewedException
 import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.model.ApprovalBody;
 import com.zjusthow.minicollections.model.ObjectSubmissionDto;
+import com.zjusthow.minicollections.model.PageResponse;
 import com.zjusthow.minicollections.model.SubmissionBody;
 import com.zjusthow.minicollections.repository.BrandObjectRepository;
 import com.zjusthow.minicollections.repository.BrandRepository;
@@ -39,6 +40,9 @@ import java.util.Objects;
 
 @Service
 public class SubmissionService {
+
+    private static final int DEFAULT_PAGE_SIZE = 24;
+    private static final int MAX_PAGE_SIZE = 100;
 
     private final ObjectSubmissionRepository submissionRepository;
     private final BrandObjectRepository brandObjectRepository;
@@ -98,9 +102,14 @@ public class SubmissionService {
         return toDto(submissionRepository.save(entity));
     }
 
-    public List<ObjectSubmissionDto> listByUser(Long userId) {
-        return submissionRepository.findBySubmittedByUserId(userId)
-                .stream().map(this::toDto).toList();
+    public PageResponse<ObjectSubmissionDto> listByUserPage(Long userId, int page, int size) {
+        int pageSize = clampSize(size);
+        int safePage = clampPage(page);
+        long total = submissionRepository.countBySubmittedByUserId(userId);
+        List<ObjectSubmissionEntity> entities = submissionRepository.findPageBySubmittedByUserId(
+                userId, pageSize, offset(safePage, pageSize));
+        List<ObjectSubmissionDto> content = entities.stream().map(this::toDto).toList();
+        return PageResponse.of(content, safePage, pageSize, total, true);
     }
 
     @Transactional
@@ -232,6 +241,21 @@ public class SubmissionService {
         if (imageStorageService != null) {
             imageStorageService.deleteUserImageIfOwned(userId, imageUrl);
         }
+    }
+
+    private int clampPage(int page) {
+        return Math.max(page, 0);
+    }
+
+    private int offset(int page, int pageSize) {
+        return page * pageSize;
+    }
+
+    private int clampSize(int size) {
+        if (size <= 0) {
+            return DEFAULT_PAGE_SIZE;
+        }
+        return Math.min(size, MAX_PAGE_SIZE);
     }
 
     private ObjectSubmissionDto toDto(ObjectSubmissionEntity e) {

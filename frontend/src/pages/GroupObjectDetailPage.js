@@ -2,7 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { App, Form, Grid } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
-import { ArrowLeftOutlined, DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  DeleteOutlined,
+  EditOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 import DetailImage from "../components/DetailImage";
 import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";
@@ -19,6 +23,7 @@ import {
   searchBrandObjects,
   purchasePriceFromFormValue,
   displayPurchasePriceFromObject,
+  discardUploadedImage,
 } from "../utils";
 
 const { useBreakpoint } = Grid;
@@ -32,7 +37,9 @@ export default function GroupObjectDetailPage() {
   const { setHeaderSlot } = useHeader();
   const screens = useBreakpoint();
 
-  const [userObject, setUserObject] = useState(location.state?.userObject ?? null);
+  const [userObject, setUserObject] = useState(
+    location.state?.userObject ?? null,
+  );
   const [group, setGroup] = useState(location.state?.group ?? null);
   const [brandObjectDetail, setBrandObjectDetail] = useState(null);
 
@@ -46,7 +53,7 @@ export default function GroupObjectDetailPage() {
   const fetchUserObject = useCallback(async () => {
     try {
       const data = await getUserObjects(groupId);
-      const list = Array.isArray(data) ? data : data?.content ?? [];
+      const list = Array.isArray(data) ? data : (data?.content ?? []);
       const found = list.find((o) => String(o.id) === String(objectId));
       if (found) setUserObject(found);
     } catch (err) {
@@ -65,8 +72,12 @@ export default function GroupObjectDetailPage() {
 
   useEffect(() => {
     if (!userObject) return;
-    const brandObjectId = userObject.brandObjectId ?? userObject.brand_object_id;
-    if (!brandObjectId) { setBrandObjectDetail(null); return; }
+    const brandObjectId =
+      userObject.brandObjectId ?? userObject.brand_object_id;
+    if (!brandObjectId) {
+      setBrandObjectDetail(null);
+      return;
+    }
     getBrandObjectById(brandObjectId)
       .then(setBrandObjectDetail)
       .catch(() => setBrandObjectDetail(null));
@@ -76,7 +87,10 @@ export default function GroupObjectDetailPage() {
     if (!userObject) return;
     modal.confirm({
       title: t("deleteModelTitle"),
-      content: t("deleteModelContent").replace("{name}", userObject.name ?? "—"),
+      content: t("deleteModelContent").replace(
+        "{name}",
+        userObject.name ?? "—",
+      ),
       okText: t("delete"),
       okType: "danger",
       cancelText: t("cancel"),
@@ -95,7 +109,8 @@ export default function GroupObjectDetailPage() {
   const openEdit = () => {
     if (!userObject) return;
     const pd = userObject.purchaseDate ?? userObject.purchase_date;
-    const brandObjectId = userObject.brandObjectId ?? userObject.brand_object_id;
+    const brandObjectId =
+      userObject.brandObjectId ?? userObject.brand_object_id;
     editForm.setFieldsValue({
       brandObjectId: brandObjectId ?? undefined,
       name: userObject.name ?? "",
@@ -116,9 +131,12 @@ export default function GroupObjectDetailPage() {
       const selectedBo =
         (values.brandObjectId != null &&
           values.brandObjectId !== "" &&
-          editSearchResults.find((o) => Number(o.id) === Number(values.brandObjectId))) ||
+          editSearchResults.find(
+            (o) => Number(o.id) === Number(values.brandObjectId),
+          )) ||
         null;
-      const image_url = editImageData ?? userObject.image_url ?? selectedBo?.image_url;
+      const image_url =
+        editImageData ?? userObject.image_url ?? selectedBo?.image_url;
       const payload = {
         brand_object_id:
           values.brandObjectId != null && values.brandObjectId !== ""
@@ -126,7 +144,9 @@ export default function GroupObjectDetailPage() {
             : null,
         name: values.name,
         image_url: image_url || null,
-        purchase_date: values.purchaseDate ? values.purchaseDate.format("YYYY-MM-DD") : null,
+        purchase_date: values.purchaseDate
+          ? values.purchaseDate.format("YYYY-MM-DD")
+          : null,
         ...purchasePriceFromFormValue(values.purchasePrice),
         other_notes: values.otherNotes || null,
       };
@@ -141,10 +161,14 @@ export default function GroupObjectDetailPage() {
           brandObjectId: data.brandObjectId ?? data.brand_object_id,
         };
         setUserObject(updated);
-        const newBrandObjectId = updated.brandObjectId ?? updated.brand_object_id;
+        const newBrandObjectId =
+          updated.brandObjectId ?? updated.brand_object_id;
         if (newBrandObjectId == null) {
           setBrandObjectDetail(null);
-        } else if (selectedBo && Number(selectedBo.id) === Number(newBrandObjectId)) {
+        } else if (
+          selectedBo &&
+          Number(selectedBo.id) === Number(newBrandObjectId)
+        ) {
           setBrandObjectDetail({ ...selectedBo });
         } else {
           getBrandObjectById(newBrandObjectId)
@@ -188,34 +212,50 @@ export default function GroupObjectDetailPage() {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate(-1)}
           />
-          {userObject && (
-            <>
-              <HeaderActionButton icon={<EditOutlined />} onClick={openEdit} />
-              <HeaderActionButton
-                danger
-                icon={<DeleteOutlined />}
-                onClick={handleDelete}
-              />
-            </>
-          )}
         </div>
-        <span className="header-slot-title">
-          {userObject?.name ?? "…"}
-        </span>
-      </div>
+        {userObject && (
+          <div className="header-slot-actions header-slot-actions-end">
+            <HeaderActionButton icon={<EditOutlined />} onClick={openEdit} />
+            <HeaderActionButton
+              danger
+              icon={<DeleteOutlined />}
+              onClick={handleDelete}
+            />
+          </div>
+        )}
+        <span className="header-slot-title">{userObject?.name ?? "…"}</span>
+      </div>,
     );
     return () => setHeaderSlot(null);
   }, [userObject]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const purchasePrice = userObject ? (userObject.purchasePrice ?? userObject.purchase_price) : null;
-  const purchaseDate = userObject ? (userObject.purchaseDate ?? userObject.purchase_date) : null;
-  const otherNotes = userObject ? (userObject.otherNotes ?? userObject.other_notes) : null;
+  const purchasePrice = userObject
+    ? (userObject.purchasePrice ?? userObject.purchase_price)
+    : null;
+  const purchaseDate = userObject
+    ? (userObject.purchaseDate ?? userObject.purchase_date)
+    : null;
+  const otherNotes = userObject
+    ? (userObject.otherNotes ?? userObject.other_notes)
+    : null;
   const imageUrl = userObject?.imageUrl ?? userObject?.image_url ?? null;
 
   return (
     <div>
-      <div style={{ display: "flex", gap: 32, alignItems: "flex-start", flexWrap: screens.md ? "nowrap" : "wrap" }}>
-        <div style={{ flex: screens.md ? "0 0 45%" : "1 1 100%", maxWidth: screens.md ? "45%" : "100%" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: 32,
+          alignItems: "flex-start",
+          flexWrap: screens.md ? "nowrap" : "wrap",
+        }}
+      >
+        <div
+          style={{
+            flex: screens.md ? "0 0 45%" : "1 1 100%",
+            maxWidth: screens.md ? "45%" : "100%",
+          }}
+        >
           <DetailImage imageUrl={imageUrl} alt={userObject?.name ?? ""} />
         </div>
 
@@ -251,7 +291,12 @@ export default function GroupObjectDetailPage() {
       <EditUserObjectModal
         visible={editVisible}
         onOk={handleUpdate}
-        onCancel={() => setEditVisible(false)}
+        onCancel={() => {
+          if (editImageData)
+            discardUploadedImage(editImageData).catch(() => {});
+          setEditImageData(null);
+          setEditVisible(false);
+        }}
         confirmLoading={editLoading}
         form={editForm}
         searchResults={editSearchResults}

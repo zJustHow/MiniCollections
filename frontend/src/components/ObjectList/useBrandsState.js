@@ -12,7 +12,7 @@ import {
 } from "../../utils";
 import { filterKeyFromIds } from "../../utils/filterParams";
 
-export default function useBrandsState() {
+export default function useBrandsState({ isAdmin = false } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchValue] = useSearchParam();
@@ -42,6 +42,7 @@ export default function useBrandsState() {
       enabled: !searchActive,
       pageSize: PAGE_SIZE,
       pageParamKey: "page",
+      reservedFirstPageSlots: isAdmin ? 1 : 0,
     },
   );
 

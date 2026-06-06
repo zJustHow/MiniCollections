@@ -1,10 +1,9 @@
-import NeuButton from "../../components/NeuButton";
-import { Drawer, Space } from "antd";
+import { CheckOutlined, DeleteOutlined } from "@ant-design/icons";
 import NeuTag from "../../components/NeuTag";
 import { useState } from "react";
 import { useLocale } from "../../LocaleContext";
-import DrawerHeaderTitle from "../../components/DrawerHeaderTitle";
-import { NeuDrawerBody } from "../../components/drawerStyles";
+import NeuFormDrawer from "../../components/NeuFormDrawer";
+import HeaderActionButton from "../../components/HeaderActionButton";
 import { radius } from "../../theme/radius";
 import { STATUS_COLOR, TYPE_COLOR, useStatusLabel, useTypeLabel } from "./constants";
 
@@ -45,31 +44,33 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
   ];
 
   return (
-    <Drawer
-      closable={false}
+    <NeuFormDrawer
+      title={`#${submission.id} — ${submission.name_en || submission.notes?.slice(0, 40) || "—"}`}
       open={!!submission}
       onClose={onClose}
-      width={480}
-      footer={
+      destroyOnClose
+      trailing={
         submission.status === "PENDING" ? (
-          <Space>
-            {isMissingModel ? (
-              <NeuButton type="primary" onClick={onApprove}>{t("approveSubmission")}</NeuButton>
-            ) : (
-              <NeuButton type="primary" onClick={onResolve}>{t("resolveSubmission")}</NeuButton>
-            )}
-            <NeuButton danger onClick={onReject}>
-              {isMissingModel ? t("rejectSubmission") : t("closeSubmission")}
-            </NeuButton>
-          </Space>
+          <>
+            <HeaderActionButton
+              icon={<CheckOutlined />}
+              onClick={isMissingModel ? onApprove : onResolve}
+              aria-label={
+                isMissingModel ? t("approveSubmission") : t("resolveSubmission")
+              }
+            />
+            <HeaderActionButton
+              danger
+              icon={<DeleteOutlined />}
+              onClick={onReject}
+              aria-label={
+                isMissingModel ? t("rejectSubmission") : t("closeSubmission")
+              }
+            />
+          </>
         ) : null
       }
     >
-      <DrawerHeaderTitle
-        title={`#${submission.id} — ${submission.name_en || submission.notes?.slice(0, 40) || "—"}`}
-        onClose={onClose}
-      />
-      <NeuDrawerBody>
       {submission.image_url && (
         <div
           onClick={() => window.open(submission.image_url, "_blank")}
@@ -131,7 +132,6 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
           </div>
         ) : null
       )}
-      </NeuDrawerBody>
-    </Drawer>
+    </NeuFormDrawer>
   );
 }

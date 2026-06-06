@@ -119,7 +119,7 @@ export default function NeuCard({
   variant = "tile",
   hoverable = true,
   className = "",
-  bodyStyle,
+  styles,
   name,
   imageUrl,
   image_url,
@@ -183,7 +183,10 @@ export default function NeuCard({
     <Card
       hoverable={hoverable}
       className={cardClassName}
-      bodyStyle={bodyStyle ?? DEFAULT_BODY_STYLE}
+      styles={{
+        ...styles,
+        body: { ...DEFAULT_BODY_STYLE, ...styles?.body },
+      }}
       cover={tileCover}
       onClick={onClick}
       {...props}

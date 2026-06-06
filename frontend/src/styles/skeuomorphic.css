@@ -327,7 +327,8 @@ a:hover {
 
 .header-slot-bar {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: stretch;
   width: 100%;
   gap: 6px;
@@ -335,9 +336,10 @@ a:hover {
 }
 
 .header-slot-title {
-  position: absolute;
-  left: 0;
-  right: 0;
+  grid-column: 2;
+  grid-row: 1;
+  min-width: 0;
+  max-width: 100%;
   color: var(--neu-text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -354,6 +356,18 @@ a:hover {
   gap: 6px;
   align-items: stretch;
   flex-shrink: 0;
+}
+
+.header-slot-actions:not(.header-slot-actions-end) {
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: start;
+}
+
+.header-slot-actions-end {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
 }
 
 /* ── TABS (antd — kept for compatibility) ─────────────────── */
@@ -1072,14 +1086,25 @@ textarea.ant-input:focus:not(:disabled):not([disabled]),
 }
 
 /* search — flex layout (antd group defaults to display:table, gap has no effect) */
-.ant-input-search > .ant-input-group {
-  display: inline-flex;
+.ant-input-group-wrapper.ant-input-search {
+  display: flex;
+  max-width: 100%;
+}
+
+.ant-input-search > .ant-input-group,
+.ant-input-group-wrapper.ant-input-search > .ant-input-wrapper.ant-input-group {
+  display: flex;
   align-items: stretch;
+  flex: 1;
+  min-width: 0;
   width: 100%;
   gap: 6px;
 }
 
-.ant-input-search > .ant-input-group > .ant-input-affix-wrapper {
+.ant-input-search > .ant-input-group > .ant-input-affix-wrapper,
+.ant-input-group-wrapper.ant-input-search
+  > .ant-input-wrapper.ant-input-group
+  > .ant-input-affix-wrapper {
   display: inline-flex;
   width: auto;
 }
@@ -2076,6 +2101,8 @@ textarea.ant-input[disabled],
   grid-template-areas: "content content content content";
   gap: 16px;
   align-items: start;
+  width: 100%;
+  min-width: 0;
 }
 
 .neu-list-page-layout--with-toolbar {
@@ -2099,6 +2126,8 @@ textarea.ant-input[disabled],
   display: flex;
   align-items: center;
   gap: 16px;
+  width: 100%;
+  min-width: 0;
 }
 
 .neu-list-page-summary,
@@ -2117,23 +2146,38 @@ textarea.ant-input[disabled],
 .neu-list-page-content {
   grid-area: content;
   min-width: 0;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.neu-list-page-search {
-  display: flex;
-  justify-content: flex-end;
-  flex-shrink: 0;
-  margin-left: auto;
+/* Spin wrappers shrink-wrap to one card unless forced full width */
+#main-content .ant-spin-nested-loading,
+#main-content .ant-spin-container {
+  width: 100%;
+  min-width: 0;
 }
 
-.neu-list-page-search > .ant-input-search,
-.neu-list-page-search > .ant-input-group-wrapper.ant-input-search {
-  width: 260px;
+.neu-list-page-search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.neu-list-page-search .ant-input-group-wrapper.ant-input-search {
+  width: 100%;
   max-width: 100%;
-  flex-shrink: 0;
+}
+
+@media (min-width: 1200px) {
+  .neu-list-page-search {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .neu-list-page-search .ant-input-group-wrapper.ant-input-search {
+    width: 260px;
+  }
 }
 
 .neu-list-page-browse-grid,
@@ -2141,6 +2185,8 @@ textarea.ant-input[disabled],
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
+  width: 100%;
+  min-width: 0;
 }
 
 .neu-list-page-layout--with-filter .neu-list-page-browse-grid,
@@ -2152,22 +2198,8 @@ textarea.ant-input[disabled],
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.neu-list-page-layout--stacked .neu-list-page-toolbar {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.neu-list-page-layout--stacked .neu-list-page-search {
-  margin-left: 0;
-}
-
-.neu-list-page-layout--stacked .neu-list-page-search > .ant-input-search,
-.neu-list-page-layout--stacked
-  .neu-list-page-search
-  > .ant-input-group-wrapper.ant-input-search {
   width: 100%;
+  min-width: 0;
 }
 
 .neu-list-page-layout--stacked .neu-list-page-browse-grid,
@@ -2204,6 +2236,18 @@ textarea.ant-input[disabled],
   border-top: 1px solid var(--neu-border);
 }
 
+@media (max-width: 1199px) {
+  .neu-list-page-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .neu-list-page-search {
+    width: 100%;
+  }
+}
+
 @media (max-width: 992px) {
   .neu-list-page-layout:not(.neu-list-page-layout--stacked) {
     grid-template-columns: minmax(0, 1fr);
@@ -2231,15 +2275,6 @@ textarea.ant-input[disabled],
     grid-template-areas:
       "filter"
       "content";
-  }
-
-  .neu-list-page-layout:not(.neu-list-page-layout--stacked)
-    .neu-list-page-search
-    > .ant-input-search,
-  .neu-list-page-layout:not(.neu-list-page-layout--stacked)
-    .neu-list-page-search
-    > .ant-input-group-wrapper.ant-input-search {
-    width: 100%;
   }
 
   .neu-list-page-browse-grid,

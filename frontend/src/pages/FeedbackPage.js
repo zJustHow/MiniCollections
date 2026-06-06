@@ -1,15 +1,16 @@
-import { App, Drawer, Empty, Spin, Typography } from "antd";
+import { App, Empty, Spin, Typography } from "antd";
 import NeuTag from "../components/NeuTag";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import NeuButton from "../components/NeuButton";
 import NeuCard, { NeuCardImageSlot } from "../components/NeuCard";
+import ListPagination from "../components/ListPagination";
+import usePagedList from "../hooks/usePagedList";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
-import { deleteMySubmission, getBrands, getMySubmissions } from "../utils";
+import { deleteMySubmission, getBrands, getMySubmissionsPage, FEEDBACK_PAGE_SIZE } from "../utils";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
-import DrawerHeaderTitle from "../components/DrawerHeaderTitle";
-import { NeuDrawerBody } from "../components/drawerStyles";
+import NeuFormDrawer from "../components/NeuFormDrawer";
 import dayjs from "dayjs";
 
 const { Text } = Typography;
@@ -102,20 +103,14 @@ function SubmissionDrawer({ item, onClose, onDelete, t }) {
   const brand = item.brand_name || item.custom_brand_name;
 
   return (
-    <Drawer
-      closable={false}
+    <NeuFormDrawer
+      title={title}
       open={!!item}
       onClose={onClose}
-      width={520}
+      onDelete={() => onDelete(item)}
+      deleteLabel={t("delete")}
       destroyOnClose
     >
-      <DrawerHeaderTitle
-        title={title}
-        onClose={onClose}
-        onDelete={() => onDelete(item)}
-        deleteLabel={t("delete")}
-      />
-      <NeuDrawerBody>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <NeuTag color={TYPE_COLOR[item.submission_type] || "default"}>
@@ -169,40 +164,41 @@ function SubmissionDrawer({ item, onClose, onDelete, t }) {
           <Text style={{ fontSize: 13, color: "var(--neu-text)" }}>{item.reject_reason}</Text>
         </div>
       )}
-      </NeuDrawerBody>
-    </Drawer>
+    </NeuFormDrawer>
   );
 }
 
 export default function FeedbackPage() {
   const { message, modal } = App.useApp(); const { t } = useLocale();
-  const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [brands, setBrands] = useState([]);
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
-  const load = async () => {
-    setLoading(true);
+  const fetchMySubmissionsPage = useCallback(async ({ page, size }) => {
     try {
-      const data = await getMySubmissions();
-      setSubmissions(Array.isArray(data) ? data.slice().reverse() : []);
+      return await getMySubmissionsPage({ page, size });
     } catch (err) {
       message.error(err?.message || t("failedToLoadMySubmissions"));
-    } finally {
-      setLoading(false);
+      return { content: [], page: 0, total_pages: 0, total_elements: 0 };
     }
-  };
+  }, [message, t]);
+
+  const {
+    items: submissions,
+    page,
+    totalPages,
+    loading,
+    loadPage,
+    onPageChange,
+  } = usePagedList(fetchMySubmissionsPage, { pageSize: FEEDBACK_PAGE_SIZE });
 
   useEffect(() => {
-    load();
     getBrands().then((data) => setBrands(Array.isArray(data) ? data : [])).catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSubmitSuccess = () => {
     setSubmitModalVisible(false);
-    load();
+    loadPage(0);
   };
 
   const handleDelete = (item) => {
@@ -217,7 +213,7 @@ export default function FeedbackPage() {
           await deleteMySubmission(item.id);
           message.success(t("feedbackDeleted"));
           setSelectedItem(null);
-          setSubmissions((prev) => prev.filter((s) => s.id !== item.id));
+          loadPage(page);
         } catch (err) {
           message.error(err?.message || t("failedToDeleteFeedback"));
         }
@@ -229,7 +225,7 @@ export default function FeedbackPage() {
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 24 }}>
         <div style={{ display: "flex", gap: 8 }}>
-          <NeuButton icon={<ReloadOutlined />} onClick={load} disabled={loading} />
+          <NeuButton icon={<ReloadOutlined />} onClick={() => loadPage(page)} disabled={loading} />
           <NeuButton variant="primary" icon={<PlusOutlined />} onClick={() => setSubmitModalVisible(true)}>
             {t("newFeedback")}
           </NeuButton>
@@ -243,11 +239,20 @@ export default function FeedbackPage() {
       ) : submissions.length === 0 ? (
         <Empty description={t("myFeedbackEmpty")} style={{ padding: 48 }} />
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {submissions.map((item) => (
-            <SubmissionCard key={item.id} item={item} t={t} onClick={() => setSelectedItem(item)} />
-          ))}
-        </div>
+        <>
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {submissions.map((item) => (
+              <SubmissionCard key={item.id} item={item} t={t} onClick={() => setSelectedItem(item)} />
+            ))}
+          </div>
+          <ListPagination
+            page={page}
+            totalPages={totalPages}
+            loading={loading}
+            onPageChange={onPageChange}
+            pageSize={FEEDBACK_PAGE_SIZE}
+          />
+        </>
       )}
 
       <SubmissionDrawer

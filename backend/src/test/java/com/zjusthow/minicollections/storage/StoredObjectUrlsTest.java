@@ -24,6 +24,14 @@ class StoredObjectUrlsTest {
   }
 
   @Test
+  void resolvesKeyFromSamePathDifferentHost() {
+    String url = BASE + "/42/a1b2c3d4-e5f6-4789-abcd-ef0123456789.png";
+    assertEquals(
+        "42/a1b2c3d4-e5f6-4789-abcd-ef0123456789.png",
+        StoredObjectUrls.objectKeyFromPublicUrl("http://minio:9000/minicollections-media", url).orElseThrow());
+  }
+
+  @Test
   void emptyForForeignUrl() {
     assertTrue(StoredObjectUrls.objectKeyFromPublicUrl(BASE, "https://cdn.example.com/x.jpg").isEmpty());
   }

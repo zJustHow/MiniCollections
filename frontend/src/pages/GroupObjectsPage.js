@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
-import { App, Form, Grid, Spin } from "antd";
+import { App, Form, Spin } from "antd";
 import NeuCard from "../components/NeuCard";
 import HeaderActionButton from "../components/HeaderActionButton";
 import { NeuInput } from "../components/NeuFormControl";
@@ -25,10 +25,10 @@ import {
   createUserObject,
   searchBrandObjects,
   purchasePriceFromFormValue,
+  discardUploadedImage,
 } from "../utils";
 
 const { Search } = NeuInput;
-const { useBreakpoint } = Grid;
 
 const normalizeList = (data) =>
   Array.isArray(data) ? data : data?.content != null ? data.content : [];
@@ -40,8 +40,6 @@ export default function GroupObjectsPage() {
   const { message, modal } = App.useApp();
   const { t } = useLocale();
   const { setHeaderSlot } = useHeader();
-  const screens = useBreakpoint();
-  const cols = screens.lg ? 4 : screens.md ? 3 : 2;
 
   const [searchValue, setSearchParam] = useSearchParam();
   const [group, setGroup] = useState(location.state?.group ?? null);
@@ -133,6 +131,8 @@ export default function GroupObjectsPage() {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate("/groups")}
           />
+        </div>
+        <div className="header-slot-actions header-slot-actions-end">
           <HeaderActionButton icon={<EditOutlined />} onClick={openEditGroup} />
           <HeaderActionButton
             danger
@@ -140,9 +140,7 @@ export default function GroupObjectsPage() {
             onClick={handleDeleteGroup}
           />
         </div>
-        <span className="header-slot-title">
-          {group?.name ?? "…"}
-        </span>
+        <span className="header-slot-title">{group?.name ?? "…"}</span>
       </div>,
     );
     return () => setHeaderSlot(null);
@@ -252,8 +250,6 @@ export default function GroupObjectsPage() {
     }
   };
 
-  const browseGridClass = cols === 4 ? "neu-list-page-browse-grid" : undefined;
-
   return (
     <div>
       <Spin spinning={loading}>
@@ -268,6 +264,8 @@ export default function GroupObjectsPage() {
           }
           search={
             <Search
+              id="group-objects-search"
+              name="groupObjectsSearch"
               placeholder={t("searchModels")}
               allowClear
               value={draftQuery}
@@ -294,40 +292,28 @@ export default function GroupObjectsPage() {
             />
           }
         >
-
-          <div
-            className={browseGridClass}
-            style={
-              browseGridClass
-                ? undefined
-                : {
-                    display: "grid",
-                    gridTemplateColumns: `repeat(${cols}, 1fr)`,
-                    gap: 16,
+          <div className="neu-list-page-browse-grid">
+            {[{ id: "__add__" }, ...displayObjects].map((item) =>
+              item.id === "__add__" ? (
+                <NeuCard
+                  key="__add__"
+                  add
+                  name={t("addModel")}
+                  onClick={openAddUserObject}
+                />
+              ) : (
+                <NeuCard
+                  key={item.id}
+                  name={item.name ?? "—"}
+                  imageUrl={item.image_url}
+                  onClick={() =>
+                    navigate(`/groups/${groupId}/objects/${item.id}`, {
+                      state: { userObject: item, group },
+                    })
                   }
-            }
-          >
-          {[{ id: "__add__" }, ...displayObjects].map((item) =>
-            item.id === "__add__" ? (
-              <NeuCard
-                key="__add__"
-                add
-                name={t("addModel")}
-                onClick={openAddUserObject}
-              />
-            ) : (
-              <NeuCard
-                key={item.id}
-                name={item.name ?? "—"}
-                imageUrl={item.image_url}
-                onClick={() =>
-                  navigate(`/groups/${groupId}/objects/${item.id}`, {
-                    state: { userObject: item, group },
-                  })
-                }
-              />
-            ),
-          )}
+                />
+              ),
+            )}
           </div>
         </ObjectListPageLayout>
       </Spin>
@@ -335,7 +321,12 @@ export default function GroupObjectsPage() {
       <EditGroupModal
         visible={editGroupVisible}
         onOk={handleUpdateGroup}
-        onCancel={() => setEditGroupVisible(false)}
+        onCancel={() => {
+          if (editGroupImageData)
+            discardUploadedImage(editGroupImageData).catch(() => {});
+          setEditGroupImageData(null);
+          setEditGroupVisible(false);
+        }}
         confirmLoading={editGroupLoading}
         form={editGroupForm}
         selectedGroup={group}
@@ -346,7 +337,11 @@ export default function GroupObjectsPage() {
       <AddUserObjectInGroupModal
         visible={addVisible}
         onOk={handleAddUserObject}
-        onCancel={() => setAddVisible(false)}
+        onCancel={() => {
+          if (addImageData) discardUploadedImage(addImageData).catch(() => {});
+          setAddImageData(null);
+          setAddVisible(false);
+        }}
         confirmLoading={addLoading}
         form={addForm}
         searchResults={addSearchResults}

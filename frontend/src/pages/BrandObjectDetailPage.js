@@ -22,6 +22,7 @@ import {
   adminDeleteBrandObject,
   purchasePriceFromFormValue,
   formatReleasePrice,
+  discardUploadedImage,
 } from "../utils";
 
 const { useBreakpoint } = Grid;
@@ -81,32 +82,30 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate(-1)}
           />
-          {isAdmin && brandObject && (
-            <>
-              <HeaderActionButton
-                icon={<EditOutlined />}
-                onClick={() => setBrandObjectModalOpen(true)}
-              />
-              <Popconfirm
-                title={t("deleteBrandObjectTitle")}
-                description={t("deleteBrandObjectContent").replace(
-                  "{name}",
-                  brandObject.name,
-                )}
-                onConfirm={handleAdminDeleteBrandObject}
-                okText={t("delete")}
-                okButtonProps={neuBtnProps({ danger: true })}
-                cancelButtonProps={neuBtnProps()}
-                cancelText={t("cancel")}
-              >
-                <HeaderActionButton danger icon={<DeleteOutlined />} />
-              </Popconfirm>
-            </>
-          )}
         </div>
-        <span className="header-slot-title">
-          {brandObject?.name ?? "…"}
-        </span>
+        {isAdmin && brandObject && (
+          <div className="header-slot-actions header-slot-actions-end">
+            <HeaderActionButton
+              icon={<EditOutlined />}
+              onClick={() => setBrandObjectModalOpen(true)}
+            />
+            <Popconfirm
+              title={t("deleteBrandObjectTitle")}
+              description={t("deleteBrandObjectContent").replace(
+                "{name}",
+                brandObject.name,
+              )}
+              onConfirm={handleAdminDeleteBrandObject}
+              okText={t("delete")}
+              okButtonProps={neuBtnProps({ danger: true })}
+              cancelButtonProps={neuBtnProps()}
+              cancelText={t("cancel")}
+            >
+              <HeaderActionButton danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          </div>
+        )}
+        <span className="header-slot-title">{brandObject?.name ?? "…"}</span>
       </div>,
     );
     return () => setHeaderSlot(null);
@@ -130,9 +129,14 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
     setAddToGroupVisible(true);
   };
 
-  const description = [brandObject?.description, brandObject?.description_en, brandObject?.description_zh]
-    .map((value) => (typeof value === "string" ? value.trim() : value))
-    .find((value) => value != null && value !== "" && value !== "—") ?? null;
+  const description =
+    [
+      brandObject?.description,
+      brandObject?.description_en,
+      brandObject?.description_zh,
+    ]
+      .map((value) => (typeof value === "string" ? value.trim() : value))
+      .find((value) => value != null && value !== "" && value !== "—") ?? null;
 
   const handleCreateUserObject = async () => {
     try {
@@ -225,7 +229,12 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       <AddToGroupModal
         visible={addToGroupVisible}
         onOk={handleCreateUserObject}
-        onCancel={() => setAddToGroupVisible(false)}
+        onCancel={() => {
+          if (customImageData)
+            discardUploadedImage(customImageData).catch(() => {});
+          setCustomImageData(null);
+          setAddToGroupVisible(false);
+        }}
         confirmLoading={addToGroupLoading}
         form={addToGroupForm}
         groups={groups}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { PAGE_SIZE } from "../utils";
+import { fetchAddCardPageData } from "../utils/addCardPagination";
 import { scrollAppToTop } from "../utils/scroll";
 import { mutateSearchParams } from "../utils/searchParams";
 
@@ -19,6 +20,7 @@ export default function usePagedList(fetchPage, options = {}) {
     pageSize = PAGE_SIZE,
     pageParamKey = null,
     allowEmptyPage = false,
+    reservedFirstPageSlots = 0,
   } = options;
 
   const location = useLocation();
@@ -55,7 +57,12 @@ export default function usePagedList(fetchPage, options = {}) {
     async (targetPage) => {
       setLoading(true);
       try {
-        const response = await fetchPage({ page: targetPage, size: pageSize });
+        const response = await fetchAddCardPageData(
+          fetchPage,
+          targetPage,
+          pageSize,
+          reservedFirstPageSlots,
+        );
         const totalPages = response?.total_pages ?? 0;
         const totalElements = response?.total_elements ?? 0;
         const contentLength = Array.isArray(response?.content)
@@ -70,7 +77,12 @@ export default function usePagedList(fetchPage, options = {}) {
           targetPage >= totalPages
         ) {
           clearPageParam();
-          const retry = await fetchPage({ page: 0, size: pageSize });
+          const retry = await fetchAddCardPageData(
+            fetchPage,
+            0,
+            pageSize,
+            reservedFirstPageSlots,
+          );
           applyPage(retry);
           return;
         }
@@ -79,7 +91,14 @@ export default function usePagedList(fetchPage, options = {}) {
         setLoading(false);
       }
     },
-    [fetchPage, pageSize, applyPage, clearPageParam, allowEmptyPage],
+    [
+      fetchPage,
+      pageSize,
+      applyPage,
+      clearPageParam,
+      allowEmptyPage,
+      reservedFirstPageSlots,
+    ],
   );
 
   const reset = useCallback(() => {
@@ -129,7 +148,7 @@ export default function usePagedList(fetchPage, options = {}) {
       ? parsePageParam(searchParams, pageParamKey)
       : 0;
     loadPage(initialPage);
-  }, [resetKey, enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [resetKey, enabled, reservedFirstPageSlots]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!pendingScrollRef.current || loading) return;

@@ -39,6 +39,7 @@ import com.zjusthow.minicollections.repository.BrandRepository;
 import com.zjusthow.minicollections.repository.CategoryRepository;
 import com.zjusthow.minicollections.repository.ScaleRepository;
 import com.zjusthow.minicollections.repository.SeriesRepository;
+import com.zjusthow.minicollections.repository.UserObjectRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +47,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -77,6 +79,7 @@ public class BrandService {
     private final BrandElasticsearchQueryService brandElasticsearchQueryService;
     private final BrandSearchRepository brandSearchRepository;
     private final ImageStorageService imageStorageService;
+    private final UserObjectRepository userObjectRepository;
 
     @Value("${app.elasticsearch.enabled:true}")
     private boolean elasticsearchEnabled;
@@ -92,7 +95,8 @@ public class BrandService {
             @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository,
             @Autowired(required = false) BrandElasticsearchQueryService brandElasticsearchQueryService,
             @Autowired(required = false) BrandSearchRepository brandSearchRepository,
-            @Autowired(required = false) ImageStorageService imageStorageService) {
+            @Autowired(required = false) ImageStorageService imageStorageService,
+            UserObjectRepository userObjectRepository) {
         this.brandRepository = brandRepository;
         this.brandObjectRepository = brandObjectRepository;
         this.seriesRepository = seriesRepository;
@@ -104,6 +108,7 @@ public class BrandService {
         this.brandElasticsearchQueryService = brandElasticsearchQueryService;
         this.brandSearchRepository = brandSearchRepository;
         this.imageStorageService = imageStorageService;
+        this.userObjectRepository = userObjectRepository;
     }
 
     private boolean esEnabled() {
@@ -761,7 +766,8 @@ public class BrandService {
 
     @CacheEvict(value = {"brands", "brandObjects"}, allEntries = true)
     public BrandDto updateBrand(long id, BrandBody req, String effectiveLocale) {
-        brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
+        BrandEntity existing = brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
+        deleteReplacedStoredImage(existing.imageUrl(), req.imageUrl());
         var updated = new com.zjusthow.minicollections.entity.BrandEntity(id, req.nameEn(), req.nameZh(), req.imageUrl());
         var saved = brandRepository.save(updated);
         if (brandEsEnabled()) {
@@ -786,15 +792,19 @@ public class BrandService {
         return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
-    @CacheEvict(value = {"brands", "brandObjects"}, allEntries = true)
+    @CacheEvict(value = {"brands", "brandObjects", "user_objects"}, allEntries = true)
+    @Transactional
     public void deleteBrand(long id) {
-        if (!brandRepository.existsById(id)) {
-            throw new BrandNotFoundException();
-        }
+        BrandEntity brand = brandRepository.findById(id)
+                .orElseThrow(BrandNotFoundException::new);
+        brandObjectRepository.findByBrandId(id)
+                .orElse(Collections.emptyList())
+                .forEach(this::removeBrandObject);
         brandRepository.deleteById(id);
         if (brandEsEnabled()) {
             brandSearchRepository.deleteById(id);
         }
+        deleteStoredImage(brand.imageUrl());
     }
 
     @CacheEvict(value = "brandObjects", allEntries = true)
@@ -820,6 +830,7 @@ public class BrandService {
         validateSeriesForBrand(req.seriesId(), existing.brandId());
         validateCategoryId(req.categoryId());
         validateScaleId(req.scaleId());
+        deleteReplacedStoredImage(existing.imageUrl(), req.imageUrl());
         BrandObjectEntity updated = new BrandObjectEntity(
                 existing.id(), req.nameEn(), req.nameZh(),
                 req.imageUrl(), req.imageSource(),
@@ -832,14 +843,33 @@ public class BrandService {
         return toBrandObjectDto(saved, preferZh);
     }
 
-    @CacheEvict(value = "brandObjects", allEntries = true)
+    @CacheEvict(value = {"brandObjects", "user_objects"}, allEntries = true)
+    @Transactional
     public void deleteBrandObject(long id) {
-        if (!brandObjectRepository.existsById(id)) {
-            throw new BrandObjectNotFoundException();
-        }
-        brandObjectRepository.deleteById(id);
+        BrandObjectEntity existing = brandObjectRepository.findById(id)
+                .orElseThrow(BrandObjectNotFoundException::new);
+        removeBrandObject(existing);
+    }
+
+    private void removeBrandObject(BrandObjectEntity existing) {
+        userObjectRepository.clearBrandObjectReference(existing.id());
+        String imageUrl = existing.imageUrl();
+        brandObjectRepository.deleteById(existing.id());
         if (esEnabled()) {
-            brandObjectSearchRepository.deleteById(id);
+            brandObjectSearchRepository.deleteById(existing.id());
+        }
+        deleteStoredImage(imageUrl);
+    }
+
+    private void deleteStoredImage(String imageUrl) {
+        if (imageStorageService != null) {
+            imageStorageService.deleteStoredImageIfInBucket(imageUrl);
+        }
+    }
+
+    private void deleteReplacedStoredImage(String previousUrl, String newUrl) {
+        if (imageStorageService != null) {
+            imageStorageService.deleteReplacedStoredImage(previousUrl, newUrl);
         }
     }
 

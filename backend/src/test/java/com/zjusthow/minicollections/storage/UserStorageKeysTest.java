@@ -16,6 +16,13 @@ class UserStorageKeysTest {
     }
 
     @Test
+    void acceptsSvgUserUploadKey() {
+        String key = "42/a1b2c3d4-e5f6-4789-abcd-ef0123456789.svg";
+        assertTrue(UserStorageKeys.isUserUploadKey(key));
+        assertTrue(UserStorageKeys.isOwnedByUser(42, key));
+    }
+
+    @Test
     void rejectsBrandAndCatalogKeys() {
         assertFalse(UserStorageKeys.isUserUploadKey("brands/minigt/logo.svg"));
         assertFalse(UserStorageKeys.isUserUploadKey("minigt/12345.jpg"));

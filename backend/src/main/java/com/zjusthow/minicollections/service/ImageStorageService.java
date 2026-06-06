@@ -41,6 +41,7 @@ public class ImageStorageService {
         this.s3Client = s3Client;
         this.s3Properties = s3Properties;
         ensureBucket();
+        log.info("Image storage public base URL: {}", s3Properties.publicBaseUrl());
     }
 
     private void ensureBucket() {
@@ -80,9 +81,17 @@ public class ImageStorageService {
      * Ignores brand assets, static URLs, and URLs owned by other users.
      */
     public void deleteUserImageIfOwned(long userId, String imageUrl) {
-        StoredObjectUrls.objectKeyFromPublicUrl(s3Properties.publicBaseUrl(), imageUrl)
-                .filter(key -> UserStorageKeys.isOwnedByUser(userId, key))
-                .ifPresent(this::deleteObjectQuietly);
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return;
+        }
+        var key = StoredObjectUrls.objectKeyFromPublicUrl(s3Properties.publicBaseUrl(), imageUrl);
+        if (key.isEmpty()) {
+            warnIfLikelyBucketUrl(imageUrl, "user image");
+            return;
+        }
+        if (UserStorageKeys.isOwnedByUser(userId, key.get())) {
+            deleteObjectQuietly(key.get());
+        }
     }
 
     public void deleteReplacedUserImage(long userId, String previousUrl, String newUrl) {
@@ -90,6 +99,26 @@ public class ImageStorageService {
             return;
         }
         deleteUserImageIfOwned(userId, previousUrl);
+    }
+
+    /** Deletes any object in this bucket referenced by {@code imageUrl}. Ignores external URLs. */
+    public void deleteStoredImageIfInBucket(String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            return;
+        }
+        var key = StoredObjectUrls.objectKeyFromPublicUrl(s3Properties.publicBaseUrl(), imageUrl);
+        if (key.isPresent()) {
+            deleteObjectQuietly(key.get());
+            return;
+        }
+        warnIfLikelyBucketUrl(imageUrl, "stored image");
+    }
+
+    public void deleteReplacedStoredImage(String previousUrl, String newUrl) {
+        if (previousUrl == null || previousUrl.isBlank() || Objects.equals(previousUrl, newUrl)) {
+            return;
+        }
+        deleteStoredImageIfInBucket(previousUrl);
     }
 
     private void deleteObjectQuietly(String key) {
@@ -100,6 +129,16 @@ public class ImageStorageService {
                     .build());
         } catch (S3Exception e) {
             log.warn("Failed to delete S3 object {}: {}", key, e.getMessage());
+        }
+    }
+
+    /** Warn when a URL looks like this bucket but does not match {@code S3_PUBLIC_BASE_URL}. */
+    private void warnIfLikelyBucketUrl(String imageUrl, String context) {
+        String bucket = s3Properties.bucket();
+        if (bucket != null && !bucket.isBlank() && imageUrl.contains("/" + bucket + "/")) {
+            log.warn(
+                    "Skipped S3 delete for {}: URL does not match configured public base (url={}, base={})",
+                    context, imageUrl, s3Properties.publicBaseUrl());
         }
     }
 

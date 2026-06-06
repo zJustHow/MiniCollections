@@ -11,12 +11,12 @@ import { BugOutlined, EditOutlined, PlusCircleOutlined } from "@ant-design/icons
 import { useLocale } from "../../../LocaleContext";
 import { radius } from "../../../theme/radius";
 import { submitFeedback, getCategories, getScales, getSeriesByBrandId } from "../../../utils";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import ImageUploadField from "../../ImageUploadField";
 
 const OTHER_BRAND = "__OTHER__";
 
-function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSeries, categoryOptions, scaleOptions, seriesOptions, imageValue, onImageChange, onImageRemove }) {
+function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSeries, categoryOptions, scaleOptions, seriesOptions, imageValue, onImageChange, uploadSessionRef }) {
   const { t } = useLocale();
   return (
     <>
@@ -111,13 +111,13 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSerie
         <NeuInput.TextArea rows={3} />
       </Form.Item>
       <Form.Item label={t("image")}>
-        <ImageUploadField value={imageValue} onChange={onImageChange} onRemove={onImageRemove} />
+        <ImageUploadField value={imageValue} onChange={onImageChange} uploadSessionRef={uploadSessionRef} />
       </Form.Item>
     </>
   );
 }
 
-function BugReportForm({ imageValue, onImageChange, onImageRemove }) {
+function BugReportForm({ imageValue, onImageChange, uploadSessionRef }) {
   const { t } = useLocale();
   return (
     <>
@@ -132,13 +132,13 @@ function BugReportForm({ imageValue, onImageChange, onImageRemove }) {
         <NeuInput.TextArea rows={5} placeholder={t("bugDescriptionPlaceholder")} />
       </Form.Item>
       <Form.Item label={t("image")}>
-        <ImageUploadField value={imageValue} onChange={onImageChange} onRemove={onImageRemove} />
+        <ImageUploadField value={imageValue} onChange={onImageChange} uploadSessionRef={uploadSessionRef} />
       </Form.Item>
     </>
   );
 }
 
-function DataCorrectionForm({ form, brands, brandValue, onBrandChange, imageValue, onImageChange, onImageRemove }) {
+function DataCorrectionForm({ form, brands, brandValue, onBrandChange, imageValue, onImageChange, uploadSessionRef }) {
   const { t } = useLocale();
   return (
     <>
@@ -182,7 +182,7 @@ function DataCorrectionForm({ form, brands, brandValue, onBrandChange, imageValu
         <NeuInput.TextArea rows={4} placeholder={t("correctionDescriptionPlaceholder")} />
       </Form.Item>
       <Form.Item label={t("image")}>
-        <ImageUploadField value={imageValue} onChange={onImageChange} onRemove={onImageRemove} />
+        <ImageUploadField value={imageValue} onChange={onImageChange} uploadSessionRef={uploadSessionRef} />
       </Form.Item>
     </>
   );
@@ -202,6 +202,7 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
   const [submissionType, setSubmissionType] = useState("MISSING_MODEL");
   const [brandValue, setBrandValue] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
+  const uploadSessionRef = useRef(null);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [scaleOptions, setScaleOptions] = useState([]);
   const [seriesOptions, setSeriesOptions] = useState([]);
@@ -225,7 +226,8 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
     { value: "DATA_CORRECTION", icon: <EditOutlined />, labelKey: "feedbackTypeDataCorrection" },
   ];
 
-  const handleTypeChange = (val) => {
+  const handleTypeChange = async (val) => {
+    await uploadSessionRef.current?.discardAll?.();
     setSubmissionType(val);
     form.resetFields();
     setBrandValue(null);
@@ -292,7 +294,8 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
     }
   };
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
+    await uploadSessionRef.current?.discardAll?.();
     form.resetFields();
     setBrandValue(null);
     setImageUrl(null);
@@ -300,7 +303,7 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
     onCancel();
   };
 
-  const imageProps = { imageValue: imageUrl, onImageChange: setImageUrl, onImageRemove: () => setImageUrl(null) };
+  const imageProps = { imageValue: imageUrl, onImageChange: setImageUrl, uploadSessionRef };
 
   return (
     <NeuFormDrawer
@@ -312,7 +315,6 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
       cancelText={t("cancel")}
       confirmLoading={loading}
       destroyOnClose
-      width={560}
     >
       <div
         style={{

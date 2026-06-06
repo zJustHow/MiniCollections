@@ -10,8 +10,10 @@ export default function DrawerHeaderTitle({
   okText,
   confirmLoading = false,
   okButtonProps,
+  trailing,
 }) {
   const { danger, disabled, ...restOkButtonProps } = okButtonProps ?? {};
+  const hasEndActions = onDelete || onOk || trailing;
 
   return (
     <div className="neu-drawer-toolbar">
@@ -21,26 +23,31 @@ export default function DrawerHeaderTitle({
           onClick={onClose}
           aria-label="Close"
         />
-        {onDelete && (
-          <HeaderActionButton
-            danger
-            icon={<DeleteOutlined />}
-            onClick={onDelete}
-            aria-label={deleteLabel}
-          />
-        )}
-        {onOk && (
-          <HeaderActionButton
-            icon={<CheckOutlined />}
-            onClick={onOk}
-            loading={confirmLoading}
-            danger={danger}
-            disabled={disabled}
-            aria-label={okText}
-            {...restOkButtonProps}
-          />
-        )}
       </div>
+      {hasEndActions && (
+        <div className="neu-drawer-toolbar-actions neu-drawer-toolbar-actions-end">
+          {onDelete && (
+            <HeaderActionButton
+              danger
+              icon={<DeleteOutlined />}
+              onClick={onDelete}
+              aria-label={deleteLabel}
+            />
+          )}
+          {onOk && (
+            <HeaderActionButton
+              icon={<CheckOutlined />}
+              onClick={onOk}
+              loading={confirmLoading}
+              danger={danger}
+              disabled={disabled}
+              aria-label={okText}
+              {...restOkButtonProps}
+            />
+          )}
+          {trailing}
+        </div>
+      )}
       {title != null && title !== "" && (
         <div className="neu-drawer-toolbar-title">{title}</div>
       )}

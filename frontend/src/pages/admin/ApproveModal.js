@@ -95,7 +95,6 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
       okText={t("approveSubmission")}
       cancelText={t("cancel")}
       confirmLoading={loading}
-      width={600}
       destroyOnClose
       zIndex={1100}
     >

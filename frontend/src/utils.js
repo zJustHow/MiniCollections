@@ -165,6 +165,7 @@ export const signup = async (data) => {
 };
 
 export const PAGE_SIZE = 48;
+export const FEEDBACK_PAGE_SIZE = 24;
 
 async function fetchAllPages(fetchPage) {
   const all = [];
@@ -426,6 +427,20 @@ export const uploadImage = async (file) => {
   return data.url;
 };
 
+/** Remove a user upload from MinIO (cancel / remove before save). Safe to ignore failures. */
+export const discardUploadedImage = async (url) => {
+  if (!url) return;
+  const response = await fetch(
+    `/uploads/image?${new URLSearchParams({ url })}`,
+    { method: "DELETE", headers: authHeaders() },
+  );
+  if (response.status === 204) return;
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw parseApiError(errorText);
+  }
+};
+
 export const uploadBrandLogo = async (brandId, file) => {
   const formData = new FormData();
   formData.append("file", file);
@@ -482,8 +497,9 @@ export const updateLocale = async (preferredLocale) => {
   return handleResponse(response);
 };
 
-export const getMySubmissions = async () => {
-  const response = await fetch("/submissions/mine", { headers: authHeaders() });
+export const getMySubmissionsPage = async ({ size = FEEDBACK_PAGE_SIZE, page = 0 } = {}) => {
+  const params = new URLSearchParams({ size: String(size), page: String(page) });
+  const response = await fetch(`/submissions/mine?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 

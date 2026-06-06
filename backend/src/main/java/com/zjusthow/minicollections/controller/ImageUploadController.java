@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -46,5 +47,15 @@ public class ImageUploadController {
         String url = imageStorageService.uploadUserImage(userId, file);
         UserProfileDto profile = userService.updateAvatarUrl(userId, url);
         return ResponseEntity.ok(profile);
+    }
+
+    /** Discards a user upload that was never saved (cancel / remove in UI). Idempotent. */
+    @DeleteMapping("/image")
+    public ResponseEntity<Void> deleteImage(
+            @AuthenticationPrincipal User user,
+            @RequestParam("url") String url) {
+        long userId = Long.parseLong(user.getUsername());
+        imageStorageService.deleteUserImageIfOwned(userId, url);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -7,7 +7,7 @@ import {
   NeuSelect,
 } from "../../NeuFormControl";
 import dayjs from "dayjs";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   adminCreateBrandObject,
   adminUpdateBrandObject,
@@ -29,6 +29,7 @@ export default function BrandObjectModal({
 }) {
   const { t } = useLocale();
   const [imageUrl, setImageUrl] = useState(null);
+  const uploadSessionRef = useRef(null);
   const [seriesOptions, setSeriesOptions] = useState([]);
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [scaleOptions, setScaleOptions] = useState([]);
@@ -65,6 +66,15 @@ export default function BrandObjectModal({
     }
   }, []);
 
+  const dismissModal = useCallback(async (discardSession) => {
+    if (discardSession) {
+      await uploadSessionRef.current?.discardAll?.();
+    } else {
+      uploadSessionRef.current?.commitAll?.();
+    }
+    onClose();
+  }, [onClose]);
+
   const { form, loading, handleOk } = useModalForm({
     onSubmit: async (values) => {
       const payload = {
@@ -92,7 +102,7 @@ export default function BrandObjectModal({
       ? t("failedToUpdateBrandObject")
       : t("failedToCreateBrandObject"),
     onSuccess,
-    onClose,
+    onClose: () => dismissModal(false),
   });
 
   useEffect(() => {
@@ -144,7 +154,7 @@ export default function BrandObjectModal({
       title={isEdit ? t("editBrandObject") : t("addBrandObject")}
       open={open}
       onOk={handleOk}
-      onClose={onClose}
+      onClose={() => dismissModal(true)}
       okText={isEdit ? t("edit") : t("addBrandObject")}
       cancelText={t("cancel")}
       confirmLoading={loading}
@@ -202,7 +212,7 @@ export default function BrandObjectModal({
           <NeuInputNumber min={0} step={0.01} stringMode />
         </Form.Item>
         <Form.Item label={t("image")}>
-          <ImageUploadField value={imageUrl} onChange={setImageUrl} />
+          <ImageUploadField value={imageUrl} onChange={setImageUrl} uploadSessionRef={uploadSessionRef} />
         </Form.Item>
         <Form.Item label={t("imageSource")} name="imageSource">
           <NeuInput placeholder={t("imageSource")} />

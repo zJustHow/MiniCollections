@@ -264,6 +264,8 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             }}
           >
             <Upload
+              id="profile-avatar-upload"
+              name="avatar"
               accept="image/*"
               showUploadList={false}
               beforeUpload={() => false}

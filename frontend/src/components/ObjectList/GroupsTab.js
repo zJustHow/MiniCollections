@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Grid, Spin } from "antd";
+import { Spin } from "antd";
 import NeuCard from "../NeuCard";
 import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +10,6 @@ import SearchResultsSummary from "../SearchResultsSummary";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = NeuInput;
-const { useBreakpoint } = Grid;
 
 export default function GroupsTab({
   groups,
@@ -34,19 +33,11 @@ export default function GroupsTab({
 }) {
   const { t } = useLocale();
   const navigate = useNavigate();
-  const screens = useBreakpoint();
   const [draftQuery, setDraftQuery] = useState(searchValue ?? "");
 
   useEffect(() => {
     setDraftQuery(searchValue ?? "");
   }, [searchValue]);
-  const cols = screens.lg ? 4 : screens.md ? 3 : 2;
-
-  const gridStyle = {
-    display: "grid",
-    gridTemplateColumns: `repeat(${cols}, 1fr)`,
-    gap: 16,
-  };
 
   const sectionLabelStyle = {
     fontSize: 13,
@@ -56,12 +47,7 @@ export default function GroupsTab({
 
   const renderGroupCard = (group) =>
     group.id === "__add__" ? (
-      <NeuCard
-        key="__add__"
-        add
-        name={t("addGroup")}
-        onClick={onCreateGroup}
-      />
+      <NeuCard key="__add__" add name={t("addGroup")} onClick={onCreateGroup} />
     ) : (
       <NeuCard
         key={group.id}
@@ -71,14 +57,11 @@ export default function GroupsTab({
       />
     );
 
-  const showFilterColumn =
-    showObjectFilters || (searchActive && facetsLoading);
+  const showFilterColumn = showObjectFilters || (searchActive && facetsLoading);
 
   const showObjectsSection =
     searchActive &&
-    (searchResultObjects.length > 0 ||
-      showFilterColumn ||
-      loading);
+    (searchResultObjects.length > 0 || showFilterColumn || loading);
 
   const spinning =
     searchActive &&
@@ -110,10 +93,8 @@ export default function GroupsTab({
     searchResultGroups.length +
     (searchFacets?.total ?? searchResultObjects.length);
 
-  const gridClass = screens.lg ? "neu-list-page-browse-grid" : undefined;
-
   return (
-    <div style={{ position: "relative", minHeight: 200 }}>
+    <div style={{ position: "relative", minHeight: 200, width: "100%" }}>
       <Spin spinning={spinning}>
         <ObjectListPageLayout
           showFilterColumn={
@@ -129,6 +110,8 @@ export default function GroupsTab({
           }
           search={
             <Search
+              id="groups-search"
+              name="groupsSearch"
               placeholder={t("searchGroups")}
               allowClear
               value={draftQuery}
@@ -155,64 +138,57 @@ export default function GroupsTab({
             ) : null
           }
         >
-
           {searchActive ? (
-          <>
-            {searchResultGroups.length > 0 && (
-              <>
-                <div style={sectionLabelStyle}>{t("groups")}</div>
-                <div
-                  className={gridClass}
-                  style={gridClass ? undefined : gridStyle}
-                >
-                  {searchResultGroups.map(renderGroupCard)}
-                </div>
-              </>
-            )}
-            {showObjectsSection && (
-              <>
-                <div
-                  style={{
-                    ...sectionLabelStyle,
-                    marginTop: searchResultGroups.length > 0 ? 24 : 0,
-                  }}
-                >
-                  {t("myObjects")}
-                </div>
-                <ObjectSearchFilterLayout
-                  showFilterColumn={showFilterColumn}
-                  facets={searchFacets}
-                  loading={facetsLoading}
-                  selectedCategoryIds={selectedCategoryIds}
-                  selectedBrandIds={selectedBrandIds}
-                  selectedScaleIds={selectedScaleIds}
-                  onToggleCategory={onToggleCategory}
-                  onToggleBrand={onToggleBrand}
-                  onToggleScale={onToggleScale}
-                >
-                  {searchResultObjects.map(renderObjectCard)}
-                </ObjectSearchFilterLayout>
-              </>
-            )}
-            {searchResultGroups.length === 0 &&
-              !showObjectsSection &&
-              !loading && (
-                <div
-                  style={{
-                    textAlign: "center",
-                    color: "var(--neu-text-2)",
-                    padding: "32px 0",
-                  }}
-                >
-                  {t("noSearchResults")}
-                </div>
+            <>
+              {searchResultGroups.length > 0 && (
+                <>
+                  <div style={sectionLabelStyle}>{t("groups")}</div>
+                  <div className="neu-list-page-browse-grid">
+                    {searchResultGroups.map(renderGroupCard)}
+                  </div>
+                </>
               )}
-          </>
+              {showObjectsSection && (
+                <>
+                  <div
+                    style={{
+                      ...sectionLabelStyle,
+                      marginTop: searchResultGroups.length > 0 ? 24 : 0,
+                    }}
+                  >
+                    {t("myObjects")}
+                  </div>
+                  <ObjectSearchFilterLayout
+                    showFilterColumn={showFilterColumn}
+                    facets={searchFacets}
+                    loading={facetsLoading}
+                    selectedCategoryIds={selectedCategoryIds}
+                    selectedBrandIds={selectedBrandIds}
+                    selectedScaleIds={selectedScaleIds}
+                    onToggleCategory={onToggleCategory}
+                    onToggleBrand={onToggleBrand}
+                    onToggleScale={onToggleScale}
+                  >
+                    {searchResultObjects.map(renderObjectCard)}
+                  </ObjectSearchFilterLayout>
+                </>
+              )}
+              {searchResultGroups.length === 0 &&
+                !showObjectsSection &&
+                !loading && (
+                  <div
+                    style={{
+                      textAlign: "center",
+                      color: "var(--neu-text-2)",
+                      padding: "32px 0",
+                    }}
+                  >
+                    {t("noSearchResults")}
+                  </div>
+                )}
+            </>
           ) : (
-            <div
-              className={gridClass}
-              style={gridClass ? undefined : gridStyle}
-            >
+            <div className="neu-list-page-browse-grid">
               {[{ id: "__add__" }, ...groups].map(renderGroupCard)}
             </div>
           )}

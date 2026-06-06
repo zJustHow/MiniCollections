@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Grid, Spin } from "antd";
+import { Spin } from "antd";
 import NeuCard from "../NeuCard";
 import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,6 @@ import { useLocale } from "../../LocaleContext";
 import { PAGE_SIZE } from "../../utils";
 
 const { Search } = NeuInput;
-const { useBreakpoint } = Grid;
 
 export default function BrandsTab({
   brands,
@@ -39,28 +38,15 @@ export default function BrandsTab({
 }) {
   const { t } = useLocale();
   const navigate = useNavigate();
-  const screens = useBreakpoint();
   const [draftQuery, setDraftQuery] = useState(searchValue ?? "");
 
   useEffect(() => {
     setDraftQuery(searchValue ?? "");
   }, [searchValue]);
-  const browseCols = screens.lg ? 4 : screens.md ? 3 : 2;
-
-  const browseGridStyle = {
-    display: "grid",
-    gridTemplateColumns: `repeat(${browseCols}, 1fr)`,
-    gap: 16,
-  };
 
   const renderBrandCard = (brand) =>
     brand.id === "__add__" ? (
-      <NeuCard
-        key="__add__"
-        add
-        name={t("addBrand")}
-        onClick={onCreateBrand}
-      />
+      <NeuCard key="__add__" add name={t("addBrand")} onClick={onCreateBrand} />
     ) : (
       <NeuCard
         key={brand.id}
@@ -85,7 +71,8 @@ export default function BrandsTab({
     />
   );
 
-  const dataSource = isAdmin ? [{ id: "__add__" }, ...brands] : brands;
+  const showAddCard = isAdmin && (brandsListPage?.page ?? 0) === 0;
+  const dataSource = showAddCard ? [{ id: "__add__" }, ...brands] : brands;
 
   const showFilterColumn = showObjectFilters || (searchActive && facetsLoading);
 
@@ -99,7 +86,9 @@ export default function BrandsTab({
   const hasBrandResults = (combinedSearchPage?.totalBrands ?? 0) > 0;
   const showBrandCards = searchResultBrands.length > 0;
   const showObjectCards =
-    searchResultObjects.length > 0 || showFilterColumn || combinedSearchPage?.loading;
+    searchResultObjects.length > 0 ||
+    showFilterColumn ||
+    combinedSearchPage?.loading;
 
   const spinning = searchActive
     ? combinedSearchPage?.loading &&
@@ -107,9 +96,6 @@ export default function BrandsTab({
       searchResultObjects.length === 0 &&
       !showFilterColumn
     : brandsListPage?.loading && brands.length === 0;
-
-  const browseGridClass =
-    browseCols === 4 ? "neu-list-page-browse-grid" : undefined;
 
   return (
     <Spin spinning={spinning}>
@@ -126,6 +112,8 @@ export default function BrandsTab({
         }
         search={
           <Search
+            id="brands-search"
+            name="brandsSearch"
             placeholder={t("searchBrandsAndObjects")}
             allowClear
             value={draftQuery}
@@ -154,7 +142,6 @@ export default function BrandsTab({
           ) : null
         }
       >
-
         {searchActive ? (
           <>
             {(hasBrandResults || showObjectsSection) && (
@@ -175,14 +162,12 @@ export default function BrandsTab({
                       {searchResultBrands.map(renderBrandCard)}
                     </div>
                   )}
-                  {showBrandCards &&
-                    showObjectsSection &&
-                    showObjectCards && (
-                      <div
-                        className="neu-search-section-divider"
-                        role="separator"
-                      />
-                    )}
+                  {showBrandCards && showObjectsSection && showObjectCards && (
+                    <div
+                      className="neu-search-section-divider"
+                      role="separator"
+                    />
+                  )}
                   {showObjectsSection && showObjectCards && (
                     <div className="neu-search-section-grid">
                       {searchResultObjects.map(renderObjectCard)}
@@ -215,10 +200,7 @@ export default function BrandsTab({
           </>
         ) : (
           <>
-            <div
-              className={browseGridClass}
-              style={browseGridClass ? undefined : browseGridStyle}
-            >
+            <div className="neu-list-page-browse-grid">
               {dataSource.map(renderBrandCard)}
             </div>
             <ListPagination
