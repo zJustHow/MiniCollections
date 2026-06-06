@@ -51,6 +51,14 @@ cd "$BACKEND"
 if [ -f ".env" ]; then
   set -a; source .env; set +a
 fi
+# LetsVPN (and similar tools) often leave 127.0.0.1:17891 in macOS proxy settings while the
+# local proxy is stopped, which makes Gradle fail to reach Maven Central.
+if nc -z 127.0.0.1 17891 2>/dev/null; then
+  : # local proxy is listening; keep system proxy settings
+else
+  export GRADLE_OPTS="${GRADLE_OPTS} -Djava.net.useSystemProxies=false"
+fi
+./gradlew --stop > /dev/null 2>&1 || true
 # Refresh resources so new seed/*.sql dirs are on the classpath (Gradle can skip unchanged outputs).
 ./gradlew cleanProcessResources processResources bootRun --console=plain > "$ROOT/backend.log" 2>&1 &
 BACKEND_PID=$!

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
+import { PAGE_SIZE } from "../utils";
 import { scrollAppToTop } from "../utils/scroll";
 
 function parsePageParam(searchParams, key) {
@@ -14,7 +15,7 @@ export default function usePagedList(fetchPage, options = {}) {
   const {
     resetKey = "",
     enabled = true,
-    pageSize = 24,
+    pageSize = PAGE_SIZE,
     pageParamKey = null,
     allowEmptyPage = false,
   } = options;

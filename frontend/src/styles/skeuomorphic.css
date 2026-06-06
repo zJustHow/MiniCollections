@@ -227,9 +227,9 @@ a:hover {
 
 .neu-pressable-btn:active:not(:disabled):not(.neu-pressable-btn--danger),
 .neu-pressable-btn.active:not(.neu-pressable-btn--danger) {
-  background: var(--neu-accent);
+  background: var(--neu-accent-light);
   color: #fff;
-  box-shadow: var(--inset-accent-lg);
+  box-shadow: var(--inset-accent);
 }
 
 .neu-pressable-btn--danger {
@@ -238,9 +238,9 @@ a:hover {
 
 .neu-pressable-btn--danger:active:not(:disabled),
 .neu-pressable-btn--danger.active {
-  background: var(--neu-danger);
+  background: var(--neu-danger-light);
   color: #fff;
-  box-shadow: var(--inset-danger-lg);
+  box-shadow: var(--inset-danger);
 }
 
 /* ── Layer 2: panel tab (login, admin, filters, modals) ── */
@@ -1413,7 +1413,7 @@ textarea.ant-input[disabled],
   color: var(--neu-text);
 }
 
-/* calendar grid — layout; colors via pickerCellStyles.js runtime injection */
+/* calendar grid — layout; interaction via pickerPopup.js + pickerCellStyles.js */
 .ant-picker-dropdown .neu-picker-date-cell {
   display: inline-flex;
   align-items: center;
@@ -2055,6 +2055,10 @@ textarea.ant-input[disabled],
   min-width: 0;
 }
 
+.neu-search-objects-layout--wide-cards .neu-search-objects-cards {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .neu-search-section-label {
   grid-column: 1 / -1;
   font-size: 13px;
@@ -2065,6 +2069,17 @@ textarea.ant-input[disabled],
 
 .neu-search-section-label--spaced {
   margin-top: 8px;
+}
+
+.neu-search-section-grid {
+  display: contents;
+}
+
+.neu-search-section-divider {
+  grid-column: 1 / -1;
+  margin: 8px 0;
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--neu-shadow-dark) 30%, transparent);
 }
 
 @media (max-width: 992px) {
@@ -2083,6 +2098,10 @@ textarea.ant-input[disabled],
 
   .neu-search-objects-layout--mobile .neu-search-objects-cards {
     grid-column: unset;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .neu-search-objects-layout--wide-cards .neu-search-objects-cards {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

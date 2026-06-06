@@ -63,6 +63,10 @@ export default function ObjectSearchFilterLayout({
       <div
         className={`neu-search-objects-layout${
           isMobile ? " neu-search-objects-layout--mobile" : ""
+        }${
+          !showInlineFilter && !isMobile
+            ? " neu-search-objects-layout--wide-cards"
+            : ""
         }`}
       >
         {showInlineFilter && <ObjectSearchFilterPanel {...filterProps} />}

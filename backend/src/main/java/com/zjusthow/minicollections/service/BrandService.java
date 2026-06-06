@@ -63,7 +63,7 @@ import java.util.function.Function;
 public class BrandService {
 
     private static final Logger log = LoggerFactory.getLogger(BrandService.class);
-    private static final int DEFAULT_SIZE = 24;
+    private static final int DEFAULT_SIZE = 48;
     private static final int MAX_SIZE = 48;
 
     private final BrandRepository brandRepository;

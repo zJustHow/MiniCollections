@@ -43,7 +43,7 @@ public class BrandController {
     @GetMapping
     public ResponseEntity<PageResponse<BrandDto>> getBrands(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "24") int size,
+            @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.getBrandsPage(
@@ -57,7 +57,7 @@ public class BrandController {
             @RequestParam(required = false) List<Long> brandIds,
             @RequestParam(required = false) List<Long> scaleIds,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "24") int size,
+            @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.searchCombinedPage(
@@ -74,7 +74,7 @@ public class BrandController {
     public ResponseEntity<PageResponse<BrandDto>> searchBrands(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "24") int size,
+            @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.searchBrandsPage(
@@ -102,7 +102,7 @@ public class BrandController {
     public ResponseEntity<PageResponse<BrandObjectDto>> getBrandObjectsByBrandId(
             @PathVariable Long brandId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "24") int size,
+            @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.getBrandObjectsPage(
@@ -126,7 +126,7 @@ public class BrandController {
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> scaleIds,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "24") int size,
+            @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.searchBrandObjectsByBrandIdPage(
@@ -155,7 +155,7 @@ public class BrandController {
             @RequestParam(required = false) List<Long> brandIds,
             @RequestParam(required = false) List<Long> scaleIds,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "24") int size,
+            @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.searchBrandObjectsPage(

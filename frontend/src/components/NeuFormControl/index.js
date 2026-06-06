@@ -1,9 +1,9 @@
 import React from "react";
 import { DatePicker, Input, InputNumber, Select } from "antd";
 import {
-  mountPickerCellRuntimeStyle,
-  unmountPickerCellRuntimeStyle,
-} from "./pickerCellStyles";
+  setupPickerCellPress,
+  syncPickerPopup,
+} from "./pickerPopup";
 
 /** Default width for controls inside vertical Form.Item layouts */
 export const NEU_CONTROL_FULL_WIDTH = { width: "100%" };
@@ -44,6 +44,9 @@ export const neuFormControlComponents = {
     colorTextDisabled: "#66799e",
     colorIcon: "#66799e",
     colorIconHover: "#5592cc",
+    colorPrimary: "#6aa8dc",
+    colorTextLightSolid: "#ffffff",
+    motionDurationMid: "0s",
     ...neuFieldBorder,
     activeShadow: NEU_INSET_ACTIVE_SHADOW,
     cellHoverBg: "transparent",
@@ -103,60 +106,12 @@ export const NeuSelect = createNeuControl(Select, "NeuSelect");
 NeuSelect.Option = Select.Option;
 NeuSelect.OptGroup = Select.OptGroup;
 
-const PICKER_TAB_BTN_SELECTOR = [
-  ".ant-picker-month-btn",
-  ".ant-picker-year-btn",
-  ".ant-picker-header-prev-btn",
-  ".ant-picker-header-next-btn",
-  ".ant-picker-header-super-prev-btn",
-  ".ant-picker-header-super-next-btn",
-  ".ant-picker-today-btn",
-  ".ant-picker-now-btn",
-].join(", ");
-
-function decoratePickerTabButtons(root) {
-  if (!root) return;
-
-  root.querySelectorAll(PICKER_TAB_BTN_SELECTOR).forEach((btn) => {
-    btn.classList.add("neu-pressable-btn", "neu-panel-tab-btn");
-  });
-}
-
-function setupPickerCellPress(popupClass) {
-  const onMouseDown = (event) => {
-    const popup = document.querySelector(`.${popupClass}`);
-    if (!popup?.contains(event.target)) return;
-
-    const cell = event.target.closest(
-      ".ant-picker-cell-in-view:not(.ant-picker-cell-disabled)"
-    );
-    if (!cell || !popup.contains(cell)) return;
-
-    popup.querySelectorAll("[data-neu-pressed]").forEach((other) => {
-      if (other !== cell) other.removeAttribute("data-neu-pressed");
-    });
-
-    if (!cell.classList.contains("ant-picker-cell-selected")) {
-      cell.setAttribute("data-neu-pressed", "");
-    }
-  };
-
-  document.addEventListener("mousedown", onMouseDown, true);
-
-  return () => {
-    document.removeEventListener("mousedown", onMouseDown, true);
-    document
-      .querySelector(`.${popupClass}`)
-      ?.querySelectorAll("[data-neu-pressed]")
-      .forEach((cell) => cell.removeAttribute("data-neu-pressed"));
-  };
-}
-
 export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
   {
     fullWidth = true,
     style,
     onOpenChange,
+    onPanelChange,
     classNames,
     popupClassName,
     cellRender: userCellRender,
@@ -167,57 +122,47 @@ export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
   const popupClassRef = React.useRef(
     `neu-date-picker-popup-${Math.random().toString(36).slice(2)}`
   );
-  const tabObserverRef = React.useRef(null);
   const cellPressCleanupRef = React.useRef(null);
 
   const neuCellRender = React.useCallback(
     (date, info) => {
       const node = userCellRender?.(date, info) ?? info.originNode;
       if (!React.isValidElement(node)) return node;
-      const className = [node.props.className, "neu-picker-date-cell"]
-        .filter(Boolean)
-        .join(" ");
-      return React.cloneElement(node, { className });
+
+      return React.cloneElement(node, {
+        className: [node.props.className, "neu-picker-date-cell"]
+          .filter(Boolean)
+          .join(" "),
+      });
     },
     [userCellRender]
   );
 
-  const syncPickerPopup = React.useCallback(() => {
-    mountPickerCellRuntimeStyle();
+  const runPopupSync = React.useCallback(() => {
     const popup = document.querySelector(`.${popupClassRef.current}`);
-    decoratePickerTabButtons(popup);
+    syncPickerPopup(popup);
   }, []);
 
-  const stopObserving = React.useCallback(() => {
-    tabObserverRef.current?.disconnect();
-    tabObserverRef.current = null;
-    cellPressCleanupRef.current?.();
-    cellPressCleanupRef.current = null;
-    unmountPickerCellRuntimeStyle();
-  }, []);
-
-  const startObserving = React.useCallback(() => {
-    const attach = (attempt = 0) => {
+  const attachPopup = React.useCallback(
+    (attempt = 0) => {
       const popup = document.querySelector(`.${popupClassRef.current}`);
       if (!popup) {
-        if (attempt < 12) requestAnimationFrame(() => attach(attempt + 1));
+        if (attempt < 12) requestAnimationFrame(() => attachPopup(attempt + 1));
         return;
       }
-
-      syncPickerPopup();
-
-      tabObserverRef.current?.disconnect();
-      tabObserverRef.current = new MutationObserver(syncPickerPopup);
-      tabObserverRef.current.observe(popup, { childList: true, subtree: true });
-
+      runPopupSync();
       cellPressCleanupRef.current?.();
-      cellPressCleanupRef.current = setupPickerCellPress(popupClassRef.current);
-    };
+      cellPressCleanupRef.current = setupPickerCellPress(popup);
+    },
+    [runPopupSync]
+  );
 
-    attach();
-  }, [syncPickerPopup]);
-
-  React.useEffect(() => () => stopObserving(), [stopObserving]);
+  React.useEffect(
+    () => () => {
+      cellPressCleanupRef.current?.();
+    },
+    []
+  );
 
   const mergedPopupClass = [popupClassRef.current, popupClassName, classNames?.popup?.root]
     .filter(Boolean)
@@ -225,11 +170,17 @@ export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
 
   const handleOpenChange = (open, ...rest) => {
     if (open) {
-      requestAnimationFrame(startObserving);
+      requestAnimationFrame(attachPopup);
     } else {
-      stopObserving();
+      cellPressCleanupRef.current?.();
+      cellPressCleanupRef.current = null;
     }
     onOpenChange?.(open, ...rest);
+  };
+
+  const handlePanelChange = (value, mode) => {
+    requestAnimationFrame(runPopupSync);
+    onPanelChange?.(value, mode);
   };
 
   return (
@@ -237,6 +188,7 @@ export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
       ref={ref}
       style={neuControlStyle(style, fullWidth)}
       onOpenChange={handleOpenChange}
+      onPanelChange={handlePanelChange}
       popupClassName={mergedPopupClass}
       classNames={classNames}
       cellRender={neuCellRender}

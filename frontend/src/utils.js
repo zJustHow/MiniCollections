@@ -137,7 +137,7 @@ export const signup = async (data) => {
   return handleResponse(response);
 };
 
-export const PAGE_SIZE = 24;
+export const PAGE_SIZE = 48;
 
 async function fetchAllPages(fetchPage) {
   const all = [];
