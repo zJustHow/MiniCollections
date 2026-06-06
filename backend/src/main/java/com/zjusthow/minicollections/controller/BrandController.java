@@ -56,6 +56,7 @@ public class BrandController {
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> brandIds,
             @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(required = false) List<Long> seriesIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
@@ -65,6 +66,7 @@ public class BrandController {
                 categoryIds,
                 brandIds,
                 scaleIds,
+                seriesIds,
                 effectiveLocale(acceptLanguage, user),
                 page,
                 size));
@@ -112,19 +114,28 @@ public class BrandController {
     @GetMapping("/{brandId}/objects/search/facets")
     public ResponseEntity<BrandObjectSearchFacetsDto> searchBrandObjectsFacetsByBrandId(
             @PathVariable Long brandId,
-            @RequestParam String keyword,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(required = false) List<Long> seriesIds,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.searchBrandObjectsByBrandIdFacets(
-                keyword, brandId, effectiveLocale(acceptLanguage, user)));
+                keyword,
+                brandId,
+                categoryIds,
+                scaleIds,
+                seriesIds,
+                effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/{brandId}/objects/search")
     public ResponseEntity<PageResponse<BrandObjectDto>> searchBrandObjectsByBrandId(
             @PathVariable Long brandId,
-            @RequestParam String keyword,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(required = false) List<Long> seriesIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
@@ -134,6 +145,7 @@ public class BrandController {
                 brandId,
                 categoryIds,
                 scaleIds,
+                seriesIds,
                 effectiveLocale(acceptLanguage, user),
                 page,
                 size));
@@ -142,10 +154,19 @@ public class BrandController {
     @GetMapping("/objects/search/facets")
     public ResponseEntity<BrandObjectSearchFacetsDto> searchBrandObjectsFacets(
             @RequestParam String keyword,
+            @RequestParam(required = false) List<Long> categoryIds,
+            @RequestParam(required = false) List<Long> brandIds,
+            @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(required = false) List<Long> seriesIds,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(brandService.searchBrandObjectsFacets(
-                keyword, effectiveLocale(acceptLanguage, user)));
+                keyword,
+                categoryIds,
+                brandIds,
+                scaleIds,
+                seriesIds,
+                effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/objects/search")
@@ -154,6 +175,7 @@ public class BrandController {
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> brandIds,
             @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(required = false) List<Long> seriesIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "48") int size,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
@@ -163,6 +185,7 @@ public class BrandController {
                 categoryIds,
                 brandIds,
                 scaleIds,
+                seriesIds,
                 effectiveLocale(acceptLanguage, user),
                 page,
                 size));

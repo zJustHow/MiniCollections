@@ -47,11 +47,13 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const {
     selectedCategoryIds,
     selectedScaleIds,
+    selectedSeriesIds,
     clearObjectFilters,
     clearSearchAndFilters,
     setSearchQueryClearingFilters,
     onToggleCategory,
     onToggleScale,
+    onToggleSeries,
   } = useObjectFilterParams({ includeBrands: false });
   const [brand, setBrand] = useState(location.state?.brand ?? null);
   const [searchActive, setSearchActive] = useState(
@@ -80,6 +82,13 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const [brandObjectModalOpen, setBrandObjectModalOpen] = useState(false);
   const [editingBrandObject, setEditingBrandObject] = useState(null);
 
+  const objectFilterKey = filterKeyFromIds(
+    selectedCategoryIds,
+    [],
+    selectedScaleIds,
+    selectedSeriesIds,
+  );
+
   const objectsList = usePagedList(
     ({ size, page }) => getBrandObjectsPage(brandId, { size, page }),
     {
@@ -98,9 +107,10 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         page,
         categoryIds: selectedCategoryIds,
         scaleIds: selectedScaleIds,
+        seriesIds: selectedSeriesIds,
       }),
     {
-      resetKey: `brand-objects-search:${brandId}:${searchKeyword}:${filterKeyFromIds(selectedCategoryIds, [], selectedScaleIds)}`,
+      resetKey: `brand-objects-search:${brandId}:${searchKeyword}:${objectFilterKey}`,
       enabled: searchActive && Boolean(searchKeyword),
       pageSize: PAGE_SIZE,
       pageParamKey: "page",
@@ -120,7 +130,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     Boolean(searchKeyword) &&
     searchFacets != null &&
     ((searchFacets.categories?.length ?? 0) > 0 ||
-      (searchFacets.scales?.length ?? 0) > 0);
+      (searchFacets.scales?.length ?? 0) > 0 ||
+      (searchFacets.series?.length ?? 0) > 0);
 
   const showFilterColumn = showObjectFilters || (searchActive && facetsLoading);
 
@@ -146,8 +157,20 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       setDraftQuery(keyword);
       setSearchKeyword(keyword);
       setSearchActive(true);
+    } else {
+      syncedKeywordRef.current = "";
+      setSearchKeyword("");
+      setSearchActive(false);
+      setSearchFacets(null);
+      if (
+        selectedCategoryIds.length > 0 ||
+        selectedScaleIds.length > 0 ||
+        selectedSeriesIds.length > 0
+      ) {
+        clearObjectFilters();
+      }
     }
-  }, [brandId, searchValue]);
+  }, [brandId, searchValue]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!searchActive || !searchKeyword) {
@@ -157,7 +180,11 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
 
     let cancelled = false;
     setFacetsLoading(true);
-    searchBrandObjectsByBrandIdFacets(brandId, searchKeyword)
+    searchBrandObjectsByBrandIdFacets(brandId, searchKeyword, {
+      categoryIds: selectedCategoryIds,
+      scaleIds: selectedScaleIds,
+      seriesIds: selectedSeriesIds,
+    })
       .then((data) => {
         if (!cancelled) {
           setSearchFacets(data);
@@ -165,7 +192,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       })
       .catch(() => {
         if (!cancelled) {
-          setSearchFacets({ total: 0, categories: [], brands: [], scales: [] });
+          setSearchFacets({ total: 0, categories: [], brands: [], scales: [], series: [] });
         }
       })
       .finally(() => {
@@ -177,7 +204,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     return () => {
       cancelled = true;
     };
-  }, [brandId, searchKeyword, searchActive]);
+  }, [brandId, searchKeyword, objectFilterKey]);
 
   const handleAdminDeleteBrand = async () => {
     if (!brand) return;
@@ -246,7 +273,6 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         clearSearchAndFilters();
         setSearchActive(false);
         setSearchKeyword("");
-        setSearchFacets(null);
         syncedKeywordRef.current = "";
         return;
       }
@@ -286,7 +312,6 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                   clearSearchAndFilters();
                   setSearchActive(false);
                   setSearchKeyword("");
-                  setSearchFacets(null);
                   syncedKeywordRef.current = "";
                 }
               }}
@@ -298,16 +323,18 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
             />
           }
           filter={
-            searchActive && showFilterColumn && showSearchObjectsSection ? (
+            searchActive && showFilterColumn ? (
               <ObjectSearchFilterPanel
                 facets={searchFacets}
                 loading={facetsLoading}
                 selectedCategoryIds={selectedCategoryIds}
                 selectedBrandIds={[]}
                 selectedScaleIds={selectedScaleIds}
+                selectedSeriesIds={selectedSeriesIds}
                 onToggleCategory={onToggleCategory}
                 onToggleBrand={() => {}}
                 onToggleScale={onToggleScale}
+                onToggleSeries={onToggleSeries}
               />
             ) : null
           }
@@ -322,9 +349,11 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                   selectedCategoryIds={selectedCategoryIds}
                   selectedBrandIds={[]}
                   selectedScaleIds={selectedScaleIds}
+                  selectedSeriesIds={selectedSeriesIds}
                   onToggleCategory={onToggleCategory}
                   onToggleBrand={() => {}}
                   onToggleScale={onToggleScale}
+                  onToggleSeries={onToggleSeries}
                 >
                   {displayObjects.map((item) => (
                     <NeuCard

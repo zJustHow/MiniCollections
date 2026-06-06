@@ -6,6 +6,7 @@ public record BrandObjectSearchFacetsDto(
         long total,
         List<CategoryFacetDto> categories,
         List<BrandFacetDto> brands,
-        List<ScaleFacetDto> scales
+        List<ScaleFacetDto> scales,
+        List<SeriesFacetDto> series
 ) {
 }

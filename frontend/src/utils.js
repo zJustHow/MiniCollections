@@ -187,12 +187,14 @@ function buildPageParams({
   categoryIds = null,
   brandIds = null,
   scaleIds = null,
+  seriesIds = null,
 } = {}) {
   const params = new URLSearchParams({ size: String(size), page: String(page) });
   if (keyword) params.set("keyword", keyword);
   appendIdListParams(params, "categoryIds", categoryIds);
   appendIdListParams(params, "brandIds", brandIds);
   appendIdListParams(params, "scaleIds", scaleIds);
+  appendIdListParams(params, "seriesIds", seriesIds);
   return params;
 }
 
@@ -213,9 +215,9 @@ export const searchBrandsPage = async (keyword, { size = PAGE_SIZE, page = 0 } =
 
 export const searchBrandsCombinedPage = async (
   keyword,
-  { size = PAGE_SIZE, page = 0, categoryIds = null, brandIds = null, scaleIds = null } = {},
+  { size = PAGE_SIZE, page = 0, categoryIds = null, brandIds = null, scaleIds = null, seriesIds = null } = {},
 ) => {
-  const params = buildPageParams({ size, page, keyword, categoryIds, brandIds, scaleIds });
+  const params = buildPageParams({ size, page, keyword, categoryIds, brandIds, scaleIds, seriesIds });
   const response = await fetch(`/brands/search/combined?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
@@ -230,9 +232,9 @@ export const getGroups = async () => {
 
 export const searchGroups = async (
   keyword,
-  { categoryIds = null, brandIds = null, scaleIds = null } = {},
+  { categoryIds = null, brandIds = null, scaleIds = null, seriesIds = null } = {},
 ) => {
-  const params = buildPageParams({ keyword, categoryIds, brandIds, scaleIds });
+  const params = buildPageParams({ keyword, categoryIds, brandIds, scaleIds, seriesIds });
   const response = await fetch(`/groups/search?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
@@ -316,15 +318,22 @@ export const getBrandObjectById = async (id) => {
 
 export const searchBrandObjectsPage = async (
   keyword,
-  { size = PAGE_SIZE, page = 0, categoryIds = null, brandIds = null, scaleIds = null } = {},
+  { size = PAGE_SIZE, page = 0, categoryIds = null, brandIds = null, scaleIds = null, seriesIds = null } = {},
 ) => {
-  const params = buildPageParams({ size, page, keyword, categoryIds, brandIds, scaleIds });
+  const params = buildPageParams({ size, page, keyword, categoryIds, brandIds, scaleIds, seriesIds });
   const response = await fetch(`/brands/objects/search?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
-export const searchBrandObjectsFacets = async (keyword) => {
+export const searchBrandObjectsFacets = async (
+  keyword,
+  { categoryIds = null, brandIds = null, scaleIds = null, seriesIds = null } = {},
+) => {
   const params = new URLSearchParams({ keyword });
+  appendIdListParams(params, "categoryIds", categoryIds);
+  appendIdListParams(params, "brandIds", brandIds);
+  appendIdListParams(params, "scaleIds", scaleIds);
+  appendIdListParams(params, "seriesIds", seriesIds);
   const response = await fetch(`/brands/objects/search/facets?${params}`, {
     headers: authHeaders(),
   });
@@ -337,17 +346,25 @@ export const searchBrandObjects = async (keyword) =>
 export const searchBrandObjectsByBrandIdPage = async (
   brandId,
   keyword,
-  { size = PAGE_SIZE, page = 0, categoryIds = null, scaleIds = null } = {},
+  { size = PAGE_SIZE, page = 0, categoryIds = null, scaleIds = null, seriesIds = null } = {},
 ) => {
-  const params = buildPageParams({ size, page, keyword, categoryIds, scaleIds });
+  const params = buildPageParams({ size, page, keyword, categoryIds, scaleIds, seriesIds });
   const response = await fetch(`/brands/${brandId}/objects/search?${params}`, {
     headers: authHeaders(),
   });
   return handleResponse(response);
 };
 
-export const searchBrandObjectsByBrandIdFacets = async (brandId, keyword) => {
-  const params = new URLSearchParams({ keyword });
+export const searchBrandObjectsByBrandIdFacets = async (
+  brandId,
+  keyword,
+  { categoryIds = null, scaleIds = null, seriesIds = null } = {},
+) => {
+  const params = new URLSearchParams();
+  if (keyword) params.set("keyword", keyword);
+  appendIdListParams(params, "categoryIds", categoryIds);
+  appendIdListParams(params, "scaleIds", scaleIds);
+  appendIdListParams(params, "seriesIds", seriesIds);
   const response = await fetch(
     `/brands/${brandId}/objects/search/facets?${params}`,
     { headers: authHeaders() },

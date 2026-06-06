@@ -40,9 +40,11 @@ function FilterContent({
   selectedCategoryIds,
   selectedBrandIds,
   selectedScaleIds,
+  selectedSeriesIds,
   onToggleCategory,
   onToggleBrand,
   onToggleScale,
+  onToggleSeries,
   showTitle,
 }) {
   const { t } = useLocale();
@@ -57,7 +59,8 @@ function FilterContent({
   const hasCategories = facets.categories?.length > 0;
   const hasBrands = facets.brands?.length > 0;
   const hasScales = facets.scales?.length > 0;
-  if (!hasCategories && !hasBrands && !hasScales) return null;
+  const hasSeries = facets.series?.length > 0;
+  if (!hasCategories && !hasBrands && !hasScales && !hasSeries) return null;
 
   return (
     <>
@@ -93,6 +96,20 @@ function FilterContent({
         </FilterSection>
       )}
 
+      {hasSeries && (
+        <FilterSection title={t("series")}>
+          {facets.series.map((item) => (
+            <FilterOption
+              key={item.id}
+              label={item.name}
+              count={item.count}
+              selected={selectedSeriesIds.includes(item.id)}
+              onClick={() => onToggleSeries(item.id)}
+            />
+          ))}
+        </FilterSection>
+      )}
+
       {hasScales && (
         <FilterSection title={t("scale")}>
           {facets.scales.map((item) => (
@@ -116,9 +133,11 @@ export default function ObjectSearchFilterPanel({
   selectedCategoryIds,
   selectedBrandIds,
   selectedScaleIds,
+  selectedSeriesIds = [],
   onToggleCategory,
   onToggleBrand,
   onToggleScale,
+  onToggleSeries = () => {},
   variant = "sidebar",
 }) {
   const isDrawer = variant === "drawer";
@@ -131,7 +150,8 @@ export default function ObjectSearchFilterPanel({
     facets &&
     ((facets.categories?.length ?? 0) > 0 ||
       (facets.brands?.length ?? 0) > 0 ||
-      (facets.scales?.length ?? 0) > 0);
+      (facets.scales?.length ?? 0) > 0 ||
+      (facets.series?.length ?? 0) > 0);
 
   if (!hasFacets && !loading) return null;
 
@@ -144,9 +164,11 @@ export default function ObjectSearchFilterPanel({
           selectedCategoryIds={selectedCategoryIds}
           selectedBrandIds={selectedBrandIds}
           selectedScaleIds={selectedScaleIds}
+          selectedSeriesIds={selectedSeriesIds}
           onToggleCategory={onToggleCategory}
           onToggleBrand={onToggleBrand}
           onToggleScale={onToggleScale}
+          onToggleSeries={onToggleSeries}
           showTitle={!isDrawer}
         />
       </Spin>

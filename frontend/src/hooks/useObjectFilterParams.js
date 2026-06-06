@@ -6,6 +6,7 @@ import { mutateSearchParams } from "../utils/searchParams";
 const CATEGORY_KEY = "categoryIds";
 const BRAND_KEY = "brandIds";
 const SCALE_KEY = "scaleIds";
+const SERIES_KEY = "seriesIds";
 const SEARCH_KEY = "q";
 const PAGE_KEYS = ["page", "searchPage", "brandPage", "objectPage"];
 
@@ -31,6 +32,10 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
     () => parseIds(searchParams, SCALE_KEY),
     [searchParams],
   );
+  const selectedSeriesIds = useMemo(
+    () => parseIds(searchParams, SERIES_KEY),
+    [searchParams],
+  );
 
   const setFilterIds = useCallback(
     (key, ids) => {
@@ -53,6 +58,7 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
         next.delete(CATEGORY_KEY);
         next.delete(BRAND_KEY);
         next.delete(SCALE_KEY);
+        next.delete(SERIES_KEY);
       },
       { replace: true },
     );
@@ -66,6 +72,7 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
         next.delete(CATEGORY_KEY);
         next.delete(BRAND_KEY);
         next.delete(SCALE_KEY);
+        next.delete(SERIES_KEY);
         PAGE_KEYS.forEach((key) => next.delete(key));
       },
       { replace: true },
@@ -80,6 +87,7 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
         next.delete(CATEGORY_KEY);
         next.delete(BRAND_KEY);
         next.delete(SCALE_KEY);
+        next.delete(SERIES_KEY);
         PAGE_KEYS.forEach((key) => next.delete(key));
         if (trimmed) {
           next.set(SEARCH_KEY, trimmed);
@@ -113,15 +121,24 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
     [selectedScaleIds, setFilterIds],
   );
 
+  const onToggleSeries = useCallback(
+    (id) => {
+      setFilterIds(SERIES_KEY, toggleInList(id, selectedSeriesIds));
+    },
+    [selectedSeriesIds, setFilterIds],
+  );
+
   return {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
+    selectedSeriesIds,
     clearObjectFilters,
     clearSearchAndFilters,
     setSearchQueryClearingFilters,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,
+    onToggleSeries,
   };
 }

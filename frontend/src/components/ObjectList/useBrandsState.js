@@ -20,12 +20,14 @@ export default function useBrandsState({ isAdmin = false } = {}) {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
+    selectedSeriesIds,
     clearObjectFilters,
     clearSearchAndFilters,
     setSearchQueryClearingFilters,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,
+    onToggleSeries,
   } = useObjectFilterParams();
   const [searchActive, setSearchActive] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -50,6 +52,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
+    selectedSeriesIds,
   );
 
   const combinedSearch = useCombinedBrandSearch(
@@ -60,6 +63,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
         categoryIds: selectedCategoryIds,
         brandIds: selectedBrandIds,
         scaleIds: selectedScaleIds,
+        seriesIds: selectedSeriesIds,
       }),
     {
       resetKey: `combined-search:${searchKeyword}:${objectFilterKey}`,
@@ -95,7 +99,12 @@ export default function useBrandsState({ isAdmin = false } = {}) {
 
     let cancelled = false;
     setFacetsLoading(true);
-    searchBrandObjectsFacets(searchKeyword)
+    searchBrandObjectsFacets(searchKeyword, {
+      categoryIds: selectedCategoryIds,
+      brandIds: selectedBrandIds,
+      scaleIds: selectedScaleIds,
+      seriesIds: selectedSeriesIds,
+    })
       .then((data) => {
         if (!cancelled) {
           setSearchFacets(data);
@@ -103,7 +112,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       })
       .catch(() => {
         if (!cancelled) {
-          setSearchFacets({ total: 0, categories: [], brands: [], scales: [] });
+          setSearchFacets({ total: 0, categories: [], brands: [], scales: [], series: [] });
         }
       })
       .finally(() => {
@@ -115,7 +124,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
     return () => {
       cancelled = true;
     };
-  }, [searchKeyword, searchActive, clearObjectFilters]);
+  }, [searchKeyword, searchActive, objectFilterKey]);
 
   const handleBrandClick = (brand) => {
     const returnSearch = location.search;
@@ -124,6 +133,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
     nextSearch.delete("categoryIds");
     nextSearch.delete("brandIds");
     nextSearch.delete("scaleIds");
+    nextSearch.delete("seriesIds");
     nextSearch.delete("page");
     nextSearch.delete("searchPage");
     nextSearch.delete("brandPage");
@@ -170,7 +180,8 @@ export default function useBrandsState({ isAdmin = false } = {}) {
     searchFacets != null &&
     ((searchFacets.categories?.length ?? 0) > 0 ||
       (searchFacets.brands?.length ?? 0) > 0 ||
-      (searchFacets.scales?.length ?? 0) > 0);
+      (searchFacets.scales?.length ?? 0) > 0 ||
+      (searchFacets.series?.length ?? 0) > 0);
 
   return useMemo(
     () => ({
@@ -193,9 +204,11 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       selectedCategoryIds,
       selectedBrandIds,
       selectedScaleIds,
+      selectedSeriesIds,
       onToggleCategory,
       onToggleBrand,
       onToggleScale,
+      onToggleSeries,
     }),
     [
       brandsList,
@@ -212,6 +225,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       selectedCategoryIds,
       selectedBrandIds,
       selectedScaleIds,
+      selectedSeriesIds,
     ],
   );
 }

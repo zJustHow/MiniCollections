@@ -27,9 +27,11 @@ export default function GroupsTab({
   selectedCategoryIds,
   selectedBrandIds,
   selectedScaleIds,
+  selectedSeriesIds,
   onToggleCategory,
   onToggleBrand,
   onToggleScale,
+  onToggleSeries,
 }) {
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -131,9 +133,11 @@ export default function GroupsTab({
                 selectedCategoryIds={selectedCategoryIds}
                 selectedBrandIds={selectedBrandIds}
                 selectedScaleIds={selectedScaleIds}
+                selectedSeriesIds={selectedSeriesIds}
                 onToggleCategory={onToggleCategory}
                 onToggleBrand={onToggleBrand}
                 onToggleScale={onToggleScale}
+                onToggleSeries={onToggleSeries}
               />
             ) : null
           }
@@ -165,9 +169,11 @@ export default function GroupsTab({
                     selectedCategoryIds={selectedCategoryIds}
                     selectedBrandIds={selectedBrandIds}
                     selectedScaleIds={selectedScaleIds}
+                    selectedSeriesIds={selectedSeriesIds}
                     onToggleCategory={onToggleCategory}
                     onToggleBrand={onToggleBrand}
                     onToggleScale={onToggleScale}
+                    onToggleSeries={onToggleSeries}
                   >
                     {searchResultObjects.map(renderObjectCard)}
                   </ObjectSearchFilterLayout>

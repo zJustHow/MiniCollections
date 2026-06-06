@@ -19,9 +19,11 @@ export default function GuestBrandsView() {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
+    selectedSeriesIds,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,
+    onToggleSeries,
   } = useBrandsState();
 
   return (
@@ -42,9 +44,11 @@ export default function GuestBrandsView() {
       selectedCategoryIds={selectedCategoryIds}
       selectedBrandIds={selectedBrandIds}
       selectedScaleIds={selectedScaleIds}
+      selectedSeriesIds={selectedSeriesIds}
       onToggleCategory={onToggleCategory}
       onToggleBrand={onToggleBrand}
       onToggleScale={onToggleScale}
+      onToggleSeries={onToggleSeries}
     />
   );
 }

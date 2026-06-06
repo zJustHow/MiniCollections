@@ -12,6 +12,7 @@ import com.zjusthow.minicollections.elasticsearch.EsSearchPageResult;
 import com.zjusthow.minicollections.model.BrandFacetDto;
 import com.zjusthow.minicollections.model.BrandObjectSearchFilter;
 import com.zjusthow.minicollections.model.ScaleFacetDto;
+import com.zjusthow.minicollections.model.SeriesFacetDto;
 import com.zjusthow.minicollections.entity.BrandEntity;
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.entity.CategoryEntity;
@@ -175,6 +176,7 @@ public class BrandService {
             List<Long> categoryIds,
             List<Long> brandIds,
             List<Long> scaleIds,
+            List<Long> seriesIds,
             String effectiveLocale,
             int page,
             int size) {
@@ -185,7 +187,8 @@ public class BrandService {
         }
         String trimmed = keyword.trim();
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
-        BrandObjectSearchFilter filter = BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds);
+        BrandObjectSearchFilter filter =
+                BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds, seriesIds);
 
         BrandSearchTotals brandTotals = resolveBrandSearchTotals(trimmed);
         ObjectSearchTotals objectTotals = resolveObjectSearchTotals(trimmed, filter);
@@ -255,7 +258,7 @@ public class BrandService {
             String effectiveLocale,
             int page,
             int size) {
-        return searchBrandObjectsPage(keyword, null, null, null, effectiveLocale, page, size);
+        return searchBrandObjectsPage(keyword, null, null, null, null, effectiveLocale, page, size);
     }
 
     public PageResponse<BrandObjectDto> searchBrandObjectsPage(
@@ -263,12 +266,13 @@ public class BrandService {
             List<Long> categoryIds,
             List<Long> brandIds,
             List<Long> scaleIds,
+            List<Long> seriesIds,
             String effectiveLocale,
             int page,
             int size) {
         return searchBrandObjectsInternal(
                 keyword,
-                BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds),
+                BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds, seriesIds),
                 effectiveLocale,
                 page,
                 size);
@@ -276,8 +280,16 @@ public class BrandService {
 
     public BrandObjectSearchFacetsDto searchBrandObjectsFacets(
             String keyword,
+            List<Long> categoryIds,
+            List<Long> brandIds,
+            List<Long> scaleIds,
+            List<Long> seriesIds,
             String effectiveLocale) {
-        return searchBrandObjectsFacetsInternal(keyword, null, effectiveLocale);
+        return searchBrandObjectsFacetsInternal(
+                keyword,
+                null,
+                BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds, seriesIds),
+                effectiveLocale);
     }
 
     public PageResponse<BrandObjectDto> searchBrandObjectsByBrandIdPage(
@@ -285,12 +297,13 @@ public class BrandService {
             long brandId,
             List<Long> categoryIds,
             List<Long> scaleIds,
+            List<Long> seriesIds,
             String effectiveLocale,
             int page,
             int size) {
         return searchBrandObjectsInternal(
                 keyword,
-                BrandObjectSearchFilter.withinBrand(brandId, categoryIds, scaleIds),
+                BrandObjectSearchFilter.withinBrand(brandId, categoryIds, scaleIds, seriesIds),
                 effectiveLocale,
                 page,
                 size);
@@ -299,54 +312,145 @@ public class BrandService {
     public BrandObjectSearchFacetsDto searchBrandObjectsByBrandIdFacets(
             String keyword,
             long brandId,
+            List<Long> categoryIds,
+            List<Long> scaleIds,
+            List<Long> seriesIds,
             String effectiveLocale) {
-        return searchBrandObjectsFacetsInternal(keyword, brandId, effectiveLocale);
+        BrandObjectSearchFilter filter =
+                BrandObjectSearchFilter.withinBrand(brandId, categoryIds, scaleIds, seriesIds);
+        return searchBrandObjectsFacetsInternal(keyword, brandId, filter, effectiveLocale);
     }
 
     private BrandObjectSearchFacetsDto searchBrandObjectsFacetsInternal(
             String keyword,
             Long brandId,
+            BrandObjectSearchFilter appliedFilter,
             String effectiveLocale) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return new BrandObjectSearchFacetsDto(0L, List.of(), List.of(), List.of());
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        if (!hasKeyword) {
+            return new BrandObjectSearchFacetsDto(0L, List.of(), List.of(), List.of(), List.of());
         }
         String trimmed = keyword.trim();
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        BrandObjectSearchFilter filter = appliedFilter != null
+                ? appliedFilter
+                : (brandId == null
+                        ? BrandObjectSearchFilter.global(null, null, null, null)
+                        : BrandObjectSearchFilter.withinBrand(brandId, null, null, null));
 
         if (esEnabled()) {
             try {
                 EsSearchFacetsResult esResult =
-                        brandObjectElasticsearchQueryService.searchFacets(trimmed, brandId);
-                if (esResult.total() > 0) {
-                    return toSearchFacetsDto(esResult, preferZh);
-                }
+                        brandObjectElasticsearchQueryService.searchFacets(trimmed, filter);
+                return toSearchFacetsDto(esResult, preferZh);
             } catch (Exception e) {
                 log.warn("Elasticsearch search facets failed, using SQL fallback: {}", e.getMessage());
             }
         }
 
-        return searchBrandObjectsFacetsSql(trimmed, brandId, preferZh);
+        return searchBrandObjectsFacetsSql(trimmed, true, brandId, preferZh, filter);
     }
 
     private BrandObjectSearchFacetsDto searchBrandObjectsFacetsSql(
             String keyword,
+            boolean hasKeyword,
             Long brandId,
-            boolean preferZh) {
-        BrandObjectSearchFilter countFilter = brandId == null
-                ? BrandObjectSearchFilter.global(null, null, null)
-                : BrandObjectSearchFilter.withinBrand(brandId, null, null);
-        long total = countSearch(keyword, countFilter);
-        List<CategoryFacetRow> categoryRows = brandId == null
-                ? brandObjectRepository.countByCategorySearch(keyword)
-                : brandObjectRepository.countByCategoryWithinBrandSearch(keyword, brandId);
-        List<CategoryFacetDto> categories = toCategoryFacetDtos(categoryRows, preferZh);
-        List<BrandFacetDto> brands = brandId == null
-                ? toBrandFacetDtos(brandObjectRepository.countByBrandSearch(keyword), preferZh)
-                : List.of();
-        List<ScaleFacetDto> scales = brandId == null
-                ? toScaleFacetDtos(brandObjectRepository.countByScaleSearch(keyword))
-                : toScaleFacetDtos(brandObjectRepository.countByScaleWithinBrandSearch(keyword, brandId));
-        return new BrandObjectSearchFacetsDto(total, categories, brands, scales);
+            boolean preferZh,
+            BrandObjectSearchFilter filter) {
+        long total = countSearch(keyword, filter);
+        if (brandId != null) {
+            BrandObjectSearchFilter categoryCtx = filter.forCategoryFacetBuckets();
+            BrandObjectSearchFilter scaleCtx = filter.forScaleFacetBuckets();
+            BrandObjectSearchFilter seriesCtx = filter.forSeriesFacetBuckets();
+            List<CategoryFacetDto> categories = toCategoryFacetDtos(
+                    brandObjectRepository.countByCategoryWithinBrandSearch(
+                            keyword,
+                            hasKeyword,
+                            brandId,
+                            categoryCtx.filterCategories(),
+                            categoryCtx.categoryIdsParam(),
+                            categoryCtx.filterScales(),
+                            categoryCtx.scaleIdsParam(),
+                            categoryCtx.filterSeries(),
+                            categoryCtx.seriesIdsParam()),
+                    preferZh);
+            List<ScaleFacetDto> scales = toScaleFacetDtos(
+                    brandObjectRepository.countByScaleWithinBrandSearch(
+                            keyword,
+                            hasKeyword,
+                            brandId,
+                            scaleCtx.filterCategories(),
+                            scaleCtx.categoryIdsParam(),
+                            scaleCtx.filterScales(),
+                            scaleCtx.scaleIdsParam(),
+                            scaleCtx.filterSeries(),
+                            scaleCtx.seriesIdsParam()));
+            List<SeriesFacetDto> series = toSeriesFacetDtos(
+                    brandObjectRepository.countBySeriesWithinBrandSearch(
+                            keyword,
+                            hasKeyword,
+                            brandId,
+                            seriesCtx.filterCategories(),
+                            seriesCtx.categoryIdsParam(),
+                            seriesCtx.filterScales(),
+                            seriesCtx.scaleIdsParam(),
+                            seriesCtx.filterSeries(),
+                            seriesCtx.seriesIdsParam()),
+                    preferZh);
+            return new BrandObjectSearchFacetsDto(total, categories, List.of(), scales, series);
+        }
+        BrandObjectSearchFilter categoryCtx = filter.forCategoryFacetBuckets();
+        BrandObjectSearchFilter brandCtx = filter.forBrandFacetBuckets();
+        BrandObjectSearchFilter scaleCtx = filter.forScaleFacetBuckets();
+        BrandObjectSearchFilter seriesCtx = filter.forSeriesFacetBuckets();
+        List<CategoryFacetDto> categories = toCategoryFacetDtos(
+                brandObjectRepository.countByCategorySearch(
+                        keyword,
+                        categoryCtx.filterBrands(),
+                        categoryCtx.brandIdsParam(),
+                        categoryCtx.filterCategories(),
+                        categoryCtx.categoryIdsParam(),
+                        categoryCtx.filterScales(),
+                        categoryCtx.scaleIdsParam(),
+                        categoryCtx.filterSeries(),
+                        categoryCtx.seriesIdsParam()),
+                preferZh);
+        List<BrandFacetDto> brands = toBrandFacetDtos(
+                brandObjectRepository.countByBrandSearch(
+                        keyword,
+                        brandCtx.filterBrands(),
+                        brandCtx.brandIdsParam(),
+                        brandCtx.filterCategories(),
+                        brandCtx.categoryIdsParam(),
+                        brandCtx.filterScales(),
+                        brandCtx.scaleIdsParam(),
+                        brandCtx.filterSeries(),
+                        brandCtx.seriesIdsParam()),
+                preferZh);
+        List<ScaleFacetDto> scales = toScaleFacetDtos(
+                brandObjectRepository.countByScaleSearch(
+                        keyword,
+                        scaleCtx.filterBrands(),
+                        scaleCtx.brandIdsParam(),
+                        scaleCtx.filterCategories(),
+                        scaleCtx.categoryIdsParam(),
+                        scaleCtx.filterScales(),
+                        scaleCtx.scaleIdsParam(),
+                        scaleCtx.filterSeries(),
+                        scaleCtx.seriesIdsParam()));
+        List<SeriesFacetDto> series = toSeriesFacetDtos(
+                brandObjectRepository.countBySeriesSearch(
+                        keyword,
+                        seriesCtx.filterBrands(),
+                        seriesCtx.brandIdsParam(),
+                        seriesCtx.filterCategories(),
+                        seriesCtx.categoryIdsParam(),
+                        seriesCtx.filterScales(),
+                        seriesCtx.scaleIdsParam(),
+                        seriesCtx.filterSeries(),
+                        seriesCtx.seriesIdsParam()),
+                preferZh);
+        return new BrandObjectSearchFacetsDto(total, categories, brands, scales, series);
     }
 
     private BrandObjectSearchFacetsDto toSearchFacetsDto(
@@ -356,7 +460,8 @@ public class BrandService {
                 esResult.total(),
                 toCategoryFacetDtosFromBuckets(esResult.categories(), preferZh),
                 toBrandFacetDtosFromBuckets(esResult.brands(), preferZh),
-                toScaleFacetDtosFromBuckets(esResult.scales()));
+                toScaleFacetDtosFromBuckets(esResult.scales()),
+                toSeriesFacetDtosFromBuckets(esResult.series(), preferZh));
     }
 
     private List<CategoryFacetDto> toCategoryFacetDtosFromBuckets(
@@ -463,24 +568,73 @@ public class BrandService {
         return result;
     }
 
+    private List<SeriesFacetDto> toSeriesFacetDtosFromBuckets(
+            List<EsFacetBucket> buckets,
+            boolean preferZh) {
+        if (buckets.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> ids = new HashSet<>();
+        for (EsFacetBucket bucket : buckets) {
+            ids.add(bucket.id());
+        }
+        Map<Long, SeriesEntity> byId = new HashMap<>();
+        seriesRepository.findAllById(ids).forEach(s -> byId.put(s.id(), s));
+        List<SeriesFacetDto> result = new ArrayList<>();
+        for (EsFacetBucket bucket : buckets) {
+            SeriesEntity entity = byId.get(bucket.id());
+            if (entity != null) {
+                result.add(SeriesFacetDto.from(entity, bucket.count(), preferZh));
+            }
+        }
+        return result;
+    }
+
+    private List<SeriesFacetDto> toSeriesFacetDtos(List<FacetCountRow> rows, boolean preferZh) {
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> ids = new HashSet<>();
+        for (FacetCountRow row : rows) {
+            ids.add(row.id());
+        }
+        Map<Long, SeriesEntity> byId = new HashMap<>();
+        seriesRepository.findAllById(ids).forEach(s -> byId.put(s.id(), s));
+        List<SeriesFacetDto> result = new ArrayList<>();
+        for (FacetCountRow row : rows) {
+            SeriesEntity entity = byId.get(row.id());
+            if (entity != null && row.cnt() != null) {
+                result.add(SeriesFacetDto.from(entity, row.cnt(), preferZh));
+            }
+        }
+        return result;
+    }
+
     private long countSearch(String keyword, BrandObjectSearchFilter filter) {
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        String trimmed = hasKeyword ? keyword.trim() : "";
         if (filter.scopeBrandId() != null) {
             return brandObjectRepository.countSearchWithinBrand(
-                    keyword,
+                    trimmed,
+                    hasKeyword,
                     filter.scopeBrandId(),
                     filter.filterCategories(),
                     filter.categoryIdsParam(),
                     filter.filterScales(),
-                    filter.scaleIdsParam());
+                    filter.scaleIdsParam(),
+                    filter.filterSeries(),
+                    filter.seriesIdsParam());
         }
         return brandObjectRepository.countSearch(
-                keyword,
+                trimmed,
                 filter.filterBrands(),
                 filter.brandIdsParam(),
                 filter.filterCategories(),
                 filter.categoryIdsParam(),
                 filter.filterScales(),
-                filter.scaleIdsParam());
+                filter.scaleIdsParam(),
+                filter.filterSeries(),
+                filter.seriesIdsParam());
     }
 
     private List<CategoryFacetDto> toCategoryFacetDtos(List<CategoryFacetRow> rows, boolean preferZh) {
@@ -530,7 +684,7 @@ public class BrandService {
             }
         }
 
-        return searchBrandObjectsSqlPage(trimmed, filter, preferZh, safePage, pageSize);
+        return searchBrandObjectsSqlPage(trimmed, true, filter, preferZh, safePage, pageSize);
     }
 
     private PageResponse<BrandDto> searchBrandsSqlPage(
@@ -549,6 +703,7 @@ public class BrandService {
 
     private PageResponse<BrandObjectDto> searchBrandObjectsSqlPage(
             String keyword,
+            boolean hasKeyword,
             BrandObjectSearchFilter filter,
             boolean preferZh,
             int page,
@@ -558,11 +713,14 @@ public class BrandService {
         if (filter.scopeBrandId() != null) {
             entities = brandObjectRepository.searchPageWithinBrand(
                     keyword,
+                    hasKeyword,
                     filter.scopeBrandId(),
                     filter.filterCategories(),
                     filter.categoryIdsParam(),
                     filter.filterScales(),
                     filter.scaleIdsParam(),
+                    filter.filterSeries(),
+                    filter.seriesIdsParam(),
                     pageSize,
                     offset(page, pageSize));
         } else {
@@ -574,6 +732,8 @@ public class BrandService {
                     filter.categoryIdsParam(),
                     filter.filterScales(),
                     filter.scaleIdsParam(),
+                    filter.filterSeries(),
+                    filter.seriesIdsParam(),
                     pageSize,
                     offset(page, pageSize));
         }
@@ -688,26 +848,33 @@ public class BrandService {
                 log.warn("Elasticsearch object slice failed, using SQL fallback: {}", e.getMessage());
             }
         }
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        String trimmed = hasKeyword ? keyword.trim() : "";
         List<BrandObjectEntity> entities;
         if (filter.scopeBrandId() != null) {
             entities = brandObjectRepository.searchPageWithinBrand(
-                    keyword,
+                    trimmed,
+                    hasKeyword,
                     filter.scopeBrandId(),
                     filter.filterCategories(),
                     filter.categoryIdsParam(),
                     filter.filterScales(),
                     filter.scaleIdsParam(),
+                    filter.filterSeries(),
+                    filter.seriesIdsParam(),
                     limit,
                     offset);
         } else {
             entities = brandObjectRepository.searchPage(
-                    keyword,
+                    trimmed,
                     filter.filterBrands(),
                     filter.brandIdsParam(),
                     filter.filterCategories(),
                     filter.categoryIdsParam(),
                     filter.filterScales(),
                     filter.scaleIdsParam(),
+                    filter.filterSeries(),
+                    filter.seriesIdsParam(),
                     limit,
                     offset);
         }

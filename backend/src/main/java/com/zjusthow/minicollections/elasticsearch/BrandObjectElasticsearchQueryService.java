@@ -28,12 +28,11 @@ import java.util.List;
 public class BrandObjectElasticsearchQueryService {
 
     private static final Logger log = LoggerFactory.getLogger(BrandObjectElasticsearchQueryService.class);
-    private static final String CATEGORY_AGG = "by_category";
-    private static final String BRAND_AGG = "by_brand";
-    private static final String SCALE_AGG = "by_scale";
+    private static final String FACET_AGG = "facet";
     private static final int MAX_CATEGORY_BUCKETS = 32;
     private static final int MAX_BRAND_BUCKETS = 48;
     private static final int MAX_SCALE_BUCKETS = 32;
+    private static final int MAX_SERIES_BUCKETS = 48;
 
     private final ElasticsearchOperations elasticsearchOperations;
 
@@ -71,45 +70,69 @@ public class BrandObjectElasticsearchQueryService {
                 pageResult.totalExact());
     }
 
-    public EsSearchFacetsResult searchFacets(String keyword, Long scopeBrandId) {
+    /**
+     * Facet buckets use cross-dimension filters (each dimension excludes its own user selection).
+     * Requires a non-blank keyword.
+     */
+    public EsSearchFacetsResult searchFacets(String keyword, BrandObjectSearchFilter filter) {
         if (keyword == null || keyword.isBlank()) {
-            return new EsSearchFacetsResult(0L, List.of(), List.of(), List.of());
+            return new EsSearchFacetsResult(0L, List.of(), List.of(), List.of(), List.of());
         }
         String q = keyword.trim();
-        BrandObjectSearchFilter facetFilter = scopeBrandId == null
-                ? BrandObjectSearchFilter.global(null, null, null)
-                : BrandObjectSearchFilter.withinBrand(scopeBrandId, null, null);
-
-        var builder = NativeQuery.builder()
-                .withQuery(buildSearchQuery(q, facetFilter))
-                .withMaxResults(0)
-                .withTrackTotalHitsUpTo(10_000)
-                .withAggregation(CATEGORY_AGG, termsAgg("category_id", MAX_CATEGORY_BUCKETS))
-                .withAggregation(BRAND_AGG, termsAgg("brand_id", MAX_BRAND_BUCKETS))
-                .withAggregation(SCALE_AGG, termsAgg("scale_id", MAX_SCALE_BUCKETS));
-
         try {
-            SearchHits<BrandObjectDocument> hits =
-                    elasticsearchOperations.search(builder.build(), BrandObjectDocument.class);
-            long total = hits.getTotalHits() >= 0 ? hits.getTotalHits() : 0L;
-            return new EsSearchFacetsResult(
-                    total,
-                    parseTermBuckets(hits, CATEGORY_AGG),
-                    scopeBrandId == null ? parseTermBuckets(hits, BRAND_AGG) : List.of(),
-                    parseTermBuckets(hits, SCALE_AGG));
+            long total = countTotal(q, filter);
+            List<EsFacetBucket> categories = facetBuckets(
+                    q, filter.forCategoryFacetBuckets(), "category_id", MAX_CATEGORY_BUCKETS);
+            List<EsFacetBucket> brands = filter.scopeBrandId() == null
+                    ? facetBuckets(q, filter.forBrandFacetBuckets(), "brand_id", MAX_BRAND_BUCKETS)
+                    : List.of();
+            List<EsFacetBucket> scales = facetBuckets(
+                    q, filter.forScaleFacetBuckets(), "scale_id", MAX_SCALE_BUCKETS);
+            List<EsFacetBucket> series = facetBuckets(
+                    q, filter.forSeriesFacetBuckets(), "series_id", MAX_SERIES_BUCKETS);
+            return new EsSearchFacetsResult(total, categories, brands, scales, series);
         } catch (Exception e) {
             log.warn("Elasticsearch search facets failed: {}", e.getMessage());
             throw e;
         }
     }
 
-    /** @deprecated use {@link #searchFacets(String, Long)} */
+    /** @deprecated use {@link #searchFacets(String, BrandObjectSearchFilter)} */
     public EsCategoryFacetsResult categoryFacets(String keyword, Long brandId) {
-        EsSearchFacetsResult result = searchFacets(keyword, brandId);
+        BrandObjectSearchFilter filter = brandId == null
+                ? BrandObjectSearchFilter.global(null, null, null, null)
+                : BrandObjectSearchFilter.withinBrand(brandId, null, null, null);
+        EsSearchFacetsResult result = searchFacets(keyword, filter);
         List<EsCategoryFacetBucket> categories = result.categories().stream()
                 .map(b -> new EsCategoryFacetBucket(b.id(), b.count()))
                 .toList();
         return new EsCategoryFacetsResult(result.total(), categories);
+    }
+
+    private long countTotal(String q, BrandObjectSearchFilter filter) {
+        var nativeQuery = NativeQuery.builder()
+                .withQuery(buildSearchQuery(q, filter))
+                .withMaxResults(0)
+                .withTrackTotalHitsUpTo(10_000)
+                .build();
+        SearchHits<BrandObjectDocument> hits =
+                elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
+        return hits.getTotalHits() >= 0 ? hits.getTotalHits() : 0L;
+    }
+
+    private List<EsFacetBucket> facetBuckets(
+            String q,
+            BrandObjectSearchFilter crossFilter,
+            String field,
+            int maxBuckets) {
+        var nativeQuery = NativeQuery.builder()
+                .withQuery(buildSearchQuery(q, crossFilter))
+                .withMaxResults(0)
+                .withAggregation(FACET_AGG, termsAgg(field, maxBuckets))
+                .build();
+        SearchHits<BrandObjectDocument> hits =
+                elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
+        return parseTermBuckets(hits, FACET_AGG);
     }
 
     private Aggregation termsAgg(String field, int size) {
@@ -137,7 +160,7 @@ public class BrandObjectElasticsearchQueryService {
     }
 
     private Query buildSearchQuery(String q, BrandObjectSearchFilter filter) {
-        if (!filter.hasActiveFilters()) {
+        if (!filter.hasUserFilters() && filter.scopeBrandId() == null) {
             return Query.of(sq -> sq.multiMatch(m -> m
                     .query(q)
                     .fields("brand_name_en^3", "brand_name_zh^3", "name_en^2", "name_zh^2",
@@ -176,6 +199,11 @@ public class BrandObjectElasticsearchQueryService {
                 b.filter(f -> f.terms(t -> t
                         .field("scale_id")
                         .terms(tv -> tv.value(toFieldValues(filter.scaleIds())))));
+            }
+            if (filter.filterSeries()) {
+                b.filter(f -> f.terms(t -> t
+                        .field("series_id")
+                        .terms(tv -> tv.value(toFieldValues(filter.seriesIds())))));
             }
             return b;
         }));

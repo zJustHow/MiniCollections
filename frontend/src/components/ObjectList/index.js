@@ -28,9 +28,11 @@ export default function ObjectList({ activeTab, isAdmin }) {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
+    selectedSeriesIds,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,
+    onToggleSeries,
     groups,
     loadingGroups,
     handleGroupClick,
@@ -44,9 +46,11 @@ export default function ObjectList({ activeTab, isAdmin }) {
     groupSelectedCategoryIds,
     groupSelectedBrandIds,
     groupSelectedScaleIds,
+    groupSelectedSeriesIds,
     onGroupToggleCategory,
     onGroupToggleBrand,
     onGroupToggleScale,
+    onGroupToggleSeries,
     createGroupModalVisible,
     setCreateGroupModalVisible,
     createGroupLoading,
@@ -78,9 +82,11 @@ export default function ObjectList({ activeTab, isAdmin }) {
           selectedCategoryIds={selectedCategoryIds}
           selectedBrandIds={selectedBrandIds}
           selectedScaleIds={selectedScaleIds}
+          selectedSeriesIds={selectedSeriesIds}
           onToggleCategory={onToggleCategory}
           onToggleBrand={onToggleBrand}
           onToggleScale={onToggleScale}
+          onToggleSeries={onToggleSeries}
         />
       ) : (
         <GroupsTab
@@ -102,9 +108,11 @@ export default function ObjectList({ activeTab, isAdmin }) {
           selectedCategoryIds={groupSelectedCategoryIds}
           selectedBrandIds={groupSelectedBrandIds}
           selectedScaleIds={groupSelectedScaleIds}
+          selectedSeriesIds={groupSelectedSeriesIds}
           onToggleCategory={onGroupToggleCategory}
           onToggleBrand={onGroupToggleBrand}
           onToggleScale={onGroupToggleScale}
+          onToggleSeries={onGroupToggleSeries}
         />
       )}
 

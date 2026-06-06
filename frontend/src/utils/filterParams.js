@@ -11,9 +11,10 @@ export function toggleIdInList(id, setList) {
   setList((prev) => toggleInList(id, prev));
 }
 
-export function filterKeyFromIds(categoryIds, brandIds, scaleIds) {
+export function filterKeyFromIds(categoryIds, brandIds, scaleIds, seriesIds = []) {
   const c = categoryIds?.length ? categoryIds.join(",") : "c";
   const b = brandIds?.length ? brandIds.join(",") : "b";
   const s = scaleIds?.length ? scaleIds.join(",") : "s";
-  return `${c}:${b}:${s}`;
+  const r = seriesIds?.length ? seriesIds.join(",") : "r";
+  return `${c}:${b}:${s}:${r}`;
 }

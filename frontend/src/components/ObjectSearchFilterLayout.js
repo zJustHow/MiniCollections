@@ -16,9 +16,11 @@ export default function ObjectSearchFilterLayout({
   selectedCategoryIds,
   selectedBrandIds,
   selectedScaleIds,
+  selectedSeriesIds = [],
   onToggleCategory,
   onToggleBrand,
   onToggleScale,
+  onToggleSeries = () => {},
   children,
   cardsStyle,
 }) {
@@ -33,15 +35,18 @@ export default function ObjectSearchFilterLayout({
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
+    selectedSeriesIds,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,
+    onToggleSeries,
   };
 
   const activeFilterCount =
     selectedCategoryIds.length +
     selectedBrandIds.length +
-    selectedScaleIds.length;
+    selectedScaleIds.length +
+    selectedSeriesIds.length;
 
   const showMobileFilter = showFilterColumn && isMobile;
 

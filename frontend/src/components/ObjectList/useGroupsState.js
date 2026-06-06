@@ -17,12 +17,14 @@ export default function useGroupsState() {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
+    selectedSeriesIds,
     clearObjectFilters,
     clearSearchAndFilters,
     setSearchQueryClearingFilters,
     onToggleCategory,
     onToggleBrand,
     onToggleScale,
+    onToggleSeries,
   } = useObjectFilterParams();
   const [groups, setGroups] = useState([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
@@ -45,6 +47,7 @@ export default function useGroupsState() {
     selectedCategoryIds,
     selectedBrandIds,
     selectedScaleIds,
+    selectedSeriesIds,
   );
 
   const runGroupSearch = useCallback(
@@ -98,6 +101,7 @@ export default function useGroupsState() {
             categoryIds: selectedCategoryIds,
             brandIds: selectedBrandIds,
             scaleIds: selectedScaleIds,
+            seriesIds: selectedSeriesIds,
           });
         } else {
           await loadBrowseGroups();
@@ -135,7 +139,7 @@ export default function useGroupsState() {
       })
       .catch(() => {
         if (!cancelled) {
-          setSearchFacets({ total: 0, categories: [], brands: [], scales: [] });
+          setSearchFacets({ total: 0, categories: [], brands: [], scales: [], series: [] });
         }
       })
       .finally(() => {
@@ -211,7 +215,8 @@ export default function useGroupsState() {
     searchFacets != null &&
     ((searchFacets.categories?.length ?? 0) > 0 ||
       (searchFacets.brands?.length ?? 0) > 0 ||
-      (searchFacets.scales?.length ?? 0) > 0);
+      (searchFacets.scales?.length ?? 0) > 0 ||
+      (searchFacets.series?.length ?? 0) > 0);
 
   return {
     groups,
@@ -229,9 +234,11 @@ export default function useGroupsState() {
     groupSelectedCategoryIds: selectedCategoryIds,
     groupSelectedBrandIds: selectedBrandIds,
     groupSelectedScaleIds: selectedScaleIds,
+    groupSelectedSeriesIds: selectedSeriesIds,
     onGroupToggleCategory: onToggleCategory,
     onGroupToggleBrand: onToggleBrand,
     onGroupToggleScale: onToggleScale,
+    onGroupToggleSeries: onToggleSeries,
     createGroupModalVisible,
     setCreateGroupModalVisible,
     createGroupLoading,

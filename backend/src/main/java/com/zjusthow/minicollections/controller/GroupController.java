@@ -57,9 +57,10 @@ public class GroupController {
             @RequestParam String keyword,
             @RequestParam(required = false) List<Long> categoryIds,
             @RequestParam(required = false) List<Long> brandIds,
-            @RequestParam(required = false) List<Long> scaleIds) {
+            @RequestParam(required = false) List<Long> scaleIds,
+            @RequestParam(required = false) List<Long> seriesIds) {
         return ResponseEntity.ok(groupService.crossSearch(
-                userId(user), keyword, categoryIds, brandIds, scaleIds));
+                userId(user), keyword, categoryIds, brandIds, scaleIds, seriesIds));
     }
 
     @GetMapping("/{groupId}")

@@ -9,6 +9,7 @@ import com.zjusthow.minicollections.exception.UserObjectNotFoundException;
 import com.zjusthow.minicollections.entity.BrandEntity;
 import com.zjusthow.minicollections.entity.CategoryEntity;
 import com.zjusthow.minicollections.entity.ScaleEntity;
+import com.zjusthow.minicollections.entity.SeriesEntity;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.BrandFacetDto;
 import com.zjusthow.minicollections.model.BrandObjectSearchFacetsDto;
@@ -17,6 +18,7 @@ import com.zjusthow.minicollections.model.CategoryFacetDto;
 import com.zjusthow.minicollections.model.GroupDto;
 import com.zjusthow.minicollections.model.GroupSearchResult;
 import com.zjusthow.minicollections.model.ScaleFacetDto;
+import com.zjusthow.minicollections.model.SeriesFacetDto;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.model.UserObjectSearchDto;
 import com.zjusthow.minicollections.repository.BrandRepository;
@@ -25,6 +27,7 @@ import com.zjusthow.minicollections.repository.CategoryFacetRow;
 import com.zjusthow.minicollections.repository.FacetCountRow;
 import com.zjusthow.minicollections.repository.GroupRepository;
 import com.zjusthow.minicollections.repository.ScaleRepository;
+import com.zjusthow.minicollections.repository.SeriesRepository;
 import com.zjusthow.minicollections.repository.UserObjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -71,6 +74,7 @@ public class GroupService {
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final ScaleRepository scaleRepository;
+    private final SeriesRepository seriesRepository;
     private final DisplayLocaleResolver displayLocaleResolver;
     private final JdbcClient jdbcClient;
     private final ImageStorageService imageStorageService;
@@ -87,6 +91,7 @@ public class GroupService {
             CategoryRepository categoryRepository,
             BrandRepository brandRepository,
             ScaleRepository scaleRepository,
+            SeriesRepository seriesRepository,
             DisplayLocaleResolver displayLocaleResolver,
             JdbcClient jdbcClient,
             @Autowired(required = false) ImageStorageService imageStorageService) {
@@ -95,6 +100,7 @@ public class GroupService {
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
         this.scaleRepository = scaleRepository;
+        this.seriesRepository = seriesRepository;
         this.displayLocaleResolver = displayLocaleResolver;
         this.jdbcClient = jdbcClient;
         this.imageStorageService = imageStorageService;
@@ -130,14 +136,15 @@ public class GroupService {
             String keyword,
             List<Long> categoryIds,
             List<Long> brandIds,
-            List<Long> scaleIds) {
+            List<Long> scaleIds,
+            List<Long> seriesIds) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return new GroupSearchResult(Collections.emptyList(), Collections.emptyList());
         }
 
         String trimmed = keyword.trim();
         BrandObjectSearchFilter filter =
-                BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds);
+                BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds, seriesIds);
 
         List<GroupDto> groups = groupRepository.searchByKeyword(userId, trimmed)
                 .stream().map(GroupDto::new).toList();
@@ -151,7 +158,7 @@ public class GroupService {
             String keyword,
             String effectiveLocale) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return new BrandObjectSearchFacetsDto(0L, List.of(), List.of(), List.of());
+            return new BrandObjectSearchFacetsDto(0L, List.of(), List.of(), List.of(), List.of());
         }
         String trimmed = keyword.trim();
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
@@ -199,7 +206,21 @@ public class GroupService {
                         .param("keyword", trimmed)
                         .query(FacetCountRow.class)
                         .list());
-        return new BrandObjectSearchFacetsDto(total, categories, brands, scales);
+        List<SeriesFacetDto> series = toSeriesFacetDtos(
+                jdbcClient.sql("""
+                                SELECT bo.series_id AS id, COUNT(DISTINCT uo.id) AS cnt
+                                """ + USER_OBJECT_SEARCH_FROM + """
+                                WHERE """ + USER_OBJECT_KEYWORD_MATCH + """
+                                  AND bo.series_id IS NOT NULL
+                                GROUP BY bo.series_id
+                                ORDER BY cnt DESC, bo.series_id ASC
+                                """)
+                        .param("userId", userId)
+                        .param("keyword", trimmed)
+                        .query(FacetCountRow.class)
+                        .list(),
+                preferZh);
+        return new BrandObjectSearchFacetsDto(total, categories, brands, scales, series);
     }
 
     private long countUserObjectSearch(Long userId, String keyword) {
@@ -231,6 +252,7 @@ public class GroupService {
                           AND (:filterCategories = FALSE OR bo.category_id IN (:categoryIds))
                           AND (:filterBrands = FALSE OR bo.brand_id IN (:brandIds))
                           AND (:filterScales = FALSE OR bo.scale_id IN (:scaleIds))
+                          AND (:filterSeries = FALSE OR bo.series_id IN (:seriesIds))
                         """)
                 .param("userId", userId)
                 .param("keyword", keyword)
@@ -240,6 +262,8 @@ public class GroupService {
                 .param("brandIds", filter.brandIdsParam())
                 .param("filterScales", filter.filterScales())
                 .param("scaleIds", filter.scaleIdsParam())
+                .param("filterSeries", filter.filterSeries())
+                .param("seriesIds", filter.seriesIdsParam())
                 .query((rs, rowNum) -> new UserObjectSearchDto(
                         rs.getLong("id"),
                         rs.getLong("user_id"),
@@ -316,6 +340,26 @@ public class GroupService {
             ScaleEntity entity = byId.get(row.id());
             if (entity != null && row.cnt() != null) {
                 result.add(ScaleFacetDto.from(entity, row.cnt()));
+            }
+        }
+        return result;
+    }
+
+    private List<SeriesFacetDto> toSeriesFacetDtos(List<FacetCountRow> rows, boolean preferZh) {
+        if (rows.isEmpty()) {
+            return List.of();
+        }
+        Set<Long> ids = new HashSet<>();
+        for (FacetCountRow row : rows) {
+            ids.add(row.id());
+        }
+        Map<Long, SeriesEntity> byId = new HashMap<>();
+        seriesRepository.findAllById(ids).forEach(s -> byId.put(s.id(), s));
+        List<SeriesFacetDto> result = new ArrayList<>();
+        for (FacetCountRow row : rows) {
+            SeriesEntity entity = byId.get(row.id());
+            if (entity != null && row.cnt() != null) {
+                result.add(SeriesFacetDto.from(entity, row.cnt(), preferZh));
             }
         }
         return result;
