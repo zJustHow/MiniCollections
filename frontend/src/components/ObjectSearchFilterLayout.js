@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Badge, Button, Drawer, Grid } from "antd";
+import NeuButton from "./NeuButton";
+import { Badge, Drawer, Grid } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import ObjectSearchFilterPanel from "./ObjectSearchFilterPanel";
 import DrawerHeaderTitle from "./DrawerHeaderTitle";
@@ -42,7 +43,6 @@ export default function ObjectSearchFilterLayout({
     selectedBrandIds.length +
     selectedScaleIds.length;
 
-  const showInlineFilter = showFilterColumn && !isMobile;
   const showMobileFilter = showFilterColumn && isMobile;
 
   return (
@@ -50,38 +50,18 @@ export default function ObjectSearchFilterLayout({
       {showMobileFilter && (
         <div className="neu-filter-mobile-bar">
           <Badge count={activeFilterCount} size="small" offset={[-4, 4]}>
-            <Button
+            <NeuButton
               icon={<FilterOutlined />}
               onClick={() => setDrawerOpen(true)}
             >
               {t("searchFilters")}
-            </Button>
+            </NeuButton>
           </Badge>
         </div>
       )}
 
-      <div
-        className={`neu-search-objects-layout${
-          isMobile ? " neu-search-objects-layout--mobile" : ""
-        }${
-          !showInlineFilter && !isMobile
-            ? " neu-search-objects-layout--wide-cards"
-            : ""
-        }`}
-      >
-        {showInlineFilter && <ObjectSearchFilterPanel {...filterProps} />}
-        <div
-          className="neu-search-objects-cards"
-          style={
-            showInlineFilter
-              ? cardsStyle
-              : !isMobile
-                ? { gridColumn: "1 / -1", ...cardsStyle }
-                : cardsStyle
-          }
-        >
-          {children}
-        </div>
+      <div className="neu-search-objects-cards" style={cardsStyle}>
+        {children}
       </div>
 
       {showMobileFilter && (

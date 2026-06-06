@@ -1,3 +1,4 @@
+import NeuPressableButton from "./components/NeuPressableButton";
 import { Layout, Avatar, Tooltip } from "antd";
 import { useState, useEffect, useRef } from "react";
 import {
@@ -13,6 +14,7 @@ import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import AdminPage from "./pages/AdminPage";
 import AdminBrandObjectsPage from "./pages/admin/AdminBrandObjectsPage";
 import FeedbackPage from "./pages/FeedbackPage";
@@ -94,31 +96,35 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
           <div className="header-slot-wrap">{headerSlot}</div>
         ) : (
           <div className="header-tabs">
-            <button
-              className={`neu-pressable-btn neu-header-bar-btn${activeTab === "brands" ? " active" : ""}`}
+            <NeuPressableButton
+              variant="header-bar"
+              active={activeTab === "brands"}
               onClick={() => handleTabChange("brands")}
             >
               {t("brands")}
-            </button>
-            <button
-              className={`neu-pressable-btn neu-header-bar-btn${activeTab === "groups" ? " active" : ""}`}
+            </NeuPressableButton>
+            <NeuPressableButton
+              variant="header-bar"
+              active={activeTab === "groups"}
               onClick={() => handleTabChange("groups")}
             >
               {t("groups")}
-            </button>
-            <button
-              className={`neu-pressable-btn neu-header-bar-btn${activeTab === "feedback" ? " active" : ""}`}
+            </NeuPressableButton>
+            <NeuPressableButton
+              variant="header-bar"
+              active={activeTab === "feedback"}
               onClick={() => handleTabChange("feedback")}
             >
               {t("feedback")}
-            </button>
+            </NeuPressableButton>
             {isAdmin && (
-              <button
-                className={`neu-pressable-btn neu-header-bar-btn${activeTab === "admin" ? " active" : ""}`}
+              <NeuPressableButton
+                variant="header-bar"
+                active={activeTab === "admin"}
                 onClick={() => navigate("/admin")}
               >
                 {t("adminPanel")}
-              </button>
+              </NeuPressableButton>
             )}
           </div>
         )}
@@ -179,15 +185,16 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
 
         {/* Mobile hamburger button — only visible on small screens */}
         {!headerSlot && (
-          <button
-            type="button"
-            className={`neu-pressable-btn neu-header-bar-btn mobile-menu-btn${menuOpen ? " active" : ""}`}
+          <NeuPressableButton
+            variant="header-bar"
+            className="mobile-menu-btn"
+            active={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
             aria-label={menuOpen ? "close menu" : "menu"}
             aria-expanded={menuOpen}
           >
             {menuOpen ? <CloseOutlined /> : <MenuOutlined />}
-          </button>
+          </NeuPressableButton>
         )}
       </Header>
 
@@ -329,6 +336,10 @@ export default function App() {
       <Route
         path="/register"
         element={authed ? <Navigate to="/" replace /> : <RegisterPage />}
+      />
+      <Route
+        path="/forgot-password"
+        element={authed ? <Navigate to="/" replace /> : <ForgotPasswordPage />}
       />
       <Route
         path="/wechat-callback"

@@ -3,7 +3,7 @@ import { DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { uploadImage } from "../utils";
 import { useLocale } from "../LocaleContext";
-import GroovedImage from "./GroovedImage";
+import NeuCard from "./NeuCard";
 
 export default function ImageUploadField({
   value,
@@ -15,10 +15,6 @@ export default function ImageUploadField({
   const { message } = App.useApp();
   const { t } = useLocale();
   const [uploading, setUploading] = useState(false);
-
-  const wellClassName = logoShadow
-    ? "neu-card-image-well neu-card-image-well--logo"
-    : "neu-card-image-well";
 
   return (
     <Upload
@@ -39,31 +35,27 @@ export default function ImageUploadField({
         return false;
       }}
     >
-      <div className="neu-image-upload-body">
-        <div className="neu-card-cover">
-          <GroovedImage
-            imageUrl={value}
-            alt=""
-            wellClassName={wellClassName}
-            fixedGroove={logoShadow}
-            placeholderSize={36}
+      <NeuCard
+        variant="upload"
+        imageUrl={value}
+        logoShadow={logoShadow}
+        fixedGroove={logoShadow}
+      >
+        {uploading && (
+          <div className="neu-image-upload-loading" aria-hidden="true">
+            <LoadingOutlined />
+          </div>
+        )}
+        {onRemove && value && !uploading && (
+          <DeleteOutlined
+            className="neu-image-upload-remove"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove();
+            }}
           />
-          {uploading && (
-            <div className="neu-image-upload-loading" aria-hidden="true">
-              <LoadingOutlined />
-            </div>
-          )}
-          {onRemove && value && !uploading && (
-            <DeleteOutlined
-              className="neu-image-upload-remove"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove();
-              }}
-            />
-          )}
-        </div>
-      </div>
+        )}
+      </NeuCard>
     </Upload>
   );
 }

@@ -36,7 +36,6 @@ export default function RejectModal({ open, submission, onClose, onSuccess }) {
       onClose={() => { setReason(""); onClose(); }}
       okText={isMissingModel ? t("rejectSubmission") : t("closeSubmission")}
       okButtonProps={{ danger: true }}
-      cancelText={t("cancel")}
       confirmLoading={loading}
       destroyOnClose
       zIndex={1100}

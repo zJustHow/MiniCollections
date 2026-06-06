@@ -1,4 +1,5 @@
-import { Button, Spin } from "antd";
+import NeuButton from "../../NeuButton";
+import { Spin } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import NeuFormDrawer from "../../NeuFormDrawer";
 import { Z_INDEX } from "../constants";
@@ -34,8 +35,8 @@ export default function UserObjectDetailModal({
       width={600}
       extra={
         <div style={{ display: "flex", gap: 8 }}>
-          <Button size="small" icon={<EditOutlined />} onClick={onEdit} />
-          <Button size="small" danger icon={<DeleteOutlined />} onClick={onDelete} />
+          <NeuButton size="small" icon={<EditOutlined />} onClick={onEdit} />
+          <NeuButton size="small" danger icon={<DeleteOutlined />} onClick={onDelete} />
         </div>
       }
     >

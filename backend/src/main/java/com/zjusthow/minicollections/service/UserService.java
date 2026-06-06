@@ -28,6 +28,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JdbcTemplate jdbc;
     private final ImageStorageService imageStorageService;
+    private final VerificationService verificationService;
 
     public UserService(
             GroupRepository groupRepository,
@@ -35,12 +36,14 @@ public class UserService {
             UserIdentifierRepository identifierRepository,
             PasswordEncoder passwordEncoder,
             JdbcTemplate jdbc,
+            VerificationService verificationService,
             @Autowired(required = false) ImageStorageService imageStorageService) {
         this.groupRepository = groupRepository;
         this.userRepository = userRepository;
         this.identifierRepository = identifierRepository;
         this.passwordEncoder = passwordEncoder;
         this.jdbc = jdbc;
+        this.verificationService = verificationService;
         this.imageStorageService = imageStorageService;
     }
 
@@ -125,6 +128,39 @@ public class UserService {
     public UserProfileDto updateDisplayName(Long userId, String displayName) {
         userRepository.updateDisplayNameById(userId, displayName.strip());
         return getProfile(userId);
+    }
+
+    public void sendPasswordResetCode(String target, String type) {
+        String normalizedTarget = "EMAIL".equals(type) ? target.toLowerCase().strip() : target.strip();
+        String identType = "EMAIL".equals(type) ? "email" : "phone";
+
+        boolean deliver = identifierRepository.findByTypeAndIdentifier(identType, normalizedTarget)
+                .flatMap(ident -> userRepository.findById(ident.userId()))
+                .filter(user -> user.password() != null && !user.password().isBlank())
+                .isPresent();
+
+        verificationService.sendResetCode(normalizedTarget, type, deliver);
+    }
+
+    @Transactional
+    @CacheEvict(value = "users", key = "#result")
+    public Long resetPassword(String email, String phone, String code, String newPassword) {
+        final String normalizedEmail = (email != null && !email.isBlank()) ? email.toLowerCase().strip() : null;
+        final String normalizedPhone = (phone != null && !phone.isBlank()) ? phone.strip() : null;
+
+        if (normalizedEmail == null && normalizedPhone == null) {
+            throw new ValidationException("error.email_or_phone_required");
+        }
+
+        String target = normalizedEmail != null ? normalizedEmail : normalizedPhone;
+        verificationService.verifyResetCode(target, code);
+
+        String identType = normalizedEmail != null ? "email" : "phone";
+        UserIdentifierEntity ident = identifierRepository.findByTypeAndIdentifier(identType, target)
+                .orElseThrow(UserNotFoundException::new);
+
+        userRepository.updatePasswordById(ident.userId(), passwordEncoder.encode(newPassword));
+        return ident.userId();
     }
 
     @Transactional

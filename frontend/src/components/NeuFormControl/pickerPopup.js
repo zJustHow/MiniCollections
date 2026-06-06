@@ -1,3 +1,4 @@
+import { buildPressableClassName } from "../NeuPressableButton";
 import { mountPickerCellRuntimeStyle } from "./pickerCellStyles";
 
 const TAB_BTN_SELECTOR = [
@@ -20,7 +21,9 @@ const SELECTED_CELL_SELECTOR = [
 function decoratePickerTabButtons(root) {
   root?.querySelectorAll(TAB_BTN_SELECTOR).forEach((btn) => {
     if (!btn.classList.contains("neu-pressable-btn")) {
-      btn.classList.add("neu-pressable-btn", "neu-panel-tab-btn");
+      btn.classList.add(
+        ...buildPressableClassName({ variant: "panel-tab" }).split(" "),
+      );
     }
   });
 }

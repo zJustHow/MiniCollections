@@ -1,7 +1,6 @@
 import {
   App,
   Avatar,
-  Button,
   Divider,
   Form,
   Layout,
@@ -9,6 +8,7 @@ import {
   Upload,
 } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
+import NeuButton from "../components/NeuButton";
 import { NeuInput, NeuSelect } from "../components/NeuFormControl";
 import {
   ArrowLeftOutlined,
@@ -351,14 +351,14 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button
+                <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={nameLoading}
                   style={{ width: "100%" }}
                 >
                   {t("saveDisplayName")}
-                </Button>
+                </NeuButton>
               </Form.Item>
             </Form>
           </SectionCard>
@@ -413,14 +413,14 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 />
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button
+                <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={pwLoading}
                   style={{ width: "100%" }}
                 >
                   {t("updatePassword")}
-                </Button>
+                </NeuButton>
               </Form.Item>
             </Form>
           </SectionCard>
@@ -456,7 +456,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   >
                     <NeuInput placeholder={t("verificationCode")} />
                   </Form.Item>
-                  <Button
+                  <NeuButton
                     loading={emailCodeLoading}
                     onClick={
                       emailCodeCountdown > 0 ? undefined : handleEmailSendCode
@@ -469,18 +469,18 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                     {emailCodeCountdown > 0
                       ? `${emailCodeCountdown}s`
                       : t("sendCode")}
-                  </Button>
+                  </NeuButton>
                 </div>
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button
+                <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={emailLoading}
                   style={{ width: "100%" }}
                 >
                   {t("updateEmail")}
-                </Button>
+                </NeuButton>
               </Form.Item>
             </Form>
           </SectionCard>
@@ -529,14 +529,14 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 </div>
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button
+                <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={phoneLoading}
                   style={{ width: "100%" }}
                 >
                   {profile.phone ? t("updatePhone") : t("bindPhone")}
-                </Button>
+                </NeuButton>
               </Form.Item>
             </Form>
           </SectionCard>
@@ -562,13 +562,13 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               >
                 {profile.wechat_bound ? t("wechatBound") : t("wechatNotBound")}
               </span>
-              <Button
+              <NeuButton
                 loading={wechatLoading}
                 onClick={handleWechatBind}
                 style={{ flexShrink: 0 }}
               >
                 {profile.wechat_bound ? t("changeWechat") : t("bindWechat")}
-              </Button>
+              </NeuButton>
             </div>
           </SectionCard>
 
@@ -591,26 +591,26 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 </Radio.Group>
               </Form.Item>
               <Form.Item style={{ marginBottom: 0 }}>
-                <Button
+                <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={localeLoading}
                   style={{ width: "100%" }}
                 >
                   {t("saveLanguage")}
-                </Button>
+                </NeuButton>
               </Form.Item>
             </Form>
           </SectionCard>
 
-          <Button
+          <NeuButton
             danger
             icon={<LogoutOutlined />}
             onClick={onLogout}
             style={{ width: "100%", marginTop: 8 }}
           >
             {t("logout")}
-          </Button>
+          </NeuButton>
         </div>
       </Content>
     </Layout>

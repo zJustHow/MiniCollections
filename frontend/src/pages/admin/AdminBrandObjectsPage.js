@@ -1,4 +1,5 @@
-import { App, Button, Popconfirm, Space, Table } from "antd";
+import NeuButton, { neuBtnProps } from "../../components/NeuButton";
+import { App, Popconfirm, Space, Table } from "antd";
 import {
   ArrowLeftOutlined,
   DeleteOutlined,
@@ -80,7 +81,7 @@ export default function AdminBrandObjectsPage() {
       width: 90,
       render: (_, record) => (
         <Space size={4}>
-          <Button
+          <NeuButton
             size="small"
             icon={<EditOutlined />}
             onClick={() => {
@@ -96,10 +97,11 @@ export default function AdminBrandObjectsPage() {
             )}
             onConfirm={() => handleDeleteObject(record)}
             okText={t("delete")}
-            okButtonProps={{ danger: true }}
+            okButtonProps={neuBtnProps({ danger: true })}
+            cancelButtonProps={neuBtnProps()}
             cancelText={t("cancel")}
           >
-            <Button size="small" danger icon={<DeleteOutlined />} />
+            <NeuButton size="small" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
@@ -121,7 +123,7 @@ export default function AdminBrandObjectsPage() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <Button
+          <NeuButton
             icon={<ArrowLeftOutlined />}
             onClick={() =>
               navigate("/admin", { state: { adminView: "brands" } })
@@ -138,10 +140,10 @@ export default function AdminBrandObjectsPage() {
           </h2>
         </div>
         <Space>
-          <Button onClick={() => setSeriesModalOpen(true)}>
+          <NeuButton onClick={() => setSeriesModalOpen(true)}>
             {t("addSeries")}
-          </Button>
-          <Button
+          </NeuButton>
+          <NeuButton
             type="primary"
             icon={<PlusOutlined />}
             onClick={() => {
@@ -150,7 +152,7 @@ export default function AdminBrandObjectsPage() {
             }}
           >
             {t("addBrandObject")}
-          </Button>
+          </NeuButton>
         </Space>
       </div>
 

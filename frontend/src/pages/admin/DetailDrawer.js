@@ -1,4 +1,5 @@
-import { Button, Drawer, Space, Tag } from "antd";
+import NeuButton from "../../components/NeuButton";
+import { Drawer, Space, Tag } from "antd";
 import { useState } from "react";
 import { useLocale } from "../../LocaleContext";
 import DrawerHeaderTitle from "../../components/DrawerHeaderTitle";
@@ -52,13 +53,13 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
         submission.status === "PENDING" ? (
           <Space>
             {isMissingModel ? (
-              <Button type="primary" onClick={onApprove}>{t("approveSubmission")}</Button>
+              <NeuButton type="primary" onClick={onApprove}>{t("approveSubmission")}</NeuButton>
             ) : (
-              <Button type="primary" onClick={onResolve}>{t("resolveSubmission")}</Button>
+              <NeuButton type="primary" onClick={onResolve}>{t("resolveSubmission")}</NeuButton>
             )}
-            <Button danger onClick={onReject}>
+            <NeuButton danger onClick={onReject}>
               {isMissingModel ? t("rejectSubmission") : t("closeSubmission")}
-            </Button>
+            </NeuButton>
           </Space>
         ) : null
       }

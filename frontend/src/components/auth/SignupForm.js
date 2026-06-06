@@ -1,4 +1,5 @@
-import { App, Button, Form, Radio } from "antd";
+import NeuButton from "../../components/NeuButton";
+import { App, Form, Radio } from "antd";
 import NeuFormDrawer from "../NeuFormDrawer";
 import { NeuInput, NeuSelect } from "../NeuFormControl";
 import { useState } from "react";
@@ -46,14 +47,13 @@ function SignupForm({ linkMode = false }) {
 
   return (
     <>
-      <Button
+      <NeuButton
         type={linkMode ? "link" : "primary"}
-        shape={linkMode ? undefined : "round"}
         onClick={() => setDisplayModal(true)}
         style={linkMode ? { padding: 0, height: "auto", fontSize: 13 } : undefined}
       >
         {t("register")}
-      </Button>
+      </NeuButton>
       <NeuFormDrawer
         title={t("register")}
         open={displayModal}
@@ -141,9 +141,9 @@ function SignupForm({ linkMode = false }) {
             </Radio.Group>
           </Form.Item>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <NeuButton type="primary" htmlType="submit">
               {t("register")}
-            </Button>
+            </NeuButton>
           </Form.Item>
         </Form>
       </NeuFormDrawer>

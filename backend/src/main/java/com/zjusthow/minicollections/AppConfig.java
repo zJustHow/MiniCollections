@@ -54,7 +54,8 @@ public class AppConfig {
                         auth
                                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                                 .requestMatchers(HttpMethod.GET, "/", "/index.html", "/*.json", "/*.png", "/static/**", "/images/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/login", "/signup", "/send-code").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/login", "/signup", "/send-code",
+                                        "/forgot-password/send-code", "/forgot-password/reset").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/auth/wechat/url").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/auth/wechat/exchange").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/brands", "/brands/**").permitAll()

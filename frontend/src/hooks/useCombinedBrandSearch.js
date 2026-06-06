@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { PAGE_SIZE } from "../utils";
 import { scrollAppToTop } from "../utils/scroll";
+import { mutateSearchParams } from "../utils/searchParams";
 
 function parsePageParam(searchParams, key) {
   const raw = searchParams.get(key);
@@ -46,11 +47,10 @@ export default function useCombinedBrandSearch(fetchPage, options = {}) {
 
   const clearPageParam = useCallback(() => {
     if (!pageParamKey) return;
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
+    mutateSearchParams(
+      setSearchParams,
+      (next) => {
         next.delete(pageParamKey);
-        return next;
       },
       { replace: true, state: location.state },
     );
@@ -100,16 +100,15 @@ export default function useCombinedBrandSearch(fetchPage, options = {}) {
   const setPageParam = useCallback(
     (pageZeroBased) => {
       if (!pageParamKey) return;
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
+      mutateSearchParams(
+        setSearchParams,
+        (next) => {
           const oneBased = pageZeroBased + 1;
           if (oneBased <= 1) {
             next.delete(pageParamKey);
           } else {
             next.set(pageParamKey, String(oneBased));
           }
-          return next;
         },
         { replace: true, state: location.state },
       );

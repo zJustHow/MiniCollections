@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { Card, Grid, Spin } from "antd";
+import { Grid, Spin } from "antd";
+import NeuCard from "../NeuCard";
 import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
-import AddCardCover from "./AddCardCover";
-import CardCover from "./CardCover";
 import ListPagination from "../ListPagination";
 import ObjectSearchFilterLayout from "../ObjectSearchFilterLayout";
-import ObjectListSearchToolbar from "../ObjectListSearchToolbar";
+import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
+import ObjectListPageLayout from "../ObjectListPageLayout";
+import SearchResultsSummary from "../SearchResultsSummary";
 import { useLocale } from "../../LocaleContext";
 import { PAGE_SIZE } from "../../utils";
 
@@ -54,44 +55,33 @@ export default function BrandsTab({
 
   const renderBrandCard = (brand) =>
     brand.id === "__add__" ? (
-      <Card
+      <NeuCard
         key="__add__"
-        hoverable
-        className="neu-card"
-        cover={<AddCardCover label={t("addBrand")} />}
+        add
+        name={t("addBrand")}
         onClick={onCreateBrand}
-        bodyStyle={{ padding: 0 }}
       />
     ) : (
-      <Card
+      <NeuCard
         key={brand.id}
-        hoverable
-        className="neu-card"
-        cover={
-          <CardCover
-            image_url={brand.image_url}
-            name={brand.name}
-            fixedGroove
-            logoShadow
-          />
-        }
+        name={brand.name}
+        imageUrl={brand.image_url}
+        fixedGroove
+        logoShadow
         onClick={() => onBrandClick(brand)}
-        bodyStyle={{ padding: 0 }}
       />
     );
 
   const renderObjectCard = (obj) => (
-    <Card
+    <NeuCard
       key={obj.id}
-      hoverable
-      className="neu-card"
-      cover={<CardCover image_url={obj.image_url} name={obj.name} />}
+      name={obj.name}
+      imageUrl={obj.image_url}
       onClick={() =>
         navigate(`/brands/${obj.brand_id}/objects/${obj.id}`, {
           state: { brandObject: obj },
         })
       }
-      bodyStyle={{ padding: 0 }}
     />
   );
 
@@ -118,30 +108,53 @@ export default function BrandsTab({
       !showFilterColumn
     : brandsListPage?.loading && brands.length === 0;
 
-  return (
-    <>
-      <ObjectListSearchToolbar
-        searchActive={searchActive}
-        keyword={searchValue}
-        resultCount={combinedSearchPage?.totalElements ?? 0}
-        totalExact={combinedSearchPage?.totalExact}
-        resultsLoading={searchActive && combinedSearchPage?.loading}
-      >
-        <Search
-          placeholder={t("searchBrandsAndObjects")}
-          allowClear
-          value={draftQuery}
-          onSearch={onSearch}
-          onChange={(e) => {
-            const v = e.target.value;
-            setDraftQuery(v);
-            if (v === "") onSearch("");
-          }}
-          style={{ width: "100%" }}
-        />
-      </ObjectListSearchToolbar>
+  const browseGridClass =
+    browseCols === 4 ? "neu-list-page-browse-grid" : undefined;
 
-      <Spin spinning={spinning}>
+  return (
+    <Spin spinning={spinning}>
+      <ObjectListPageLayout
+        showFilterColumn={searchActive && showFilterColumn}
+        summary={
+          <SearchResultsSummary
+            active={searchActive}
+            keyword={searchValue}
+            count={combinedSearchPage?.totalElements ?? 0}
+            exact={combinedSearchPage?.totalExact}
+            loading={searchActive && combinedSearchPage?.loading}
+          />
+        }
+        search={
+          <Search
+            placeholder={t("searchBrandsAndObjects")}
+            allowClear
+            value={draftQuery}
+            onSearch={onSearch}
+            onChange={(e) => {
+              const v = e.target.value;
+              setDraftQuery(v);
+              if (v === "") onSearch("");
+            }}
+          />
+        }
+        filter={
+          searchActive &&
+          showFilterColumn &&
+          (hasBrandResults || showObjectsSection) ? (
+            <ObjectSearchFilterPanel
+              facets={searchFacets}
+              loading={facetsLoading}
+              selectedCategoryIds={selectedCategoryIds}
+              selectedBrandIds={selectedBrandIds}
+              selectedScaleIds={selectedScaleIds}
+              onToggleCategory={onToggleCategory}
+              onToggleBrand={onToggleBrand}
+              onToggleScale={onToggleScale}
+            />
+          ) : null
+        }
+      >
+
         {searchActive ? (
           <>
             {(hasBrandResults || showObjectsSection) && (
@@ -202,7 +215,12 @@ export default function BrandsTab({
           </>
         ) : (
           <>
-            <div style={browseGridStyle}>{dataSource.map(renderBrandCard)}</div>
+            <div
+              className={browseGridClass}
+              style={browseGridClass ? undefined : browseGridStyle}
+            >
+              {dataSource.map(renderBrandCard)}
+            </div>
             <ListPagination
               page={brandsListPage?.page ?? 0}
               totalElements={brandsListPage?.totalElements ?? 0}
@@ -214,7 +232,7 @@ export default function BrandsTab({
             />
           </>
         )}
-      </Spin>
-    </>
+      </ObjectListPageLayout>
+    </Spin>
   );
 }

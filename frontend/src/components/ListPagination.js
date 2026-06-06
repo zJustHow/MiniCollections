@@ -1,5 +1,6 @@
 import { LeftOutlined, RightOutlined } from "@ant-design/icons";
-import { Button, Grid } from "antd";
+import { Grid } from "antd";
+import NeuButton from "./NeuButton";
 import { useLocale } from "../LocaleContext";
 
 const { useBreakpoint } = Grid;
@@ -57,8 +58,8 @@ export default function ListPagination({
       style={{ "--neu-grid-cols": cols }}
     >
       <div className="neu-pagination-controls">
-        <Button
-          className="neu-pagination-btn"
+        <NeuButton
+          pagination
           icon={<LeftOutlined />}
           disabled={loading || current <= 1}
           aria-label={t("previousPage")}
@@ -75,20 +76,21 @@ export default function ListPagination({
               …
             </span>
           ) : (
-            <Button
+            <NeuButton
               key={item}
-              className={`neu-pagination-btn${item === current ? " neu-pagination-btn-current" : ""}`}
+              pagination
+              current={item === current}
               disabled={loading}
               aria-current={item === current ? "page" : undefined}
               onClick={() => onPageChange(item)}
             >
               {item}
-            </Button>
+            </NeuButton>
           ),
         )}
 
-        <Button
-          className="neu-pagination-btn"
+        <NeuButton
+          pagination
           icon={<RightOutlined />}
           disabled={loading || current >= totalPages}
           aria-label={t("nextPage")}

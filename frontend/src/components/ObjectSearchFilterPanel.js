@@ -1,4 +1,5 @@
 import { Spin } from "antd";
+import NeuPressableButton from "./NeuPressableButton";
 import { useLocale } from "../LocaleContext";
 
 function formatFacetCount(count) {
@@ -19,9 +20,9 @@ function FilterSection({ title, children }) {
 
 function FilterOption({ label, count, selected, onClick }) {
   return (
-    <button
-      type="button"
-      className={`neu-pressable-btn neu-panel-tab-btn neu-filter-tab-option${selected ? " active" : ""}`}
+    <NeuPressableButton
+      filter
+      active={selected}
       onClick={onClick}
       aria-pressed={selected}
     >
@@ -29,7 +30,7 @@ function FilterOption({ label, count, selected, onClick }) {
         <span className="neu-filter-option-label">{label}</span>
         <span className="neu-filter-option-count">{formatFacetCount(count)}</span>
       </span>
-    </button>
+    </NeuPressableButton>
   );
 }
 

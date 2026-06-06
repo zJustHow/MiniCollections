@@ -1,6 +1,7 @@
 import React from "react";
 import { PictureOutlined } from "@ant-design/icons";
 import { useAdaptiveImageFrame } from "./useAdaptiveImageFrame";
+import { resolveMediaUrl } from "../utils";
 
 export default function GroovedImage({
   imageUrl,
@@ -14,8 +15,9 @@ export default function GroovedImage({
   placeholderSize,
   loading = "lazy",
 }) {
+  const src = resolveMediaUrl(imageUrl);
   const { wellRef, frameSize, imageDisplayable, onImageLoad, onImageError } =
-    useAdaptiveImageFrame(imageUrl, {
+    useAdaptiveImageFrame(src, {
       coverMode,
       adaptiveGroove: !fixedGroove,
       wellInset,
@@ -37,13 +39,13 @@ export default function GroovedImage({
   );
 
   const renderFrame = () => {
-    if (!imageUrl) return placeholder;
+    if (!src) return placeholder;
     if (fixedGroove) {
       return (
         <div className="neu-card-image-frame neu-card-image-frame--fill">
           <img
             className="neu-card-image-display"
-            src={imageUrl}
+            src={src}
             alt={alt}
             loading="eager"
             onLoad={onImageLoad}
@@ -65,7 +67,7 @@ export default function GroovedImage({
       >
         <img
           className="neu-card-image-display"
-          src={imageUrl}
+          src={src}
           alt={alt}
           loading="eager"
         />
@@ -87,10 +89,10 @@ export default function GroovedImage({
   return (
     <div ref={wellRef} className={wellClasses}>
       <div className="neu-card-image-slot">
-        {imageUrl && !fixedGroove && !imageDisplayable && (
+        {src && !fixedGroove && !imageDisplayable && (
           <img
             className="neu-card-image-preload"
-            src={imageUrl}
+            src={src}
             alt=""
             aria-hidden
             loading={loading}

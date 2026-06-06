@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toggleInList } from "../utils/filterParams";
+import { mutateSearchParams } from "../utils/searchParams";
 
 const CATEGORY_KEY = "categoryIds";
 const BRAND_KEY = "brandIds";
@@ -33,12 +34,11 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
 
   const setFilterIds = useCallback(
     (key, ids) => {
-      setSearchParams(
-        (prev) => {
-          const next = new URLSearchParams(prev);
+      mutateSearchParams(
+        setSearchParams,
+        (next) => {
           next.delete(key);
           ids.forEach((id) => next.append(key, String(id)));
-          return next;
         },
         { replace: true },
       );
@@ -47,28 +47,26 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
   );
 
   const clearObjectFilters = useCallback(() => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
+    mutateSearchParams(
+      setSearchParams,
+      (next) => {
         next.delete(CATEGORY_KEY);
         next.delete(BRAND_KEY);
         next.delete(SCALE_KEY);
-        return next;
       },
       { replace: true },
     );
   }, [setSearchParams]);
 
   const clearSearchAndFilters = useCallback(() => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
+    mutateSearchParams(
+      setSearchParams,
+      (next) => {
         next.delete(SEARCH_KEY);
         next.delete(CATEGORY_KEY);
         next.delete(BRAND_KEY);
         next.delete(SCALE_KEY);
         PAGE_KEYS.forEach((key) => next.delete(key));
-        return next;
       },
       { replace: true },
     );
@@ -76,9 +74,9 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
 
   const setSearchQueryClearingFilters = useCallback((query) => {
     const trimmed = (query ?? "").trim();
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
+    mutateSearchParams(
+      setSearchParams,
+      (next) => {
         next.delete(CATEGORY_KEY);
         next.delete(BRAND_KEY);
         next.delete(SCALE_KEY);
@@ -88,7 +86,6 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
         } else {
           next.delete(SEARCH_KEY);
         }
-        return next;
       },
       { replace: true },
     );

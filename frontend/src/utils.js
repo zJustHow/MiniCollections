@@ -3,6 +3,15 @@ import { appendIdListParams } from "./utils/filterParams";
 
 const TOKEN_KEY = "auth_token";
 
+/** Bust browser cache when seed media files are replaced at the same MinIO URL. */
+export function resolveMediaUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  if (url.includes("minicollections-media/") && !/[?&]v=/.test(url)) {
+    return `${url}${url.includes("?") ? "&" : "?"}v=2`;
+  }
+  return url;
+}
+
 export const COUNTRIES = [
   { code: "+86", zh: "中国大陆", en: "China" },
   { code: "+852", zh: "香港", en: "Hong Kong" },
@@ -124,6 +133,24 @@ export const sendCode = async (target, type) => {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ target, type }),
+  });
+  return handleResponse(response);
+};
+
+export const sendForgotPasswordCode = async (target, type) => {
+  const response = await fetch("/forgot-password/send-code", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ target, type }),
+  });
+  return handleResponse(response);
+};
+
+export const resetPassword = async (data) => {
+  const response = await fetch("/forgot-password/reset", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
   return handleResponse(response);
 };

@@ -1,3 +1,4 @@
+import NeuPressableButton from "../../NeuPressableButton";
 import { App, Form } from "antd";
 import NeuFormDrawer from "../../NeuFormDrawer";
 import {
@@ -324,16 +325,15 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
         }}
       >
         {typeOptions.map(({ value, icon, labelKey }) => (
-          <button
+          <NeuPressableButton
             key={value}
-            type="button"
-            className={`neu-pressable-btn neu-panel-tab-btn${submissionType === value ? " active" : ""}`}
+            active={submissionType === value}
             style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
             onClick={() => handleTypeChange(value)}
           >
             <span style={{ marginRight: 6 }}>{icon}</span>
             {t(labelKey)}
-          </button>
+          </NeuPressableButton>
         ))}
       </div>
 

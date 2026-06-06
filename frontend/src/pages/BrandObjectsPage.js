@@ -3,7 +3,9 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useObjectFilterParams from "../hooks/useObjectFilterParams";
 import usePagedList from "../hooks/usePagedList";
-import { App, Card, Grid, Popconfirm, Spin } from "antd";
+import { App, Grid, Popconfirm, Spin } from "antd";
+import NeuCard from "../components/NeuCard";
+import { neuBtnProps } from "../components/NeuButton";
 import HeaderActionButton from "../components/HeaderActionButton";
 import { NeuInput } from "../components/NeuFormControl";
 import {
@@ -11,11 +13,11 @@ import {
   DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import AddCardCover from "../components/ObjectList/AddCardCover";
-import CardCover from "../components/ObjectList/CardCover";
 import ListPagination from "../components/ListPagination";
 import ObjectSearchFilterLayout from "../components/ObjectSearchFilterLayout";
-import ObjectListSearchToolbar from "../components/ObjectListSearchToolbar";
+import ObjectSearchFilterPanel from "../components/ObjectSearchFilterPanel";
+import ObjectListPageLayout from "../components/ObjectListPageLayout";
+import SearchResultsSummary from "../components/SearchResultsSummary";
 import { filterKeyFromIds } from "../utils/filterParams";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import BrandModal from "../components/ObjectList/modals/BrandModal";
@@ -219,7 +221,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 )}
                 onConfirm={handleAdminDeleteBrand}
                 okText={t("delete")}
-                okButtonProps={{ danger: true }}
+                okButtonProps={neuBtnProps({ danger: true })}
+                cancelButtonProps={neuBtnProps()}
                 cancelText={t("cancel")}
               >
                 <HeaderActionButton danger icon={<DeleteOutlined />} />
@@ -250,54 +253,73 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         syncedKeywordRef.current = "";
         return;
       }
-      if (trimmed !== syncedKeywordRef.current) {
-        setSearchQueryClearingFilters(trimmed);
-        syncedKeywordRef.current = trimmed;
-      }
+      setSearchQueryClearingFilters(trimmed);
+      syncedKeywordRef.current = trimmed;
       setSearchKeyword(trimmed);
       setSearchActive(true);
     },
     [clearSearchAndFilters, setSearchQueryClearingFilters],
   );
 
+  const browseGridClass = cols === 4 ? "neu-list-page-browse-grid" : undefined;
+
   return (
     <div>
-      <ObjectListSearchToolbar
-        searchActive={searchActive}
-        keyword={searchKeyword}
-        resultCount={activePage.totalElements}
-        totalExact={activePage.totalExact}
-        resultsLoading={searchActive && activePage.loading}
-      >
-        <Search
-          placeholder={t("searchModels")}
-          allowClear
-          value={draftQuery}
-          onChange={(e) => {
-            const v = e.target.value;
-            setDraftQuery(v);
-            if (v === "") {
-              clearSearchAndFilters();
-              setSearchActive(false);
-              setSearchKeyword("");
-              setSearchFacets(null);
-              syncedKeywordRef.current = "";
-            }
-          }}
-          onSearch={(v) => {
-            const keyword = (v ?? "").trim();
-            setDraftQuery(keyword);
-            runSearch(keyword);
-          }}
-          style={{ width: "100%" }}
-        />
-      </ObjectListSearchToolbar>
-
       <Spin spinning={activePage.loading && displayObjects.length === 0}>
-        {searchActive ? (
-          <>
-            {showSearchObjectsSection ? (
-              <ObjectSearchFilterLayout
+        <ObjectListPageLayout
+          showFilterColumn={searchActive && showFilterColumn}
+          summary={
+            <SearchResultsSummary
+              active={searchActive}
+              keyword={searchKeyword}
+              count={activePage.totalElements}
+              exact={activePage.totalExact}
+              loading={searchActive && activePage.loading}
+            />
+          }
+          search={
+            <Search
+              placeholder={t("searchModels")}
+              allowClear
+              value={draftQuery}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDraftQuery(v);
+                if (v === "") {
+                  clearSearchAndFilters();
+                  setSearchActive(false);
+                  setSearchKeyword("");
+                  setSearchFacets(null);
+                  syncedKeywordRef.current = "";
+                }
+              }}
+              onSearch={(v) => {
+                const keyword = (v ?? "").trim();
+                setDraftQuery(keyword);
+                runSearch(keyword);
+              }}
+            />
+          }
+          filter={
+            searchActive && showFilterColumn && showSearchObjectsSection ? (
+              <ObjectSearchFilterPanel
+                facets={searchFacets}
+                loading={facetsLoading}
+                selectedCategoryIds={selectedCategoryIds}
+                selectedBrandIds={[]}
+                selectedScaleIds={selectedScaleIds}
+                onToggleCategory={onToggleCategory}
+                onToggleBrand={() => {}}
+                onToggleScale={onToggleScale}
+              />
+            ) : null
+          }
+        >
+
+          {searchActive ? (
+            <>
+              {showSearchObjectsSection ? (
+                <ObjectSearchFilterLayout
                 showFilterColumn={showFilterColumn}
                 facets={searchFacets}
                 loading={facetsLoading}
@@ -309,22 +331,15 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 onToggleScale={onToggleScale}
               >
                 {displayObjects.map((item) => (
-                  <Card
+                  <NeuCard
                     key={item.id}
-                    hoverable
-                    className="neu-card"
-                    cover={
-                      <CardCover
-                        image_url={item.image_url}
-                        name={item.name}
-                      />
-                    }
+                    name={item.name}
+                    imageUrl={item.image_url}
                     onClick={() =>
                       navigate(`/brands/${brandId}/objects/${item.id}`, {
                         state: { brandObject: item, brand },
                       })
                     }
-                    bodyStyle={{ padding: 0 }}
                   />
                 ))}
               </ObjectSearchFilterLayout>
@@ -341,67 +356,67 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 </div>
               )
             )}
-            <ListPagination
-              page={activePage.page}
-              totalElements={activePage.totalElements}
-              totalPages={activePage.totalPages}
-              totalExact={activePage.totalExact}
-              loading={activePage.loading}
-              onPageChange={activePage.onPageChange}
-              pageSize={PAGE_SIZE}
-            />
-          </>
-        ) : (
-          <>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: `repeat(${cols}, 1fr)`,
-                gap: 16,
-              }}
-            >
+              <ListPagination
+                page={activePage.page}
+                totalElements={activePage.totalElements}
+                totalPages={activePage.totalPages}
+                totalExact={activePage.totalExact}
+                loading={activePage.loading}
+                onPageChange={activePage.onPageChange}
+                pageSize={PAGE_SIZE}
+              />
+            </>
+          ) : (
+            <>
+              <div
+                className={browseGridClass}
+                style={
+                  browseGridClass
+                    ? undefined
+                    : {
+                        display: "grid",
+                        gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                        gap: 16,
+                      }
+                }
+              >
               {listData.map((item) =>
                 item.id === "__add__" ? (
-                  <Card
+                  <NeuCard
                     key="__add__"
-                    hoverable
-                    className="neu-card"
-                    cover={<AddCardCover label={t("addBrandObject")} />}
+                    add
+                    name={t("addBrandObject")}
                     onClick={() => {
                       setEditingBrandObject(null);
                       setBrandObjectModalOpen(true);
                     }}
-                    bodyStyle={{ padding: 0 }}
                   />
                 ) : (
-                  <Card
+                  <NeuCard
                     key={item.id}
-                    hoverable
-                    className="neu-card"
-                    cover={
-                      <CardCover image_url={item.image_url} name={item.name} />
-                    }
+                    name={item.name}
+                    imageUrl={item.image_url}
                     onClick={() =>
                       navigate(`/brands/${brandId}/objects/${item.id}`, {
                         state: { brandObject: item, brand },
                       })
                     }
-                    bodyStyle={{ padding: 0 }}
                   />
                 ),
               )}
             </div>
-            <ListPagination
-              page={activePage.page}
-              totalElements={activePage.totalElements}
-              totalPages={activePage.totalPages}
-              totalExact={activePage.totalExact}
-              loading={activePage.loading}
-              onPageChange={activePage.onPageChange}
-              pageSize={PAGE_SIZE}
-            />
-          </>
-        )}
+              <ListPagination
+                page={activePage.page}
+                totalElements={activePage.totalElements}
+                totalPages={activePage.totalPages}
+                totalExact={activePage.totalExact}
+                loading={activePage.loading}
+                onPageChange={activePage.onPageChange}
+                pageSize={PAGE_SIZE}
+              />
+            </>
+          )}
+        </ObjectListPageLayout>
       </Spin>
 
       {authed && (

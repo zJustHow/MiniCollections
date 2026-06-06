@@ -1,4 +1,6 @@
-import { App, Button, Form, Layout } from "antd";
+import NeuPressableButton from "../components/NeuPressableButton";
+import NeuButton from "../components/NeuButton";
+import { App, Form, Layout } from "antd";
 import { NeuInput, NeuSelect } from "../components/NeuFormControl";
 import { useRef, useState } from "react";
 import {
@@ -142,24 +144,22 @@ export default function RegisterPage() {
               marginBottom: 24,
             }}
           >
-            <button
-              type="button"
-              className={`neu-pressable-btn neu-panel-tab-btn${registerType === "email" ? " active" : ""}`}
+            <NeuPressableButton
+              active={registerType === "email"}
               style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
               onClick={() => handleTypeChange("email")}
             >
               <MailOutlined style={{ marginRight: 6 }} />
               {t("registerWithEmail")}
-            </button>
-            <button
-              type="button"
-              className={`neu-pressable-btn neu-panel-tab-btn${registerType === "phone" ? " active" : ""}`}
+            </NeuPressableButton>
+            <NeuPressableButton
+              active={registerType === "phone"}
               style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
               onClick={() => handleTypeChange("phone")}
             >
               <PhoneOutlined style={{ marginRight: 6 }} />
               {t("registerWithPhone")}
-            </button>
+            </NeuPressableButton>
           </div>
 
           <Form
@@ -251,7 +251,7 @@ export default function RegisterPage() {
                     maxLength={6}
                   />
                 </Form.Item>
-                <Button
+                <NeuButton
                   size="large"
                   loading={sendingCode}
                   disabled={codeCountdown > 0}
@@ -259,7 +259,7 @@ export default function RegisterPage() {
                   style={{ flexShrink: 0, minWidth: 120 }}
                 >
                   {codeCountdown > 0 ? `${codeCountdown}s` : t("sendCode")}
-                </Button>
+                </NeuButton>
               </div>
             </Form.Item>
 
@@ -315,22 +315,20 @@ export default function RegisterPage() {
                   boxShadow: "var(--inset)",
                 }}
               >
-                <button
-                  type="button"
-                  className={`neu-pressable-btn neu-panel-tab-btn${selectedLocale === "en-US" ? " active" : ""}`}
+                <NeuPressableButton
+                  active={selectedLocale === "en-US"}
                   style={{ flex: 1, padding: "7px 0", fontSize: 13 }}
                   onClick={() => handleLocaleChange("en-US")}
                 >
                   English
-                </button>
-                <button
-                  type="button"
-                  className={`neu-pressable-btn neu-panel-tab-btn${selectedLocale === "zh-CN" ? " active" : ""}`}
+                </NeuPressableButton>
+                <NeuPressableButton
+                  active={selectedLocale === "zh-CN"}
                   style={{ flex: 1, padding: "7px 0", fontSize: 13 }}
                   onClick={() => handleLocaleChange("zh-CN")}
                 >
                   中文
-                </button>
+                </NeuPressableButton>
               </div>
             </div>
 
@@ -352,7 +350,7 @@ export default function RegisterPage() {
             )}
 
             <Form.Item style={{ marginBottom: 0 }}>
-              <Button
+              <NeuButton
                 type="primary"
                 htmlType="submit"
                 loading={loading}
@@ -360,7 +358,7 @@ export default function RegisterPage() {
                 style={{ width: "100%", borderRadius: radius.md }}
               >
                 {t("register")}
-              </Button>
+              </NeuButton>
             </Form.Item>
           </Form>
 

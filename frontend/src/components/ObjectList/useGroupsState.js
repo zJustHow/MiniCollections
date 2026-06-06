@@ -173,10 +173,8 @@ export default function useGroupsState() {
         }
         return;
       }
-      if (keyword !== syncedKeywordRef.current) {
-        setSearchQueryClearingFilters(keyword);
-        syncedKeywordRef.current = keyword;
-      }
+      setSearchQueryClearingFilters(keyword);
+      syncedKeywordRef.current = keyword;
       setGroupSearchKeyword(keyword);
       setGroupSearchActive(true);
     },

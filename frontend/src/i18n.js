@@ -29,6 +29,11 @@ const en = {
   codeRequired: "Please enter verification code",
   sendCode: "Send Code",
   codeSent: "Code sent",
+  forgotPassword: "Forgot password?",
+  forgotPasswordHint: "Enter your email or phone to receive a verification code, then set a new password.",
+  resetPassword: "Reset Password",
+  passwordResetSuccess: "Password reset successfully. Please sign in.",
+  backToSignIn: "Back to sign in",
 
   // Profile Drawer
   profileTitle: "Profile",
@@ -350,6 +355,11 @@ const zh = {
   codeRequired: "请输入验证码",
   sendCode: "发送验证码",
   codeSent: "验证码已发送",
+  forgotPassword: "忘记密码？",
+  forgotPasswordHint: "输入注册邮箱或手机号获取验证码，然后设置新密码。",
+  resetPassword: "重置密码",
+  passwordResetSuccess: "密码已重置，请登录。",
+  backToSignIn: "返回登录",
 
   // Profile Drawer
   profileTitle: "个人资料",

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
-import { App, Card, Form, Grid, Spin } from "antd";
+import { App, Form, Grid, Spin } from "antd";
+import NeuCard from "../components/NeuCard";
 import HeaderActionButton from "../components/HeaderActionButton";
 import { NeuInput } from "../components/NeuFormControl";
 import {
@@ -9,10 +10,9 @@ import {
   DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
-import AddCardCover from "../components/ObjectList/AddCardCover";
-import CardCover from "../components/ObjectList/CardCover";
 import AddUserObjectInGroupModal from "../components/ObjectList/modals/AddUserObjectInGroupModal";
-import ObjectListSearchToolbar from "../components/ObjectListSearchToolbar";
+import ObjectListPageLayout from "../components/ObjectListPageLayout";
+import SearchResultsSummary from "../components/SearchResultsSummary";
 import EditGroupModal from "../components/ObjectList/modals/EditGroupModal";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
@@ -252,81 +252,84 @@ export default function GroupObjectsPage() {
     }
   };
 
+  const browseGridClass = cols === 4 ? "neu-list-page-browse-grid" : undefined;
+
   return (
     <div>
-      <ObjectListSearchToolbar
-        searchActive={searchActive}
-        keyword={searchValue}
-        resultCount={searchResults.length}
-        resultsLoading={searchActive && loading}
-      >
-        <Search
-          placeholder={t("searchModels")}
-          allowClear
-          value={draftQuery}
-          onChange={(e) => {
-            const v = e.target.value;
-            setDraftQuery(v);
-            if (v === "") {
-              setSearchActive(false);
-              setSearchResults([]);
-              setSearchParam("");
-            }
-          }}
-          onSearch={(v) => {
-            const keyword = (v ?? "").trim();
-            if (keyword) {
-              setSearchParam(keyword);
-              doSearch(keyword);
-            } else {
-              setSearchActive(false);
-              setSearchResults([]);
-              setSearchParam("");
-            }
-          }}
-          style={{ width: "100%" }}
-        />
-      </ObjectListSearchToolbar>
-
       <Spin spinning={loading}>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gap: 16,
-          }}
+        <ObjectListPageLayout
+          summary={
+            <SearchResultsSummary
+              active={searchActive}
+              keyword={searchValue}
+              count={searchResults.length}
+              loading={searchActive && loading}
+            />
+          }
+          search={
+            <Search
+              placeholder={t("searchModels")}
+              allowClear
+              value={draftQuery}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDraftQuery(v);
+                if (v === "") {
+                  setSearchActive(false);
+                  setSearchResults([]);
+                  setSearchParam("");
+                }
+              }}
+              onSearch={(v) => {
+                const keyword = (v ?? "").trim();
+                if (keyword) {
+                  setSearchParam(keyword);
+                  doSearch(keyword);
+                } else {
+                  setSearchActive(false);
+                  setSearchResults([]);
+                  setSearchParam("");
+                }
+              }}
+            />
+          }
         >
+
+          <div
+            className={browseGridClass}
+            style={
+              browseGridClass
+                ? undefined
+                : {
+                    display: "grid",
+                    gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                    gap: 16,
+                  }
+            }
+          >
           {[{ id: "__add__" }, ...displayObjects].map((item) =>
             item.id === "__add__" ? (
-              <Card
+              <NeuCard
                 key="__add__"
-                hoverable
-                className="neu-card"
-                cover={<AddCardCover label={t("addModel")} />}
+                add
+                name={t("addModel")}
                 onClick={openAddUserObject}
-                bodyStyle={{ padding: 0 }}
               />
             ) : (
-              <Card
+              <NeuCard
                 key={item.id}
-                hoverable
-                className="neu-card"
-                cover={
-                  <CardCover
-                    image_url={item.image_url}
-                    name={item.name ?? "—"}
-                  />
-                }
+                name={item.name ?? "—"}
+                imageUrl={item.image_url}
                 onClick={() =>
                   navigate(`/groups/${groupId}/objects/${item.id}`, {
                     state: { userObject: item, group },
                   })
                 }
-                bodyStyle={{ padding: 0 }}
               />
             ),
           )}
-        </div>
+          </div>
+        </ObjectListPageLayout>
       </Spin>
 
       <EditGroupModal

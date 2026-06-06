@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { App, Button, Form, Grid, Popconfirm } from "antd";
+import { App, Form, Grid, Popconfirm } from "antd";
+import NeuButton, { neuBtnProps } from "../components/NeuButton";
 import HeaderActionButton from "../components/HeaderActionButton";
 import {
   ArrowLeftOutlined,
@@ -122,7 +123,8 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
                 )}
                 onConfirm={handleAdminDeleteBrandObject}
                 okText={t("delete")}
-                okButtonProps={{ danger: true }}
+                okButtonProps={neuBtnProps({ danger: true })}
+                cancelButtonProps={neuBtnProps()}
                 cancelText={t("cancel")}
               >
                 <HeaderActionButton danger icon={<DeleteOutlined />} />
@@ -156,11 +158,9 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
     setAddToGroupVisible(true);
   };
 
-  const description =
-    brandObject?.description ??
-    brandObject?.description_en ??
-    brandObject?.description_zh ??
-    null;
+  const description = [brandObject?.description, brandObject?.description_en, brandObject?.description_zh]
+    .map((value) => (typeof value === "string" ? value.trim() : value))
+    .find((value) => value != null && value !== "" && value !== "—") ?? null;
 
   const handleCreateUserObject = async () => {
     try {
@@ -238,14 +238,14 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
             />
           </DetailPanel>
           <div style={{ marginTop: 24 }}>
-            <Button
+            <NeuButton
               type="primary"
               block
               icon={<PlusOutlined />}
               onClick={() => (authed ? openAddToGroup() : navigate("/login"))}
             >
               {t("addToGroup")}
-            </Button>
+            </NeuButton>
           </div>
         </div>
       </div>

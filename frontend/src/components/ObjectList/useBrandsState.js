@@ -119,6 +119,10 @@ export default function useBrandsState() {
   const handleBrandClick = (brand) => {
     const returnSearch = location.search;
     const nextSearch = new URLSearchParams(location.search);
+    nextSearch.delete("q");
+    nextSearch.delete("categoryIds");
+    nextSearch.delete("brandIds");
+    nextSearch.delete("scaleIds");
     nextSearch.delete("page");
     nextSearch.delete("searchPage");
     nextSearch.delete("brandPage");
@@ -141,10 +145,8 @@ export default function useBrandsState() {
         syncedKeywordRef.current = "";
         return;
       }
-      if (keyword !== syncedKeywordRef.current) {
-        setSearchQueryClearingFilters(keyword);
-        syncedKeywordRef.current = keyword;
-      }
+      setSearchQueryClearingFilters(keyword);
+      syncedKeywordRef.current = keyword;
       setSearchKeyword(keyword);
       setSearchActive(true);
     },

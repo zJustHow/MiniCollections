@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Card, Grid, Spin } from "antd";
+import { Grid, Spin } from "antd";
+import NeuCard from "../NeuCard";
 import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
-import AddCardCover from "./AddCardCover";
-import CardCover from "./CardCover";
 import ObjectSearchFilterLayout from "../ObjectSearchFilterLayout";
-import ObjectListSearchToolbar from "../ObjectListSearchToolbar";
+import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
+import ObjectListPageLayout from "../ObjectListPageLayout";
+import SearchResultsSummary from "../SearchResultsSummary";
 import { useLocale } from "../../LocaleContext";
 
 const { Search } = NeuInput;
@@ -55,22 +56,18 @@ export default function GroupsTab({
 
   const renderGroupCard = (group) =>
     group.id === "__add__" ? (
-      <Card
+      <NeuCard
         key="__add__"
-        hoverable
-        className="neu-card"
-        cover={<AddCardCover label={t("addGroup")} />}
+        add
+        name={t("addGroup")}
         onClick={onCreateGroup}
-        bodyStyle={{ padding: 0 }}
       />
     ) : (
-      <Card
+      <NeuCard
         key={group.id}
-        hoverable
-        className="neu-card"
-        cover={<CardCover image_url={group.image_url} name={group.name} />}
+        name={group.name}
+        imageUrl={group.image_url}
         onClick={() => onGroupClick(group)}
-        bodyStyle={{ padding: 0 }}
       />
     );
 
@@ -91,13 +88,10 @@ export default function GroupsTab({
     !showFilterColumn;
 
   const renderObjectCard = (obj) => (
-    <Card
+    <NeuCard
       key={obj.id}
-      hoverable
-      className="neu-card"
-      cover={
-        <CardCover image_url={obj.imageUrl ?? obj.image_url} name={obj.name} />
-      }
+      name={obj.name}
+      imageUrl={obj.imageUrl ?? obj.image_url}
       onClick={() =>
         navigate(`/groups/${obj.groupId ?? obj.group_id}/objects/${obj.id}`, {
           state: {
@@ -109,7 +103,6 @@ export default function GroupsTab({
           },
         })
       }
-      bodyStyle={{ padding: 0 }}
     />
   );
 
@@ -117,35 +110,61 @@ export default function GroupsTab({
     searchResultGroups.length +
     (searchFacets?.total ?? searchResultObjects.length);
 
+  const gridClass = screens.lg ? "neu-list-page-browse-grid" : undefined;
+
   return (
     <div style={{ position: "relative", minHeight: 200 }}>
-      <ObjectListSearchToolbar
-        searchActive={searchActive}
-        keyword={searchValue}
-        resultCount={searchResultCount}
-        resultsLoading={searchActive && loading}
-      >
-        <Search
-          placeholder={t("searchGroups")}
-          allowClear
-          value={draftQuery}
-          onSearch={onSearch}
-          onChange={(e) => {
-            const v = e.target.value;
-            setDraftQuery(v);
-            if (v === "") onSearch("");
-          }}
-          style={{ width: "100%" }}
-        />
-      </ObjectListSearchToolbar>
-
       <Spin spinning={spinning}>
-        {searchActive ? (
+        <ObjectListPageLayout
+          showFilterColumn={
+            searchActive && showObjectsSection && showFilterColumn
+          }
+          summary={
+            <SearchResultsSummary
+              active={searchActive}
+              keyword={searchValue}
+              count={searchResultCount}
+              loading={searchActive && loading}
+            />
+          }
+          search={
+            <Search
+              placeholder={t("searchGroups")}
+              allowClear
+              value={draftQuery}
+              onSearch={onSearch}
+              onChange={(e) => {
+                const v = e.target.value;
+                setDraftQuery(v);
+                if (v === "") onSearch("");
+              }}
+            />
+          }
+          filter={
+            searchActive && showObjectsSection && showFilterColumn ? (
+              <ObjectSearchFilterPanel
+                facets={searchFacets}
+                loading={facetsLoading}
+                selectedCategoryIds={selectedCategoryIds}
+                selectedBrandIds={selectedBrandIds}
+                selectedScaleIds={selectedScaleIds}
+                onToggleCategory={onToggleCategory}
+                onToggleBrand={onToggleBrand}
+                onToggleScale={onToggleScale}
+              />
+            ) : null
+          }
+        >
+
+          {searchActive ? (
           <>
             {searchResultGroups.length > 0 && (
               <>
                 <div style={sectionLabelStyle}>{t("groups")}</div>
-                <div style={gridStyle}>
+                <div
+                  className={gridClass}
+                  style={gridClass ? undefined : gridStyle}
+                >
                   {searchResultGroups.map(renderGroupCard)}
                 </div>
               </>
@@ -189,11 +208,15 @@ export default function GroupsTab({
                 </div>
               )}
           </>
-        ) : (
-          <div style={gridStyle}>
-            {[{ id: "__add__" }, ...groups].map(renderGroupCard)}
-          </div>
-        )}
+          ) : (
+            <div
+              className={gridClass}
+              style={gridClass ? undefined : gridStyle}
+            >
+              {[{ id: "__add__" }, ...groups].map(renderGroupCard)}
+            </div>
+          )}
+        </ObjectListPageLayout>
       </Spin>
     </div>
   );

@@ -1,7 +1,7 @@
-import {
-  App, Button, Drawer, Empty, Spin, Tag, Typography } from "antd";
+import { App, Drawer, Empty, Spin, Tag, Typography } from "antd";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
+import NeuButton from "../components/NeuButton";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
 import { getBrands, getMySubmissions } from "../utils";
@@ -209,10 +209,10 @@ export default function FeedbackPage() {
     <div style={{ maxWidth: 720, margin: "0 auto" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 24 }}>
         <div style={{ display: "flex", gap: 8 }}>
-          <Button icon={<ReloadOutlined />} onClick={load} disabled={loading} />
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setSubmitModalVisible(true)}>
+          <NeuButton icon={<ReloadOutlined />} onClick={load} disabled={loading} />
+          <NeuButton variant="primary" icon={<PlusOutlined />} onClick={() => setSubmitModalVisible(true)}>
             {t("newFeedback")}
-          </Button>
+          </NeuButton>
         </div>
       </div>
 

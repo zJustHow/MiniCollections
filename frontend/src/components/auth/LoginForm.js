@@ -1,4 +1,6 @@
-import { Button, Form } from "antd";
+import NeuPressableButton from "../NeuPressableButton";
+import NeuButton from "../NeuButton";
+import { Form } from "antd";
 import { NeuInput, NeuSelect } from "../NeuFormControl";
 import { useState } from "react";
 import { LockOutlined, MailOutlined, PhoneOutlined, WechatOutlined } from "@ant-design/icons";
@@ -68,9 +70,7 @@ function LoginForm({ onSuccess }) {
       {/* 微信浏览器内：一键登录置顶 */}
       {inWeChat && (
         <>
-          <button
-            type="button"
-            className="neu-pressable-btn neu-panel-tab-btn"
+          <NeuPressableButton
             onClick={handleWechatLogin}
             disabled={wechatLoading}
             style={{
@@ -85,7 +85,7 @@ function LoginForm({ onSuccess }) {
           >
             <WechatOutlined style={{ marginRight: 8, fontSize: 20 }} />
             {wechatLoading ? t("wechatLoggingIn") : t("loginWithWechat")}
-          </button>
+          </NeuPressableButton>
           <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "12px 0" }}>
             <div style={{ flex: 1, height: 1, background: "var(--neu-border)" }} />
             <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>or</span>
@@ -105,24 +105,22 @@ function LoginForm({ onSuccess }) {
           marginBottom: 24,
         }}
       >
-        <button
-          type="button"
-          className={`neu-pressable-btn neu-panel-tab-btn${loginType === "email" ? " active" : ""}`}
+        <NeuPressableButton
+          active={loginType === "email"}
           style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
           onClick={() => handleTypeChange("email")}
         >
           <MailOutlined style={{ marginRight: 6 }} />
           {t("registerWithEmail")}
-        </button>
-        <button
-          type="button"
-          className={`neu-pressable-btn neu-panel-tab-btn${loginType === "phone" ? " active" : ""}`}
+        </NeuPressableButton>
+        <NeuPressableButton
+          active={loginType === "phone"}
           style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
           onClick={() => handleTypeChange("phone")}
         >
           <PhoneOutlined style={{ marginRight: 6 }} />
           {t("registerWithPhone")}
-        </button>
+        </NeuPressableButton>
       </div>
 
       <Form
@@ -207,6 +205,20 @@ function LoginForm({ onSuccess }) {
           />
         </Form.Item>
 
+        <div style={{ textAlign: "right", marginTop: -12, marginBottom: 16 }}>
+          <span
+            onClick={() => navigate("/forgot-password")}
+            style={{
+              cursor: "pointer",
+              color: "var(--neu-accent)",
+              fontSize: 13,
+              textDecoration: "underline",
+            }}
+          >
+            {t("forgotPassword")}
+          </span>
+        </div>
+
         {error && (
           <div
             style={{
@@ -225,7 +237,7 @@ function LoginForm({ onSuccess }) {
         )}
 
         <Form.Item style={{ marginBottom: 0 }}>
-          <Button
+          <NeuButton
             type="primary"
             htmlType="submit"
             loading={loading}
@@ -233,7 +245,7 @@ function LoginForm({ onSuccess }) {
             style={{ width: "100%", borderRadius: radius.md }}
           >
             {t("signIn")}
-          </Button>
+          </NeuButton>
         </Form.Item>
       </Form>
 
@@ -264,16 +276,14 @@ function LoginForm({ onSuccess }) {
             </div>
           ) : (
             // PC 浏览器：微信扫码按钮
-            <button
-              type="button"
-              className="neu-pressable-btn neu-panel-tab-btn"
+            <NeuPressableButton
               onClick={handleWechatLogin}
               disabled={wechatLoading}
               style={{ width: "100%", padding: "10px 0", fontSize: 14, borderRadius: radius.md }}
             >
               <WechatOutlined style={{ marginRight: 8, color: "#07C160", fontSize: 18 }} />
               {wechatLoading ? t("wechatLoggingIn") : t("loginWithWechat")}
-            </button>
+            </NeuPressableButton>
           )}
         </>
       )}

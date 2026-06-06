@@ -1,4 +1,5 @@
-import { App, Button, Popconfirm, Space, Table } from "antd";
+import NeuButton, { neuBtnProps } from "../../components/NeuButton";
+import { App, Popconfirm, Space, Table } from "antd";
 import { DeleteOutlined, EditOutlined, PlusOutlined, TagsOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -42,7 +43,7 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
       width: 130,
       render: (_, record) => (
         <Space size={4}>
-          <Button
+          <NeuButton
             size="small"
             icon={<TagsOutlined />}
             onClick={() =>
@@ -50,8 +51,8 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
             }
           >
             {t("viewObjects")}
-          </Button>
-          <Button
+          </NeuButton>
+          <NeuButton
             size="small"
             icon={<EditOutlined />}
             onClick={() => { setEditingBrand(record); setBrandModalOpen(true); }}
@@ -61,10 +62,11 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
             description={t("deleteBrandContent").replace("{name}", record.name_en)}
             onConfirm={() => handleDeleteBrand(record)}
             okText={t("delete")}
-            okButtonProps={{ danger: true }}
+            okButtonProps={neuBtnProps({ danger: true })}
+            cancelButtonProps={neuBtnProps()}
             cancelText={t("cancel")}
           >
-            <Button size="small" danger icon={<DeleteOutlined />} />
+            <NeuButton size="small" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
@@ -74,13 +76,13 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
   return (
     <>
       <div style={{ marginBottom: 16, display: "flex", justifyContent: "flex-end" }}>
-        <Button
+        <NeuButton
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => { setEditingBrand(null); setBrandModalOpen(true); }}
         >
           {t("addBrand")}
-        </Button>
+        </NeuButton>
       </div>
       <Table
         rowKey="id"

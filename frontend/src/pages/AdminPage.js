@@ -1,3 +1,4 @@
+import NeuPressableButton from "../components/NeuPressableButton";
 import { App, Table, Tag } from "antd";
 import {
   CheckCircleOutlined,
@@ -136,10 +137,9 @@ export default function AdminPage() {
             {t("adminSubmissions")}
           </div>
           {statusOptions.map(({ key, label, icon }) => (
-            <button
+            <NeuPressableButton
               key={key}
-              type="button"
-              className={`neu-pressable-btn neu-panel-tab-btn${activeView === "submissions" && activeStatus === key ? " active" : ""}`}
+              active={activeView === "submissions" && activeStatus === key}
               style={{
                 width: "100%",
                 padding: "10px 14px",
@@ -172,7 +172,7 @@ export default function AdminPage() {
                   {pendingCount}
                 </span>
               )}
-            </button>
+            </NeuPressableButton>
           ))}
 
           <div style={{ height: 1, background: "rgba(184,182,176,0.25)", margin: "4px 8px" }} />
@@ -180,9 +180,8 @@ export default function AdminPage() {
           <div style={{ fontSize: 11, color: "var(--neu-text-2)", padding: "0 10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("adminBrands")}
           </div>
-          <button
-            type="button"
-            className={`neu-pressable-btn neu-panel-tab-btn${activeView === "brands" ? " active" : ""}`}
+          <NeuPressableButton
+            active={activeView === "brands"}
             style={{
               width: "100%",
               padding: "10px 14px",
@@ -196,7 +195,7 @@ export default function AdminPage() {
           >
             <TagsOutlined />
             {t("brands")}
-          </button>
+          </NeuPressableButton>
         </div>
 
         {/* Right content panel */}

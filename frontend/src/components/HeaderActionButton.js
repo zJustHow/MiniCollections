@@ -1,20 +1,22 @@
 import { LoadingOutlined } from "@ant-design/icons";
 import { forwardRef } from "react";
+import NeuPressableButton from "./NeuPressableButton";
 
 const HeaderActionButton = forwardRef(function HeaderActionButton(
   { icon, children, danger = false, loading = false, className = "", disabled, ...props },
   ref,
 ) {
   return (
-    <button
+    <NeuPressableButton
       ref={ref}
-      type="button"
-      className={`neu-pressable-btn neu-header-bar-btn${danger ? " neu-pressable-btn--danger" : ""}${className ? ` ${className}` : ""}`}
+      variant="header-bar"
+      danger={danger}
+      className={className}
       disabled={disabled || loading}
       {...props}
     >
       {loading ? <LoadingOutlined /> : (icon ?? children)}
-    </button>
+    </NeuPressableButton>
   );
 });
 
