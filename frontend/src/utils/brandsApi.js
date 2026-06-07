@@ -7,14 +7,28 @@ import {
 } from "./apiClient";
 import { appendIdListParams } from "./filterParams";
 
+export const SELECT_PAGE_SIZE = 20;
+
 export const getBrandsPage = async ({ size = PAGE_SIZE, page = 0 } = {}) => {
   const params = buildPageParams({ size, page });
   const response = await fetch(`/brands?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
+/** @deprecated Prefer getBrandsPage or searchBrandsForSelect for paginated loads. */
 export const getBrands = async () =>
   fetchAllPages(({ size, page }) => getBrandsPage({ size, page }));
+
+export async function searchBrandsForSelect(
+  keyword = "",
+  { size = SELECT_PAGE_SIZE, page = 0 } = {},
+) {
+  const trimmed = (keyword ?? "").trim();
+  const response = trimmed
+    ? await searchBrandsPage(trimmed, { size, page })
+    : await getBrandsPage({ size, page });
+  return response?.content ?? [];
+}
 
 export const searchBrandsPage = async (keyword, { size = PAGE_SIZE, page = 0 } = {}) => {
   const params = buildPageParams({ size, page, keyword });
@@ -31,6 +45,7 @@ export const searchBrandsCombinedPage = async (
   return handleResponse(response);
 };
 
+/** @deprecated Prefer searchBrandsPage or searchBrandsForSelect. */
 export const searchBrands = async (keyword) =>
   fetchAllPages(({ size, page }) => searchBrandsPage(keyword, { size, page }));
 
@@ -60,6 +75,7 @@ export const getBrandObjectsPage = async (brandId, { size = PAGE_SIZE, page = 0 
   return handleResponse(response);
 };
 
+/** @deprecated Prefer getBrandObjectsPage. */
 export const getBrandObjectsByBrandId = async (brandId) =>
   fetchAllPages(({ size, page }) => getBrandObjectsPage(brandId, { size, page }));
 
@@ -127,8 +143,19 @@ export const searchBrandObjectsFacets = async (
   return handleResponse(response);
 };
 
+/** @deprecated Prefer searchBrandObjectsPage or searchBrandObjectsForSelect. */
 export const searchBrandObjects = async (keyword) =>
   fetchAllPages(({ size, page }) => searchBrandObjectsPage(keyword, { size, page }));
+
+export async function searchBrandObjectsForSelect(
+  keyword,
+  { size = SELECT_PAGE_SIZE, page = 0 } = {},
+) {
+  const trimmed = (keyword ?? "").trim();
+  if (!trimmed) return [];
+  const response = await searchBrandObjectsPage(trimmed, { size, page });
+  return response?.content ?? [];
+}
 
 export const searchBrandObjectsByBrandIdPage = async (
   brandId,
@@ -159,6 +186,7 @@ export const searchBrandObjectsByBrandIdFacets = async (
   return handleResponse(response);
 };
 
+/** @deprecated Prefer searchBrandObjectsByBrandIdPage. */
 export const searchBrandObjectsByBrandId = async (brandId, keyword) =>
   fetchAllPages(({ size, page }) =>
     searchBrandObjectsByBrandIdPage(brandId, keyword, { size, page }),

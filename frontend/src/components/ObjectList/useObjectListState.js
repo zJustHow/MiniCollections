@@ -1,5 +1,4 @@
 import { App } from "antd";
-import { searchBrandObjects } from "../../utils";
 import useBrandsState from "./useBrandsState";
 import useGroupsState from "./useGroupsState";
 
@@ -12,10 +11,6 @@ export default function useObjectListState({ isAdmin = false } = {}) {
   return {
     ...brandsSection,
     ...groupsSection,
-    // Pass through utility functions for backward compatibility.
-    searchBrandObjects,
     message,
   };
 }
-
-

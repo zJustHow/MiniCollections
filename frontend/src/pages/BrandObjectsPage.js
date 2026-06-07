@@ -472,7 +472,6 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         visible={submitModalVisible}
         onCancel={() => setSubmitModalVisible(false)}
         selectedBrand={brand}
-        brands={brand ? [brand] : []}
       />
 
       <BrandModal

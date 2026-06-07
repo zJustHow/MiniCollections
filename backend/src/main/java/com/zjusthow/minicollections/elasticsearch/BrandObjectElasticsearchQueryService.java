@@ -28,10 +28,10 @@ public class BrandObjectElasticsearchQueryService {
 
     private static final Logger log = LoggerFactory.getLogger(BrandObjectElasticsearchQueryService.class);
     private static final String FACET_AGG = "facet";
-    private static final int MAX_CATEGORY_BUCKETS = 32;
-    private static final int MAX_BRAND_BUCKETS = 48;
-    private static final int MAX_SCALE_BUCKETS = 32;
-    private static final int MAX_SERIES_BUCKETS = 48;
+    private static final int MAX_CATEGORY_BUCKETS = 64;
+    private static final int MAX_BRAND_BUCKETS = 64;
+    private static final int MAX_SCALE_BUCKETS = 64;
+    private static final int MAX_SERIES_BUCKETS = 64;
 
     private final ElasticsearchOperations elasticsearchOperations;
 

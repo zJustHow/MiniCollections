@@ -3,11 +3,11 @@ import { Spin } from "antd";
 import NeuCard from "../NeuCard";
 import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
-import ObjectSearchFilterLayout from "../ObjectSearchFilterLayout";
-import ObjectSearchFilterPanel from "../ObjectSearchFilterPanel";
+import ListPagination from "../ListPagination";
 import ObjectListPageLayout from "../ObjectListPageLayout";
 import SearchResultsSummary from "../SearchResultsSummary";
 import { useLocale } from "../../LocaleContext";
+import { PAGE_SIZE } from "../../utils";
 
 const { Search } = NeuInput;
 
@@ -21,17 +21,8 @@ export default function GroupsTab({
   searchActive,
   searchResultGroups,
   searchResultObjects,
-  showObjectFilters,
-  searchFacets,
-  facetsLoading,
-  selectedCategoryIds,
-  selectedBrandIds,
-  selectedScaleIds,
-  selectedSeriesIds,
-  onToggleCategory,
-  onToggleBrand,
-  onToggleScale,
-  onToggleSeries,
+  groupsListPage,
+  combinedSearchPage,
 }) {
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -59,18 +50,18 @@ export default function GroupsTab({
       />
     );
 
-  const showFilterColumn = showObjectFilters || (searchActive && facetsLoading);
-
+  const hasGroupResults = (combinedSearchPage?.totalBrands ?? 0) > 0;
   const showObjectsSection =
     searchActive &&
-    (searchResultObjects.length > 0 || showFilterColumn || loading);
+    ((combinedSearchPage?.totalObjects ?? 0) > 0 ||
+      combinedSearchPage?.loading ||
+      searchResultObjects.length > 0);
 
-  const spinning =
-    searchActive &&
-    loading &&
-    searchResultGroups.length === 0 &&
-    searchResultObjects.length === 0 &&
-    !showFilterColumn;
+  const spinning = searchActive
+    ? combinedSearchPage?.loading &&
+      searchResultGroups.length === 0 &&
+      searchResultObjects.length === 0
+    : groupsListPage?.loading && groups.length === 0;
 
   const renderObjectCard = (obj) => (
     <NeuCard
@@ -91,23 +82,21 @@ export default function GroupsTab({
     />
   );
 
-  const searchResultCount =
-    searchResultGroups.length +
-    (searchFacets?.total ?? searchResultObjects.length);
+  const showAddCard = (groupsListPage?.page ?? 0) === 0;
+  const browseData = showAddCard ? [{ id: "__add__" }, ...groups] : groups;
+  const activePage = searchActive ? combinedSearchPage : groupsListPage;
 
   return (
     <div style={{ position: "relative", minHeight: 200, width: "100%" }}>
       <Spin spinning={spinning}>
         <ObjectListPageLayout
-          showFilterColumn={
-            searchActive && showObjectsSection && showFilterColumn
-          }
           summary={
             <SearchResultsSummary
               active={searchActive}
               keyword={searchValue}
-              count={searchResultCount}
-              loading={searchActive && loading}
+              count={combinedSearchPage?.totalElements ?? 0}
+              exact={combinedSearchPage?.totalExact}
+              loading={searchActive && combinedSearchPage?.loading}
             />
           }
           search={
@@ -125,63 +114,46 @@ export default function GroupsTab({
               }}
             />
           }
-          filter={
-            searchActive && showObjectsSection && showFilterColumn ? (
-              <ObjectSearchFilterPanel
-                facets={searchFacets}
-                loading={facetsLoading}
-                selectedCategoryIds={selectedCategoryIds}
-                selectedBrandIds={selectedBrandIds}
-                selectedScaleIds={selectedScaleIds}
-                selectedSeriesIds={selectedSeriesIds}
-                onToggleCategory={onToggleCategory}
-                onToggleBrand={onToggleBrand}
-                onToggleScale={onToggleScale}
-                onToggleSeries={onToggleSeries}
-              />
-            ) : null
-          }
         >
           {searchActive ? (
             <>
-              {searchResultGroups.length > 0 && (
+              {(hasGroupResults || showObjectsSection) && (
                 <>
-                  <div style={sectionLabelStyle}>{t("groups")}</div>
-                  <div className="neu-list-page-browse-grid">
-                    {searchResultGroups.map(renderGroupCard)}
-                  </div>
+                  {searchResultGroups.length > 0 && (
+                    <>
+                      <div style={sectionLabelStyle}>{t("groups")}</div>
+                      <div className="neu-list-page-browse-grid">
+                        {searchResultGroups.map(renderGroupCard)}
+                      </div>
+                    </>
+                  )}
+                  {showObjectsSection && (
+                    <>
+                      <div
+                        style={{
+                          ...sectionLabelStyle,
+                          marginTop: searchResultGroups.length > 0 ? 24 : 0,
+                        }}
+                      >
+                        {t("myObjects")}
+                      </div>
+                      <div className="neu-list-page-browse-grid">
+                        {searchResultObjects.map(renderObjectCard)}
+                      </div>
+                    </>
+                  )}
+                  <ListPagination
+                    page={activePage?.page ?? 0}
+                    totalPages={activePage?.totalPages ?? 0}
+                    loading={activePage?.loading}
+                    onPageChange={activePage?.onPageChange}
+                    pageSize={PAGE_SIZE}
+                  />
                 </>
               )}
-              {showObjectsSection && (
-                <>
-                  <div
-                    style={{
-                      ...sectionLabelStyle,
-                      marginTop: searchResultGroups.length > 0 ? 24 : 0,
-                    }}
-                  >
-                    {t("myObjects")}
-                  </div>
-                  <ObjectSearchFilterLayout
-                    showFilterColumn={showFilterColumn}
-                    facets={searchFacets}
-                    loading={facetsLoading}
-                    selectedCategoryIds={selectedCategoryIds}
-                    selectedBrandIds={selectedBrandIds}
-                    selectedScaleIds={selectedScaleIds}
-                    selectedSeriesIds={selectedSeriesIds}
-                    onToggleCategory={onToggleCategory}
-                    onToggleBrand={onToggleBrand}
-                    onToggleScale={onToggleScale}
-                    onToggleSeries={onToggleSeries}
-                  >
-                    {searchResultObjects.map(renderObjectCard)}
-                  </ObjectSearchFilterLayout>
-                </>
-              )}
-              {searchResultGroups.length === 0 &&
+              {!hasGroupResults &&
                 !showObjectsSection &&
-                !loading && (
+                !combinedSearchPage?.loading && (
                   <div
                     style={{
                       textAlign: "center",
@@ -194,9 +166,18 @@ export default function GroupsTab({
                 )}
             </>
           ) : (
-            <div className="neu-list-page-browse-grid">
-              {[{ id: "__add__" }, ...groups].map(renderGroupCard)}
-            </div>
+            <>
+              <div className="neu-list-page-browse-grid">
+                {browseData.map(renderGroupCard)}
+              </div>
+              <ListPagination
+                page={activePage?.page ?? 0}
+                totalPages={activePage?.totalPages ?? 0}
+                loading={activePage?.loading}
+                onPageChange={activePage?.onPageChange}
+                pageSize={PAGE_SIZE}
+              />
+            </>
           )}
         </ObjectListPageLayout>
       </Spin>

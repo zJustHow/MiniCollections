@@ -12,15 +12,15 @@ import DetailImage from "../components/DetailImage";
 import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";
 import RelatedModelCard from "../components/RelatedModelCard";
 import EditUserObjectModal from "../components/ObjectList/modals/EditUserObjectModal";
+import useRemoteModelSelectSearch from "../hooks/useRemoteModelSelectSearch";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import {
   getGroupById,
-  getUserObjects,
+  getUserObjectById,
   getBrandObjectById,
   updateUserObject,
   deleteUserObject,
-  searchBrandObjects,
   purchasePriceFromFormValue,
   displayPurchasePriceFromObject,
   discardUploadedImage,
@@ -47,19 +47,23 @@ export default function GroupObjectDetailPage() {
   const [editLoading, setEditLoading] = useState(false);
   const [editForm] = Form.useForm();
   const [editImageData, setEditImageData] = useState(null);
-  const [editSearchResults, setEditSearchResults] = useState([]);
-  const [editSearchLoading, setEditSearchLoading] = useState(false);
+  const {
+    results: editSearchResults,
+    loading: editSearchLoading,
+    onSearch: onEditModelSearch,
+    setResults: setEditSearchResults,
+  } = useRemoteModelSelectSearch({
+    onError: (err) => message.error(err?.message || t("searchFailed")),
+  });
 
   const fetchUserObject = useCallback(async () => {
     try {
-      const data = await getUserObjects(groupId);
-      const list = Array.isArray(data) ? data : (data?.content ?? []);
-      const found = list.find((o) => String(o.id) === String(objectId));
-      if (found) setUserObject(found);
+      const found = await getUserObjectById(groupId, objectId);
+      setUserObject(found);
     } catch (err) {
       message.error(err?.message || t("failedToLoadGroupModels"));
     }
-  }, [groupId, objectId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [groupId, objectId, message, t]);
 
   useEffect(() => {
     if (!group) {
@@ -186,22 +190,13 @@ export default function GroupObjectDetailPage() {
     }
   };
 
-  const handleEditSearch = async (value) => {
+  const handleEditSearch = (value) => {
     const keyword = (value || "").trim();
     if (keyword === "") {
       setEditSearchResults(brandObjectDetail ? [brandObjectDetail] : []);
       return;
     }
-    setEditSearchLoading(true);
-    try {
-      const data = await searchBrandObjects(keyword);
-      setEditSearchResults(Array.isArray(data) ? data : []);
-    } catch (err) {
-      message.error(err?.message || t("searchFailed"));
-      setEditSearchResults([]);
-    } finally {
-      setEditSearchLoading(false);
-    }
+    onEditModelSearch(keyword);
   };
 
   useEffect(() => {

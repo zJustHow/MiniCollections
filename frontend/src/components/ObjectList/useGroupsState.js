@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useSearchParam from "../../hooks/useSearchParam";
-import useObjectFilterParams from "../../hooks/useObjectFilterParams";
+import usePagedList from "../../hooks/usePagedList";
+import useCombinedBrandSearch from "../../hooks/useCombinedBrandSearch";
 import { App, Form } from "antd";
-import { getGroups, searchGroups, searchGroupsFacets, createGroup } from "../../utils";
-import { filterKeyFromIds } from "../../utils/filterParams";
+import { getGroupsPage, searchGroupsCombinedPage, createGroup, PAGE_SIZE } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 
 export default function useGroupsState() {
@@ -12,177 +12,74 @@ export default function useGroupsState() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchValue] = useSearchParam();
-  const {
-    selectedCategoryIds,
-    selectedBrandIds,
-    selectedScaleIds,
-    selectedSeriesIds,
-    clearObjectFilters,
-    clearSearchAndFilters,
-    setSearchQueryClearingFilters,
-    onToggleCategory,
-    onToggleBrand,
-    onToggleScale,
-    onToggleSeries,
-  } = useObjectFilterParams();
-  const [groups, setGroups] = useState([]);
-  const [loadingGroups, setLoadingGroups] = useState(false);
-  const [groupSearchActive, setGroupSearchActive] = useState(false);
-  const [groupSearchKeyword, setGroupSearchKeyword] = useState("");
-  const [groupSearchResultGroups, setGroupSearchResultGroups] = useState([]);
-  const [groupSearchResultObjects, setGroupSearchResultObjects] = useState([]);
-  const [searchFacets, setSearchFacets] = useState(null);
-  const [facetsLoading, setFacetsLoading] = useState(false);
+  const [searchValue, setSearchParam] = useSearchParam();
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const syncedKeywordRef = useRef("");
 
-  // Create group modal
   const [createGroupModalVisible, setCreateGroupModalVisible] = useState(false);
   const [createGroupLoading, setCreateGroupLoading] = useState(false);
   const [groupForm] = Form.useForm();
   const [groupImageData, setGroupImageData] = useState(null);
-  const syncedKeywordRef = useRef((searchValue ?? "").trim());
-  const fetchKeywordRef = useRef("");
 
-  const objectFilterKey = filterKeyFromIds(
-    selectedCategoryIds,
-    selectedBrandIds,
-    selectedScaleIds,
-    selectedSeriesIds,
-  );
+  const groupSearchActive =
+    location.pathname === "/groups" && Boolean((searchValue ?? "").trim());
 
-  const runGroupSearch = useCallback(
-    async (keyword, filters = {}) => {
-      const data = await searchGroups(keyword, filters);
-      setGroupSearchResultGroups(data.groups ?? []);
-      setGroupSearchResultObjects(data.objects ?? []);
+  const groupsList = usePagedList(
+    ({ size, page }) => getGroupsPage({ size, page }),
+    {
+      resetKey: "groups-list",
+      enabled: location.pathname === "/groups" && !groupSearchActive,
+      pageSize: PAGE_SIZE,
+      pageParamKey: "page",
+      reservedFirstPageSlots: 1,
     },
-    [],
   );
 
-  const loadBrowseGroups = useCallback(async () => {
-    const data = await getGroups();
-    setGroups(data);
-    setGroupSearchActive(false);
-    setGroupSearchResultGroups([]);
-    setGroupSearchResultObjects([]);
-  }, []);
+  const combinedSearch = useCombinedBrandSearch(
+    ({ size, page }) =>
+      searchGroupsCombinedPage(searchKeyword, { size, page }).then((response) => ({
+        ...response,
+        brands: response.groups ?? [],
+        total_brands: response.total_groups ?? 0,
+      })),
+    {
+      resetKey: `group-search:${searchKeyword}`,
+      enabled: groupSearchActive && Boolean(searchKeyword),
+      pageSize: PAGE_SIZE,
+      pageParamKey: "searchPage",
+    },
+  );
 
   useEffect(() => {
-    if (location.pathname !== "/groups") return undefined;
-
+    if (location.pathname !== "/groups") return;
     const keyword = (searchValue ?? "").trim();
     if (keyword) {
-      if (keyword !== syncedKeywordRef.current) {
-        clearObjectFilters();
-        syncedKeywordRef.current = keyword;
-      }
-      setGroupSearchKeyword(keyword);
-      setGroupSearchActive(true);
+      syncedKeywordRef.current = keyword;
+      setSearchKeyword(keyword);
     } else {
-      setGroupSearchKeyword("");
-      setGroupSearchActive(false);
-      clearObjectFilters();
-      setSearchFacets(null);
       syncedKeywordRef.current = "";
-      fetchKeywordRef.current = "";
+      setSearchKeyword("");
     }
-
-    const keywordChanged = keyword !== fetchKeywordRef.current;
-    fetchKeywordRef.current = keyword;
-
-    let cancelled = false;
-    const fetchPage = async () => {
-      if (!keyword || keywordChanged) {
-        setLoadingGroups(true);
-      }
-      try {
-        if (keyword) {
-          await runGroupSearch(keyword, {
-            categoryIds: selectedCategoryIds,
-            brandIds: selectedBrandIds,
-            scaleIds: selectedScaleIds,
-            seriesIds: selectedSeriesIds,
-          });
-        } else {
-          await loadBrowseGroups();
-        }
-      } catch (err) {
-        if (!cancelled) {
-          message.error(err?.message || t("failedToLoadGroups"));
-        }
-      } finally {
-        if (!cancelled && (!keyword || keywordChanged)) {
-          setLoadingGroups(false);
-        }
-      }
-    };
-    fetchPage();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [location.pathname, searchValue, objectFilterKey]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!groupSearchActive || !groupSearchKeyword) {
-      setSearchFacets(null);
-      return undefined;
-    }
-
-    let cancelled = false;
-    setFacetsLoading(true);
-    searchGroupsFacets(groupSearchKeyword)
-      .then((data) => {
-        if (!cancelled) {
-          setSearchFacets(data);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setSearchFacets({ total: 0, categories: [], brands: [], scales: [], series: [] });
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setFacetsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [groupSearchKeyword, groupSearchActive, clearObjectFilters]);
+  }, [location.pathname, searchValue]);
 
   const handleGroupClick = (group) => {
     navigate(`/groups/${group.id}`, { state: { group } });
   };
 
   const handleGroupSearch = useCallback(
-    async (value) => {
+    (value) => {
       const keyword = value.trim();
       if (!keyword) {
-        clearSearchAndFilters();
-        setGroupSearchKeyword("");
-        setGroupSearchActive(false);
-        setSearchFacets(null);
+        setSearchParam("");
         syncedKeywordRef.current = "";
-        fetchKeywordRef.current = "";
-        setLoadingGroups(true);
-        try {
-          await loadBrowseGroups();
-        } catch (err) {
-          message.error(err?.message || t("failedToSearchGroups"));
-        } finally {
-          setLoadingGroups(false);
-        }
+        setSearchKeyword("");
         return;
       }
-      setSearchQueryClearingFilters(keyword);
+      setSearchParam(keyword);
       syncedKeywordRef.current = keyword;
-      setGroupSearchKeyword(keyword);
-      setGroupSearchActive(true);
+      setSearchKeyword(keyword);
     },
-    [clearSearchAndFilters, setSearchQueryClearingFilters, loadBrowseGroups, message, t],
+    [setSearchParam],
   );
 
   const handleCreateGroup = async () => {
@@ -194,11 +91,12 @@ export default function useGroupsState() {
         image_url: groupImageData || null,
       };
       try {
-        const created = await createGroup(payload);
+        await createGroup(payload);
         message.success(t("groupCreated"));
-        setGroups((prev) => [...prev, created]);
+        groupsList.loadPage(0);
         setCreateGroupModalVisible(false);
         setGroupImageData(null);
+        groupForm.resetFields();
       } catch (err) {
         message.error(err?.message || t("failedToCreateGroup"));
       } finally {
@@ -209,42 +107,40 @@ export default function useGroupsState() {
     }
   };
 
-  const groupShowObjectFilters =
-    groupSearchActive &&
-    Boolean(groupSearchKeyword) &&
-    searchFacets != null &&
-    ((searchFacets.categories?.length ?? 0) > 0 ||
-      (searchFacets.brands?.length ?? 0) > 0 ||
-      (searchFacets.scales?.length ?? 0) > 0 ||
-      (searchFacets.series?.length ?? 0) > 0);
+  const loadingGroups = groupSearchActive ? combinedSearch.loading : groupsList.loading;
 
-  return {
-    groups,
-    setGroups,
-    loadingGroups,
-    handleGroupClick,
-    handleGroupSearch,
-    searchValue,
-    groupSearchActive,
-    groupSearchResultGroups,
-    groupSearchResultObjects,
-    groupShowObjectFilters,
-    groupSearchFacets: searchFacets,
-    groupFacetsLoading: facetsLoading,
-    groupSelectedCategoryIds: selectedCategoryIds,
-    groupSelectedBrandIds: selectedBrandIds,
-    groupSelectedScaleIds: selectedScaleIds,
-    groupSelectedSeriesIds: selectedSeriesIds,
-    onGroupToggleCategory: onToggleCategory,
-    onGroupToggleBrand: onToggleBrand,
-    onGroupToggleScale: onToggleScale,
-    onGroupToggleSeries: onToggleSeries,
-    createGroupModalVisible,
-    setCreateGroupModalVisible,
-    createGroupLoading,
-    groupForm,
-    groupImageData,
-    setGroupImageData,
-    handleCreateGroup,
-  };
+  return useMemo(
+    () => ({
+      groups: groupsList.items,
+      loadingGroups,
+      handleGroupClick,
+      handleGroupSearch,
+      searchValue,
+      groupSearchActive,
+      groupSearchResultGroups: combinedSearch.brands,
+      groupSearchResultObjects: combinedSearch.objects,
+      groupsListPage: groupsList,
+      groupCombinedSearchPage: combinedSearch,
+      createGroupModalVisible,
+      setCreateGroupModalVisible,
+      createGroupLoading,
+      groupForm,
+      groupImageData,
+      setGroupImageData,
+      handleCreateGroup,
+    }),
+    [
+      groupsList,
+      combinedSearch,
+      loadingGroups,
+      handleGroupSearch,
+      searchValue,
+      groupSearchActive,
+      createGroupModalVisible,
+      createGroupLoading,
+      groupForm,
+      groupImageData,
+      handleCreateGroup,
+    ],
+  );
 }

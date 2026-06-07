@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getAdminSubmissions, getBrands } from "../utils";
+import { getAdminSubmissions } from "../utils";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
 import { STATUS_COLOR, TYPE_COLOR, useStatusLabel, useTypeLabel } from "./admin/constants";
@@ -38,10 +38,6 @@ export default function AdminPage() {
   const [resolveModalOpen, setResolveModalOpen] = useState(false);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
 
-  const [brands, setBrands] = useState([]);
-  const [brandsLoading, setBrandsLoading] = useState(false);
-  const [brandsLoaded, setBrandsLoaded] = useState(false);
-
   const fetchSubmissions = useCallback(async (status) => {
     setSubmissionsLoading(true);
     try {
@@ -54,28 +50,9 @@ export default function AdminPage() {
     }
   }, [message, t]);
 
-  const fetchBrands = useCallback(async () => {
-    setBrandsLoading(true);
-    try {
-      const data = await getBrands();
-      setBrands(Array.isArray(data) ? data : []);
-      setBrandsLoaded(true);
-    } catch (err) {
-      message.error(err?.message || t("failedToLoadBrands"));
-    } finally {
-      setBrandsLoading(false);
-    }
-  }, [message, t]);
-
   useEffect(() => {
     fetchSubmissions(activeStatus);
   }, [fetchSubmissions, activeStatus]);
-
-  useEffect(() => {
-    if ((activeView === "brands" || approveModalOpen) && !brandsLoaded && !brandsLoading) {
-      fetchBrands();
-    }
-  }, [activeView, approveModalOpen, brandsLoaded, brandsLoading, fetchBrands]);
 
   useEffect(() => {
     if (location.state?.adminView === "brands") {
@@ -90,7 +67,6 @@ export default function AdminPage() {
   const handleSubmissionSuccess = () => {
     setSelectedSubmission(null);
     fetchSubmissions(activeStatus);
-    fetchBrands();
   };
 
   const pendingCount = submissions.filter((s) => s.status === "PENDING").length;
@@ -229,11 +205,7 @@ export default function AdminPage() {
               pagination={{ pageSize: 20, showSizeChanger: false }}
             />
           ) : (
-            <BrandsPanel
-              brands={brands}
-              loading={brandsLoading}
-              onBrandsChanged={fetchBrands}
-            />
+            <BrandsPanel />
           )}
         </div>
       </div>
@@ -248,7 +220,6 @@ export default function AdminPage() {
       <ApproveModal
         open={approveModalOpen}
         submission={selectedSubmission}
-        brands={brands}
         onClose={() => setApproveModalOpen(false)}
         onSuccess={handleSubmissionSuccess}
       />

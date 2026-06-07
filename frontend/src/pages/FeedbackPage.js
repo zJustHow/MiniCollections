@@ -1,14 +1,14 @@
 import { App, Empty, Spin, Typography } from "antd";
 import NeuTag from "../components/NeuTag";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import NeuButton from "../components/NeuButton";
 import NeuCard, { NeuCardImageSlot } from "../components/NeuCard";
 import ListPagination from "../components/ListPagination";
 import usePagedList from "../hooks/usePagedList";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
-import { deleteMySubmission, getBrands, getMySubmissionsPage, FEEDBACK_PAGE_SIZE } from "../utils";
+import { deleteMySubmission, getMySubmissionsPage, FEEDBACK_PAGE_SIZE } from "../utils";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import NeuFormDrawer from "../components/NeuFormDrawer";
 import dayjs from "dayjs";
@@ -170,7 +170,6 @@ function SubmissionDrawer({ item, onClose, onDelete, t }) {
 
 export default function FeedbackPage() {
   const { message, modal } = App.useApp(); const { t } = useLocale();
-  const [brands, setBrands] = useState([]);
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -191,10 +190,6 @@ export default function FeedbackPage() {
     loadPage,
     onPageChange,
   } = usePagedList(fetchMySubmissionsPage, { pageSize: FEEDBACK_PAGE_SIZE });
-
-  useEffect(() => {
-    getBrands().then((data) => setBrands(Array.isArray(data) ? data : [])).catch(() => {});
-  }, []);
 
   const handleSubmitSuccess = () => {
     setSubmitModalVisible(false);
@@ -266,7 +261,6 @@ export default function FeedbackPage() {
         visible={submitModalVisible}
         onCancel={handleSubmitSuccess}
         selectedBrand={null}
-        brands={brands}
       />
     </div>
   );

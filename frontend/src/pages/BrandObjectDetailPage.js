@@ -17,7 +17,7 @@ import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import {
   getBrandObjectById,
-  getGroups,
+  getGroupsPage,
   createUserObject,
   adminDeleteBrandObject,
   purchasePriceFromFormValue,
@@ -131,8 +131,8 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       groupId: undefined,
     });
     try {
-      const data = await getGroups();
-      setGroups(Array.isArray(data) ? data : []);
+      const data = await getGroupsPage({ page: 0, size: 100 });
+      setGroups(data?.content ?? []);
     } catch (err) {
       message.error(err?.message || t("failedToLoadGroups"));
     }

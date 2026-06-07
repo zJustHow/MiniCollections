@@ -1,24 +1,23 @@
-import { authHeaders, buildPageParams, handleDeleteResponse, handleResponse } from "./apiClient";
+import {
+  authHeaders,
+  buildPageParams,
+  handleDeleteResponse,
+  handleResponse,
+  PAGE_SIZE,
+} from "./apiClient";
 
-export const getGroups = async () => {
-  const response = await fetch("/groups", { headers: authHeaders() });
+export const getGroupsPage = async ({ size = PAGE_SIZE, page = 0 } = {}) => {
+  const params = buildPageParams({ size, page });
+  const response = await fetch(`/groups?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 
-export const searchGroups = async (
+export const searchGroupsCombinedPage = async (
   keyword,
-  { categoryIds = null, brandIds = null, scaleIds = null, seriesIds = null } = {},
+  { size = PAGE_SIZE, page = 0 } = {},
 ) => {
-  const params = buildPageParams({ keyword, categoryIds, brandIds, scaleIds, seriesIds });
+  const params = buildPageParams({ size, page, keyword });
   const response = await fetch(`/groups/search?${params}`, { headers: authHeaders() });
-  return handleResponse(response);
-};
-
-export const searchGroupsFacets = async (keyword) => {
-  const params = new URLSearchParams({ keyword });
-  const response = await fetch(`/groups/search/facets?${params}`, {
-    headers: authHeaders(),
-  });
   return handleResponse(response);
 };
 
@@ -53,16 +52,30 @@ export const getGroupById = async (groupId) => {
   return handleResponse(response);
 };
 
-export const getUserObjects = async (groupId) => {
-  const response = await fetch(`/groups/${groupId}/objects`, { headers: authHeaders() });
+export const getUserObjectsPage = async (groupId, { size = PAGE_SIZE, page = 0 } = {}) => {
+  const params = buildPageParams({ size, page });
+  const response = await fetch(`/groups/${groupId}/objects?${params}`, {
+    headers: authHeaders(),
+  });
   return handleResponse(response);
 };
 
-export const searchGroupObjects = async (groupId, keyword) => {
-  const response = await fetch(
-    `/groups/${groupId}/objects/search?keyword=${encodeURIComponent(keyword)}`,
-    { headers: authHeaders() },
-  );
+export const getUserObjectById = async (groupId, userObjectId) => {
+  const response = await fetch(`/groups/${groupId}/objects/${userObjectId}`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(response);
+};
+
+export const searchGroupObjectsPage = async (
+  groupId,
+  keyword,
+  { size = PAGE_SIZE, page = 0 } = {},
+) => {
+  const params = buildPageParams({ size, page, keyword });
+  const response = await fetch(`/groups/${groupId}/objects/search?${params}`, {
+    headers: authHeaders(),
+  });
   return handleResponse(response);
 };
 

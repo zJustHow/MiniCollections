@@ -13,18 +13,16 @@ import { radius } from "../../../theme/radius";
 import { submitFeedback, getCategories, getScales, getSeriesByBrandId } from "../../../utils";
 import { useState, useEffect, useCallback, useRef } from "react";
 import ImageUploadField from "../../ImageUploadField";
+import BrandSelectField, { OTHER_BRAND } from "../../BrandSelectField";
 
-const OTHER_BRAND = "__OTHER__";
-
-function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSeries, categoryOptions, scaleOptions, seriesOptions, imageValue, onImageChange, uploadSessionRef }) {
+function MissingModelForm({ form, brandValue, onBrandChange, onLoadSeries, categoryOptions, scaleOptions, seriesOptions, imageValue, onImageChange, uploadSessionRef, seedBrand }) {
   const { t } = useLocale();
   return (
     <>
       <Form.Item label={t("brand")} name="brandId">
-        <NeuSelect
-          showSearch
-          optionFilterProp="children"
-          placeholder={t("brand")}
+        <BrandSelectField
+          includeOther
+          seedBrand={seedBrand}
           onChange={(v) => {
             onBrandChange(v);
             form.setFieldValue("seriesId", undefined);
@@ -35,16 +33,7 @@ function MissingModelForm({ form, brands, brandValue, onBrandChange, onLoadSerie
               onLoadSeries(null);
             }
           }}
-        >
-          {(brands || []).map((b) => (
-            <NeuSelect.Option key={b.id} value={b.id}>
-              {b.name}
-            </NeuSelect.Option>
-          ))}
-          <NeuSelect.Option key={OTHER_BRAND} value={OTHER_BRAND}>
-            {t("brandOther")}
-          </NeuSelect.Option>
-        </NeuSelect>
+        />
       </Form.Item>
 
       {brandValue === OTHER_BRAND && (
@@ -138,30 +127,20 @@ function BugReportForm({ imageValue, onImageChange, uploadSessionRef }) {
   );
 }
 
-function DataCorrectionForm({ form, brands, brandValue, onBrandChange, imageValue, onImageChange, uploadSessionRef }) {
+function DataCorrectionForm({ form, brandValue, onBrandChange, imageValue, onImageChange, uploadSessionRef, seedBrand }) {
   const { t } = useLocale();
   return (
     <>
       <Form.Item label={t("brand")} name="brandId">
-        <NeuSelect
-          showSearch
-          optionFilterProp="children"
-          placeholder={t("brand")}
+        <BrandSelectField
+          includeOther
+          seedBrand={seedBrand}
+          allowClear
           onChange={(v) => {
             onBrandChange(v);
             if (v !== OTHER_BRAND) form.setFieldValue("customBrandName", undefined);
           }}
-          allowClear
-        >
-          {(brands || []).map((b) => (
-            <NeuSelect.Option key={b.id} value={b.id}>
-              {b.name}
-            </NeuSelect.Option>
-          ))}
-          <NeuSelect.Option key={OTHER_BRAND} value={OTHER_BRAND}>
-            {t("brandOther")}
-          </NeuSelect.Option>
-        </NeuSelect>
+        />
       </Form.Item>
 
       {brandValue === OTHER_BRAND && (
@@ -194,7 +173,7 @@ const MODAL_TITLE_KEY = {
   DATA_CORRECTION: "reportModalTitleDataCorrection",
 };
 
-export default function SubmitObjectModal({ visible, onCancel, selectedBrand, brands }) {
+export default function SubmitObjectModal({ visible, onCancel, selectedBrand }) {
   const { message } = App.useApp();
   const { t } = useLocale();
   const [form] = Form.useForm();
@@ -347,13 +326,13 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
         {submissionType === "MISSING_MODEL" && (
           <MissingModelForm
             form={form}
-            brands={brands}
             brandValue={brandValue}
             onBrandChange={setBrandValue}
             onLoadSeries={loadSeries}
             categoryOptions={categoryOptions}
             scaleOptions={scaleOptions}
             seriesOptions={seriesOptions}
+            seedBrand={selectedBrand}
             {...imageProps}
           />
         )}
@@ -361,9 +340,9 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand, br
         {submissionType === "DATA_CORRECTION" && (
           <DataCorrectionForm
             form={form}
-            brands={brands}
             brandValue={brandValue}
             onBrandChange={setBrandValue}
+            seedBrand={selectedBrand}
             {...imageProps}
           />
         )}

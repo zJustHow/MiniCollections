@@ -3,25 +3,47 @@ import AdminDeleteAction from "../../components/admin/AdminDeleteAction";
 import AdminEditButton from "../../components/admin/AdminEditButton";
 import { App, Space, Table } from "antd";
 import { PlusOutlined, TagsOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { adminDeleteBrand } from "../../utils";
+import { adminDeleteBrand, getBrandsPage, SELECT_PAGE_SIZE } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import GroovedImage from "../../components/GroovedImage";
 import BrandModal from "../../components/ObjectList/modals/BrandModal";
+import usePagedList from "../../hooks/usePagedList";
 
-export default function BrandsPanel({ brands, loading = false, onBrandsChanged }) {
+export default function BrandsPanel() {
   const { message } = App.useApp();
   const { t } = useLocale();
   const navigate = useNavigate();
   const [brandModalOpen, setBrandModalOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
 
+  const fetchBrandsPage = useCallback(
+    ({ size, page }) => getBrandsPage({ size, page }),
+    [],
+  );
+
+  const {
+    items: brands,
+    page,
+    totalElements,
+    loading,
+    loadPage,
+    onPageChange,
+  } = usePagedList(fetchBrandsPage, {
+    resetKey: "admin-brands",
+    pageSize: SELECT_PAGE_SIZE,
+  });
+
+  const refreshBrands = useCallback(() => {
+    loadPage(page);
+  }, [loadPage, page]);
+
   const handleDeleteBrand = async (brand) => {
     try {
       await adminDeleteBrand(brand.id);
       message.success(t("brandDeleted"));
-      onBrandsChanged();
+      refreshBrands();
     } catch (err) {
       message.error(err?.message || t("failedToDeleteBrand"));
     }
@@ -94,13 +116,19 @@ export default function BrandsPanel({ brands, loading = false, onBrandsChanged }
         columns={columns}
         loading={loading}
         size="middle"
-        pagination={{ pageSize: 20, showSizeChanger: false }}
+        pagination={{
+          current: page + 1,
+          total: totalElements,
+          pageSize: SELECT_PAGE_SIZE,
+          onChange: onPageChange,
+          showSizeChanger: false,
+        }}
       />
       <BrandModal
         open={brandModalOpen}
         brand={editingBrand}
         onClose={() => { setBrandModalOpen(false); setEditingBrand(null); }}
-        onSuccess={() => { onBrandsChanged(); }}
+        onSuccess={refreshBrands}
       />
     </>
   );

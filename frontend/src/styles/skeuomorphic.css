@@ -1640,6 +1640,11 @@ textarea.ant-input[disabled],
   flex-shrink: 0;
 }
 
+.neu-drawer-toolbar-actions-end {
+  margin-inline-start: auto;
+  padding-inline-end: 6px;
+}
+
 .neu-drawer-toolbar-title {
   position: absolute;
   inset: 0;

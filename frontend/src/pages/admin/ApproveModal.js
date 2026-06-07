@@ -1,5 +1,6 @@
 import { Form } from "antd";
 import NeuFormDrawer from "../../components/NeuFormDrawer";
+import BrandSelectField from "../../components/BrandSelectField";
 import {
   NeuDatePicker,
   NeuInput,
@@ -12,7 +13,7 @@ import { approveSubmission, getCategories, getScales, getSeriesByBrandId } from 
 import { useLocale } from "../../LocaleContext";
 import useModalForm from "../../hooks/useModalForm";
 
-export default function ApproveModal({ open, submission, brands, onClose, onSuccess }) {
+export default function ApproveModal({ open, submission, onClose, onSuccess }) {
   const { t } = useLocale();
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [scaleOptions, setScaleOptions] = useState([]);
@@ -100,18 +101,12 @@ export default function ApproveModal({ open, submission, brands, onClose, onSucc
     >
       <Form layout="vertical" form={form}>
         <Form.Item label={t("brand")} name="brandId" rules={[{ required: true, message: t("brandRequired") }]}>
-          <NeuSelect
-            showSearch
-            optionFilterProp="children"
+          <BrandSelectField
             onChange={(brandId) => {
               form.setFieldValue("seriesId", undefined);
               loadSeries(brandId);
             }}
-          >
-            {brands.map((b) => (
-              <NeuSelect.Option key={b.id} value={b.id}>{b.name}</NeuSelect.Option>
-            ))}
-          </NeuSelect>
+          />
         </Form.Item>
         <Form.Item label={t("nameEn")} name="nameEn" rules={[{ required: true, message: t("nameRequired") }]}>
           <NeuInput />

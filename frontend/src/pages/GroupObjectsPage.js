@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
+import usePagedList from "../hooks/usePagedList";
+import useRemoteModelSelectSearch from "../hooks/useRemoteModelSelectSearch";
 import { App, Form, Spin } from "antd";
 import NeuCard from "../components/NeuCard";
 import HeaderActionButton from "../components/HeaderActionButton";
@@ -10,6 +12,7 @@ import {
   DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
+import ListPagination from "../components/ListPagination";
 import AddUserObjectInGroupModal from "../components/ObjectList/modals/AddUserObjectInGroupModal";
 import ObjectListPageLayout from "../components/ObjectListPageLayout";
 import SearchResultsSummary from "../components/SearchResultsSummary";
@@ -18,20 +21,17 @@ import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import {
   getGroupById,
-  getUserObjects,
-  searchGroupObjects,
+  getUserObjectsPage,
+  searchGroupObjectsPage,
   updateGroup,
   deleteGroup,
   createUserObject,
-  searchBrandObjects,
   purchasePriceFromFormValue,
   discardUploadedImage,
+  PAGE_SIZE,
 } from "../utils";
 
 const { Search } = NeuInput;
-
-const normalizeList = (data) =>
-  Array.isArray(data) ? data : data?.content != null ? data.content : [];
 
 export default function GroupObjectsPage() {
   const { groupId } = useParams();
@@ -43,55 +43,59 @@ export default function GroupObjectsPage() {
 
   const [searchValue, setSearchParam] = useSearchParam();
   const [group, setGroup] = useState(location.state?.group ?? null);
-  const [userObjects, setUserObjects] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchActive, setSearchActive] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchActive, setSearchActive] = useState(Boolean((searchValue ?? "").trim()));
+  const [searchKeyword, setSearchKeyword] = useState((searchValue ?? "").trim());
   const [draftQuery, setDraftQuery] = useState(searchValue);
+  const syncedKeywordRef = useRef(searchKeyword);
 
-  // Edit group modal
   const [editGroupVisible, setEditGroupVisible] = useState(false);
   const [editGroupLoading, setEditGroupLoading] = useState(false);
   const [editGroupForm] = Form.useForm();
   const [editGroupImageData, setEditGroupImageData] = useState(null);
 
-  // Add user object modal
   const [addVisible, setAddVisible] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
   const [addForm] = Form.useForm();
   const [addImageData, setAddImageData] = useState(null);
-  const [addSearchResults, setAddSearchResults] = useState([]);
-  const [addSearchLoading, setAddSearchLoading] = useState(false);
+  const {
+    results: addSearchResults,
+    loading: addSearchLoading,
+    onSearch: onAddModelSearch,
+    setResults: setAddSearchResults,
+  } = useRemoteModelSelectSearch({
+    onError: (err) => message.error(err?.message || t("searchFailed")),
+  });
   const [selectedBrandObjectForAdd, setSelectedBrandObjectForAdd] =
     useState(null);
 
-  const fetchUserObjects = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getUserObjects(groupId);
-      setUserObjects(normalizeList(data));
-    } catch (err) {
-      message.error(err?.message || t("failedToLoadGroupModels"));
-    } finally {
-      setLoading(false);
-    }
-  }, [groupId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const doSearch = useCallback(
-    async (keyword) => {
-      setLoading(true);
-      try {
-        const data = await searchGroupObjects(groupId, keyword);
-        setSearchResults(Array.isArray(data) ? data : []);
-        setSearchActive(true);
-      } catch (err) {
-        message.error(err?.message || t("failedToSearchBrands"));
-      } finally {
-        setLoading(false);
-      }
+  const objectsList = usePagedList(
+    ({ size, page }) => getUserObjectsPage(groupId, { size, page }),
+    {
+      resetKey: `group-objects:${groupId}`,
+      enabled: !searchActive,
+      pageSize: PAGE_SIZE,
+      pageParamKey: "page",
+      reservedFirstPageSlots: 1,
     },
-    [groupId],
-  ); // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
+  const objectsSearch = usePagedList(
+    ({ size, page }) =>
+      searchGroupObjectsPage(groupId, searchKeyword, { size, page }),
+    {
+      resetKey: `group-objects-search:${groupId}:${searchKeyword}`,
+      enabled: searchActive && Boolean(searchKeyword),
+      pageSize: PAGE_SIZE,
+      pageParamKey: "page",
+    },
+  );
+
+  const activePage = searchActive ? objectsSearch : objectsList;
+  const displayObjects = activePage.items;
+  const showAddCard = !searchActive && activePage.page === 0;
+  const listData = showAddCard
+    ? [{ id: "__add__" }, ...displayObjects]
+    : displayObjects;
 
   useEffect(() => {
     if (!group) {
@@ -99,9 +103,39 @@ export default function GroupObjectsPage() {
         .then(setGroup)
         .catch((err) => message.error(err?.message || t("failedToLoadGroups")));
     }
-    fetchUserObjects();
-    if (searchValue) doSearch(searchValue);
-  }, [groupId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [groupId, group, message, t]);
+
+  useEffect(() => {
+    const keyword = (searchValue ?? "").trim();
+    if (keyword) {
+      syncedKeywordRef.current = keyword;
+      setDraftQuery(keyword);
+      setSearchKeyword(keyword);
+      setSearchActive(true);
+    } else {
+      syncedKeywordRef.current = "";
+      setSearchKeyword("");
+      setSearchActive(false);
+    }
+  }, [groupId, searchValue]);
+
+  const runSearch = useCallback(
+    (keyword) => {
+      const trimmed = keyword.trim();
+      if (!trimmed) {
+        setSearchParam("");
+        syncedKeywordRef.current = "";
+        setSearchKeyword("");
+        setSearchActive(false);
+        return;
+      }
+      setSearchParam(trimmed);
+      syncedKeywordRef.current = trimmed;
+      setSearchKeyword(trimmed);
+      setSearchActive(true);
+    },
+    [setSearchParam],
+  );
 
   const handleDeleteGroup = () => {
     if (!group) return;
@@ -121,6 +155,13 @@ export default function GroupObjectsPage() {
         }
       },
     });
+  };
+
+  const openEditGroup = () => {
+    if (!group) return;
+    editGroupForm.setFieldsValue({ name: group.name });
+    setEditGroupImageData(null);
+    setEditGroupVisible(true);
   };
 
   useEffect(() => {
@@ -145,15 +186,6 @@ export default function GroupObjectsPage() {
     );
     return () => setHeaderSlot(null);
   }, [group]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const displayObjects = searchActive ? searchResults : userObjects;
-
-  const openEditGroup = () => {
-    if (!group) return;
-    editGroupForm.setFieldsValue({ name: group.name });
-    setEditGroupImageData(null);
-    setEditGroupVisible(true);
-  };
 
   const handleUpdateGroup = async () => {
     if (!group) return;
@@ -201,18 +233,9 @@ export default function GroupObjectsPage() {
       };
       setAddLoading(true);
       try {
-        const created = await createUserObject(group.id, payload);
+        await createUserObject(group.id, payload);
         message.success(t("modelAdded"));
-        setUserObjects((prev) => [
-          ...prev,
-          {
-            ...created,
-            purchasePrice: created.purchasePrice ?? created.purchase_price,
-            purchaseDate: created.purchaseDate ?? created.purchase_date,
-            otherNotes: created.otherNotes ?? created.other_notes,
-            brandObjectId: created.brandObjectId ?? created.brand_object_id,
-          },
-        ]);
+        objectsList.loadPage(0);
         setAddVisible(false);
       } catch (err) {
         message.error(err?.message || t("failedToAddModel"));
@@ -232,34 +255,17 @@ export default function GroupObjectsPage() {
     setAddVisible(true);
   };
 
-  const handleAddSearch = async (value) => {
-    const keyword = (value || "").trim();
-    if (keyword === "") {
-      setAddSearchResults([]);
-      return;
-    }
-    setAddSearchLoading(true);
-    try {
-      const data = await searchBrandObjects(keyword);
-      setAddSearchResults(Array.isArray(data) ? data : []);
-    } catch (err) {
-      message.error(err?.message || t("searchFailed"));
-      setAddSearchResults([]);
-    } finally {
-      setAddSearchLoading(false);
-    }
-  };
-
   return (
     <div>
-      <Spin spinning={loading}>
+      <Spin spinning={activePage.loading && displayObjects.length === 0}>
         <ObjectListPageLayout
           summary={
             <SearchResultsSummary
               active={searchActive}
-              keyword={searchValue}
-              count={searchResults.length}
-              loading={searchActive && loading}
+              keyword={searchKeyword}
+              count={activePage.totalElements}
+              exact={activePage.totalExact}
+              loading={searchActive && activePage.loading}
             />
           }
           search={
@@ -272,49 +278,58 @@ export default function GroupObjectsPage() {
               onChange={(e) => {
                 const v = e.target.value;
                 setDraftQuery(v);
-                if (v === "") {
-                  setSearchActive(false);
-                  setSearchResults([]);
-                  setSearchParam("");
-                }
+                if (v === "") runSearch("");
               }}
-              onSearch={(v) => {
-                const keyword = (v ?? "").trim();
-                if (keyword) {
-                  setSearchParam(keyword);
-                  doSearch(keyword);
-                } else {
-                  setSearchActive(false);
-                  setSearchResults([]);
-                  setSearchParam("");
-                }
-              }}
+              onSearch={runSearch}
             />
           }
         >
-          <div className="neu-list-page-browse-grid">
-            {[{ id: "__add__" }, ...displayObjects].map((item) =>
-              item.id === "__add__" ? (
-                <NeuCard
-                  key="__add__"
-                  add
-                  name={t("addModel")}
-                  onClick={openAddUserObject}
-                />
-              ) : (
-                <NeuCard
-                  key={item.id}
-                  name={item.name ?? "—"}
-                  imageUrl={item.image_url}
-                  onClick={() =>
-                    navigate(`/groups/${groupId}/objects/${item.id}`, {
-                      state: { userObject: item, group },
-                    })
-                  }
-                />
-              ),
-            )}
-          </div>
+          {searchActive &&
+          displayObjects.length === 0 &&
+          !activePage.loading ? (
+            <div
+              style={{
+                textAlign: "center",
+                color: "var(--neu-text-2)",
+                padding: "32px 0",
+              }}
+            >
+              {t("noSearchResults")}
+            </div>
+          ) : (
+            <>
+              <div className="neu-list-page-browse-grid">
+                {listData.map((item) =>
+                  item.id === "__add__" ? (
+                    <NeuCard
+                      key="__add__"
+                      add
+                      name={t("addModel")}
+                      onClick={openAddUserObject}
+                    />
+                  ) : (
+                    <NeuCard
+                      key={item.id}
+                      name={item.name ?? "—"}
+                      imageUrl={item.image_url}
+                      onClick={() =>
+                        navigate(`/groups/${groupId}/objects/${item.id}`, {
+                          state: { userObject: item, group },
+                        })
+                      }
+                    />
+                  ),
+                )}
+              </div>
+              <ListPagination
+                page={activePage.page}
+                totalPages={activePage.totalPages}
+                loading={activePage.loading}
+                onPageChange={activePage.onPageChange}
+                pageSize={PAGE_SIZE}
+              />
+            </>
+          )}
         </ObjectListPageLayout>
       </Spin>
 
@@ -346,7 +361,7 @@ export default function GroupObjectsPage() {
         form={addForm}
         searchResults={addSearchResults}
         searchLoading={addSearchLoading}
-        onSearch={handleAddSearch}
+        onSearch={onAddModelSearch}
         onSelectChange={(value) => {
           if (value == null) {
             setSelectedBrandObjectForAdd(null);

@@ -1,13 +1,14 @@
 import { act, renderHook } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import useCountdown from "./useCountdown";
 
 describe("useCountdown", () => {
   beforeEach(() => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test("counts down and clears on unmount", () => {
@@ -19,14 +20,14 @@ describe("useCountdown", () => {
     expect(result.current.countdown).toBe(2);
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      vi.advanceTimersByTime(1000);
     });
     expect(result.current.countdown).toBe(1);
 
     unmount();
 
     act(() => {
-      jest.advanceTimersByTime(2000);
+      vi.advanceTimersByTime(2000);
     });
   });
 

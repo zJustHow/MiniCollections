@@ -89,7 +89,7 @@ done
 log "Backend is ready."
 
 # 3. Start frontend
-log "Starting React frontend..."
+log "Starting Vite frontend..."
 cd "$FRONTEND"
 npm start > "$ROOT/frontend.log" 2>&1 &
 FRONTEND_PID=$!

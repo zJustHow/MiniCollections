@@ -1,66 +1,47 @@
 package com.zjusthow.minicollections.controller;
 
-import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
-import com.zjusthow.minicollections.model.BrandObjectSearchFacetsDto;
 import com.zjusthow.minicollections.model.GroupBody;
+import com.zjusthow.minicollections.model.GroupCombinedSearchDto;
 import com.zjusthow.minicollections.model.GroupDto;
-import com.zjusthow.minicollections.model.GroupSearchResult;
+import com.zjusthow.minicollections.model.PageResponse;
 import com.zjusthow.minicollections.model.UserObjectBody;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.service.GroupService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/groups")
 public class GroupController {
     private final GroupService groupService;
-    private final DisplayLocaleResolver displayLocaleResolver;
 
-    public GroupController(GroupService groupService, DisplayLocaleResolver displayLocaleResolver) {
+    public GroupController(GroupService groupService) {
         this.groupService = groupService;
-        this.displayLocaleResolver = displayLocaleResolver;
     }
 
     private Long userId(User user) {
         return Long.parseLong(user.getUsername());
     }
 
-    private String effectiveLocale(String acceptLanguage, User user) {
-        return displayLocaleResolver.resolveEffectiveLocale(acceptLanguage, user);
-    }
-
     @GetMapping
-    public ResponseEntity<List<GroupDto>> getGroups(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(groupService.getGroups(userId(user)));
-    }
-
-    @GetMapping("/search/facets")
-    public ResponseEntity<BrandObjectSearchFacetsDto> searchGroupsFacets(
+    public ResponseEntity<PageResponse<GroupDto>> getGroups(
             @AuthenticationPrincipal User user,
-            @RequestParam String keyword,
-            @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage) {
-        return ResponseEntity.ok(groupService.searchCollectionFacets(
-                userId(user), keyword, effectiveLocale(acceptLanguage, user)));
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "48") int size) {
+        return ResponseEntity.ok(groupService.getGroupsPage(userId(user), page, size));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<GroupSearchResult> searchGroups(
+    public ResponseEntity<GroupCombinedSearchDto> searchGroups(
             @AuthenticationPrincipal User user,
             @RequestParam String keyword,
-            @RequestParam(required = false) List<Long> categoryIds,
-            @RequestParam(required = false) List<Long> brandIds,
-            @RequestParam(required = false) List<Long> scaleIds,
-            @RequestParam(required = false) List<Long> seriesIds) {
-        return ResponseEntity.ok(groupService.crossSearch(
-                userId(user), keyword, categoryIds, brandIds, scaleIds, seriesIds));
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "48") int size) {
+        return ResponseEntity.ok(groupService.crossSearchPage(userId(user), keyword, page, size));
     }
 
     @GetMapping("/{groupId}")
@@ -96,18 +77,31 @@ public class GroupController {
     }
 
     @GetMapping("/{groupId}/objects")
-    public ResponseEntity<List<UserObjectDto>> getUserObjects(
+    public ResponseEntity<PageResponse<UserObjectDto>> getUserObjects(
             @AuthenticationPrincipal User user,
-            @PathVariable Long groupId) {
-        return ResponseEntity.ok(groupService.getUserObjects(userId(user), groupId));
+            @PathVariable Long groupId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "48") int size) {
+        return ResponseEntity.ok(groupService.getUserObjectsPage(userId(user), groupId, page, size));
     }
 
     @GetMapping("/{groupId}/objects/search")
-    public ResponseEntity<List<UserObjectDto>> searchUserObjects(
+    public ResponseEntity<PageResponse<UserObjectDto>> searchUserObjects(
             @AuthenticationPrincipal User user,
             @PathVariable Long groupId,
-            @RequestParam String keyword) {
-        return ResponseEntity.ok(groupService.searchUserObjectsByGroupId(userId(user), groupId, keyword));
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "48") int size) {
+        return ResponseEntity.ok(
+                groupService.searchUserObjectsByGroupIdPage(userId(user), groupId, keyword, page, size));
+    }
+
+    @GetMapping("/{groupId}/objects/{userObjectId}")
+    public ResponseEntity<UserObjectDto> getUserObjectById(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long groupId,
+            @PathVariable Long userObjectId) {
+        return ResponseEntity.ok(groupService.getUserObjectById(userId(user), groupId, userObjectId));
     }
 
     @PostMapping("/{groupId}/objects")

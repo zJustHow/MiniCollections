@@ -18,6 +18,20 @@ public interface UserObjectRepository extends ListCrudRepository<UserObjectEntit
 
     Optional<List<UserObjectEntity>> findByGroupId(Long groupId);
 
+    @Query("SELECT COUNT(*) FROM user_objects WHERE group_id = :groupId")
+    long countByGroupId(@Param("groupId") Long groupId);
+
+    @Query("""
+            SELECT * FROM user_objects
+            WHERE group_id = :groupId
+            ORDER BY id ASC
+            LIMIT :limit OFFSET :offset
+            """)
+    List<UserObjectEntity> findPageByGroupId(
+            @Param("groupId") Long groupId,
+            @Param("limit") int limit,
+            @Param("offset") int offset);
+
     /** Detach catalog model from user collections before deleting the brand object. */
     @Modifying
     @Query("UPDATE user_objects SET brand_object_id = NULL WHERE brand_object_id = :brandObjectId")
