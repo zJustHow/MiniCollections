@@ -23,6 +23,8 @@ import {
   purchasePriceFromFormValue,
   formatReleasePrice,
   discardUploadedImage,
+  recordModelView,
+  formatViewCount,
 } from "../utils";
 
 const { useBreakpoint } = Grid;
@@ -62,6 +64,14 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       fetchBrandObject();
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (isAdmin || !objectId) return;
+    const key = `viewed:model:${objectId}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    recordModelView(objectId);
+  }, [objectId, isAdmin]);
 
   const handleAdminDeleteBrandObject = async () => {
     if (!brandObject) return;
@@ -138,6 +148,11 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       .map((value) => (typeof value === "string" ? value.trim() : value))
       .find((value) => value != null && value !== "" && value !== "—") ?? null;
 
+  const viewCountLabel = formatViewCount(
+    brandObject?.view_count ?? brandObject?.viewCount,
+    t,
+  );
+
   const handleCreateUserObject = async () => {
     try {
       const values = await addToGroupForm.validateFields();
@@ -207,6 +222,9 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
               label={t("imageSource")}
               value={brandObject?.image_source ?? brandObject?.imageSource}
             />
+            {viewCountLabel && (
+              <DetailRow label={t("viewCount")} value={viewCountLabel} />
+            )}
             <PanelText
               label={t("description")}
               text={description}

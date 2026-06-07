@@ -316,6 +316,55 @@ export const getBrandObjectById = async (id) => {
   return handleResponse(response);
 };
 
+const ANON_SESSION_KEY = "mc_anon_session";
+
+export function getOrCreateAnonSessionId() {
+  try {
+    let id = localStorage.getItem(ANON_SESSION_KEY);
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem(ANON_SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return null;
+  }
+}
+
+async function recordView(url) {
+  try {
+    const sessionId = getOrCreateAnonSessionId();
+    const response = await fetch(url, {
+      method: "POST",
+      headers: authHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify(sessionId ? { sessionId } : {}),
+    });
+    if (response.status === 204) return;
+  } catch {
+    // ignore view tracking failures
+  }
+}
+
+export const recordBrandView = (brandId) =>
+  recordView(`/brands/${brandId}/views`);
+
+export const recordModelView = (objectId) =>
+  recordView(`/brands/objects/${objectId}/views`);
+
+export function formatViewCount(count, t) {
+  const n = Number(count);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  if (n >= 1_000_000) {
+    const value = (n / 1_000_000).toFixed(1).replace(/\.0$/, "");
+    return t("viewsCountMillion", { count: value });
+  }
+  if (n >= 1_000) {
+    const value = (n / 1_000).toFixed(1).replace(/\.0$/, "");
+    return t("viewsCountThousand", { count: value });
+  }
+  return t("viewsCount", { count: n });
+}
+
 export const searchBrandObjectsPage = async (
   keyword,
   { size = PAGE_SIZE, page = 0, categoryIds = null, brandIds = null, scaleIds = null, seriesIds = null } = {},

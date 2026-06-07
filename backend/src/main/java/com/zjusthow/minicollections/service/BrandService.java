@@ -81,6 +81,7 @@ public class BrandService {
     private final BrandSearchRepository brandSearchRepository;
     private final ImageStorageService imageStorageService;
     private final UserObjectRepository userObjectRepository;
+    private final ViewCountService viewCountService;
 
     @Value("${app.elasticsearch.enabled:true}")
     private boolean elasticsearchEnabled;
@@ -97,7 +98,8 @@ public class BrandService {
             @Autowired(required = false) BrandElasticsearchQueryService brandElasticsearchQueryService,
             @Autowired(required = false) BrandSearchRepository brandSearchRepository,
             @Autowired(required = false) ImageStorageService imageStorageService,
-            UserObjectRepository userObjectRepository) {
+            UserObjectRepository userObjectRepository,
+            ViewCountService viewCountService) {
         this.brandRepository = brandRepository;
         this.brandObjectRepository = brandObjectRepository;
         this.seriesRepository = seriesRepository;
@@ -110,6 +112,7 @@ public class BrandService {
         this.brandSearchRepository = brandSearchRepository;
         this.imageStorageService = imageStorageService;
         this.userObjectRepository = userObjectRepository;
+        this.viewCountService = viewCountService;
     }
 
     private boolean esEnabled() {
@@ -127,7 +130,7 @@ public class BrandService {
         long total = brandRepository.countAll();
         List<BrandEntity> entities = brandRepository.findPage(pageSize, offset(safePage, pageSize));
         List<BrandDto> content = entities.stream()
-                .map(e -> BrandDto.from(e, preferZh))
+                .map(e -> toBrandDto(e, preferZh))
                 .toList();
         return PageResponse.of(content, safePage, pageSize, total, true);
     }
@@ -139,7 +142,7 @@ public class BrandService {
     public BrandDto getBrandById(long id, String effectiveLocale) {
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
         return brandRepository.findById(id)
-                .map(e -> BrandDto.from(e, preferZh))
+                .map(e -> toBrandDto(e, preferZh))
                 .orElseThrow(BrandNotFoundException::new);
     }
 
@@ -696,7 +699,7 @@ public class BrandService {
         List<BrandEntity> entities = brandRepository.searchPage(
                 keyword, pageSize, offset(page, pageSize));
         List<BrandDto> content = entities.stream()
-                .map(e -> BrandDto.from(e, preferZh))
+                .map(e -> toBrandDto(e, preferZh))
                 .toList();
         return PageResponse.of(content, page, pageSize, total, true);
     }
@@ -749,7 +752,7 @@ public class BrandService {
         List<BrandDto> content = loadByIdsInOrder(
                 esResult.ids(),
                 brandRepository::findAllById,
-                e -> BrandDto.from(e, preferZh));
+                e -> toBrandDto(e, preferZh));
         return PageResponse.of(content, page, pageSize, esResult.totalElements(), esResult.totalExact());
     }
 
@@ -814,14 +817,14 @@ public class BrandService {
                     return loadByIdsInOrder(
                             esResult.ids(),
                             brandRepository::findAllById,
-                            e -> BrandDto.from(e, preferZh));
+                            e -> toBrandDto(e, preferZh));
                 }
             } catch (Exception e) {
                 log.warn("Elasticsearch brand slice failed, using SQL fallback: {}", e.getMessage());
             }
         }
         return brandRepository.searchPage(keyword, limit, offset).stream()
-                .map(e -> BrandDto.from(e, preferZh))
+                .map(e -> toBrandDto(e, preferZh))
                 .toList();
     }
 
@@ -923,25 +926,27 @@ public class BrandService {
 
     @CacheEvict(value = "brands", allEntries = true)
     public BrandDto createBrand(BrandBody req, String effectiveLocale) {
-        var entity = new com.zjusthow.minicollections.entity.BrandEntity(null, req.nameEn(), req.nameZh(), req.imageUrl());
+        var entity = new com.zjusthow.minicollections.entity.BrandEntity(
+                null, req.nameEn(), req.nameZh(), req.imageUrl(), 0L);
         var saved = brandRepository.save(entity);
         if (brandEsEnabled()) {
             brandSearchRepository.save(BrandDocument.from(saved));
         }
-        return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
+        return toBrandDto(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
     @CacheEvict(value = {"brands", "brandObjects"}, allEntries = true)
     public BrandDto updateBrand(long id, BrandBody req, String effectiveLocale) {
         BrandEntity existing = brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
         deleteReplacedStoredImage(existing.imageUrl(), req.imageUrl());
-        var updated = new com.zjusthow.minicollections.entity.BrandEntity(id, req.nameEn(), req.nameZh(), req.imageUrl());
+        var updated = new com.zjusthow.minicollections.entity.BrandEntity(
+                id, req.nameEn(), req.nameZh(), req.imageUrl(), existing.viewCount());
         var saved = brandRepository.save(updated);
         if (brandEsEnabled()) {
             brandSearchRepository.save(BrandDocument.from(saved));
         }
         reindexBrandObjectsForBrand(saved);
-        return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
+        return toBrandDto(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
     @CacheEvict(value = "brands", allEntries = true)
@@ -951,12 +956,12 @@ public class BrandService {
         }
         BrandEntity brand = brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
         String imageUrl = imageStorageService.uploadBrandAsset(id, brand.nameEn(), file);
-        var updated = new BrandEntity(id, brand.nameEn(), brand.nameZh(), imageUrl);
+        var updated = new BrandEntity(id, brand.nameEn(), brand.nameZh(), imageUrl, brand.viewCount());
         var saved = brandRepository.save(updated);
         if (brandEsEnabled()) {
             brandSearchRepository.save(BrandDocument.from(saved));
         }
-        return BrandDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
+        return toBrandDto(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
     @CacheEvict(value = {"brands", "brandObjects", "user_objects"}, allEntries = true)
@@ -982,7 +987,7 @@ public class BrandService {
         BrandObjectEntity entity = new BrandObjectEntity(
                 null, req.nameEn(), req.nameZh(), req.imageUrl(), req.imageSource(),
                 req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
-                brandId, req.seriesId(), req.categoryId(), req.scaleId()
+                brandId, req.seriesId(), req.categoryId(), req.scaleId(), 0L
         );
         BrandObjectEntity saved = brandObjectRepository.save(entity);
         indexBrandObject(saved);
@@ -1002,7 +1007,8 @@ public class BrandService {
                 existing.id(), req.nameEn(), req.nameZh(),
                 req.imageUrl(), req.imageSource(),
                 req.releasePriceCny(), req.releasePriceUsd(), req.releaseDate(),
-                existing.brandId(), req.seriesId(), req.categoryId(), req.scaleId()
+                existing.brandId(), req.seriesId(), req.categoryId(), req.scaleId(),
+                existing.viewCount()
         );
         BrandObjectEntity saved = brandObjectRepository.save(updated);
         indexBrandObject(saved);
@@ -1051,7 +1057,16 @@ public class BrandService {
         ScaleEntity scale = entity.scaleId() != null
                 ? scaleRepository.findById(entity.scaleId()).orElse(null)
                 : null;
-        return BrandObjectDto.from(entity, brand, series, category, scale, preferZh);
+        return BrandObjectDto.from(
+                entity, brand, series, category, scale, preferZh,
+                viewCountService.displayModelViewCount(entity.id(), entity.viewCount()));
+    }
+
+    private BrandDto toBrandDto(BrandEntity entity, boolean preferZh) {
+        return BrandDto.from(
+                entity,
+                preferZh,
+                viewCountService.displayBrandViewCount(entity.id(), entity.viewCount()));
     }
 
     private List<BrandObjectDto> toBrandObjectDtos(List<BrandObjectEntity> entities, boolean preferZh) {

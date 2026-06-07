@@ -1,6 +1,7 @@
 package com.zjusthow.minicollections.repository;
 
 import com.zjusthow.minicollections.entity.BrandEntity;
+import org.springframework.data.jdbc.repository.query.Modifying;
 import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -35,4 +36,8 @@ public interface BrandRepository extends ListCrudRepository<BrandEntity, Long> {
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
             """)
     long countSearch(@Param("keyword") String keyword);
+
+    @Modifying
+    @Query("UPDATE brands SET view_count = view_count + :delta WHERE id = :id")
+    void incrementViewCount(@Param("id") long id, @Param("delta") long delta);
 }

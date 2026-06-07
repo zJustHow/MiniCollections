@@ -33,7 +33,8 @@ public record BrandObjectDto(
         String categoryEn,
         String categoryZh,
         Long scaleId,
-        String scale
+        String scale,
+        long viewCount
 ) {
 
     public static BrandObjectDto from(
@@ -43,6 +44,17 @@ public record BrandObjectDto(
             CategoryEntity category,
             ScaleEntity scale,
             boolean preferZh) {
+        return from(entity, brand, series, category, scale, preferZh, entity.viewCount());
+    }
+
+    public static BrandObjectDto from(
+            BrandObjectEntity entity,
+            BrandEntity brand,
+            SeriesEntity series,
+            CategoryEntity category,
+            ScaleEntity scale,
+            boolean preferZh,
+            long viewCount) {
         String name = DisplayLocaleResolver.pickName(entity.nameEn(), entity.nameZh(), preferZh);
         String brandEn = brand != null ? brand.nameEn() : null;
         String brandZh = brand != null ? brand.nameZh() : null;
@@ -76,7 +88,8 @@ public record BrandObjectDto(
                 catEn,
                 catZh,
                 entity.scaleId(),
-                scale != null ? scale.code() : null
+                scale != null ? scale.code() : null,
+                viewCount
         );
     }
 }

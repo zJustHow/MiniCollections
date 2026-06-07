@@ -38,7 +38,8 @@ public record BrandObjectDocument(
         String categoryEn,
         @Field(name = "category_zh", type = FieldType.Text) String categoryZh,
         @Field(name = "scale_id", type = FieldType.Long) Long scaleId,
-        @Field(name = "scale", type = FieldType.Keyword) String scale
+        @Field(name = "scale", type = FieldType.Keyword) String scale,
+        @Field(name = "view_count", type = FieldType.Long) long viewCount
 ) {
     public static BrandObjectDocument from(
             BrandObjectEntity e,
@@ -56,7 +57,8 @@ public record BrandObjectDocument(
                 e.brandId(), brandNameEn, brandNameZh,
                 e.seriesId(), seriesEn, seriesZh,
                 e.categoryId(), categoryEn, categoryZh,
-                e.scaleId(), scaleCode
+                e.scaleId(), scaleCode,
+                e.viewCount()
         );
     }
 }

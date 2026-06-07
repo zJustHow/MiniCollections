@@ -8,17 +8,23 @@ public record BrandDto(
         String name,
         String nameEn,
         String nameZh,
-        String imageUrl
+        String imageUrl,
+        long viewCount
 ) {
 
     public static BrandDto from(BrandEntity entity, boolean preferZh) {
+        return from(entity, preferZh, entity.viewCount());
+    }
+
+    public static BrandDto from(BrandEntity entity, boolean preferZh, long viewCount) {
         String name = DisplayLocaleResolver.pickName(entity.nameEn(), entity.nameZh(), preferZh);
         return new BrandDto(
                 entity.id(),
                 name,
                 entity.nameEn(),
                 entity.nameZh(),
-                entity.imageUrl()
+                entity.imageUrl(),
+                viewCount
         );
     }
 }

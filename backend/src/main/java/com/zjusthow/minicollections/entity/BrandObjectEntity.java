@@ -19,6 +19,7 @@ public record BrandObjectEntity(
         Long brandId,
         Long seriesId,
         Long categoryId,
-        Long scaleId
+        Long scaleId,
+        long viewCount
 ) {
 }

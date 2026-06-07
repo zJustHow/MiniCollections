@@ -31,6 +31,7 @@ import {
   searchBrandObjectsByBrandIdFacets,
   adminDeleteBrand,
   PAGE_SIZE,
+  recordBrandView,
 } from "../utils";
 
 const { Search } = NeuInput;
@@ -146,6 +147,14 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
     }
   }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (isAdmin || !brandId) return;
+    const key = `viewed:brand:${brandId}`;
+    if (sessionStorage.getItem(key)) return;
+    sessionStorage.setItem(key, "1");
+    recordBrandView(brandId);
+  }, [brandId, isAdmin]);
 
   useEffect(() => {
     const keyword = (searchValue ?? "").trim();

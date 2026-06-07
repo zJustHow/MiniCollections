@@ -59,6 +59,7 @@ public class AppConfig {
                                 .requestMatchers(HttpMethod.GET, "/auth/wechat/url").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/auth/wechat/exchange").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/brands", "/brands/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/brands/*/views", "/brands/objects/*/views").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/categories").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/scales").permitAll()
                                 .requestMatchers("/admin/**").hasRole("ADMIN")

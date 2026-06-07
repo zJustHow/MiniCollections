@@ -8,6 +8,7 @@ public record BrandEntity(
         @Id Long id,
         String nameEn,
         String nameZh,
-        String imageUrl
+        String imageUrl,
+        long viewCount
 ) {
 }

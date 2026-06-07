@@ -22,7 +22,7 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('1/18 Audi 2021 R8 Coupé Silver', '1/18 奥迪 2021 R8 Coupé 银色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf035-4.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 33, 1, 18),
 ('1/18 Audi 2021 R8 Coupé Blue', '1/18 奥迪 2021 R8 Coupé 蓝色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf035-5.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 33, 1, 18),
 ('1/18 2021 Audi R8 GT RWD Red', '1/18 2021 奥迪 R8 GT RWD 红色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf035-6.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 33, 1, 18),
-('1/18 2021 Audi R8 GT RWD Light Grey', '1/18 2021 奥迪 R8 GT RWD Light 灰色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf035-7.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 33, 1, 18),
+('1/18 2021 Audi R8 GT RWD Light Grey', '1/18 2021 奥迪 R8 GT RWD 浅灰色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf035-7.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 33, 1, 18),
 ('1/18 2021 Audi R8 GT RWD Green', '1/18 2021 奥迪 R8 GT RWD 绿色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf035-8.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 33, 1, 18),
 ('1/64 Audi 2021 R8 Black', '1/64 奥迪 2021 R8 黑色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf036-1.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 33, 1, 64),
 ('1/64 Audi 2021 R8 Silver', '1/64 奥迪 2021 R8 银色', 'http://localhost:9000/minicollections-media/kengfai/tk-kf036-2.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 33, 1, 64),

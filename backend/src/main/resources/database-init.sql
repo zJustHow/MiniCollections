@@ -1,4 +1,6 @@
 DROP TABLE IF EXISTS object_submissions;
+DROP TABLE IF EXISTS page_view_daily_stats;
+DROP TABLE IF EXISTS page_view_events;
 DROP TABLE IF EXISTS authorities;
 DROP TABLE IF EXISTS user_objects;
 DROP TABLE IF EXISTS groups;
@@ -45,8 +47,11 @@ CREATE TABLE brands
     id                  SERIAL PRIMARY KEY  NOT NULL,
     name_en             VARCHAR(512)        NOT NULL,
     name_zh             VARCHAR(512),
-    image_url           TEXT
+    image_url           TEXT,
+    view_count          BIGINT              NOT NULL DEFAULT 0
 );
+
+CREATE INDEX idx_brands_view_count ON brands (view_count DESC);
 
 CREATE TABLE series
 (
@@ -191,15 +196,43 @@ CREATE TABLE brand_objects
     series_id           INTEGER,
     category_id         INTEGER,
     scale_id            INTEGER,
+    view_count          BIGINT              NOT NULL DEFAULT 0,
     CONSTRAINT fk_brand FOREIGN KEY (brand_id) REFERENCES brands (id),
     CONSTRAINT fk_series FOREIGN KEY (series_id) REFERENCES series (id) ON DELETE SET NULL,
     CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL,
     CONSTRAINT fk_scale FOREIGN KEY (scale_id) REFERENCES scales (id) ON DELETE SET NULL
 );
 
+CREATE INDEX idx_brand_objects_view_count ON brand_objects (view_count DESC);
 CREATE INDEX idx_brand_objects_series_id ON brand_objects (series_id);
 CREATE INDEX idx_brand_objects_category_id ON brand_objects (category_id);
 CREATE INDEX idx_brand_objects_scale_id ON brand_objects (scale_id);
+
+CREATE TABLE page_view_events
+(
+    id              BIGSERIAL PRIMARY KEY  NOT NULL,
+    entity_type     VARCHAR(16)            NOT NULL,
+    entity_id       BIGINT                 NOT NULL,
+    visitor_hash    VARCHAR(128)           NOT NULL,
+    viewed_at       TIMESTAMPTZ            NOT NULL DEFAULT NOW(),
+    CONSTRAINT chk_page_view_events_entity_type CHECK (entity_type IN ('BRAND', 'MODEL'))
+);
+
+CREATE INDEX idx_page_view_events_viewed_at ON page_view_events (viewed_at);
+CREATE INDEX idx_page_view_events_entity ON page_view_events (entity_type, entity_id, viewed_at DESC);
+
+CREATE TABLE page_view_daily_stats
+(
+    entity_type     VARCHAR(16)            NOT NULL,
+    entity_id       BIGINT                 NOT NULL,
+    stat_date       DATE                   NOT NULL,
+    pv              BIGINT                 NOT NULL DEFAULT 0,
+    uv              BIGINT                 NOT NULL DEFAULT 0,
+    PRIMARY KEY (entity_type, entity_id, stat_date),
+    CONSTRAINT chk_page_view_daily_stats_entity_type CHECK (entity_type IN ('BRAND', 'MODEL'))
+);
+
+CREATE INDEX idx_page_view_daily_stats_date ON page_view_daily_stats (stat_date DESC);
 
 CREATE TABLE user_objects
 (

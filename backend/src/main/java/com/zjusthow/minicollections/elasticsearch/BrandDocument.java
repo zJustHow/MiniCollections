@@ -15,9 +15,11 @@ public record BrandDocument(
                analyzer = "brand_name_index", searchAnalyzer = "brand_name_search")
         String nameEn,
         @Field(name = "name_zh", type = FieldType.Text)
-        String nameZh
+        String nameZh,
+        @Field(name = "view_count", type = FieldType.Long)
+        long viewCount
 ) {
     public static BrandDocument from(BrandEntity e) {
-        return new BrandDocument(e.id(), e.nameEn(), e.nameZh());
+        return new BrandDocument(e.id(), e.nameEn(), e.nameZh(), e.viewCount());
     }
 }

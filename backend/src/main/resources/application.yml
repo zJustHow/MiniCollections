@@ -143,6 +143,11 @@ app:
   verification:
     otp-ttl-seconds: 300
     resend-cooldown-seconds: 60
+  view-count:
+    dedup-minutes: ${VIEW_COUNT_DEDUP_MINUTES:30}
+    flush-interval-ms: ${VIEW_COUNT_FLUSH_INTERVAL_MS:120000}
+    event-retention-days: ${VIEW_COUNT_EVENT_RETENTION_DAYS:30}
+    purge-events-cron: ${VIEW_COUNT_PURGE_EVENTS_CRON:0 0 4 * * ?}
   elasticsearch:
     enabled: ${ELASTICSEARCH_ENABLED:true}
   s3:
