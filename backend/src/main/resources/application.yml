@@ -166,6 +166,17 @@ logging:
   level:
     root: INFO
 ---
+# One-off batch: normalize raster brand logos in MinIO (no HTTP server).
+spring:
+  config:
+    activate:
+      on-profile: normalize-brand-logos
+  main:
+    web-application-type: none
+  sql:
+    init:
+      mode: never
+---
 # Development: SQL and request logs for debugging
 spring:
   config:

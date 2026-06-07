@@ -1,5 +1,24 @@
 {
   "analysis": {
+    "char_filter": {
+      "remove_hyphens": {
+        "type": "pattern_replace",
+        "pattern": "-",
+        "replacement": ""
+      },
+      "normalize_scale_ratio": {
+        "type": "pattern_replace",
+        "pattern": "/",
+        "replacement": ":"
+      }
+    },
+    "normalizer": {
+      "scale_normalizer": {
+        "type": "custom",
+        "char_filter": ["normalize_scale_ratio"],
+        "filter": ["lowercase"]
+      }
+    },
     "filter": {
       "brand_wdg": {
         "type": "word_delimiter_graph",
@@ -10,11 +29,13 @@
     "analyzer": {
       "brand_name_index": {
         "type": "custom",
+        "char_filter": ["remove_hyphens"],
         "tokenizer": "keyword",
-        "filter": ["lowercase", "brand_wdg"]
+        "filter": ["brand_wdg", "lowercase"]
       },
       "brand_name_search": {
         "type": "custom",
+        "char_filter": ["remove_hyphens"],
         "tokenizer": "whitespace",
         "filter": ["lowercase"]
       }

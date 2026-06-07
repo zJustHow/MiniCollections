@@ -7,6 +7,7 @@ import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { signup, COUNTRIES } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import { detectBrowserLocale } from "../../i18n";
+import { PHONE_AUTH_ENABLED } from "./authFeatures";
 
 function SignupForm({ linkMode = false }) {
   const { message } = App.useApp();
@@ -69,7 +70,10 @@ function SignupForm({ linkMode = false }) {
             buttonStyle="solid"
           >
             <Radio.Button value="email">{t("registerWithEmail")}</Radio.Button>
-            <Radio.Button value="phone">{t("registerWithPhone")}</Radio.Button>
+            <Radio.Button value="phone" disabled={!PHONE_AUTH_ENABLED}>
+              {t("registerWithPhone")}
+              {!PHONE_AUTH_ENABLED && ` (${t("underDevelopment")})`}
+            </Radio.Button>
           </Radio.Group>
         </div>
 

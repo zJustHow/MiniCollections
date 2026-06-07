@@ -20,6 +20,10 @@ public record BrandDocument(
         long viewCount
 ) {
     public static BrandDocument from(BrandEntity e) {
-        return new BrandDocument(e.id(), e.nameEn(), e.nameZh(), e.viewCount());
+        return new BrandDocument(
+                e.id(),
+                BrandNameForSearch.forIndex(e.nameEn()),
+                e.nameZh(),
+                e.viewCount());
     }
 }

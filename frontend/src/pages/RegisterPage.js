@@ -14,6 +14,7 @@ import { signup, sendCode, COUNTRIES } from "../utils";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
 import { detectBrowserLocale } from "../i18n";
+import { PHONE_AUTH_ENABLED } from "../components/auth/authFeatures";
 
 const { Header, Content } = Layout;
 
@@ -154,11 +155,21 @@ export default function RegisterPage() {
             </NeuPressableButton>
             <NeuPressableButton
               active={registerType === "phone"}
-              style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
-              onClick={() => handleTypeChange("phone")}
+              disabled={!PHONE_AUTH_ENABLED}
+              style={{
+                flex: 1,
+                padding: "8px 0",
+                fontSize: 13,
+                opacity: PHONE_AUTH_ENABLED ? 1 : 0.6,
+                cursor: PHONE_AUTH_ENABLED ? "pointer" : "not-allowed",
+              }}
+              onClick={() => PHONE_AUTH_ENABLED && handleTypeChange("phone")}
             >
               <PhoneOutlined style={{ marginRight: 6 }} />
               {t("registerWithPhone")}
+              {!PHONE_AUTH_ENABLED && (
+                <span style={{ marginLeft: 4, fontSize: 11 }}>({t("underDevelopment")})</span>
+              )}
             </NeuPressableButton>
           </div>
 

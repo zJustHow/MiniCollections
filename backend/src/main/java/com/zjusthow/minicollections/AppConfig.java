@@ -2,6 +2,7 @@ package com.zjusthow.minicollections;
 
 import com.zjusthow.minicollections.config.JwtAuthFilter;
 import com.zjusthow.minicollections.service.MultiLoginUserDetailsService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,6 +43,7 @@ public class AppConfig {
     }
 
     @Bean
+    @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     public SecurityFilterChain filterChain(
             HttpSecurity http,
             DaoAuthenticationProvider authProvider,

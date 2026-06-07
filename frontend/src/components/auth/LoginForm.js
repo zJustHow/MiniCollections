@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { login, getWechatAuthUrl, COUNTRIES } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import { radius } from "../../theme/radius";
+import { PHONE_AUTH_ENABLED, WECHAT_AUTH_ENABLED } from "./authFeatures";
 
 const isWechatBrowser = () => /MicroMessenger/i.test(navigator.userAgent);
 const isMobileBrowser = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -29,6 +30,7 @@ function LoginForm({ onSuccess }) {
   };
 
   const handleWechatLogin = async () => {
+    if (!WECHAT_AUTH_ENABLED) return;
     setWechatLoading(true);
     setError(null);
     try {
@@ -70,22 +72,44 @@ function LoginForm({ onSuccess }) {
       {/* 微信浏览器内：一键登录置顶 */}
       {inWeChat && (
         <>
-          <NeuPressableButton
-            onClick={handleWechatLogin}
-            disabled={wechatLoading}
-            style={{
-              width: "100%",
-              padding: "12px 0",
-              fontSize: 15,
-              borderRadius: radius.md,
-              marginBottom: 8,
-              background: "#07C160",
-              color: "#fff",
-            }}
-          >
-            <WechatOutlined style={{ marginRight: 8, fontSize: 20 }} />
-            {wechatLoading ? t("wechatLoggingIn") : t("loginWithWechat")}
-          </NeuPressableButton>
+          {WECHAT_AUTH_ENABLED ? (
+            <NeuPressableButton
+              onClick={handleWechatLogin}
+              disabled={wechatLoading}
+              style={{
+                width: "100%",
+                padding: "12px 0",
+                fontSize: 15,
+                borderRadius: radius.md,
+                marginBottom: 8,
+                background: "#07C160",
+                color: "#fff",
+              }}
+            >
+              <WechatOutlined style={{ marginRight: 8, fontSize: 20 }} />
+              {wechatLoading ? t("wechatLoggingIn") : t("loginWithWechat")}
+            </NeuPressableButton>
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 8,
+                width: "100%",
+                padding: "12px 0",
+                fontSize: 15,
+                borderRadius: radius.md,
+                marginBottom: 8,
+                boxShadow: "var(--inset)",
+                color: "var(--neu-text-2)",
+                opacity: 0.75,
+              }}
+            >
+              <WechatOutlined style={{ fontSize: 20, color: "#07C160" }} />
+              {t("loginWithWechat")} ({t("underDevelopment")})
+            </div>
+          )}
           <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "12px 0" }}>
             <div style={{ flex: 1, height: 1, background: "var(--neu-border)" }} />
             <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>or</span>
@@ -115,11 +139,21 @@ function LoginForm({ onSuccess }) {
         </NeuPressableButton>
         <NeuPressableButton
           active={loginType === "phone"}
-          style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
-          onClick={() => handleTypeChange("phone")}
+          disabled={!PHONE_AUTH_ENABLED}
+          style={{
+            flex: 1,
+            padding: "8px 0",
+            fontSize: 13,
+            opacity: PHONE_AUTH_ENABLED ? 1 : 0.6,
+            cursor: PHONE_AUTH_ENABLED ? "pointer" : "not-allowed",
+          }}
+          onClick={() => PHONE_AUTH_ENABLED && handleTypeChange("phone")}
         >
           <PhoneOutlined style={{ marginRight: 6 }} />
           {t("registerWithPhone")}
+          {!PHONE_AUTH_ENABLED && (
+            <span style={{ marginLeft: 4, fontSize: 11 }}>({t("underDevelopment")})</span>
+          )}
         </NeuPressableButton>
       </div>
 
@@ -257,33 +291,53 @@ function LoginForm({ onSuccess }) {
             <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>or</span>
             <div style={{ flex: 1, height: 1, background: "var(--neu-border)" }} />
           </div>
-          {inMobileNonWeChat ? (
-            // 手机普通浏览器：提示在微信内打开
+          {WECHAT_AUTH_ENABLED ? (
+            inMobileNonWeChat ? (
+              // 手机普通浏览器：提示在微信内打开
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  padding: "10px 14px",
+                  borderRadius: radius.md,
+                  boxShadow: "var(--inset)",
+                  color: "var(--neu-text-2)",
+                  fontSize: 13,
+                }}
+              >
+                <WechatOutlined style={{ color: "#07C160", fontSize: 18, flexShrink: 0 }} />
+                {t("wechatOpenInApp")}
+              </div>
+            ) : (
+              // PC 浏览器：微信扫码按钮
+              <NeuPressableButton
+                onClick={handleWechatLogin}
+                disabled={wechatLoading}
+                style={{ width: "100%", padding: "10px 0", fontSize: 14, borderRadius: radius.md }}
+              >
+                <WechatOutlined style={{ marginRight: 8, color: "#07C160", fontSize: 18 }} />
+                {wechatLoading ? t("wechatLoggingIn") : t("loginWithWechat")}
+              </NeuPressableButton>
+            )
+          ) : (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
+                justifyContent: "center",
+                gap: 8,
                 padding: "10px 14px",
                 borderRadius: radius.md,
                 boxShadow: "var(--inset)",
                 color: "var(--neu-text-2)",
                 fontSize: 13,
+                opacity: 0.75,
               }}
             >
               <WechatOutlined style={{ color: "#07C160", fontSize: 18, flexShrink: 0 }} />
-              {t("wechatOpenInApp")}
+              {t("loginWithWechat")} ({t("underDevelopment")})
             </div>
-          ) : (
-            // PC 浏览器：微信扫码按钮
-            <NeuPressableButton
-              onClick={handleWechatLogin}
-              disabled={wechatLoading}
-              style={{ width: "100%", padding: "10px 0", fontSize: 14, borderRadius: radius.md }}
-            >
-              <WechatOutlined style={{ marginRight: 8, color: "#07C160", fontSize: 18 }} />
-              {wechatLoading ? t("wechatLoggingIn") : t("loginWithWechat")}
-            </NeuPressableButton>
           )}
         </>
       )}

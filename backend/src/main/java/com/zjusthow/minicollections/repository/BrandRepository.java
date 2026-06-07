@@ -40,4 +40,8 @@ public interface BrandRepository extends ListCrudRepository<BrandEntity, Long> {
     @Modifying
     @Query("UPDATE brands SET view_count = view_count + :delta WHERE id = :id")
     void incrementViewCount(@Param("id") long id, @Param("delta") long delta);
+
+    @Modifying
+    @Query("UPDATE brands SET image_url = :imageUrl WHERE id = :id")
+    void updateImageUrl(@Param("id") long id, @Param("imageUrl") String imageUrl);
 }
