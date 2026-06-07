@@ -8,6 +8,16 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.resolve(__dirname, "public");
 const proxyTarget = "http://localhost:8080";
 
+function resolvePublicFilePathname(pathname) {
+  const relativePath = pathname.replace(/^\//, "");
+  if (!relativePath) return null;
+  const publicPath = path.join(publicDir, relativePath);
+  if (fs.existsSync(publicPath) && fs.statSync(publicPath).isFile()) {
+    return pathname;
+  }
+  return null;
+}
+
 function shouldProxy(req) {
   const url = req.url ?? "";
   const pathname = url.split("?")[0] ?? "";
@@ -23,8 +33,7 @@ function shouldProxy(req) {
   }
 
   if (req.method === "GET") {
-    const publicPath = path.join(publicDir, pathname);
-    if (fs.existsSync(publicPath) && fs.statSync(publicPath).isFile()) {
+    if (resolvePublicFilePathname(pathname)) {
       return false;
     }
 
@@ -38,20 +47,28 @@ function shouldProxy(req) {
 }
 
 function proxyBypass(req) {
-  if (shouldProxy(req)) {
-    return;
+  const url = req.url ?? "";
+  const pathname = url.split("?")[0] ?? "";
+
+  if (req.method === "GET") {
+    const publicFile = resolvePublicFilePathname(pathname);
+    if (publicFile) return publicFile;
+
+    const accept = req.headers.accept ?? "";
+    if (accept.includes("text/html")) {
+      return "/index.html";
+    }
   }
 
-  const accept = req.headers.accept ?? "";
-  if (req.method === "GET" && accept.includes("text/html")) {
-    return "/index.html";
+  if (!shouldProxy(req)) {
+    return false;
   }
 
-  return false;
+  return undefined;
 }
 
 const apiProxy = {
-  "^/(?!@|src|node_modules).*": {
+  "^/(?!@|src|node_modules|assets|manifest\\.json|robots\\.txt).*": {
     target: proxyTarget,
     changeOrigin: true,
     bypass: proxyBypass,

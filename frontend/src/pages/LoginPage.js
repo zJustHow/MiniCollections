@@ -1,5 +1,6 @@
 import { Layout } from "antd";
 import LoginForm from "../components/auth/LoginForm";
+import SiteLogo from "../components/SiteLogo";
 
 const { Header, Content } = Layout;
 
@@ -14,9 +15,7 @@ export default function LoginPage({ onSuccess }) {
           paddingRight: 32,
         }}
       >
-        <span className="header-logo">
-          Mini <span className="header-logo-accent">Collections</span>
-        </span>
+        <SiteLogo />
       </Header>
       <Content
         style={{

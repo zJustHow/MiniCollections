@@ -1,5 +1,6 @@
-import { CheckOutlined, CloseOutlined, DeleteOutlined } from "@ant-design/icons";
+import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
 import HeaderActionButton from "./HeaderActionButton";
+import ConfirmDeleteButton from "./ConfirmDeleteButton";
 
 export default function DrawerHeaderTitle({
   title,
@@ -17,40 +18,41 @@ export default function DrawerHeaderTitle({
 
   return (
     <div className="neu-drawer-toolbar">
-      <div className="neu-drawer-toolbar-actions">
-        <HeaderActionButton
-          icon={<CloseOutlined />}
-          onClick={onClose}
-          aria-label="Close"
-        />
-      </div>
-      {hasEndActions && (
-        <div className="neu-drawer-toolbar-actions neu-drawer-toolbar-actions-end">
-          {onDelete && (
-            <HeaderActionButton
-              danger
-              icon={<DeleteOutlined />}
-              onClick={onDelete}
-              aria-label={deleteLabel}
-            />
-          )}
-          {onOk && (
-            <HeaderActionButton
-              icon={<CheckOutlined />}
-              onClick={onOk}
-              loading={confirmLoading}
-              danger={danger}
-              disabled={disabled}
-              aria-label={okText}
-              {...restOkButtonProps}
-            />
-          )}
-          {trailing}
+      <div className="header-slot-bar">
+        <div className="header-slot-actions">
+          <HeaderActionButton
+            icon={<CloseOutlined />}
+            onClick={onClose}
+            aria-label="Close"
+          />
         </div>
-      )}
-      {title != null && title !== "" && (
-        <div className="neu-drawer-toolbar-title">{title}</div>
-      )}
+        {hasEndActions && (
+          <div className="header-slot-actions header-slot-actions-end">
+            {onDelete && (
+              <ConfirmDeleteButton
+                variant="header"
+                onConfirm={onDelete}
+                deleteLabel={deleteLabel}
+              />
+            )}
+            {onOk && (
+              <HeaderActionButton
+                icon={<CheckOutlined />}
+                onClick={onOk}
+                loading={confirmLoading}
+                danger={danger}
+                disabled={disabled}
+                aria-label={okText}
+                {...restOkButtonProps}
+              />
+            )}
+            {trailing}
+          </div>
+        )}
+        {title != null && title !== "" && (
+          <span className="header-slot-title">{title}</span>
+        )}
+      </div>
     </div>
   );
 }

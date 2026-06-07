@@ -1,4 +1,5 @@
 import NeuPressableButton from "../components/NeuPressableButton";
+import SiteLogo from "../components/SiteLogo";
 import NeuButton from "../components/NeuButton";
 import { App, Form, Layout } from "antd";
 import { NeuInput, NeuSelect } from "../components/NeuFormControl";
@@ -116,9 +117,7 @@ export default function RegisterPage() {
           paddingRight: 32,
         }}
       >
-        <span className="header-logo">
-          Mini <span className="header-logo-accent">Collections</span>
-        </span>
+        <SiteLogo />
       </Header>
       <Content
         style={{

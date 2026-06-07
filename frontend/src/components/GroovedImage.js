@@ -5,7 +5,6 @@ import {
   IMAGE_ACTION_RESERVE_PX,
 } from "./useAdaptiveImageFrame";
 import { resolveMediaUrl } from "../utils";
-import { neuRem } from "../theme/fontScale";
 
 export default function GroovedImage({
   imageUrl,
@@ -32,13 +31,15 @@ export default function GroovedImage({
 
   const placeholderStyle =
     placeholderSize != null
-      ? { fontSize: neuRem(placeholderSize), color: "var(--neu-text-2)" }
-      : { color: "var(--neu-text-2)" };
+      ? { "--neu-placeholder-icon-size": `${placeholderSize}px` }
+      : undefined;
+
+  const iconStyle = { color: "var(--neu-text-2)" };
 
   const placeholder = (
     <div className="neu-card-image-frame neu-card-image-frame--fill">
-      <div className="neu-card-image-placeholder">
-        <PlaceholderIcon style={placeholderStyle} />
+      <div className="neu-card-image-placeholder" style={placeholderStyle}>
+        <PlaceholderIcon style={iconStyle} />
       </div>
       <div className="neu-card-image-groove" aria-hidden="true" />
     </div>

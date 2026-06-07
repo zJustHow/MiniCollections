@@ -182,6 +182,9 @@ const en = {
   edit: "Edit",
   delete: "Delete",
   cancel: "Cancel",
+  confirmDelete: "CONFIRM",
+  confirmReject: "CONFIRM",
+  confirmClose: "CONFIRM",
 
   // Admin
   adminPanel: "Admin",
@@ -520,6 +523,9 @@ const zh = {
   edit: "编辑",
   delete: "删除",
   cancel: "取消",
+  confirmDelete: "确认删除",
+  confirmReject: "确认拒绝",
+  confirmClose: "确认关闭",
 
   // Admin
   adminPanel: "管理",

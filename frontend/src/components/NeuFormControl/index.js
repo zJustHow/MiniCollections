@@ -6,7 +6,6 @@ import {
   attachNeuSelectPopup,
   mapNeuSelectOptions,
   NEU_SELECT_POPUP_MARKER,
-  withNeuSelectOptionClassName,
 } from "./selectPopup";
 import {
   setupPickerCellPress,
@@ -16,7 +15,7 @@ import {
 /** Default width for controls inside vertical Form.Item layouts */
 export const NEU_CONTROL_FULL_WIDTH = { width: "100%" };
 
-/** Inset shadow for focus — matches --inset in skeuomorphic.css */
+/** Inset shadow for focus — matches --inset in neumorphism.css */
 export const NEU_INSET_ACTIVE_SHADOW =
   "inset 2px 2px 5px #b8b9be, inset -3px -3px 7px #ffffff";
 
@@ -135,7 +134,7 @@ NeuInputBase.Search = NeuInputSearch;
 
 /**
  * Neumorphic form controls — layout defaults; theme tokens via root ConfigProvider.
- * Raised/inset visuals: styles/skeuomorphic.css
+ * Raised/inset visuals: styles/neumorphism.css
  */
 export const NeuInput = NeuInputBase;
 
@@ -156,15 +155,7 @@ function buildNeuSelectPopupClass(
     .join(" ");
 }
 
-const NeuSelectOption = function NeuSelectOption({ className, ...props }) {
-  return (
-    <Select.Option
-      className={withNeuSelectOptionClassName(className)}
-      {...props}
-    />
-  );
-};
-NeuSelectOption.displayName = "NeuSelect.Option";
+const NeuSelectOption = Select.Option;
 
 export const NeuSelect = React.forwardRef(function NeuSelect(
   {
@@ -190,6 +181,16 @@ export const NeuSelect = React.forwardRef(function NeuSelect(
     classNames?.popup?.root
   );
   const neuOptions = React.useMemo(() => mapNeuSelectOptions(options), [options]);
+  const mergedClassNames = React.useMemo(
+    () => ({
+      ...classNames,
+      popup: {
+        ...classNames?.popup,
+        root: mergedPopupClass,
+      },
+    }),
+    [classNames, mergedPopupClass]
+  );
 
   React.useEffect(
     () => () => {
@@ -216,9 +217,8 @@ export const NeuSelect = React.forwardRef(function NeuSelect(
     <Select
       ref={ref}
       style={neuControlStyle(style, fullWidth)}
-      popupClassName={mergedPopupClass}
-      classNames={classNames}
-      options={neuOptions}
+      classNames={mergedClassNames}
+      {...(neuOptions ? { options: neuOptions } : {})}
       onOpenChange={handleOpenChange}
       {...props}
     />
@@ -289,6 +289,16 @@ export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
   const mergedPopupClass = [popupClassRef.current, popupClassName, classNames?.popup?.root]
     .filter(Boolean)
     .join(" ");
+  const mergedClassNames = React.useMemo(
+    () => ({
+      ...classNames,
+      popup: {
+        ...classNames?.popup,
+        root: mergedPopupClass,
+      },
+    }),
+    [classNames, mergedPopupClass]
+  );
 
   const handleOpenChange = (open, ...rest) => {
     if (open) {
@@ -311,8 +321,7 @@ export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
       style={neuControlStyle(style, fullWidth)}
       onOpenChange={handleOpenChange}
       onPanelChange={handlePanelChange}
-      popupClassName={mergedPopupClass}
-      classNames={classNames}
+      classNames={mergedClassNames}
       cellRender={neuCellRender}
       {...props}
     />

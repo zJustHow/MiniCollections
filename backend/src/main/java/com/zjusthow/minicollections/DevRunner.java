@@ -35,7 +35,25 @@ public class DevRunner implements ApplicationRunner {
     /** Enough objects in one group for 3 detail pages (47 + 48 + 5 with add-card slot). */
     private static final int MOCK_OBJECTS_IN_MAIN_GROUP = 100;
 
+    /** Feedback FEEDBACK_PAGE_SIZE=24 → 3+ pages for user@email.com. */
+    private static final int MOCK_USER1_PENDING_COUNT = 55;
+    private static final int MOCK_USER1_APPROVED_COUNT = 12;
+    private static final int MOCK_USER1_REJECTED_COUNT = 5;
+
+    /** Feedback FEEDBACK_PAGE_SIZE=24 → 3+ pages for admin@email.com. */
+    private static final int MOCK_ADMIN_PENDING_COUNT = 40;
+    private static final int MOCK_ADMIN_APPROVED_COUNT = 20;
+    private static final int MOCK_ADMIN_REJECTED_COUNT = 10;
+
+    /** Extra pending items from a second user (admin pending tab pageSize=20). */
+    private static final int MOCK_USER2_PENDING_COUNT = 18;
+
+    /** Admin Table pageSize=20 → 2+ pages on approved / rejected tabs. */
+    private static final int MOCK_EXTRA_APPROVED_COUNT = 28;
+    private static final int MOCK_EXTRA_REJECTED_COUNT = 28;
+
     private static final int BRAND_OBJECT_BATCH_SIZE = 48;
+    private static final String[] SUBMISSION_TYPES = {"MISSING_MODEL", "DATA_CORRECTION", "BUG_REPORT"};
 
     private final BrandObjectRepository brandObjectRepository;
     private final GroupRepository groupRepository;
@@ -63,9 +81,10 @@ public class DevRunner implements ApplicationRunner {
         userService.grantAdminRole(adminId);
 
         Long userId = userService.signUp("user@email.com", null, "secret", "user", null);
+        Long user2Id = userService.signUp("user2@email.com", null, "secret", "user2", null);
 
         seedAdminCollection(adminId);
-        seedPendingSubmissions(userId);
+        seedSubmissions(userId, user2Id, adminId);
 
         logger.info("Dev seed data loaded.");
     }
@@ -172,32 +191,156 @@ public class DevRunner implements ApplicationRunner {
         }
     }
 
-    private void seedPendingSubmissions(Long userId) {
-        OffsetDateTime now = OffsetDateTime.now();
-        submissionRepository.saveAll(List.of(
-                new ObjectSubmissionEntity(
-                        null, userId, "MISSING_MODEL",
-                        "Nissan Skyline GT-R V.spec II Nür", "日产 Skyline GT-R V.spec II Nür",
-                        null, new BigDecimal("150.00"), null, LocalDate.of(2024, 6, 1),
-                        4L, null, null, 1L, 64L,
-                        "Missing TLV release from 2024 catalog.", "PENDING", now,
-                        null, null, null, null
-                ),
-                new ObjectSubmissionEntity(
-                        null, userId, "DATA_CORRECTION",
-                        "Honda Civic Type R (FK8) Championship White", null,
-                        null, null, null, null,
-                        1L, null, 1019L, 1L, 64L,
-                        "Release date should be 2018-03, not blank.", "PENDING", now,
-                        null, null, null, null
-                ),
-                new ObjectSubmissionEntity(
-                        null, userId, "BUG_REPORT",
-                        null, null, null, null, null, null,
-                        null, null, null, null, null,
-                        "Brand filter resets when switching tabs on mobile.", "PENDING", now,
-                        null, null, null, null
-                )
-        ));
+    private void seedSubmissions(Long userId, Long user2Id, Long adminId) {
+        List<BrandObjectEntity> namePool = brandObjectRepository.findPageByBrandId(4L, 200, 0);
+        if (namePool.isEmpty()) {
+            throw new IllegalStateException("No brand objects found for dev submission seed");
+        }
+
+        List<ObjectSubmissionEntity> submissions = new ArrayList<>();
+        int index = 0;
+
+        for (int i = 0; i < MOCK_USER1_PENDING_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    userId,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "PENDING",
+                    adminId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+        for (int i = 0; i < MOCK_USER1_APPROVED_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    userId,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "APPROVED",
+                    adminId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+        for (int i = 0; i < MOCK_USER1_REJECTED_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    userId,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "REJECTED",
+                    adminId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+
+        for (int i = 0; i < MOCK_USER2_PENDING_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    user2Id,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "PENDING",
+                    adminId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+        for (int i = 0; i < MOCK_EXTRA_APPROVED_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    user2Id,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "APPROVED",
+                    adminId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+        for (int i = 0; i < MOCK_EXTRA_REJECTED_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    user2Id,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "REJECTED",
+                    adminId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+
+        for (int i = 0; i < MOCK_ADMIN_PENDING_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    adminId,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "PENDING",
+                    userId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+        for (int i = 0; i < MOCK_ADMIN_APPROVED_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    adminId,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "APPROVED",
+                    userId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+        for (int i = 0; i < MOCK_ADMIN_REJECTED_COUNT; i++) {
+            submissions.add(mockSubmission(
+                    adminId,
+                    index++,
+                    SUBMISSION_TYPES[i % SUBMISSION_TYPES.length],
+                    "REJECTED",
+                    userId,
+                    namePool.get(i % namePool.size())
+            ));
+        }
+
+        submissionRepository.saveAll(submissions);
+    }
+
+    private ObjectSubmissionEntity mockSubmission(
+            Long userId,
+            int index,
+            String type,
+            String status,
+            Long adminId,
+            BrandObjectEntity brandObject
+    ) {
+        OffsetDateTime submittedAt = OffsetDateTime.now().minusDays(index).minusMinutes(index * 17L);
+        boolean reviewed = !"PENDING".equals(status);
+        OffsetDateTime reviewedAt = reviewed ? submittedAt.plusHours(6) : null;
+        Long reviewedBy = reviewed ? adminId : null;
+        String rejectReason = "REJECTED".equals(status)
+                ? "Dev mock rejection #%d".formatted(index + 1)
+                : null;
+        String adminNote = "APPROVED".equals(status) ? "Dev mock approval note." : null;
+
+        return switch (type) {
+            case "MISSING_MODEL" -> new ObjectSubmissionEntity(
+                    null, userId, type,
+                    brandObject.nameEn(), brandObject.nameZh(),
+                    brandObject.imageUrl(),
+                    new BigDecimal("120.00").add(BigDecimal.valueOf(index % 50)),
+                    null,
+                    LocalDate.of(2024, 1, 1).plusDays(index % 365),
+                    4L, null, null, 1L, 64L,
+                    "Dev mock missing model submission #%d".formatted(index + 1),
+                    status, submittedAt, reviewedBy, reviewedAt, rejectReason, adminNote
+            );
+            case "DATA_CORRECTION" -> new ObjectSubmissionEntity(
+                    null, userId, type,
+                    brandObject.nameEn(), null,
+                    brandObject.imageUrl(),
+                    null, null, null,
+                    1L, null, null, 1L, 64L,
+                    "Dev mock data correction #%d — release date or scale may be wrong.".formatted(index + 1),
+                    status, submittedAt, reviewedBy, reviewedAt, rejectReason, adminNote
+            );
+            default -> new ObjectSubmissionEntity(
+                    null, userId, type,
+                    null, null, null, null, null, null,
+                    null, null, null, null, null,
+                    "Dev mock bug report #%d — UI glitch in dev pagination test.".formatted(index + 1),
+                    status, submittedAt, reviewedBy, reviewedAt, rejectReason, adminNote
+            );
+        };
     }
 }

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { App, Form, Grid, Popconfirm } from "antd";
-import NeuButton, { neuBtnProps } from "../components/NeuButton";
+import { App, Form, Grid } from "antd";
+import NeuButton from "../components/NeuButton";
 import HeaderActionButton from "../components/HeaderActionButton";
+import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
 import {
   ArrowLeftOutlined,
-  DeleteOutlined,
   EditOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
@@ -99,20 +99,10 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
               icon={<EditOutlined />}
               onClick={() => setBrandObjectModalOpen(true)}
             />
-            <Popconfirm
-              title={t("deleteBrandObjectTitle")}
-              description={t("deleteBrandObjectContent").replace(
-                "{name}",
-                brandObject.name,
-              )}
+            <ConfirmDeleteButton
+              variant="header"
               onConfirm={handleAdminDeleteBrandObject}
-              okText={t("delete")}
-              okButtonProps={neuBtnProps({ danger: true })}
-              cancelButtonProps={neuBtnProps()}
-              cancelText={t("cancel")}
-            >
-              <HeaderActionButton danger icon={<DeleteOutlined />} />
-            </Popconfirm>
+            />
           </div>
         )}
         <span className="header-slot-title">{brandObject?.name ?? "…"}</span>

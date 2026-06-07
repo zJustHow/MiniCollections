@@ -2,9 +2,9 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { App, Form, Grid } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
+import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
 import {
   ArrowLeftOutlined,
-  DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
@@ -32,7 +32,7 @@ export default function GroupObjectDetailPage() {
   const { groupId, objectId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { message, modal } = App.useApp();
+  const { message } = App.useApp();
   const { t } = useLocale();
   const { setHeaderSlot } = useHeader();
   const screens = useBreakpoint();
@@ -94,33 +94,21 @@ export default function GroupObjectDetailPage() {
       .catch(() => setBrandObjectDetail(null));
   }, [userObject]);
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!userObject) return;
-    modal.confirm({
-      title: t("deleteModelTitle"),
-      content: t("deleteModelContent").replace(
-        "{name}",
-        userObject.name ?? "—",
-      ),
-      okText: t("delete"),
-      okType: "danger",
-      cancelText: t("cancel"),
-      onOk: async () => {
-        try {
-          await deleteUserObject(groupId, userObject.id);
-          message.success(t("modelDeleted"));
-          navigate(
-            {
-              pathname: `/groups/${groupId}`,
-              search: returnSearchRef.current,
-            },
-            { replace: true },
-          );
-        } catch (err) {
-          message.error(err?.message || t("failedToDeleteModel"));
-        }
-      },
-    });
+    try {
+      await deleteUserObject(groupId, userObject.id);
+      message.success(t("modelDeleted"));
+      navigate(
+        {
+          pathname: `/groups/${groupId}`,
+          search: returnSearchRef.current,
+        },
+        { replace: true },
+      );
+    } catch (err) {
+      message.error(err?.message || t("failedToDeleteModel"));
+    }
   };
 
   const openEdit = () => {
@@ -233,11 +221,7 @@ export default function GroupObjectDetailPage() {
         {userObject && (
           <div className="header-slot-actions header-slot-actions-end">
             <HeaderActionButton icon={<EditOutlined />} onClick={openEdit} />
-            <HeaderActionButton
-              danger
-              icon={<DeleteOutlined />}
-              onClick={handleDelete}
-            />
+            <ConfirmDeleteButton variant="header" onConfirm={handleDelete} />
           </div>
         )}
         <span className="header-slot-title">{userObject?.name ?? "…"}</span>

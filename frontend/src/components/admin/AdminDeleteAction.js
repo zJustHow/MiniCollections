@@ -1,26 +1,13 @@
-import { Popconfirm } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
-import NeuButton, { neuBtnProps } from "../NeuButton";
-import { useLocale } from "../../LocaleContext";
+import ConfirmDeleteButton from "../ConfirmDeleteButton";
 
-export default function AdminDeleteAction({ title, description, onConfirm }) {
-  const { t } = useLocale();
+export default function AdminDeleteAction({ onConfirm }) {
   return (
-    <Popconfirm
-      title={title}
-      description={description}
-      onConfirm={onConfirm}
-      okText={t("delete")}
-      okButtonProps={neuBtnProps({ danger: true })}
-      cancelButtonProps={neuBtnProps()}
-      cancelText={t("cancel")}
+    <span
+      className="admin-delete-action"
+      onClick={(event) => event.stopPropagation()}
+      onMouseDown={(event) => event.stopPropagation()}
     >
-      <NeuButton
-        size="small"
-        danger
-        icon={<DeleteOutlined />}
-        aria-label={t("delete")}
-      />
-    </Popconfirm>
+      <ConfirmDeleteButton variant="neu" size="small" onConfirm={onConfirm} />
+    </span>
   );
 }

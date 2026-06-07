@@ -1,6 +1,7 @@
 import NeuButton from "../../NeuButton";
+import ConfirmDeleteButton from "../../ConfirmDeleteButton";
 import { Spin } from "antd";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import { EditOutlined } from "@ant-design/icons";
 import NeuFormDrawer from "../../NeuFormDrawer";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
@@ -36,7 +37,7 @@ export default function UserObjectDetailModal({
       extra={
         <div style={{ display: "flex", gap: 8 }}>
           <NeuButton size="small" icon={<EditOutlined />} onClick={onEdit} />
-          <NeuButton size="small" danger icon={<DeleteOutlined />} onClick={onDelete} />
+          <ConfirmDeleteButton variant="neu" size="small" onConfirm={onDelete} />
         </div>
       }
     >

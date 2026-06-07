@@ -3,12 +3,12 @@ import {
   Avatar,
   Divider,
   Form,
-  Layout,
   Radio,
   Upload,
 } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
 import NeuButton from "../components/NeuButton";
+import PageLoader from "../components/PageLoader";
 import { NeuInput, NeuSelect } from "../components/NeuFormControl";
 import {
   ArrowLeftOutlined,
@@ -18,7 +18,7 @@ import {
   MailOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import useCountdown from "../hooks/useCountdown";
 import { useNavigate } from "react-router-dom";
 import {
@@ -33,10 +33,9 @@ import {
   uploadAvatar,
 } from "../utils";
 import { useLocale } from "../LocaleContext";
+import { useHeader } from "../HeaderContext";
 import { PHONE_AUTH_ENABLED, WECHAT_AUTH_ENABLED } from "../components/auth/authFeatures";
 import "../styles/profile.css";
-
-const { Header, Content } = Layout;
 
 function SectionLabel({ title }) {
   return <div className="profile-section-label">{title}</div>;
@@ -50,6 +49,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   const { message } = App.useApp();
   const { t, locale } = useLocale();
   const navigate = useNavigate();
+  const { setHeaderSlot } = useHeader();
 
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [nameLoading, setNameLoading] = useState(false);
@@ -192,26 +192,26 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
     }
   };
 
-  if (!profile) return null;
+  useLayoutEffect(() => {
+    setHeaderSlot(
+      <div className="header-slot-bar">
+        <div className="header-slot-actions">
+          <HeaderActionButton
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+          />
+        </div>
+        <span className="header-slot-title">{t("profileTitle")}</span>
+      </div>,
+    );
+    return () => setHeaderSlot(null);
+  }, [t, navigate, setHeaderSlot]);
+
+  if (!profile) return <PageLoader />;
 
   return (
-    <Layout style={{ height: "100vh" }}>
-      <Header className="profile-page-header">
-        <div className="header-slot-wrap">
-          <div className="header-slot-bar">
-            <div className="header-slot-actions">
-              <HeaderActionButton
-                icon={<ArrowLeftOutlined />}
-                onClick={() => navigate(-1)}
-              />
-            </div>
-            <span className="header-slot-title">{t("profileTitle")}</span>
-          </div>
-        </div>
-      </Header>
-
-      <Content className="profile-page-content">
-        <div className="profile-page-inner">
+    <div className="profile-page-content">
+      <div className="profile-page-inner">
           <div className="profile-hero">
             <Upload
               id="profile-avatar-upload"
@@ -426,17 +426,12 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                       style={{ width: 110 }}
                       optionLabelProp="label"
                       disabled={!PHONE_AUTH_ENABLED}
-                    >
-                      {COUNTRIES.map((c) => (
-                        <NeuSelect.Option
-                          key={c.code}
-                          value={c.code}
-                          label={c.code}
-                        >
-                          {locale === "zh-CN" ? c.zh : c.en} {c.code}
-                        </NeuSelect.Option>
-                      ))}
-                    </NeuSelect>
+                      options={COUNTRIES.map((c) => ({
+                        value: c.code,
+                        label: `${locale === "zh-CN" ? c.zh : c.en} ${c.code}`,
+                      }))}
+                      optionLabelProp="value"
+                    />
                   </Form.Item>
                   <div className="profile-inline-grow">
                     <Form.Item
@@ -534,10 +529,9 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             onClick={onLogout}
             className="profile-logout-btn"
           >
-            {t("logout")}
-          </NeuButton>
-        </div>
-      </Content>
-    </Layout>
+          {t("logout")}
+        </NeuButton>
+      </div>
+    </div>
   );
 }

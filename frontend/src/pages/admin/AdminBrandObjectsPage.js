@@ -86,6 +86,10 @@ export default function AdminBrandObjectsPage() {
       title: "",
       key: "actions",
       width: 90,
+      onCell: () => ({
+        onClick: (event) => event.stopPropagation(),
+        onMouseDown: (event) => event.stopPropagation(),
+      }),
       render: (_, record) => (
         <Space size={4}>
           <AdminEditButton
@@ -94,14 +98,7 @@ export default function AdminBrandObjectsPage() {
               setObjectModalOpen(true);
             }}
           />
-          <AdminDeleteAction
-            title={t("deleteBrandObjectTitle")}
-            description={t("deleteBrandObjectContent").replace(
-              "{name}",
-              record.name_en
-            )}
-            onConfirm={() => handleDeleteObject(record)}
-          />
+          <AdminDeleteAction onConfirm={() => handleDeleteObject(record)} />
         </Space>
       ),
     },

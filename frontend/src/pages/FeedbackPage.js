@@ -3,12 +3,13 @@ import NeuTag from "../components/NeuTag";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useCallback, useState } from "react";
 import NeuButton from "../components/NeuButton";
-import NeuCard, { NeuCardImageSlot } from "../components/NeuCard";
+import NeuCard from "../components/NeuCard";
 import ListPagination from "../components/ListPagination";
 import usePagedList from "../hooks/usePagedList";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
-import { deleteMySubmission, getMySubmissionsPage, FEEDBACK_PAGE_SIZE } from "../utils";
+import DetailImage from "../components/DetailImage";
+import { deleteMySubmission, getMySubmissionsPage, FEEDBACK_PAGE_SIZE, resolveMediaUrl } from "../utils";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import NeuFormDrawer from "../components/NeuFormDrawer";
 import dayjs from "dayjs";
@@ -62,9 +63,6 @@ function SubmissionCard({ item, t, onClick }) {
 
   return (
     <NeuCard variant="row" onClick={onClick}>
-      {item.image_url ? (
-        <NeuCardImageSlot slot="thumb" imageUrl={item.image_url} alt={title} />
-      ) : null}
       <div className="neu-card-row-body" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", minWidth: 0 }}>
@@ -135,16 +133,11 @@ function SubmissionDrawer({ item, onClose, onDelete, t }) {
       {item.image_url && (
         <div style={{ padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
           <span style={{ color: "var(--neu-text-2)", fontSize: neuRem(13), display: "block", marginBottom: 8 }}>{t("image")}</span>
-          <div
-            onClick={() => window.open(item.image_url, "_blank")}
-            style={{ display: "inline-block", borderRadius: radius.md, overflow: "hidden", boxShadow: "var(--raised-sm)", cursor: "pointer", lineHeight: 0 }}
-          >
-            <img
-              src={item.image_url}
-              alt="attachment"
-              style={{ display: "block", maxWidth: "100%", maxHeight: 260, objectFit: "contain" }}
-            />
-          </div>
+          <DetailImage
+            imageUrl={item.image_url}
+            alt={title}
+            onClick={() => window.open(resolveMediaUrl(item.image_url), "_blank")}
+          />
         </div>
       )}
 
@@ -170,7 +163,7 @@ function SubmissionDrawer({ item, onClose, onDelete, t }) {
 }
 
 export default function FeedbackPage() {
-  const { message, modal } = App.useApp(); const { t } = useLocale();
+  const { message } = App.useApp(); const { t } = useLocale();
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
 
@@ -197,24 +190,15 @@ export default function FeedbackPage() {
     loadPage(0);
   };
 
-  const handleDelete = (item) => {
-    modal.confirm({
-      title: t("deleteFeedbackTitle"),
-      content: t("deleteFeedbackContent"),
-      okText: t("delete"),
-      okType: "danger",
-      cancelText: t("cancel"),
-      onOk: async () => {
-        try {
-          await deleteMySubmission(item.id);
-          message.success(t("feedbackDeleted"));
-          setSelectedItem(null);
-          loadPage(page);
-        } catch (err) {
-          message.error(err?.message || t("failedToDeleteFeedback"));
-        }
-      },
-    });
+  const handleDelete = async (item) => {
+    try {
+      await deleteMySubmission(item.id);
+      message.success(t("feedbackDeleted"));
+      setSelectedItem(null);
+      loadPage(page);
+    } catch (err) {
+      message.error(err?.message || t("failedToDeleteFeedback"));
+    }
   };
 
   return (

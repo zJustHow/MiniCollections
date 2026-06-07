@@ -7,10 +7,8 @@ import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminDeleteBrand, getBrandsPage, SELECT_PAGE_SIZE } from "../../utils";
 import { useLocale } from "../../LocaleContext";
-import GroovedImage from "../../components/GroovedImage";
 import BrandModal from "../../components/ObjectList/modals/BrandModal";
 import usePagedList from "../../hooks/usePagedList";
-import { neuRem } from "../../theme/fontScale";
 
 export default function BrandsPanel() {
   const { message } = App.useApp();
@@ -52,30 +50,15 @@ export default function BrandsPanel() {
 
   const columns = [
     { title: "#", dataIndex: "id", width: 60 },
-    {
-      title: t("image"),
-      dataIndex: "image_url",
-      width: 60,
-      render: (url, record) => url
-        ? (
-          <div className="admin-table-logo">
-            <GroovedImage
-              imageUrl={url}
-              alt={record.name_en ? `${record.name_en} ${t("brandLogo")}` : t("brandLogo")}
-              fixedGroove
-              wellClassName="neu-card-image-well neu-card-image-well--logo"
-              placeholderSize={16}
-            />
-          </div>
-        )
-        : <span style={{ color: "var(--neu-text-2)", fontSize: neuRem(12) }}>—</span>,
-    },
     { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },
-    { title: t("nameZh"), dataIndex: "name_zh", ellipsis: true, width: 140 },
     {
       title: "",
       key: "actions",
       width: 130,
+      onCell: () => ({
+        onClick: (event) => event.stopPropagation(),
+        onMouseDown: (event) => event.stopPropagation(),
+      }),
       render: (_, record) => (
         <Space size={4}>
           <NeuButton
@@ -90,11 +73,7 @@ export default function BrandsPanel() {
           <AdminEditButton
             onClick={() => { setEditingBrand(record); setBrandModalOpen(true); }}
           />
-          <AdminDeleteAction
-            title={t("deleteBrandTitle")}
-            description={t("deleteBrandContent").replace("{name}", record.name_en ?? record.name ?? "—")}
-            onConfirm={() => handleDeleteBrand(record)}
-          />
+          <AdminDeleteAction onConfirm={() => handleDeleteBrand(record)} />
         </Space>
       ),
     },

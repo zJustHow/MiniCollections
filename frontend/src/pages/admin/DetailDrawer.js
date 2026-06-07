@@ -1,25 +1,39 @@
-import { CheckOutlined, DeleteOutlined } from "@ant-design/icons";
+import { CheckOutlined } from "@ant-design/icons";
 import NeuTag from "../../components/NeuTag";
-import { useState } from "react";
+import DetailImage from "../../components/DetailImage";
 import { useLocale } from "../../LocaleContext";
 import NeuFormDrawer from "../../components/NeuFormDrawer";
 import HeaderActionButton from "../../components/HeaderActionButton";
-import { radius } from "../../theme/radius";
-import { STATUS_COLOR, TYPE_COLOR, useStatusLabel, useTypeLabel } from "./constants";
+import ConfirmDeleteButton from "../../components/ConfirmDeleteButton";
+import { resolveMediaUrl } from "../../utils";
+import {
+  STATUS_COLOR,
+  TYPE_COLOR,
+  useStatusLabel,
+  useTypeLabel,
+} from "./constants";
 import { neuRem } from "../../theme/fontScale";
 
-export default function DetailDrawer({ submission, onClose, onApprove, onResolve, onReject }) {
+export default function DetailDrawer({
+  submission,
+  onClose,
+  onApprove,
+  onResolve,
+  onReject,
+}) {
   const { t } = useLocale();
   const getTypeLabel = useTypeLabel(t);
   const getStatusLabel = useStatusLabel(t);
-  const [imgHovered, setImgHovered] = useState(false);
   if (!submission) return null;
 
   const isMissingModel = submission.submission_type === "MISSING_MODEL";
 
   const rows = [
     { label: t("submitter"), value: submission.submitter_name },
-    { label: t("submissionType"), value: getTypeLabel(submission.submission_type) },
+    {
+      label: t("submissionType"),
+      value: getTypeLabel(submission.submission_type),
+    },
     ...(isMissingModel
       ? [
           { label: t("brand"), value: submission.brand_name },
@@ -60,12 +74,14 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
                 isMissingModel ? t("approveSubmission") : t("resolveSubmission")
               }
             />
-            <HeaderActionButton
-              danger
-              icon={<DeleteOutlined />}
-              onClick={onReject}
-              aria-label={
+            <ConfirmDeleteButton
+              variant="header"
+              onConfirm={onReject}
+              deleteLabel={
                 isMissingModel ? t("rejectSubmission") : t("closeSubmission")
+              }
+              confirmLabel={
+                isMissingModel ? t("confirmReject") : t("confirmClose")
               }
             />
           </>
@@ -73,65 +89,56 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
       }
     >
       {submission.image_url && (
-        <div
-          onClick={() => window.open(submission.image_url, "_blank")}
-          onMouseEnter={() => setImgHovered(true)}
-          onMouseLeave={() => setImgHovered(false)}
-          style={{
-            position: "relative",
-            marginBottom: 16,
-            borderRadius: radius.md,
-            overflow: "hidden",
-            boxShadow: "var(--raised-sm)",
-            cursor: "pointer",
-            lineHeight: 0,
-          }}
-        >
-          <img
-            src={submission.image_url}
+        <div style={{ marginBottom: 16 }}>
+          <DetailImage
+            imageUrl={submission.image_url}
             alt={submission.name_en}
-            style={{
-              width: "100%",
-              maxHeight: 220,
-              objectFit: "contain",
-              display: "block",
-              background: "rgba(0,0,0,0.03)",
-              transition: "transform 0.2s",
-              transform: imgHovered ? "scale(1.02)" : "scale(1)",
-            }}
+            onClick={() =>
+              window.open(resolveMediaUrl(submission.image_url), "_blank")
+            }
           />
-          <div style={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(0,0,0,0.28)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            opacity: imgHovered ? 1 : 0,
-            transition: "opacity 0.2s",
-            color: "#fff",
-            fontSize: neuRem(13),
-            letterSpacing: "0.5px",
-            lineHeight: 1,
-          }}>
-            {t("image")} ↗
-          </div>
         </div>
       )}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        <NeuTag color={TYPE_COLOR[submission.submission_type]}>{getTypeLabel(submission.submission_type)}</NeuTag>
-        <NeuTag color={STATUS_COLOR[submission.status]}>{getStatusLabel(submission.status)}</NeuTag>
+        <NeuTag color={TYPE_COLOR[submission.submission_type]}>
+          {getTypeLabel(submission.submission_type)}
+        </NeuTag>
+        <NeuTag color={STATUS_COLOR[submission.status]}>
+          {getStatusLabel(submission.status)}
+        </NeuTag>
       </div>
       {rows.map(({ label, value }) =>
         value != null && value !== "" ? (
           <div
             key={label}
-            style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}
+            style={{
+              display: "flex",
+              gap: 12,
+              padding: "10px 0",
+              borderBottom: "1px solid rgba(184,182,176,0.2)",
+            }}
           >
-            <span style={{ color: "var(--neu-text-2)", fontSize: neuRem(13), minWidth: 120, flexShrink: 0 }}>{label}</span>
-            <span style={{ color: "var(--neu-text)", fontSize: neuRem(13), whiteSpace: "pre-wrap" }}>{String(value)}</span>
+            <span
+              style={{
+                color: "var(--neu-text-2)",
+                fontSize: neuRem(13),
+                minWidth: 120,
+                flexShrink: 0,
+              }}
+            >
+              {label}
+            </span>
+            <span
+              style={{
+                color: "var(--neu-text)",
+                fontSize: neuRem(13),
+                whiteSpace: "pre-wrap",
+              }}
+            >
+              {String(value)}
+            </span>
           </div>
-        ) : null
+        ) : null,
       )}
     </NeuFormDrawer>
   );

@@ -15,6 +15,7 @@ import {
 import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
+import SiteLogo from "./components/SiteLogo";
 import LoginPage from "./pages/LoginPage";
 import BrandObjectsPage from "./pages/BrandObjectsPage";
 import BrandObjectDetailPage from "./pages/BrandObjectDetailPage";
@@ -57,6 +58,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
   }, [location.pathname]);
 
   const hideProfileButton = [
+    "/profile",
     "/brands/:brandId",
     "/brands/:brandId/objects/:objectId",
     "/groups/:groupId",
@@ -135,11 +137,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
         }}
       >
         {/* Logo — hidden when a page injects its own header slot */}
-        {!headerSlot && (
-          <span className="header-logo">
-            Mini <span className="header-logo-accent">Collections</span>
-          </span>
-        )}
+        {!headerSlot && <SiteLogo />}
 
         {/* Center slot: either custom page content or default nav tabs */}
         {headerSlot ? (
@@ -328,11 +326,11 @@ export default function App() {
       const me = await getMe();
       setProfile(me);
       if (me.preferred_locale) setLocale(me.preferred_locale);
+      setAuthed(true);
+      navigate("/");
     } catch {
-      // proceed even if profile fetch fails
+      localStorage.removeItem("auth_token");
     }
-    setAuthed(true);
-    navigate("/");
   };
 
   const handleWechatBind = (updatedProfile) => {
@@ -407,26 +405,26 @@ export default function App() {
         }
       />
       <Route
-        path="/profile"
-        element={
-          !authed ? (
-            <Navigate to="/login" replace />
-          ) : (
-            <Suspense fallback={<PageLoader />}>
-              <ProfilePage
-                profile={profile}
-                onProfileChange={handleProfileChange}
-                onLogout={handleLogout}
-              />
-            </Suspense>
-          )
-        }
-      />
-      <Route
         element={
           <MainLayout authed={authed} profile={profile} isAdmin={isAdmin} />
         }
       >
+        <Route
+          path="profile"
+          element={
+            !authed ? (
+              <Navigate to="/login" replace />
+            ) : (
+              <Suspense fallback={<PageLoader />}>
+                <ProfilePage
+                  profile={profile}
+                  onProfileChange={handleProfileChange}
+                  onLogout={handleLogout}
+                />
+              </Suspense>
+            )
+          }
+        />
         <Route
           element={
             authed ? <ObjectList isAdmin={isAdmin} /> : <Outlet />

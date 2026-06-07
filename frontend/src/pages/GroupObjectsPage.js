@@ -33,7 +33,7 @@ export default function GroupObjectsPage() {
   const { groupId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { message, modal } = App.useApp();
+  const { message } = App.useApp();
   const { t } = useLocale();
   const { setHeaderSlot } = useHeader();
 
@@ -140,24 +140,15 @@ export default function GroupObjectsPage() {
     [setSearchParam],
   );
 
-  const handleDeleteGroup = () => {
+  const handleDeleteGroup = async () => {
     if (!group) return;
-    modal.confirm({
-      title: t("deleteGroupTitle"),
-      content: t("deleteGroupContent").replace("{name}", group.name),
-      okText: t("delete"),
-      okType: "danger",
-      cancelText: t("cancel"),
-      onOk: async () => {
-        try {
-          await deleteGroup(group.id);
-          message.success(t("groupDeleted"));
-          navigate("/groups");
-        } catch (err) {
-          message.error(err?.message || t("failedToDeleteGroup"));
-        }
-      },
-    });
+    try {
+      await deleteGroup(group.id);
+      message.success(t("groupDeleted"));
+      navigate("/groups");
+    } catch (err) {
+      message.error(err?.message || t("failedToDeleteGroup"));
+    }
   };
 
   const openEditGroup = () => {

@@ -677,7 +677,7 @@ public class BrandService {
             try {
                 EsSearchPageResult esResult = brandObjectElasticsearchQueryService.searchPage(
                         trimmed, filter, safePage, pageSize);
-                return fromEsBrandObjectPage(esResult, preferZh, safePage, pageSize);
+                return fromEsBrandObjectPage(esResult, filter, preferZh, safePage, pageSize);
             } catch (Exception e) {
                 log.warn("Elasticsearch search failed, using SQL fallback: {}", e.getMessage());
             }
@@ -754,13 +754,11 @@ public class BrandService {
 
     private PageResponse<BrandObjectDto> fromEsBrandObjectPage(
             EsSearchPageResult esResult,
+            BrandObjectSearchFilter filter,
             boolean preferZh,
             int page,
             int pageSize) {
-        List<BrandObjectDto> content = loadByIdsInOrder(
-                esResult.ids(),
-                brandObjectRepository::findAllById,
-                e -> toBrandObjectDto(e, preferZh));
+        List<BrandObjectDto> content = loadBrandObjectsByIdsInOrder(esResult.ids(), filter, preferZh);
         return PageResponse.of(content, page, pageSize, esResult.totalElements(), esResult.totalExact());
     }
 
@@ -831,10 +829,7 @@ public class BrandService {
             try {
                 EsSearchPageResult esResult =
                         brandObjectElasticsearchQueryService.searchSlice(keyword, filter, offset, limit);
-                return loadByIdsInOrder(
-                        esResult.ids(),
-                        brandObjectRepository::findAllById,
-                        e -> toBrandObjectDto(e, preferZh));
+                return loadBrandObjectsByIdsInOrder(esResult.ids(), filter, preferZh);
             } catch (Exception e) {
                 log.warn("Elasticsearch object slice failed, using SQL fallback: {}", e.getMessage());
             }
@@ -895,6 +890,50 @@ public class BrandService {
             }
         }
         return content;
+    }
+
+    private List<BrandObjectDto> loadBrandObjectsByIdsInOrder(
+            List<Long> ids,
+            BrandObjectSearchFilter filter,
+            boolean preferZh) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        Map<Long, BrandObjectEntity> byId = new HashMap<>();
+        brandObjectRepository.findAllById(ids).forEach(entity -> byId.put(entity.id(), entity));
+        List<BrandObjectDto> content = new ArrayList<>(ids.size());
+        for (Long id : ids) {
+            BrandObjectEntity entity = byId.get(id);
+            if (entity != null && entityMatchesFilter(entity, filter)) {
+                content.add(toBrandObjectDto(entity, preferZh));
+            }
+        }
+        return content;
+    }
+
+    private static boolean entityMatchesFilter(
+            BrandObjectEntity entity,
+            BrandObjectSearchFilter filter) {
+        if (filter.scopeBrandId() != null && !filter.scopeBrandId().equals(entity.brandId())) {
+            return false;
+        }
+        if (filter.filterBrands()
+                && (entity.brandId() == null || !filter.brandIds().contains(entity.brandId()))) {
+            return false;
+        }
+        if (filter.filterCategories()
+                && (entity.categoryId() == null || !filter.categoryIds().contains(entity.categoryId()))) {
+            return false;
+        }
+        if (filter.filterScales()
+                && (entity.scaleId() == null || !filter.scaleIds().contains(entity.scaleId()))) {
+            return false;
+        }
+        if (filter.filterSeries()
+                && (entity.seriesId() == null || !filter.seriesIds().contains(entity.seriesId()))) {
+            return false;
+        }
+        return true;
     }
 
     private int clampPage(int page) {

@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 export const WELL_INSET_PX = 6;
 export const GROOVE_PAD_PX = 4;
-/** gap + remove btn + shadow buffer — keep in sync with skeuomorphic.css upload action reserve */
+/** gap + remove btn + shadow buffer — keep in sync with neumorphism.css upload action reserve */
 export const IMAGE_ACTION_RESERVE_PX = 42;
 
 function probeCachedImage(url) {

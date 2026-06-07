@@ -17,7 +17,9 @@ export default function RejectModal({ open, submission, onClose, onSuccess }) {
     setLoading(true);
     try {
       await rejectSubmission(submission.id, reason || null);
-      message.success(isMissingModel ? t("submissionRejected") : t("submissionClosed"));
+      message.success(
+        isMissingModel ? t("submissionRejected") : t("submissionClosed"),
+      );
       setReason("");
       onSuccess();
       onClose();
@@ -33,16 +35,24 @@ export default function RejectModal({ open, submission, onClose, onSuccess }) {
       title={isMissingModel ? t("rejectTitle") : t("closeTitle")}
       open={open}
       onOk={handleOk}
-      onClose={() => { setReason(""); onClose(); }}
+      onClose={() => {
+        setReason("");
+        onClose();
+      }}
       okText={isMissingModel ? t("rejectSubmission") : t("closeSubmission")}
-      okButtonProps={{ danger: true }}
       confirmLoading={loading}
       destroyOnClose
       zIndex={1100}
     >
       <Form layout="vertical">
-        <Form.Item label={isMissingModel ? t("rejectReason") : t("closeReason")}>
-          <NeuInput.TextArea rows={3} value={reason} onChange={(e) => setReason(e.target.value)} />
+        <Form.Item
+          label={isMissingModel ? t("rejectReason") : t("closeReason")}
+        >
+          <NeuInput.TextArea
+            rows={3}
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+          />
         </Form.Item>
       </Form>
     </NeuFormDrawer>

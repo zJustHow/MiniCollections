@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -92,7 +93,8 @@ public class ElasticsearchIndexBootstrap {
         try {
             IndexOperations indexOps = elasticsearchOperations.indexOps(BrandObjectDocument.class);
             long dbCount = brandObjectRepository.count();
-            if (shouldRebuild(indexOps, brandObjectSearchRepository.count(), dbCount, "brand-objects")) {
+            if (shouldRebuild(indexOps, brandObjectSearchRepository.count(), dbCount, "brand-objects")
+                    || isBrandObjectIndexStale()) {
                 rebuildBrandObjectIndex(indexOps, dbCount);
             } else {
                 log.info(
@@ -102,6 +104,28 @@ public class ElasticsearchIndexBootstrap {
         } catch (Exception e) {
             log.warn("Could not ensure Elasticsearch brand-objects index: {}", e.getMessage());
         }
+    }
+
+    /**
+     * Document count alone does not detect stale denormalized fields (e.g. category_id after taxonomy changes).
+     */
+    private boolean isBrandObjectIndexStale() {
+        List<BrandObjectEntity> sample = brandObjectRepository.findPageByBrandId(1L, 30, 0);
+        for (BrandObjectEntity entity : sample) {
+            if (entity.categoryId() == null) {
+                continue;
+            }
+            BrandObjectDocument doc = brandObjectSearchRepository.findById(entity.id()).orElse(null);
+            if (doc == null || !Objects.equals(doc.categoryId(), entity.categoryId())) {
+                log.info(
+                        "Elasticsearch brand-objects index stale (id {} db category {} vs es category {})",
+                        entity.id(),
+                        entity.categoryId(),
+                        doc != null ? doc.categoryId() : null);
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean shouldRebuild(

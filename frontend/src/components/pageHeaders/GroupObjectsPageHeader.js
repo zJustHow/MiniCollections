@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeftOutlined,
-  DeleteOutlined,
   EditOutlined,
 } from "@ant-design/icons";
 import HeaderActionButton from "../HeaderActionButton";
+import ConfirmDeleteButton from "../ConfirmDeleteButton";
 
 export default function GroupObjectsPageHeader({
   group,
@@ -30,11 +30,7 @@ export default function GroupObjectsPageHeader({
       {group && onEdit && onDelete && (
         <div className="header-slot-actions header-slot-actions-end">
           <HeaderActionButton icon={<EditOutlined />} onClick={onEdit} />
-          <HeaderActionButton
-            danger
-            icon={<DeleteOutlined />}
-            onClick={onDelete}
-          />
+          <ConfirmDeleteButton variant="header" onConfirm={onDelete} />
         </div>
       )}
       <span className="header-slot-title">{group?.name ?? "…"}</span>

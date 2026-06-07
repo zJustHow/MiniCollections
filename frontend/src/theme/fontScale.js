@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 
-/** Keep in sync with --neu-font-scale breakpoints in skeuomorphic.css */
-export function getNeuFontScale(width = typeof window !== "undefined" ? window.innerWidth : 1920) {
-  if (width <= 640) return 0.875;
-  if (width <= 992) return 0.9375;
+export const NEU_FONT_BASE_PX = 16;
+
+const NEU_VP_SM_MAX = 640;
+const NEU_VP_MD_MAX = 992;
+
+export function getNeuFontScale() {
+  if (typeof window === "undefined") return 1;
+  if (window.matchMedia(`(max-width: ${NEU_VP_SM_MAX}px)`).matches) return 0.875;
+  if (window.matchMedia(`(max-width: ${NEU_VP_MD_MAX}px)`).matches) return 0.9375;
   return 1;
 }
 
@@ -11,24 +16,40 @@ export function scaleFontSize(px, scale) {
   return Math.round(px * scale);
 }
 
-/** Use in inline styles so font sizes follow html rem scaling */
+/** Inline font sizes as rem (scales with html @media font-size in neumorphism.css) */
 export function neuRem(px) {
-  return `${px / 16}rem`;
+  return `${px / NEU_FONT_BASE_PX}rem`;
 }
 
 export function useNeuFontScale() {
   const [scale, setScale] = useState(() => getNeuFontScale());
 
   useEffect(() => {
-    const onResize = () => setScale(getNeuFontScale());
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+    const sync = () => setScale(getNeuFontScale());
+
+    sync();
+    window.addEventListener("resize", sync);
+    window.addEventListener("orientationchange", sync);
+    window.visualViewport?.addEventListener("resize", sync);
+
+    const mql992 = window.matchMedia(`(max-width: ${NEU_VP_MD_MAX}px)`);
+    const mql640 = window.matchMedia(`(max-width: ${NEU_VP_SM_MAX}px)`);
+    mql992.addEventListener("change", sync);
+    mql640.addEventListener("change", sync);
+
+    return () => {
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("orientationchange", sync);
+      window.visualViewport?.removeEventListener("resize", sync);
+      mql992.removeEventListener("change", sync);
+      mql640.removeEventListener("change", sync);
+    };
   }, []);
 
   return scale;
 }
 
-/** Ant Design token font sizes — scale together with html rem base */
+/** Ant Design token font sizes — scale with viewport tier */
 export function buildAntdFontTokens(scale) {
   const fs = (px) => scaleFontSize(px, scale);
   return {
