@@ -144,7 +144,8 @@ public class GroupService {
         return jdbcClient.sql("""
                         SELECT COUNT(DISTINCT uo.id)
                         """ + USER_OBJECT_SEARCH_FROM + """
-                        WHERE """ + USER_OBJECT_KEYWORD_MATCH + """
+                        WHERE
+                        """ + USER_OBJECT_KEYWORD_MATCH + """
                         """)
                 .param("userId", userId)
                 .param("keyword", keyword)
@@ -166,7 +167,8 @@ public class GroupService {
                                br.name_en AS brand_name_en,
                                br.name_zh AS brand_name_zh
                         """ + USER_OBJECT_SEARCH_FROM + """
-                        WHERE """ + USER_OBJECT_KEYWORD_MATCH + """
+                        WHERE
+                        """ + USER_OBJECT_KEYWORD_MATCH + """
                         ORDER BY uo.id ASC
                         LIMIT :limit OFFSET :offset
                         """)

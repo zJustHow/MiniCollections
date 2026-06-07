@@ -9,6 +9,7 @@ import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.repository.GroupRepository;
 import com.zjusthow.minicollections.repository.UserIdentifierRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
+import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.UserProfileDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -80,7 +81,8 @@ public class UserService {
         }
 
         jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", user.id(), "ROLE_USER");
-        groupRepository.save(new GroupEntity(null, user.id(), "default", null));
+        groupRepository.save(new GroupEntity(
+                null, user.id(), DisplayLocaleResolver.defaultGroupName(locale), null));
 
         return user.id();
     }
@@ -193,7 +195,8 @@ public class UserService {
             identifierRepository.save(new UserIdentifierEntity(null, user.id(), "wechat_unionid", unionid));
         }
         jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", user.id(), "ROLE_USER");
-        groupRepository.save(new GroupEntity(null, user.id(), "default", null));
+        groupRepository.save(new GroupEntity(
+                null, user.id(), DisplayLocaleResolver.defaultGroupName("zh-CN"), null));
         return user.id();
     }
 
@@ -234,9 +237,81 @@ public class UserService {
         return getProfile(userId);
     }
 
+    public boolean hasAnyAdmin() {
+        return Boolean.TRUE.equals(jdbc.queryForObject(
+                "SELECT COUNT(*) > 0 FROM authorities WHERE authority = 'ROLE_ADMIN'",
+                Boolean.class));
+    }
+
+    public boolean isAdmin(Long userId) {
+        return Boolean.TRUE.equals(jdbc.queryForObject(
+                "SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
+                Boolean.class, userId));
+    }
+
+    public UserProfileDto getProfileByEmail(String email) {
+        final String normalizedEmail = email.toLowerCase().strip();
+        Long userId = identifierRepository.findByTypeAndIdentifier("email", normalizedEmail)
+                .map(UserIdentifierEntity::userId)
+                .orElseThrow(UserNotFoundException::new);
+        return getProfile(userId);
+    }
+
+    /**
+     * Creates or promotes the bootstrap admin when none exists. Idempotent once any admin is present.
+     *
+     * @return true if an admin account was ensured
+     */
+    @Transactional
+    public boolean tryBootstrapAdmin(String email, String password, String name, String preferredLocale) {
+        if (hasAnyAdmin()) {
+            return false;
+        }
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+
+        final String normalizedEmail = email.toLowerCase().strip();
+        Long userId = identifierRepository.findByTypeAndIdentifier("email", normalizedEmail)
+                .map(UserIdentifierEntity::userId)
+                .orElse(null);
+
+        if (userId == null) {
+            if (password == null || password.isBlank()) {
+                return false;
+            }
+            String displayName = (name != null && !name.isBlank()) ? name.strip() : "Admin";
+            userId = signUp(normalizedEmail, null, password, displayName, preferredLocale);
+        }
+
+        grantAdminRole(userId);
+        return true;
+    }
+
     @Transactional
     public void grantAdminRole(Long userId) {
-        jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", userId, "ROLE_ADMIN");
+        userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+        jdbc.update(
+                "INSERT INTO authorities (user_id, authority) VALUES (?, ?) ON CONFLICT DO NOTHING",
+                userId,
+                "ROLE_ADMIN");
+    }
+
+    @Transactional
+    public void revokeAdminRole(Long targetUserId) {
+        userRepository.findById(targetUserId).orElseThrow(UserNotFoundException::new);
+        if (!isAdmin(targetUserId)) {
+            return;
+        }
+        int adminCount = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM authorities WHERE authority = 'ROLE_ADMIN'",
+                Integer.class);
+        if (adminCount <= 1) {
+            throw new IllegalStateException("Cannot revoke the last admin");
+        }
+        jdbc.update(
+                "DELETE FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
+                targetUserId);
     }
 
     @Transactional

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,5 +22,11 @@ class DisplayLocaleResolverTest {
     void prefersZh_forChineseLocales() {
         assertTrue(displayLocaleResolver.prefersZh("zh-CN"));
         assertFalse(displayLocaleResolver.prefersZh("en-US"));
+    }
+
+    @Test
+    void defaultGroupName_followsLocale() {
+        assertEquals("默认", DisplayLocaleResolver.defaultGroupName("zh-CN"));
+        assertEquals("default", DisplayLocaleResolver.defaultGroupName("en-US"));
     }
 }

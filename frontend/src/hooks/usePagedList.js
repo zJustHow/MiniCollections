@@ -30,7 +30,7 @@ export default function usePagedList(fetchPage, options = {}) {
   const [totalElements, setTotalElements] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalExact, setTotalExact] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(() => enabled);
   const prevResetKeyRef = useRef(null);
   const pendingScrollRef = useRef(false);
   const loadPageRef = useRef(() => {});
@@ -134,6 +134,7 @@ export default function usePagedList(fetchPage, options = {}) {
   useEffect(() => {
     if (!enabled) {
       reset();
+      setLoading(false);
       return;
     }
 

@@ -1,17 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import usePagedList from "../hooks/usePagedList";
 import useRemoteModelSelectSearch from "../hooks/useRemoteModelSelectSearch";
 import { App, Form, Spin } from "antd";
 import NeuCard from "../components/NeuCard";
-import HeaderActionButton from "../components/HeaderActionButton";
+import GroupObjectsPageHeader from "../components/pageHeaders/GroupObjectsPageHeader";
 import { NeuInput } from "../components/NeuFormControl";
-import {
-  ArrowLeftOutlined,
-  DeleteOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
 import ListPagination from "../components/ListPagination";
 import AddUserObjectInGroupModal from "../components/ObjectList/modals/AddUserObjectInGroupModal";
 import ObjectListPageLayout from "../components/ObjectListPageLayout";
@@ -30,6 +25,7 @@ import {
   discardUploadedImage,
   PAGE_SIZE,
 } from "../utils";
+import { scrollAppToTop } from "../utils/scroll";
 
 const { Search } = NeuInput;
 
@@ -47,6 +43,13 @@ export default function GroupObjectsPage() {
   const [searchKeyword, setSearchKeyword] = useState((searchValue ?? "").trim());
   const [draftQuery, setDraftQuery] = useState(searchValue);
   const syncedKeywordRef = useRef(searchKeyword);
+  const returnSearchRef = useRef(location.state?.returnSearch ?? "");
+
+  useEffect(() => {
+    if (location.state?.returnSearch != null) {
+      returnSearchRef.current = location.state.returnSearch;
+    }
+  }, [location.state?.returnSearch]);
 
   const [editGroupVisible, setEditGroupVisible] = useState(false);
   const [editGroupLoading, setEditGroupLoading] = useState(false);
@@ -164,25 +167,18 @@ export default function GroupObjectsPage() {
     setEditGroupVisible(true);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    scrollAppToTop();
+  }, [groupId]);
+
+  useLayoutEffect(() => {
     setHeaderSlot(
-      <div className="header-slot-bar">
-        <div className="header-slot-actions">
-          <HeaderActionButton
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate("/groups")}
-          />
-        </div>
-        <div className="header-slot-actions header-slot-actions-end">
-          <HeaderActionButton icon={<EditOutlined />} onClick={openEditGroup} />
-          <HeaderActionButton
-            danger
-            icon={<DeleteOutlined />}
-            onClick={handleDeleteGroup}
-          />
-        </div>
-        <span className="header-slot-title">{group?.name ?? "…"}</span>
-      </div>,
+      <GroupObjectsPageHeader
+        group={group}
+        returnSearch={returnSearchRef.current}
+        onEdit={openEditGroup}
+        onDelete={handleDeleteGroup}
+      />,
     );
     return () => setHeaderSlot(null);
   }, [group]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -311,10 +307,16 @@ export default function GroupObjectsPage() {
                     <NeuCard
                       key={item.id}
                       name={item.name ?? "—"}
+                      subtitle={group?.name}
+                      nameplateVariant="object"
                       imageUrl={item.image_url}
                       onClick={() =>
                         navigate(`/groups/${groupId}/objects/${item.id}`, {
-                          state: { userObject: item, group },
+                          state: {
+                            userObject: item,
+                            group,
+                            returnSearch: location.search,
+                          },
                         })
                       }
                     />

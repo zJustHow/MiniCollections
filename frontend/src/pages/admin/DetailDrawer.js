@@ -6,6 +6,7 @@ import NeuFormDrawer from "../../components/NeuFormDrawer";
 import HeaderActionButton from "../../components/HeaderActionButton";
 import { radius } from "../../theme/radius";
 import { STATUS_COLOR, TYPE_COLOR, useStatusLabel, useTypeLabel } from "./constants";
+import { neuRem } from "../../theme/fontScale";
 
 export default function DetailDrawer({ submission, onClose, onApprove, onResolve, onReject }) {
   const { t } = useLocale();
@@ -109,7 +110,7 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
             opacity: imgHovered ? 1 : 0,
             transition: "opacity 0.2s",
             color: "#fff",
-            fontSize: 13,
+            fontSize: neuRem(13),
             letterSpacing: "0.5px",
             lineHeight: 1,
           }}>
@@ -127,8 +128,8 @@ export default function DetailDrawer({ submission, onClose, onApprove, onResolve
             key={label}
             style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}
           >
-            <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 120, flexShrink: 0 }}>{label}</span>
-            <span style={{ color: "var(--neu-text)", fontSize: 13, whiteSpace: "pre-wrap" }}>{String(value)}</span>
+            <span style={{ color: "var(--neu-text-2)", fontSize: neuRem(13), minWidth: 120, flexShrink: 0 }}>{label}</span>
+            <span style={{ color: "var(--neu-text)", fontSize: neuRem(13), whiteSpace: "pre-wrap" }}>{String(value)}</span>
           </div>
         ) : null
       )}

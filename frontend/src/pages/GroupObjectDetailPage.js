@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { App, Form, Grid } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
@@ -41,6 +41,13 @@ export default function GroupObjectDetailPage() {
     location.state?.userObject ?? null,
   );
   const [group, setGroup] = useState(location.state?.group ?? null);
+  const returnSearchRef = useRef(location.state?.returnSearch ?? "");
+
+  useEffect(() => {
+    if (location.state?.returnSearch != null) {
+      returnSearchRef.current = location.state.returnSearch;
+    }
+  }, [location.state?.returnSearch]);
   const [brandObjectDetail, setBrandObjectDetail] = useState(null);
 
   const [editVisible, setEditVisible] = useState(false);
@@ -102,7 +109,13 @@ export default function GroupObjectDetailPage() {
         try {
           await deleteUserObject(groupId, userObject.id);
           message.success(t("modelDeleted"));
-          navigate(`/groups/${groupId}`, { replace: true });
+          navigate(
+            {
+              pathname: `/groups/${groupId}`,
+              search: returnSearchRef.current,
+            },
+            { replace: true },
+          );
         } catch (err) {
           message.error(err?.message || t("failedToDeleteModel"));
         }
@@ -199,13 +212,22 @@ export default function GroupObjectDetailPage() {
     onEditModelSearch(keyword);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setHeaderSlot(
       <div className="header-slot-bar">
         <div className="header-slot-actions">
           <HeaderActionButton
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate(-1)}
+            onClick={() => {
+              if (location.state?.returnSearch != null) {
+                navigate({
+                  pathname: `/groups/${groupId}`,
+                  search: returnSearchRef.current,
+                });
+              } else {
+                navigate(-1);
+              }
+            }}
           />
         </div>
         {userObject && (

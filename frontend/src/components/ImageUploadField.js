@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { discardUploadedImage, uploadImage } from "../utils";
 import { useLocale } from "../LocaleContext";
 import NeuCard from "./NeuCard";
+import NeuPressableButton from "./NeuPressableButton";
 
 export default function ImageUploadField({
   value,
@@ -91,17 +92,24 @@ export default function ImageUploadField({
         imageUrl={value}
         logoShadow={logoShadow}
         fixedGroove={logoShadow}
+        frameAction={
+          value && !uploading ? (
+            <NeuPressableButton
+              variant=""
+              danger
+              className="neu-image-upload-remove-btn"
+              aria-label={t("delete")}
+              onClick={handleRemove}
+            >
+              <DeleteOutlined />
+            </NeuPressableButton>
+          ) : null
+        }
       >
         {uploading && (
           <div className="neu-image-upload-loading" aria-hidden="true">
             <LoadingOutlined />
           </div>
-        )}
-        {value && !uploading && (
-          <DeleteOutlined
-            className="neu-image-upload-remove"
-            onClick={handleRemove}
-          />
         )}
       </NeuCard>
     </Upload>

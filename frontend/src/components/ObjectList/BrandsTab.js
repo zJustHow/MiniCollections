@@ -10,6 +10,7 @@ import ObjectListPageLayout from "../ObjectListPageLayout";
 import SearchResultsSummary from "../SearchResultsSummary";
 import { useLocale } from "../../LocaleContext";
 import { PAGE_SIZE } from "../../utils";
+import { pickBrandName } from "../../utils/displayLocale";
 
 const { Search } = NeuInput;
 
@@ -38,7 +39,7 @@ export default function BrandsTab({
   onToggleScale,
   onToggleSeries,
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const navigate = useNavigate();
   const [draftQuery, setDraftQuery] = useState(searchValue ?? "");
 
@@ -64,6 +65,8 @@ export default function BrandsTab({
     <NeuCard
       key={obj.id}
       name={obj.name}
+      subtitle={pickBrandName(obj, locale)}
+      nameplateVariant="object"
       imageUrl={obj.image_url}
       onClick={() =>
         navigate(`/brands/${obj.brand_id}/objects/${obj.id}`, {

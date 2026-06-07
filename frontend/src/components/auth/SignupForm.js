@@ -8,6 +8,7 @@ import { signup, COUNTRIES } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import { detectBrowserLocale } from "../../i18n";
 import { PHONE_AUTH_ENABLED } from "./authFeatures";
+import { neuRem } from "../../theme/fontScale";
 
 function SignupForm({ linkMode = false }) {
   const { message } = App.useApp();
@@ -51,7 +52,7 @@ function SignupForm({ linkMode = false }) {
       <NeuButton
         type={linkMode ? "link" : "primary"}
         onClick={() => setDisplayModal(true)}
-        style={linkMode ? { padding: 0, height: "auto", fontSize: 13 } : undefined}
+        style={linkMode ? { padding: 0, height: "auto", fontSize: neuRem(13) } : undefined}
       >
         {t("register")}
       </NeuButton>

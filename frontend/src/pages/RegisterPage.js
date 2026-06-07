@@ -15,6 +15,7 @@ import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
 import { detectBrowserLocale } from "../i18n";
 import { PHONE_AUTH_ENABLED } from "../components/auth/authFeatures";
+import { neuRem } from "../theme/fontScale";
 
 const { Header, Content } = Layout;
 
@@ -147,7 +148,7 @@ export default function RegisterPage() {
           >
             <NeuPressableButton
               active={registerType === "email"}
-              style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
+              style={{ flex: 1, padding: "8px 0", fontSize: neuRem(13) }}
               onClick={() => handleTypeChange("email")}
             >
               <MailOutlined style={{ marginRight: 6 }} />
@@ -159,7 +160,7 @@ export default function RegisterPage() {
               style={{
                 flex: 1,
                 padding: "8px 0",
-                fontSize: 13,
+                fontSize: neuRem(13),
                 opacity: PHONE_AUTH_ENABLED ? 1 : 0.6,
                 cursor: PHONE_AUTH_ENABLED ? "pointer" : "not-allowed",
               }}
@@ -168,7 +169,7 @@ export default function RegisterPage() {
               <PhoneOutlined style={{ marginRight: 6 }} />
               {t("registerWithPhone")}
               {!PHONE_AUTH_ENABLED && (
-                <span style={{ marginLeft: 4, fontSize: 11 }}>({t("underDevelopment")})</span>
+                <span style={{ marginLeft: 4, fontSize: neuRem(11) }}>({t("underDevelopment")})</span>
               )}
             </NeuPressableButton>
           </div>
@@ -308,7 +309,7 @@ export default function RegisterPage() {
             <div style={{ marginBottom: 24 }}>
               <div
                 style={{
-                  fontSize: 12,
+                  fontSize: neuRem(12),
                   color: "var(--neu-text-2)",
                   letterSpacing: 0.5,
                   textTransform: "uppercase",
@@ -328,14 +329,14 @@ export default function RegisterPage() {
               >
                 <NeuPressableButton
                   active={selectedLocale === "en-US"}
-                  style={{ flex: 1, padding: "7px 0", fontSize: 13 }}
+                  style={{ flex: 1, padding: "7px 0", fontSize: neuRem(13) }}
                   onClick={() => handleLocaleChange("en-US")}
                 >
                   English
                 </NeuPressableButton>
                 <NeuPressableButton
                   active={selectedLocale === "zh-CN"}
-                  style={{ flex: 1, padding: "7px 0", fontSize: 13 }}
+                  style={{ flex: 1, padding: "7px 0", fontSize: neuRem(13) }}
                   onClick={() => handleLocaleChange("zh-CN")}
                 >
                   中文
@@ -351,7 +352,7 @@ export default function RegisterPage() {
                   borderRadius: radius.md,
                   padding: "8px 14px",
                   marginBottom: 16,
-                  fontSize: 13,
+                  fontSize: neuRem(13),
                   boxShadow:
                     "inset 2px 2px 6px rgba(163, 177, 198, 0.4), inset -2px -2px 5px rgba(255,255,255,0.6)",
                 }}
@@ -378,10 +379,9 @@ export default function RegisterPage() {
               textAlign: "center",
               marginTop: 16,
               color: "var(--neu-text-2)",
-              fontSize: 13,
+              fontSize: neuRem(13),
             }}
           >
-            or{" "}
             <span
               onClick={() => navigate("/login")}
               style={{

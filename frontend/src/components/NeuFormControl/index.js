@@ -3,6 +3,12 @@ import { SearchOutlined } from "@ant-design/icons";
 import { DatePicker, Input, InputNumber, Select } from "antd";
 import { createNeuButton } from "../NeuButton";
 import {
+  attachNeuSelectPopup,
+  mapNeuSelectOptions,
+  NEU_SELECT_POPUP_MARKER,
+  withNeuSelectOptionClassName,
+} from "./selectPopup";
+import {
   setupPickerCellPress,
   syncPickerPopup,
 } from "./pickerPopup";
@@ -133,8 +139,93 @@ NeuInputBase.Search = NeuInputSearch;
  */
 export const NeuInput = NeuInputBase;
 
-export const NeuSelect = createNeuControl(Select, "NeuSelect");
-NeuSelect.Option = Select.Option;
+function buildNeuSelectPopupClass(
+  popupClassRef,
+  popupClassName,
+  dropdownClassName,
+  classNamesRoot
+) {
+  return [
+    NEU_SELECT_POPUP_MARKER,
+    popupClassRef.current,
+    popupClassName,
+    dropdownClassName,
+    classNamesRoot,
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+const NeuSelectOption = function NeuSelectOption({ className, ...props }) {
+  return (
+    <Select.Option
+      className={withNeuSelectOptionClassName(className)}
+      {...props}
+    />
+  );
+};
+NeuSelectOption.displayName = "NeuSelect.Option";
+
+export const NeuSelect = React.forwardRef(function NeuSelect(
+  {
+    fullWidth = true,
+    style,
+    classNames,
+    popupClassName,
+    dropdownClassName,
+    options,
+    onOpenChange,
+    ...props
+  },
+  ref
+) {
+  const popupClassRef = React.useRef(
+    `neu-select-popup-${Math.random().toString(36).slice(2)}`
+  );
+  const optionPressCleanupRef = React.useRef(null);
+  const mergedPopupClass = buildNeuSelectPopupClass(
+    popupClassRef,
+    popupClassName,
+    dropdownClassName,
+    classNames?.popup?.root
+  );
+  const neuOptions = React.useMemo(() => mapNeuSelectOptions(options), [options]);
+
+  React.useEffect(
+    () => () => {
+      optionPressCleanupRef.current?.();
+    },
+    []
+  );
+
+  const handleOpenChange = (open, ...rest) => {
+    if (open) {
+      requestAnimationFrame(() => {
+        optionPressCleanupRef.current?.();
+        optionPressCleanupRef.current =
+          attachNeuSelectPopup(popupClassRef.current) ?? null;
+      });
+    } else {
+      optionPressCleanupRef.current?.();
+      optionPressCleanupRef.current = null;
+    }
+    onOpenChange?.(open, ...rest);
+  };
+
+  return (
+    <Select
+      ref={ref}
+      style={neuControlStyle(style, fullWidth)}
+      popupClassName={mergedPopupClass}
+      classNames={classNames}
+      options={neuOptions}
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
+  );
+});
+NeuSelect.displayName = "NeuSelect";
+NeuSelect.Option = NeuSelectOption;
 NeuSelect.OptGroup = Select.OptGroup;
 
 export const NeuDatePicker = React.forwardRef(function NeuDatePicker(

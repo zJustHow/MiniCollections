@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import BrandObjectsPageHeader from "../pageHeaders/BrandObjectsPageHeader";
+import { useHeader } from "../../HeaderContext";
 import useSearchParam from "../../hooks/useSearchParam";
 import useObjectFilterParams from "../../hooks/useObjectFilterParams";
 import usePagedList from "../../hooks/usePagedList";
@@ -15,6 +17,7 @@ import { filterKeyFromIds } from "../../utils/filterParams";
 export default function useBrandsState({ isAdmin = false } = {}) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setHeaderSlot } = useHeader();
   const [searchValue] = useSearchParam();
   const {
     selectedCategoryIds,
@@ -128,6 +131,9 @@ export default function useBrandsState({ isAdmin = false } = {}) {
 
   const handleBrandClick = (brand) => {
     const returnSearch = location.search;
+    setHeaderSlot(
+      <BrandObjectsPageHeader brand={brand} returnSearch={returnSearch} />,
+    );
     const nextSearch = new URLSearchParams(location.search);
     nextSearch.delete("q");
     nextSearch.delete("categoryIds");

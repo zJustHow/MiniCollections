@@ -1,4 +1,5 @@
 import React from "react";
+import { neuRem } from "../theme/fontScale";
 
 function isDisplayableText(value) {
   if (value == null || value === false) return false;
@@ -34,14 +35,14 @@ export function DetailRow({ label, value }) {
       <span
         style={{
           color: "var(--neu-text-2)",
-          fontSize: 13,
+          fontSize: neuRem(13),
           minWidth: 100,
           flexShrink: 0,
         }}
       >
         {label}
       </span>
-      <span style={{ color: "var(--neu-text)", fontSize: 13 }}>{value}</span>
+      <span style={{ color: "var(--neu-text)", fontSize: neuRem(13) }}>{value}</span>
     </div>
   );
 }

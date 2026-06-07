@@ -215,15 +215,14 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
           <div className="profile-hero">
             <Upload
               id="profile-avatar-upload"
+              className="profile-avatar-upload"
               name="avatar"
               accept="image/*"
               showUploadList={false}
               beforeUpload={() => false}
               onChange={({ file }) => handleAvatarUpload({ file })}
             >
-              <div
-                className={`neu-avatar-btn profile-avatar-wrap${profile.avatar_url ? "" : " neu-avatar-btn--accent"}`}
-              >
+              <div className="neu-card neu-card--avatar profile-avatar-wrap">
                 <Avatar
                   size={96}
                   src={profile.avatar_url}
@@ -380,12 +379,9 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   </Form.Item>
                   <NeuButton
                     loading={emailCodeLoading}
-                    onClick={
-                      emailCodeCountdown > 0 ? undefined : handleEmailSendCode
-                    }
-                    className={
-                      emailCodeCountdown > 0 ? "btn-counting-down profile-btn-shrink" : "profile-btn-shrink"
-                    }
+                    disabled={emailCodeCountdown > 0}
+                    onClick={handleEmailSendCode}
+                    className="profile-btn-shrink"
                   >
                     {emailCodeCountdown > 0
                       ? `${emailCodeCountdown}s`

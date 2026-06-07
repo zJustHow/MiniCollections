@@ -16,7 +16,7 @@
 }
 
 .profile-section-label {
-  font-size: 11px;
+  font-size: 0.6875rem;
   letter-spacing: 1.4px;
   text-transform: uppercase;
   color: var(--neu-text-2);
@@ -46,23 +46,23 @@
 .profile-avatar-overlay {
   position: absolute;
   inset: 0;
-  border-radius: 0;
+  border-radius: 50%;
   background: rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 .profile-display-name {
   margin-top: 12px;
-  font-size: 18px;
+  font-size: 1.125rem;
   color: var(--neu-text);
 }
 
 .profile-display-email {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--neu-text-2);
   margin-top: 3px;
 }
@@ -110,7 +110,7 @@
 }
 
 .profile-wechat-status {
-  font-size: 13px;
+  font-size: 0.8125rem;
 }
 
 .profile-wechat-status--bound {

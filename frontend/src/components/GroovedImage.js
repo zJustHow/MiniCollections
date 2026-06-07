@@ -1,7 +1,11 @@
 import React from "react";
 import { PictureOutlined } from "@ant-design/icons";
-import { useAdaptiveImageFrame } from "./useAdaptiveImageFrame";
+import {
+  useAdaptiveImageFrame,
+  IMAGE_ACTION_RESERVE_PX,
+} from "./useAdaptiveImageFrame";
 import { resolveMediaUrl } from "../utils";
+import { neuRem } from "../theme/fontScale";
 
 export default function GroovedImage({
   imageUrl,
@@ -14,6 +18,7 @@ export default function GroovedImage({
   placeholderIcon: PlaceholderIcon = PictureOutlined,
   placeholderSize,
   loading = "lazy",
+  frameAction,
 }) {
   const src = resolveMediaUrl(imageUrl);
   const { wellRef, frameSize, imageDisplayable, onImageLoad, onImageError } =
@@ -22,11 +27,12 @@ export default function GroovedImage({
       adaptiveGroove: !fixedGroove,
       wellInset,
       groovePad,
+      actionReserve: frameAction ? IMAGE_ACTION_RESERVE_PX : 0,
     });
 
   const placeholderStyle =
     placeholderSize != null
-      ? { fontSize: placeholderSize, color: "var(--neu-text-2)" }
+      ? { fontSize: neuRem(placeholderSize), color: "var(--neu-text-2)" }
       : { color: "var(--neu-text-2)" };
 
   const placeholder = (
@@ -86,6 +92,26 @@ export default function GroovedImage({
     .filter(Boolean)
     .join(" ");
 
+  const showFrameAction =
+    Boolean(frameAction) && (fixedGroove || imageDisplayable);
+  const frameActionNode = showFrameAction ? (
+    <div className="neu-image-upload-remove neu-image-upload-remove--on-groove">
+      {frameAction}
+    </div>
+  ) : null;
+
+  const renderFrameWithAction = (frameNode) => {
+    if (!frameActionNode) return frameNode;
+    return (
+      <div
+        className={`neu-card-image-stack${fixedGroove ? " neu-card-image-stack--fill" : ""}`}
+      >
+        {frameNode}
+        {frameActionNode}
+      </div>
+    );
+  };
+
   return (
     <div ref={wellRef} className={wellClasses}>
       <div className="neu-card-image-slot">
@@ -100,7 +126,7 @@ export default function GroovedImage({
             onError={onImageError}
           />
         )}
-        {renderFrame()}
+        {renderFrameWithAction(renderFrame())}
       </div>
     </div>
   );

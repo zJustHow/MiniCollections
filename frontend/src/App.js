@@ -1,7 +1,8 @@
 import NeuPressableButton from "./components/NeuPressableButton";
 import PageLoader from "./components/PageLoader";
 import { Layout, Avatar, Tooltip, Spin } from "antd";
-import { lazy, Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
+import { lazyWithRetry } from "./utils/lazyWithRetry";
 import {
   Routes,
   Route,
@@ -9,26 +10,27 @@ import {
   useNavigate,
   useLocation,
   Outlet,
+  matchPath,
 } from "react-router-dom";
 import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
 import LoginPage from "./pages/LoginPage";
 import BrandObjectsPage from "./pages/BrandObjectsPage";
+import BrandObjectDetailPage from "./pages/BrandObjectDetailPage";
 import GroupObjectsPage from "./pages/GroupObjectsPage";
+import GroupObjectDetailPage from "./pages/GroupObjectDetailPage";
 import { getMe, logout } from "./utils";
 import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
 
-const RegisterPage = lazy(() => import("./pages/RegisterPage"));
-const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
-const AdminPage = lazy(() => import("./pages/AdminPage"));
-const AdminBrandObjectsPage = lazy(() => import("./pages/admin/AdminBrandObjectsPage"));
-const FeedbackPage = lazy(() => import("./pages/FeedbackPage"));
-const ProfilePage = lazy(() => import("./pages/ProfilePage"));
-const BrandObjectDetailPage = lazy(() => import("./pages/BrandObjectDetailPage"));
-const GroupObjectDetailPage = lazy(() => import("./pages/GroupObjectDetailPage"));
-const WechatCallbackPage = lazy(() => import("./pages/WechatCallbackPage"));
+const RegisterPage = lazyWithRetry(() => import("./pages/RegisterPage"));
+const ForgotPasswordPage = lazyWithRetry(() => import("./pages/ForgotPasswordPage"));
+const AdminPage = lazyWithRetry(() => import("./pages/AdminPage"));
+const AdminBrandObjectsPage = lazyWithRetry(() => import("./pages/admin/AdminBrandObjectsPage"));
+const FeedbackPage = lazyWithRetry(() => import("./pages/FeedbackPage"));
+const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"));
+const WechatCallbackPage = lazyWithRetry(() => import("./pages/WechatCallbackPage"));
 
 const { Header, Content } = Layout;
 
@@ -54,6 +56,13 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  const hideProfileButton = [
+    "/brands/:brandId",
+    "/brands/:brandId/objects/:objectId",
+    "/groups/:groupId",
+    "/groups/:groupId/objects/:objectId",
+  ].some((pattern) => matchPath(pattern, location.pathname));
+
   const activeTab =
     location.pathname === "/groups"
       ? "groups"
@@ -64,6 +73,45 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
           : "brands";
 
   const goToLogin = () => navigate("/login");
+
+  const goToProfile = () => navigate(authed ? "/profile" : "/login");
+
+  const renderProfileBtn = (onClick) =>
+    authed ? (
+      <button
+        type="button"
+        className="neu-card neu-card--avatar"
+        aria-label={profile?.display_name || t("profile")}
+        onClick={onClick}
+      >
+        <Avatar
+          src={profile?.avatar_url}
+          icon={!profile?.avatar_url && <UserOutlined />}
+          size={36}
+          style={{
+            background: profile?.avatar_url
+              ? "transparent"
+              : "var(--neu-accent)",
+          }}
+        />
+      </button>
+    ) : (
+      <button
+        type="button"
+        className="neu-card neu-card--avatar"
+        aria-label={t("signIn")}
+        onClick={onClick}
+      >
+        <Avatar
+          icon={<UserOutlined />}
+          size={36}
+          style={{
+            background: "var(--neu-bg)",
+            color: "var(--neu-text-2)",
+          }}
+        />
+      </button>
+    );
 
   const handleTabChange = (tab) => {
     if (!authed && (tab === "groups" || tab === "feedback")) {
@@ -131,59 +179,30 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
           </div>
         )}
 
-        {/* Right slot — hidden when page has its own header slot */}
-        <div
-          className="header-right"
-          style={{
-            flexShrink: 0,
-            display: headerSlot ? "none" : "flex",
-            alignItems: "center",
-            gap: 12,
-          }}
-        >
-          {authed ? (
-            <Tooltip
-              title={profile?.display_name || t("profile")}
-              placement="bottomRight"
-            >
-              <button
-                type="button"
-                className={`neu-avatar-btn${profile?.avatar_url ? "" : " neu-avatar-btn--accent"}`}
-                aria-label={profile?.display_name || t("profile")}
-                onClick={() => navigate("/profile")}
+        {!hideProfileButton && (
+          <div
+            className="header-right"
+            style={{
+              flexShrink: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 12,
+            }}
+          >
+            {authed ? (
+              <Tooltip
+                title={profile?.display_name || t("profile")}
+                placement="bottomRight"
               >
-                <Avatar
-                  src={profile?.avatar_url}
-                  icon={!profile?.avatar_url && <UserOutlined />}
-                  size={36}
-                  style={{
-                    background: profile?.avatar_url
-                      ? "transparent"
-                      : "var(--neu-accent)",
-                  }}
-                />
-              </button>
-            </Tooltip>
-          ) : (
-            <Tooltip title={t("signIn")} placement="bottomRight">
-              <button
-                type="button"
-                className="neu-avatar-btn"
-                aria-label={t("signIn")}
-                onClick={goToLogin}
-              >
-                <Avatar
-                  icon={<UserOutlined />}
-                  size={36}
-                  style={{
-                    background: "var(--neu-bg)",
-                    color: "var(--neu-text-2)",
-                  }}
-                />
-              </button>
-            </Tooltip>
-          )}
-        </div>
+                {renderProfileBtn(goToProfile)}
+              </Tooltip>
+            ) : (
+              <Tooltip title={t("signIn")} placement="bottomRight">
+                {renderProfileBtn(goToLogin)}
+              </Tooltip>
+            )}
+          </div>
+        )}
 
         {/* Mobile hamburger button — only visible on small screens */}
         {!headerSlot && (
@@ -229,14 +248,14 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
               {t("adminPanel")}
             </button>
           )}
-          <div className="mobile-menu-divider" />
-          <button
-            type="button"
-            className="mobile-menu-profile-btn"
-            onClick={() => (authed ? navigate("/profile") : navigate("/login"))}
-          >
-            {authed ? profile?.display_name || t("profile") : t("signIn")}
-          </button>
+          {!hideProfileButton && (
+            <>
+              <div className="mobile-menu-divider" />
+              <div className="mobile-menu-profile">
+                {renderProfileBtn(goToProfile)}
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -409,25 +428,16 @@ export default function App() {
         }
       >
         <Route
-          index
           element={
-            authed ? (
-              <ObjectList activeTab="brands" isAdmin={isAdmin} />
-            ) : (
-              <GuestBrandsView />
-            )
+            authed ? <ObjectList isAdmin={isAdmin} /> : <Outlet />
           }
-        />
-        <Route
-          path="groups"
-          element={
-            authed ? (
-              <ObjectList activeTab="groups" isAdmin={isAdmin} />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+        >
+          <Route index element={authed ? null : <GuestBrandsView />} />
+          <Route
+            path="groups"
+            element={authed ? null : <Navigate to="/login" replace />}
+          />
+        </Route>
         <Route
           path="brands/:brandId"
           element={
@@ -437,12 +447,10 @@ export default function App() {
         <Route
           path="brands/:brandId/objects/:objectId"
           element={
-            <Suspense fallback={<PageLoader />}>
-              <BrandObjectDetailPage
-                isAdmin={isAdmin && authed}
-                authed={authed}
-              />
-            </Suspense>
+            <BrandObjectDetailPage
+              isAdmin={isAdmin && authed}
+              authed={authed}
+            />
           }
         />
         <Route
@@ -455,9 +463,7 @@ export default function App() {
           path="groups/:groupId/objects/:objectId"
           element={
             authed ? (
-              <Suspense fallback={<PageLoader />}>
-                <GroupObjectDetailPage />
-              </Suspense>
+              <GroupObjectDetailPage />
             ) : (
               <Navigate to="/login" replace />
             )

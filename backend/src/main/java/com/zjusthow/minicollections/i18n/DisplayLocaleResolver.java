@@ -43,6 +43,18 @@ public class DisplayLocaleResolver {
         return Locale.forLanguageTag(effectiveLocale.replace('_', '-')).getLanguage().equalsIgnoreCase("zh");
     }
 
+    public static String defaultGroupName(String locale) {
+        if (locale != null
+                && Locale.forLanguageTag(locale.replace('_', '-')).getLanguage().equalsIgnoreCase("zh")) {
+            return "默认";
+        }
+        return "default";
+    }
+
+    public static boolean isDefaultGroupName(String name) {
+        return "default".equals(name) || "默认".equals(name);
+    }
+
     public static String pickName(String nameEn, String nameZh, boolean preferZh) {
         if (preferZh) {
             return firstNonBlank(nameZh, nameEn);

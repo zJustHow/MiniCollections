@@ -10,8 +10,10 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { sendForgotPasswordCode, resetPassword, COUNTRIES } from "../utils";
+import { PHONE_AUTH_ENABLED } from "../components/auth/authFeatures";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
+import { neuRem } from "../theme/fontScale";
 
 const { Header, Content } = Layout;
 
@@ -125,7 +127,7 @@ export default function ForgotPasswordPage() {
             style={{
               textAlign: "center",
               color: "var(--neu-text-2)",
-              fontSize: 13,
+              fontSize: neuRem(13),
               marginBottom: 24,
               lineHeight: 1.5,
             }}
@@ -145,7 +147,7 @@ export default function ForgotPasswordPage() {
           >
             <NeuPressableButton
               active={resetType === "email"}
-              style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
+              style={{ flex: 1, padding: "8px 0", fontSize: neuRem(13) }}
               onClick={() => handleTypeChange("email")}
             >
               <MailOutlined style={{ marginRight: 6 }} />
@@ -153,11 +155,21 @@ export default function ForgotPasswordPage() {
             </NeuPressableButton>
             <NeuPressableButton
               active={resetType === "phone"}
-              style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
-              onClick={() => handleTypeChange("phone")}
+              disabled={!PHONE_AUTH_ENABLED}
+              style={{
+                flex: 1,
+                padding: "8px 0",
+                fontSize: neuRem(13),
+                opacity: PHONE_AUTH_ENABLED ? 1 : 0.6,
+                cursor: PHONE_AUTH_ENABLED ? "pointer" : "not-allowed",
+              }}
+              onClick={() => PHONE_AUTH_ENABLED && handleTypeChange("phone")}
             >
               <PhoneOutlined style={{ marginRight: 6 }} />
               {t("registerWithPhone")}
+              {!PHONE_AUTH_ENABLED && (
+                <span style={{ marginLeft: 4, fontSize: neuRem(11) }}>({t("underDevelopment")})</span>
+              )}
             </NeuPressableButton>
           </div>
 
@@ -300,7 +312,7 @@ export default function ForgotPasswordPage() {
                   borderRadius: radius.md,
                   padding: "8px 14px",
                   marginBottom: 16,
-                  fontSize: 13,
+                  fontSize: neuRem(13),
                   boxShadow:
                     "inset 2px 2px 6px rgba(163, 177, 198, 0.4), inset -2px -2px 5px rgba(255,255,255,0.6)",
                 }}
@@ -327,7 +339,7 @@ export default function ForgotPasswordPage() {
               textAlign: "center",
               marginTop: 16,
               color: "var(--neu-text-2)",
-              fontSize: 13,
+              fontSize: neuRem(13),
             }}
           >
             <span

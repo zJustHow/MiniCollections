@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { App, Form, Grid, Popconfirm } from "antd";
 import NeuButton, { neuBtnProps } from "../components/NeuButton";
@@ -84,7 +84,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setHeaderSlot(
       <div className="header-slot-bar">
         <div className="header-slot-actions">

@@ -14,6 +14,7 @@ import { submitFeedback, getCategories, getScales, getSeriesByBrandId } from "..
 import { useState, useEffect, useCallback, useRef } from "react";
 import ImageUploadField from "../../ImageUploadField";
 import BrandSelectField, { OTHER_BRAND } from "../../BrandSelectField";
+import { neuRem } from "../../../theme/fontScale";
 
 function MissingModelForm({ form, brandValue, onBrandChange, onLoadSeries, categoryOptions, scaleOptions, seriesOptions, imageValue, onImageChange, uploadSessionRef, seedBrand }) {
   const { t } = useLocale();
@@ -309,7 +310,7 @@ export default function SubmitObjectModal({ visible, onCancel, selectedBrand }) 
           <NeuPressableButton
             key={value}
             active={submissionType === value}
-            style={{ flex: 1, padding: "8px 0", fontSize: 13 }}
+            style={{ flex: 1, padding: "8px 0", fontSize: neuRem(13) }}
             onClick={() => handleTypeChange(value)}
           >
             <span style={{ marginRight: 6 }}>{icon}</span>

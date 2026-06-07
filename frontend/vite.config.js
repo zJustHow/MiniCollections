@@ -16,7 +16,8 @@ function shouldProxy(req) {
     pathname.startsWith("/@") ||
     pathname.startsWith("/src") ||
     pathname.startsWith("/node_modules") ||
-    pathname.startsWith("/assets")
+    pathname.startsWith("/assets") ||
+    pathname.startsWith("/static")
   ) {
     return false;
   }
@@ -49,6 +50,14 @@ function proxyBypass(req) {
   return false;
 }
 
+const apiProxy = {
+  "^/(?!@|src|node_modules).*": {
+    target: proxyTarget,
+    changeOrigin: true,
+    bypass: proxyBypass,
+  },
+};
+
 export default defineConfig({
   plugins: [
     react({
@@ -69,13 +78,11 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    proxy: {
-      "^/(?!@|src|node_modules).*": {
-        target: proxyTarget,
-        changeOrigin: true,
-        bypass: proxyBypass,
-      },
-    },
+    proxy: apiProxy,
+  },
+  preview: {
+    port: 4173,
+    proxy: apiProxy,
   },
   build: {
     outDir: "build",

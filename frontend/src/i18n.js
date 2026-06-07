@@ -212,7 +212,7 @@ const en = {
   submitReport: "Submit",
   feedbackTypeLabel: "Feedback Type",
   feedbackTypeMissingModel: "Missing Model",
-  feedbackTypeBugReport: "Bug / Issue Report",
+  feedbackTypeBugReport: "Bug Report",
   feedbackTypeDataCorrection: "Data Correction",
   reportModalTitleMissingModel: "Report Missing Model",
   reportModalTitleBugReport: "Report a Bug / Issue",

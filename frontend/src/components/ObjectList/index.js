@@ -1,3 +1,6 @@
+import { useLayoutEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useHeader } from "../../HeaderContext";
 import useObjectListState from "./useObjectListState";
 import BrandsTab from "./BrandsTab";
 import GroupsTab from "./GroupsTab";
@@ -5,8 +8,15 @@ import BrandModal from "./modals/BrandModal";
 import CreateGroupModal from "./modals/CreateGroupModal";
 import { discardUploadedImage } from "../../utils";
 
-export default function ObjectList({ activeTab, isAdmin }) {
+export default function ObjectList({ isAdmin }) {
+  const location = useLocation();
+  const { setHeaderSlot } = useHeader();
   const state = useObjectListState({ isAdmin });
+  const activeTab = location.pathname === "/groups" ? "groups" : "brands";
+
+  useLayoutEffect(() => {
+    setHeaderSlot(null);
+  }, [setHeaderSlot]);
 
   const {
     brands,
@@ -53,7 +63,7 @@ export default function ObjectList({ activeTab, isAdmin }) {
 
   return (
     <>
-      {activeTab === "brands" ? (
+      <div hidden={activeTab !== "brands"}>
         <BrandsTab
           brands={brands}
           loading={loadingBrands}
@@ -79,7 +89,8 @@ export default function ObjectList({ activeTab, isAdmin }) {
           onToggleScale={onToggleScale}
           onToggleSeries={onToggleSeries}
         />
-      ) : (
+      </div>
+      <div hidden={activeTab !== "groups"}>
         <GroupsTab
           groups={groups}
           loading={loadingGroups}
@@ -96,7 +107,7 @@ export default function ObjectList({ activeTab, isAdmin }) {
           groupsListPage={groupsListPage}
           combinedSearchPage={groupCombinedSearchPage}
         />
-      )}
+      </div>
 
       <BrandModal
         open={brandModalOpen}

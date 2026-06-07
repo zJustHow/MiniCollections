@@ -1,18 +1,12 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useObjectFilterParams from "../hooks/useObjectFilterParams";
 import usePagedList from "../hooks/usePagedList";
-import { App, Popconfirm, Spin } from "antd";
+import { App, Spin } from "antd";
 import NeuCard from "../components/NeuCard";
-import { neuBtnProps } from "../components/NeuButton";
-import HeaderActionButton from "../components/HeaderActionButton";
+import BrandObjectsPageHeader from "../components/pageHeaders/BrandObjectsPageHeader";
 import { NeuInput } from "../components/NeuFormControl";
-import {
-  ArrowLeftOutlined,
-  DeleteOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
 import ListPagination from "../components/ListPagination";
 import ObjectSearchFilterLayout from "../components/ObjectSearchFilterLayout";
 import ObjectSearchFilterPanel from "../components/ObjectSearchFilterPanel";
@@ -24,6 +18,7 @@ import BrandModal from "../components/ObjectList/modals/BrandModal";
 import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
+import { pickBrandName } from "../utils/displayLocale";
 import {
   getBrandByBrandId,
   getBrandObjectsPage,
@@ -33,6 +28,8 @@ import {
   PAGE_SIZE,
   recordBrandView,
 } from "../utils";
+import { scrollAppToTop } from "../utils/scroll";
+import { neuRem } from "../theme/fontScale";
 
 const { Search } = NeuInput;
 
@@ -41,7 +38,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { setHeaderSlot } = useHeader();
 
   const [searchValue] = useSearchParam();
@@ -225,47 +222,22 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     }
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    scrollAppToTop();
+  }, [brandId]);
+
+  useLayoutEffect(() => {
     setHeaderSlot(
-      <div className="header-slot-bar">
-        <div className="header-slot-actions">
-          <HeaderActionButton
-            icon={<ArrowLeftOutlined />}
-            onClick={() =>
-              navigate({
-                pathname: "/",
-                search: returnSearchRef.current,
-              })
-            }
-          />
-        </div>
-        {isAdmin && brand && (
-          <div className="header-slot-actions header-slot-actions-end">
-            <HeaderActionButton
-              icon={<EditOutlined />}
-              onClick={() => {
-                setEditingBrand(brand);
-                setBrandModalOpen(true);
-              }}
-            />
-            <Popconfirm
-              title={t("deleteBrandTitle")}
-              description={t("deleteBrandContent").replace(
-                "{name}",
-                brand.name,
-              )}
-              onConfirm={handleAdminDeleteBrand}
-              okText={t("delete")}
-              okButtonProps={neuBtnProps({ danger: true })}
-              cancelButtonProps={neuBtnProps()}
-              cancelText={t("cancel")}
-            >
-              <HeaderActionButton danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </div>
-        )}
-        <span className="header-slot-title">{brand?.name ?? "…"}</span>
-      </div>,
+      <BrandObjectsPageHeader
+        brand={brand}
+        returnSearch={returnSearchRef.current}
+        isAdmin={isAdmin}
+        onEditBrand={() => {
+          setEditingBrand(brand);
+          setBrandModalOpen(true);
+        }}
+        onDeleteBrand={handleAdminDeleteBrand}
+      />,
     );
     return () => setHeaderSlot(null);
   }, [brand, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -291,6 +263,9 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     },
     [clearSearchAndFilters, setSearchQueryClearingFilters],
   );
+
+  const objectCardBrandSubtitle = (obj) =>
+    pickBrandName(obj, locale) || brand?.name;
 
   return (
     <div>
@@ -367,6 +342,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                     <NeuCard
                       key={item.id}
                       name={item.name}
+                      subtitle={objectCardBrandSubtitle(item)}
+                      nameplateVariant="object"
                       imageUrl={item.image_url}
                       onClick={() =>
                         navigate(`/brands/${brandId}/objects/${item.id}`, {
@@ -417,6 +394,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                     <NeuCard
                       key={item.id}
                       name={item.name}
+                      subtitle={objectCardBrandSubtitle(item)}
+                      nameplateVariant="object"
                       imageUrl={item.image_url}
                       onClick={() =>
                         navigate(`/brands/${brandId}/objects/${item.id}`, {
@@ -458,7 +437,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
               border: "none",
               cursor: "pointer",
               color: "var(--neu-text-2)",
-              fontSize: 13,
+              fontSize: neuRem(13),
               textDecoration: "underline",
               padding: 0,
             }}

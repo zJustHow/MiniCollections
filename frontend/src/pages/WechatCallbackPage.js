@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { bindWechatAccount, exchangeWechatCode } from "../utils";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
+import { neuRem } from "../theme/fontScale";
 
 const BIND_INTENT_KEY = "wechat_intent";
 
@@ -61,7 +62,7 @@ export default function WechatCallbackPage({ onSuccess, onBind }) {
             background: "rgba(224, 93, 93, 0.08)",
             borderRadius: radius.md,
             padding: "12px 20px",
-            fontSize: 14,
+            fontSize: neuRem(14),
             boxShadow:
               "inset 2px 2px 6px rgba(163, 177, 198, 0.4), inset -2px -2px 5px rgba(255,255,255,0.6)",
           }}
@@ -70,7 +71,7 @@ export default function WechatCallbackPage({ onSuccess, onBind }) {
         </div>
         <span
           onClick={() => navigate(isBind ? "/profile" : "/login")}
-          style={{ cursor: "pointer", color: "var(--neu-accent)", fontSize: 13 }}
+          style={{ cursor: "pointer", color: "var(--neu-accent)", fontSize: neuRem(13) }}
         >
           {isBind ? t("profileTitle") : t("signIn")}
         </span>
@@ -87,7 +88,7 @@ export default function WechatCallbackPage({ onSuccess, onBind }) {
         minHeight: "100vh",
         background: "var(--neu-bg)",
         color: "var(--neu-text-2)",
-        fontSize: 14,
+        fontSize: neuRem(14),
       }}
     >
       {isBind ? t("wechatBindingInProgress") : t("wechatLoggingIn")}

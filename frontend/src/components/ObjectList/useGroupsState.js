@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import useSearchParam from "../../hooks/useSearchParam";
+import GroupObjectsPageHeader from "../pageHeaders/GroupObjectsPageHeader";
+import { useHeader } from "../../HeaderContext";
+import { useSearchParams } from "react-router-dom";
+import { mutateSearchParams } from "../../utils/searchParams";
 import usePagedList from "../../hooks/usePagedList";
 import useCombinedBrandSearch from "../../hooks/useCombinedBrandSearch";
 import { App, Form } from "antd";
@@ -12,7 +15,9 @@ export default function useGroupsState() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchValue, setSearchParam] = useSearchParam();
+  const { setHeaderSlot } = useHeader();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchValue = searchParams.get("q") || "";
   const [searchKeyword, setSearchKeyword] = useState("");
   const syncedKeywordRef = useRef("");
 
@@ -28,7 +33,7 @@ export default function useGroupsState() {
     ({ size, page }) => getGroupsPage({ size, page }),
     {
       resetKey: "groups-list",
-      enabled: location.pathname === "/groups" && !groupSearchActive,
+      enabled: !groupSearchActive,
       pageSize: PAGE_SIZE,
       pageParamKey: "page",
       reservedFirstPageSlots: 1,
@@ -63,23 +68,41 @@ export default function useGroupsState() {
   }, [location.pathname, searchValue]);
 
   const handleGroupClick = (group) => {
-    navigate(`/groups/${group.id}`, { state: { group } });
+    const returnSearch = location.search;
+    setHeaderSlot(
+      <GroupObjectsPageHeader group={group} returnSearch={returnSearch} />,
+    );
+    const nextSearch = new URLSearchParams(location.search);
+    nextSearch.delete("q");
+    nextSearch.delete("page");
+    nextSearch.delete("searchPage");
+    const search = nextSearch.toString();
+    navigate(
+      { pathname: `/groups/${group.id}`, search: search ? `?${search}` : "" },
+      { state: { group, returnSearch } },
+    );
   };
 
   const handleGroupSearch = useCallback(
     (value) => {
       const keyword = value.trim();
-      if (!keyword) {
-        setSearchParam("");
-        syncedKeywordRef.current = "";
-        setSearchKeyword("");
-        return;
-      }
-      setSearchParam(keyword);
+      mutateSearchParams(
+        setSearchParams,
+        (next) => {
+          next.delete("page");
+          next.delete("searchPage");
+          if (keyword) {
+            next.set("q", keyword);
+          } else {
+            next.delete("q");
+          }
+        },
+        { replace: true },
+      );
       syncedKeywordRef.current = keyword;
       setSearchKeyword(keyword);
     },
-    [setSearchParam],
+    [setSearchParams],
   );
 
   const handleCreateGroup = async () => {

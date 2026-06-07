@@ -19,6 +19,7 @@ import ResolveModal from "./admin/ResolveModal";
 import RejectModal from "./admin/RejectModal";
 import DetailDrawer from "./admin/DetailDrawer";
 import BrandsPanel from "./admin/BrandsPanel";
+import { neuRem } from "../theme/fontScale";
 
 export default function AdminPage() {
   const { message } = App.useApp();
@@ -120,7 +121,7 @@ export default function AdminPage() {
             flexShrink: 0,
           }}
         >
-          <div style={{ fontSize: 11, color: "var(--neu-text-2)", padding: "4px 10px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ fontSize: neuRem(11), color: "var(--neu-text-2)", padding: "4px 10px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("adminSubmissions")}
           </div>
           {statusOptions.map(({ key, label, icon }) => (
@@ -135,7 +136,7 @@ export default function AdminPage() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 gap: 8,
-                fontSize: 13,
+                fontSize: neuRem(13),
               }}
               onClick={() => { setActiveView("submissions"); handleTabChange(key); }}
             >
@@ -149,7 +150,7 @@ export default function AdminPage() {
                     background: "var(--neu-accent)",
                     color: "#fff",
                     borderRadius: radius.md,
-                    fontSize: 11,
+                    fontSize: neuRem(11),
                     padding: "1px 7px",
                     lineHeight: "18px",
                     minWidth: 20,
@@ -164,7 +165,7 @@ export default function AdminPage() {
 
           <div style={{ height: 1, background: "rgba(184,182,176,0.25)", margin: "4px 8px" }} />
 
-          <div style={{ fontSize: 11, color: "var(--neu-text-2)", padding: "0 10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <div style={{ fontSize: neuRem(11), color: "var(--neu-text-2)", padding: "0 10px", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             {t("adminBrands")}
           </div>
           <NeuPressableButton
@@ -176,7 +177,7 @@ export default function AdminPage() {
               display: "flex",
               alignItems: "center",
               gap: 8,
-              fontSize: 13,
+              fontSize: neuRem(13),
             }}
             onClick={() => setActiveView("brands")}
           >

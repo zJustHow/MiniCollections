@@ -10,6 +10,7 @@ import { useLocale } from "../../LocaleContext";
 import GroovedImage from "../../components/GroovedImage";
 import BrandModal from "../../components/ObjectList/modals/BrandModal";
 import usePagedList from "../../hooks/usePagedList";
+import { neuRem } from "../../theme/fontScale";
 
 export default function BrandsPanel() {
   const { message } = App.useApp();
@@ -67,7 +68,7 @@ export default function BrandsPanel() {
             />
           </div>
         )
-        : <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>—</span>,
+        : <span style={{ color: "var(--neu-text-2)", fontSize: neuRem(12) }}>—</span>,
     },
     { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },
     { title: t("nameZh"), dataIndex: "name_zh", ellipsis: true, width: 140 },

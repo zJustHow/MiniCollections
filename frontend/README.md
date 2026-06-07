@@ -8,6 +8,7 @@ React SPA built with [Vite](https://vite.dev/).
 |---------|-------------|
 | `npm start` / `npm run dev` | Dev server at [http://localhost:3000](http://localhost:3000) |
 | `npm run build` | Production build → `build/` |
+| `npm run build:backend` | Build and copy into `backend/src/main/resources/public/` for single-port deploy |
 | `npm run preview` | Preview production build locally |
 | `npm test` | Run unit tests once (Vitest) |
 | `npm run test:watch` | Run tests in watch mode |

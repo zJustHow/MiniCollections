@@ -18,6 +18,7 @@ import { radius } from "../../theme/radius";
 import usePagedList from "../../hooks/usePagedList";
 import BrandObjectModal from "../../components/ObjectList/modals/BrandObjectModal";
 import SeriesModal from "../../components/ObjectList/modals/SeriesModal";
+import { neuRem } from "../../theme/fontScale";
 
 const ADMIN_TABLE_PAGE_SIZE = 20;
 
@@ -130,7 +131,7 @@ export default function AdminBrandObjectsPage() {
           <h2
             style={{
               margin: 0,
-              fontSize: 20,
+              fontSize: neuRem(20),
               color: "var(--neu-text)",
             }}
           >

@@ -12,6 +12,7 @@ import { deleteMySubmission, getMySubmissionsPage, FEEDBACK_PAGE_SIZE } from "..
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
 import NeuFormDrawer from "../components/NeuFormDrawer";
 import dayjs from "dayjs";
+import { neuRem } from "../theme/fontScale";
 
 const { Text } = Typography;
 
@@ -49,8 +50,8 @@ function DetailRow({ label, value }) {
   if (value == null || value === "") return null;
   return (
     <div style={{ display: "flex", gap: 12, padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
-      <span style={{ color: "var(--neu-text-2)", fontSize: 13, minWidth: 110, flexShrink: 0 }}>{label}</span>
-      <span style={{ color: "var(--neu-text)", fontSize: 13 }}>{value}</span>
+      <span style={{ color: "var(--neu-text-2)", fontSize: neuRem(13), minWidth: 110, flexShrink: 0 }}>{label}</span>
+      <span style={{ color: "var(--neu-text)", fontSize: neuRem(13) }}>{value}</span>
     </div>
   );
 }
@@ -70,25 +71,25 @@ function SubmissionCard({ item, t, onClick }) {
             <NeuTag color={TYPE_COLOR[item.submission_type] || "default"}>
               {typeLabel(item.submission_type, t)}
             </NeuTag>
-            <Text strong style={{ fontSize: 14, color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <Text strong style={{ fontSize: neuRem(14), color: "var(--neu-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
               {title}
             </Text>
             {brand && (
-              <Text style={{ fontSize: 13, color: "var(--neu-text-2)", flexShrink: 0 }}>· {brand}</Text>
+              <Text style={{ fontSize: neuRem(13), color: "var(--neu-text-2)", flexShrink: 0 }}>· {brand}</Text>
             )}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
             <NeuTag color={STATUS_COLOR[item.status] || "default"}>
               {statusLabel(item.status, t)}
             </NeuTag>
-            <Text style={{ fontSize: 12, color: "var(--neu-text-2)" }}>
+            <Text style={{ fontSize: neuRem(12), color: "var(--neu-text-2)" }}>
               {item.submitted_at ? dayjs(item.submitted_at).format("YYYY-MM-DD") : ""}
             </Text>
           </div>
         </div>
 
         {item.notes && (
-          <Text style={{ fontSize: 13, color: "var(--neu-text-2)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          <Text style={{ fontSize: neuRem(13), color: "var(--neu-text-2)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
             {item.notes}
           </Text>
         )}
@@ -120,7 +121,7 @@ function SubmissionDrawer({ item, onClose, onDelete, t }) {
             {statusLabel(item.status, t)}
           </NeuTag>
         </div>
-        <Text style={{ fontSize: 12, color: "var(--neu-text-2)" }}>
+        <Text style={{ fontSize: neuRem(12), color: "var(--neu-text-2)" }}>
           {item.submitted_at ? dayjs(item.submitted_at).format("YYYY-MM-DD HH:mm") : ""}
         </Text>
       </div>
@@ -133,7 +134,7 @@ function SubmissionDrawer({ item, onClose, onDelete, t }) {
 
       {item.image_url && (
         <div style={{ padding: "10px 0", borderBottom: "1px solid rgba(184,182,176,0.2)" }}>
-          <span style={{ color: "var(--neu-text-2)", fontSize: 13, display: "block", marginBottom: 8 }}>{t("image")}</span>
+          <span style={{ color: "var(--neu-text-2)", fontSize: neuRem(13), display: "block", marginBottom: 8 }}>{t("image")}</span>
           <div
             onClick={() => window.open(item.image_url, "_blank")}
             style={{ display: "inline-block", borderRadius: radius.md, overflow: "hidden", boxShadow: "var(--raised-sm)", cursor: "pointer", lineHeight: 0 }}
@@ -149,19 +150,19 @@ function SubmissionDrawer({ item, onClose, onDelete, t }) {
 
       {item.admin_note && (
         <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset)", borderLeft: "3px solid var(--neu-accent)" }}>
-          <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, letterSpacing: "0.3px" }}>
+          <Text style={{ fontSize: neuRem(11), color: "var(--neu-text-2)", display: "block", marginBottom: 3, letterSpacing: "0.3px" }}>
             {t("adminReply")}
           </Text>
-          <Text style={{ fontSize: 13, color: "var(--neu-text)" }}>{item.admin_note}</Text>
+          <Text style={{ fontSize: neuRem(13), color: "var(--neu-text)" }}>{item.admin_note}</Text>
         </div>
       )}
 
       {item.reject_reason && (
         <div style={{ marginTop: 16, borderRadius: radius.md, padding: "10px 14px", boxShadow: "var(--inset)", borderLeft: "3px solid var(--neu-danger)" }}>
-          <Text style={{ fontSize: 11, color: "var(--neu-text-2)", display: "block", marginBottom: 3, letterSpacing: "0.3px" }}>
+          <Text style={{ fontSize: neuRem(11), color: "var(--neu-text-2)", display: "block", marginBottom: 3, letterSpacing: "0.3px" }}>
             {t("rejectionReason")}
           </Text>
-          <Text style={{ fontSize: 13, color: "var(--neu-text)" }}>{item.reject_reason}</Text>
+          <Text style={{ fontSize: neuRem(13), color: "var(--neu-text)" }}>{item.reject_reason}</Text>
         </div>
       )}
     </NeuFormDrawer>

@@ -26,6 +26,7 @@
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
+    "build:backend": "vite build && rm -rf ../backend/src/main/resources/public && cp -R build ../backend/src/main/resources/public",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest"

@@ -710,4 +710,4 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('CH005-2 British LEVC TX5-Black', 'CH005-2 英伦 LEVC TX5-黑色', 'http://localhost:9000/minicollections-media/xcartoys/ch-58978164.png', 'https://www.xcartoys.com/', NULL, NULL, NULL, 7, 1, 64),
 ('CH006-1 Geely Galaxy L7-Morning White', 'CH006-1 吉利银河L7-晨曦白', 'http://localhost:9000/minicollections-media/xcartoys/ch-58978163.png', 'https://www.xcartoys.com/', NULL, NULL, NULL, 7, 1, 64),
 ('CH006-2 Geely Galaxy L7-Mushan Purple', 'CH006-2 吉利银河 L7-暮山紫', 'http://localhost:9000/minicollections-media/xcartoys/ch-58978161.png', 'https://www.xcartoys.com/', NULL, NULL, NULL, 7, 1, 64),
-('CH007 Army Wheeled Equipment Vol.01', 'CH007 陆军轮式装备vol.01', 'http://localhost:9000/minicollections-media/xcartoys/ch-175140718.jpg', 'https://www.xcartoys.com/', NULL, NULL, NULL, 7, 1, 64););
+('CH007 Army Wheeled Equipment Vol.01', 'CH007 陆军轮式装备vol.01', 'http://localhost:9000/minicollections-media/xcartoys/ch-175140718.jpg', 'https://www.xcartoys.com/', NULL, NULL, NULL, 7, 11, 64);

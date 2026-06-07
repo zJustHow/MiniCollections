@@ -32,12 +32,6 @@ export default function GroupsTab({
     setDraftQuery(searchValue ?? "");
   }, [searchValue]);
 
-  const sectionLabelStyle = {
-    fontSize: 13,
-    color: "var(--neu-text-2)",
-    marginBottom: 10,
-  };
-
   const renderGroupCard = (group) =>
     group.id === "__add__" ? (
       <NeuCard key="__add__" add name={t("addGroup")} onClick={onCreateGroup} />
@@ -53,9 +47,12 @@ export default function GroupsTab({
   const hasGroupResults = (combinedSearchPage?.totalBrands ?? 0) > 0;
   const showObjectsSection =
     searchActive &&
-    ((combinedSearchPage?.totalObjects ?? 0) > 0 ||
+    (searchResultObjects.length > 0 ||
       combinedSearchPage?.loading ||
-      searchResultObjects.length > 0);
+      (combinedSearchPage?.totalObjects ?? 0) > 0);
+  const showGroupCards = searchResultGroups.length > 0;
+  const showObjectCards =
+    searchResultObjects.length > 0 || combinedSearchPage?.loading;
 
   const spinning = searchActive
     ? combinedSearchPage?.loading &&
@@ -67,6 +64,8 @@ export default function GroupsTab({
     <NeuCard
       key={obj.id}
       name={obj.name}
+      subtitle={obj.groupName ?? obj.group_name}
+      nameplateVariant="object"
       imageUrl={obj.imageUrl ?? obj.image_url}
       onClick={() =>
         navigate(`/groups/${obj.groupId ?? obj.group_id}/objects/${obj.id}`, {
@@ -119,29 +118,26 @@ export default function GroupsTab({
             <>
               {(hasGroupResults || showObjectsSection) && (
                 <>
-                  {searchResultGroups.length > 0 && (
-                    <>
-                      <div style={sectionLabelStyle}>{t("groups")}</div>
-                      <div className="neu-list-page-browse-grid">
+                  <div className="neu-search-objects-cards">
+                    {showGroupCards && (
+                      <div className="neu-search-section-grid">
                         {searchResultGroups.map(renderGroupCard)}
                       </div>
-                    </>
-                  )}
-                  {showObjectsSection && (
-                    <>
-                      <div
-                        style={{
-                          ...sectionLabelStyle,
-                          marginTop: searchResultGroups.length > 0 ? 24 : 0,
-                        }}
-                      >
-                        {t("myObjects")}
-                      </div>
-                      <div className="neu-list-page-browse-grid">
+                    )}
+                    {showGroupCards &&
+                      showObjectsSection &&
+                      showObjectCards && (
+                        <div
+                          className="neu-search-section-divider"
+                          role="separator"
+                        />
+                      )}
+                    {showObjectsSection && showObjectCards && (
+                      <div className="neu-search-section-grid">
                         {searchResultObjects.map(renderObjectCard)}
                       </div>
-                    </>
-                  )}
+                    )}
+                  </div>
                   <ListPagination
                     page={activePage?.page ?? 0}
                     totalPages={activePage?.totalPages ?? 0}
