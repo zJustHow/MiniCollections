@@ -33,6 +33,7 @@ export default function useCombinedBrandSearch(fetchPage, options = {}) {
   const [loading, setLoading] = useState(false);
   const prevResetKeyRef = useRef(null);
   const pendingScrollRef = useRef(false);
+  const loadPageRef = useRef(() => {});
 
   const applyPage = useCallback((response) => {
     setBrands(Array.isArray(response?.brands) ? response.brands : []);
@@ -86,6 +87,8 @@ export default function useCombinedBrandSearch(fetchPage, options = {}) {
     [fetchPage, pageSize, applyPage, clearPageParam],
   );
 
+  loadPageRef.current = loadPage;
+
   const reset = useCallback(() => {
     setBrands([]);
     setObjects([]);
@@ -128,15 +131,15 @@ export default function useCombinedBrandSearch(fetchPage, options = {}) {
 
     if (resetKeyChanged) {
       clearPageParam();
-      loadPage(0);
+      loadPageRef.current(0);
       return;
     }
 
     const initialPage = pageParamKey
       ? parsePageParam(searchParams, pageParamKey)
       : 0;
-    loadPage(initialPage);
-  }, [resetKey, enabled]); // eslint-disable-line react-hooks/exhaustive-deps
+    loadPageRef.current(initialPage);
+  }, [resetKey, enabled, searchParams, pageParamKey, clearPageParam, reset]);
 
   useEffect(() => {
     if (!pendingScrollRef.current || loading) return;

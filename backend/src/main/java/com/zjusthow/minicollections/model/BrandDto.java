@@ -8,6 +8,7 @@ public record BrandDto(
         String name,
         String nameEn,
         String nameZh,
+        String abbreviation,
         String imageUrl,
         long viewCount
 ) {
@@ -23,6 +24,7 @@ public record BrandDto(
                 name,
                 entity.nameEn(),
                 entity.nameZh(),
+                entity.abbreviation(),
                 entity.imageUrl(),
                 viewCount
         );

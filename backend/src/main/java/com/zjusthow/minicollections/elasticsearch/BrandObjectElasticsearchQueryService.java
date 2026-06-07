@@ -11,7 +11,6 @@ import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import com.zjusthow.minicollections.model.BrandObjectSearchFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -40,12 +39,18 @@ public class BrandObjectElasticsearchQueryService {
         this.elasticsearchOperations = elasticsearchOperations;
     }
 
+    private static final int MAX_RESULT_WINDOW = 10_000;
+
     public EsSearchPageResult searchPage(
             String keyword,
             BrandObjectSearchFilter filter,
             int page,
             int size) {
-        return searchPageInternal(keyword, filter, page, size);
+        if (keyword == null || keyword.isBlank() || size <= 0) {
+            return new EsSearchPageResult(List.of(), 0L, true);
+        }
+        int safePage = Math.max(page, 0);
+        return searchAtOffset(keyword, filter, (long) safePage * size, size);
     }
 
     public EsSearchPageResult searchSlice(
@@ -56,18 +61,7 @@ public class BrandObjectElasticsearchQueryService {
         if (keyword == null || keyword.isBlank() || size <= 0) {
             return new EsSearchPageResult(List.of(), 0L, true);
         }
-        int safeOffset = Math.max(offset, 0);
-        int fetchSize = Math.min(safeOffset + size, 10_000);
-        EsSearchPageResult pageResult = searchPageInternal(keyword, filter, 0, fetchSize);
-        List<Long> ids = pageResult.ids();
-        if (safeOffset >= ids.size()) {
-            return new EsSearchPageResult(List.of(), pageResult.totalElements(), pageResult.totalExact());
-        }
-        int end = Math.min(safeOffset + size, ids.size());
-        return new EsSearchPageResult(
-                ids.subList(safeOffset, end),
-                pageResult.totalElements(),
-                pageResult.totalExact());
+        return searchAtOffset(keyword, filter, Math.max(offset, 0), size);
     }
 
     /**
@@ -113,7 +107,7 @@ public class BrandObjectElasticsearchQueryService {
         var nativeQuery = NativeQuery.builder()
                 .withQuery(buildSearchQuery(q, filter))
                 .withMaxResults(0)
-                .withTrackTotalHitsUpTo(10_000)
+                .withTrackTotalHitsUpTo(MAX_RESULT_WINDOW)
                 .build();
         SearchHits<BrandObjectDocument> hits =
                 elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
@@ -139,32 +133,56 @@ public class BrandObjectElasticsearchQueryService {
         return Aggregation.of(a -> a.terms(t -> t.field(field).size(size)));
     }
 
-    private EsSearchPageResult searchPageInternal(
+    private EsSearchPageResult searchAtOffset(
             String keyword,
             BrandObjectSearchFilter filter,
-            int page,
+            long offset,
             int size) {
         if (keyword == null || keyword.isBlank()) {
             return new EsSearchPageResult(List.of(), 0L, true);
         }
         String q = keyword.trim();
-        int safePage = Math.max(page, 0);
+        int safeOffset = (int) Math.min(Math.max(offset, 0L), MAX_RESULT_WINDOW);
+        int safeSize = Math.min(size, MAX_RESULT_WINDOW - safeOffset);
+        if (safeSize <= 0) {
+            return countOnly(q, filter);
+        }
         var nativeQuery = NativeQuery.builder()
                 .withQuery(buildSearchQuery(q, filter))
                 .withSort(s -> s.score(sc -> sc.order(SortOrder.Desc)))
                 .withSort(s -> s.field(f -> f.field("id").order(SortOrder.Asc)))
-                .withPageable(PageRequest.of(safePage, size))
-                .withTrackTotalHitsUpTo(10_000)
+                .withPageable(new OffsetPageRequest(safeOffset, safeSize))
+                .withTrackTotalHitsUpTo(MAX_RESULT_WINDOW)
                 .build();
         return executePage(nativeQuery);
     }
+
+    private EsSearchPageResult countOnly(String q, BrandObjectSearchFilter filter) {
+        var nativeQuery = NativeQuery.builder()
+                .withQuery(buildSearchQuery(q, filter))
+                .withMaxResults(0)
+                .withTrackTotalHitsUpTo(MAX_RESULT_WINDOW)
+                .build();
+        return executePage(nativeQuery);
+    }
+
+    private static final List<String> BRAND_OBJECT_SEARCH_FIELDS = List.of(
+            "brand_name_en^3",
+            "brand_abbreviation^3",
+            "brand_name_zh^3",
+            "name_en^2",
+            "name_zh^2",
+            "series_en",
+            "series_zh",
+            "category_en",
+            "category_zh",
+            "scale");
 
     private Query buildSearchQuery(String q, BrandObjectSearchFilter filter) {
         if (!filter.hasUserFilters() && filter.scopeBrandId() == null) {
             return Query.of(sq -> sq.multiMatch(m -> m
                     .query(q)
-                    .fields("brand_name_en^3", "brand_name_zh^3", "name_en^2", "name_zh^2",
-                            "series_en", "series_zh", "category_en", "category_zh", "scale")
+                    .fields(BRAND_OBJECT_SEARCH_FIELDS)
                     .type(TextQueryType.BestFields)
                     .operator(Operator.Or)));
         }
@@ -180,8 +198,7 @@ public class BrandObjectElasticsearchQueryService {
             } else {
                 b.must(m -> m.multiMatch(mm -> mm
                         .query(q)
-                        .fields("brand_name_en^3", "brand_name_zh^3", "name_en^2", "name_zh^2",
-                                "series_en", "series_zh", "category_en", "category_zh", "scale")
+                        .fields(BRAND_OBJECT_SEARCH_FIELDS)
                         .type(TextQueryType.BestFields)
                         .operator(Operator.Or)));
                 if (filter.filterBrands()) {

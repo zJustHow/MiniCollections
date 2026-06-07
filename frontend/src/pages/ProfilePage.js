@@ -19,6 +19,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
+import useCountdown from "../hooks/useCountdown";
 import { useNavigate } from "react-router-dom";
 import {
   COUNTRIES,
@@ -32,40 +33,17 @@ import {
   uploadAvatar,
 } from "../utils";
 import { useLocale } from "../LocaleContext";
-import { radius } from "../theme/radius";
+import { PHONE_AUTH_ENABLED, WECHAT_AUTH_ENABLED } from "../components/auth/authFeatures";
+import "../styles/profile.css";
 
 const { Header, Content } = Layout;
 
 function SectionLabel({ title }) {
-  return (
-    <div
-      style={{
-        fontSize: 11,
-        letterSpacing: 1.4,
-        textTransform: "uppercase",
-        color: "var(--neu-text-2)",
-        marginBottom: 14,
-      }}
-    >
-      {title}
-    </div>
-  );
+  return <div className="profile-section-label">{title}</div>;
 }
 
 function SectionCard({ children }) {
-  return (
-    <div
-      style={{
-        background: "var(--neu-bg)",
-        borderRadius: radius.card,
-        padding: "22px 24px",
-        boxShadow: "var(--raised-sm)",
-        marginBottom: 16,
-      }}
-    >
-      {children}
-    </div>
-  );
+  return <div className="profile-section-card">{children}</div>;
 }
 
 export default function ProfilePage({ profile, onProfileChange, onLogout }) {
@@ -78,7 +56,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   const [pwLoading, setPwLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailCodeLoading, setEmailCodeLoading] = useState(false);
-  const [emailCodeCountdown, setEmailCodeCountdown] = useState(0);
+  const { countdown: emailCodeCountdown, start: startEmailCodeCountdown, reset: resetEmailCodeCountdown } = useCountdown();
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [localeLoading, setLocaleLoading] = useState(false);
 
@@ -141,16 +119,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
     try {
       await sendCode(email, "EMAIL");
       message.success(t("codeSent"));
-      setEmailCodeCountdown(60);
-      const timer = setInterval(() => {
-        setEmailCodeCountdown((c) => {
-          if (c <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
-          return c - 1;
-        });
-      }, 1000);
+      startEmailCodeCountdown(60);
     } catch (err) {
       message.error(err?.message || t("sendCodeFailed"));
     } finally {
@@ -168,7 +137,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
       });
       onProfileChange(updated);
       emailForm.resetFields(["emailCode"]);
-      setEmailCodeCountdown(0);
+      resetEmailCodeCountdown();
       message.success(t("emailUpdated"));
     } catch (err) {
       message.error(err?.message || t("emailUpdateFailed"));
@@ -178,6 +147,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   };
 
   const handlePhoneSave = async (values) => {
+    if (!PHONE_AUTH_ENABLED) return;
     setPhoneLoading(true);
     try {
       const updated = await updateIdentifier({
@@ -209,6 +179,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   const [wechatLoading, setWechatLoading] = useState(false);
 
   const handleWechatBind = async () => {
+    if (!WECHAT_AUTH_ENABLED) return;
     setWechatLoading(true);
     try {
       const isMobile = /MicroMessenger/i.test(navigator.userAgent);
@@ -225,14 +196,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
 
   return (
     <Layout style={{ height: "100vh" }}>
-      <Header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          paddingLeft: 24,
-          paddingRight: 24,
-        }}
-      >
+      <Header className="profile-page-header">
         <div className="header-slot-wrap">
           <div className="header-slot-bar">
             <div className="header-slot-actions">
@@ -246,23 +210,9 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
         </div>
       </Header>
 
-      <Content
-        style={{
-          overflowY: "auto",
-          padding: "32px 24px 48px",
-        }}
-      >
-        <div style={{ maxWidth: 480, margin: "0 auto" }}>
-          {/* Avatar + name card */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              marginBottom: 28,
-              paddingBottom: 28,
-            }}
-          >
+      <Content className="profile-page-content">
+        <div className="profile-page-inner">
+          <div className="profile-hero">
             <Upload
               id="profile-avatar-upload"
               name="avatar"
@@ -272,10 +222,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               onChange={({ file }) => handleAvatarUpload({ file })}
             >
               <div
-                className={`neu-avatar-btn${profile.avatar_url ? "" : " neu-avatar-btn--accent"}`}
-                style={{
-                  position: "relative",
-                }}
+                className={`neu-avatar-btn profile-avatar-wrap${profile.avatar_url ? "" : " neu-avatar-btn--accent"}`}
               >
                 <Avatar
                   size={96}
@@ -288,47 +235,19 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   }}
                 />
                 {avatarLoading && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      borderRadius: radius.round,
-                      background: "rgba(0,0,0,0.35)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#fff",
-                      fontSize: 20,
-                    }}
-                  >
+                  <div className="profile-avatar-overlay">
                     <LoadingOutlined />
                   </div>
                 )}
               </div>
             </Upload>
-            <div
-              style={{
-                marginTop: 12,
-                fontSize: 18,
-                color: "var(--neu-text)",
-              }}
-            >
-              {profile.display_name}
-            </div>
+            <div className="profile-display-name">{profile.display_name}</div>
             {profile.email && (
-              <div
-                style={{
-                  fontSize: 13,
-                  color: "var(--neu-text-2)",
-                  marginTop: 3,
-                }}
-              >
-                {profile.email}
-              </div>
+              <div className="profile-display-email">{profile.email}</div>
             )}
           </div>
 
-          <Divider style={{ margin: "0 0 24px" }} />
+          <Divider className="profile-divider" />
 
           {/* Display Name */}
           <SectionCard>
@@ -345,19 +264,19 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   { required: true, message: t("displayNameRequired") },
                   { max: 64, message: t("displayNameMax") },
                 ]}
-                style={{ marginBottom: 12 }}
+                className="profile-form-item-submit"
               >
                 <NeuInput
                   prefix={<UserOutlined />}
                   placeholder={t("displayName")}
                 />
               </Form.Item>
-              <Form.Item style={{ marginBottom: 0 }}>
+              <Form.Item className="profile-form-item-none">
                 <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={nameLoading}
-                  style={{ width: "100%" }}
+                  className="profile-btn-full"
                 >
                   {t("saveDisplayName")}
                 </NeuButton>
@@ -374,7 +293,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 rules={[
                   { required: true, message: t("currentPasswordRequired") },
                 ]}
-                style={{ marginBottom: 10 }}
+                className="profile-form-item-tight"
               >
                 <NeuInput.Password
                   prefix={<LockOutlined />}
@@ -387,7 +306,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   { required: true, message: t("newPasswordRequired") },
                   { min: 6, message: t("newPasswordMin") },
                 ]}
-                style={{ marginBottom: 10 }}
+                className="profile-form-item-tight"
               >
                 <NeuInput.Password
                   prefix={<LockOutlined />}
@@ -407,19 +326,19 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                     },
                   }),
                 ]}
-                style={{ marginBottom: 12 }}
+                className="profile-form-item-submit"
               >
                 <NeuInput.Password
                   prefix={<LockOutlined />}
                   placeholder={t("confirmPassword")}
                 />
               </Form.Item>
-              <Form.Item style={{ marginBottom: 0 }}>
+              <Form.Item className="profile-form-item-none">
                 <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={pwLoading}
-                  style={{ width: "100%" }}
+                  className="profile-btn-full"
                 >
                   {t("updatePassword")}
                 </NeuButton>
@@ -442,20 +361,20 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   { required: true, message: t("emailRequired") },
                   { type: "email", message: t("emailInvalid") },
                 ]}
-                style={{ marginBottom: 10 }}
+                className="profile-form-item-tight"
               >
                 <NeuInput
                   prefix={<MailOutlined />}
                   placeholder={t("emailAddress")}
                 />
               </Form.Item>
-              <Form.Item style={{ marginBottom: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Form.Item className="profile-form-item-submit">
+                <div className="profile-inline-row">
                   <Form.Item
                     name="emailCode"
                     noStyle
                     rules={[{ required: true, message: t("codeRequired") }]}
-                    style={{ flex: 1, minWidth: 0, marginBottom: 0 }}
+                    className="profile-inline-grow"
                   >
                     <NeuInput placeholder={t("verificationCode")} />
                   </Form.Item>
@@ -465,9 +384,8 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                       emailCodeCountdown > 0 ? undefined : handleEmailSendCode
                     }
                     className={
-                      emailCodeCountdown > 0 ? "btn-counting-down" : ""
+                      emailCodeCountdown > 0 ? "btn-counting-down profile-btn-shrink" : "profile-btn-shrink"
                     }
-                    style={{ flexShrink: 0 }}
                   >
                     {emailCodeCountdown > 0
                       ? `${emailCodeCountdown}s`
@@ -475,12 +393,12 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                   </NeuButton>
                 </div>
               </Form.Item>
-              <Form.Item style={{ marginBottom: 0 }}>
+              <Form.Item className="profile-form-item-none">
                 <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={emailLoading}
-                  style={{ width: "100%" }}
+                  className="profile-btn-full"
                 >
                   {t("updateEmail")}
                 </NeuButton>
@@ -490,7 +408,13 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
 
           {/* Phone */}
           <SectionCard>
-            <SectionLabel title={t("phoneNumber")} />
+            <SectionLabel
+              title={
+                PHONE_AUTH_ENABLED
+                  ? t("phoneNumber")
+                  : `${t("phoneNumber")} (${t("underDevelopment")})`
+              }
+            />
             <Form
               form={phoneForm}
               onFinish={handlePhoneSave}
@@ -498,13 +422,14 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               key={profile.phone}
               layout="vertical"
             >
-              <Form.Item style={{ marginBottom: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <Form.Item className="profile-form-item-submit">
+                <div className="profile-inline-row">
                   <Form.Item name="countryCode" noStyle>
                     <NeuSelect
                       fullWidth={false}
                       style={{ width: 110 }}
                       optionLabelProp="label"
+                      disabled={!PHONE_AUTH_ENABLED}
                     >
                       {COUNTRIES.map((c) => (
                         <NeuSelect.Option
@@ -517,7 +442,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                       ))}
                     </NeuSelect>
                   </Form.Item>
-                  <div style={{ flex: 1 }}>
+                  <div className="profile-inline-grow">
                     <Form.Item
                       name="phoneNumber"
                       noStyle
@@ -526,19 +451,24 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                         { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
                       ]}
                     >
-                      <NeuInput placeholder={t("phoneNumber")} />
+                      <NeuInput
+                        placeholder={t("phoneNumber")}
+                        disabled={!PHONE_AUTH_ENABLED}
+                      />
                     </Form.Item>
                   </div>
                 </div>
               </Form.Item>
-              <Form.Item style={{ marginBottom: 0 }}>
+              <Form.Item className="profile-form-item-none">
                 <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={phoneLoading}
-                  style={{ width: "100%" }}
+                  disabled={!PHONE_AUTH_ENABLED}
+                  className="profile-btn-full"
                 >
                   {profile.phone ? t("updatePhone") : t("bindPhone")}
+                  {!PHONE_AUTH_ENABLED && ` (${t("underDevelopment")})`}
                 </NeuButton>
               </Form.Item>
             </Form>
@@ -546,31 +476,27 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
 
           {/* WeChat */}
           <SectionCard>
-            <SectionLabel title={t("wechatAccount")} />
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: 12,
-              }}
-            >
+            <SectionLabel
+              title={
+                WECHAT_AUTH_ENABLED
+                  ? t("wechatAccount")
+                  : `${t("wechatAccount")} (${t("underDevelopment")})`
+              }
+            />
+            <div className="profile-wechat-row">
               <span
-                style={{
-                  fontSize: 13,
-                  color: profile.wechat_bound
-                    ? "var(--neu-accent)"
-                    : "var(--neu-text-2)",
-                }}
+                className={`profile-wechat-status ${profile.wechat_bound ? "profile-wechat-status--bound" : "profile-wechat-status--unbound"}`}
               >
                 {profile.wechat_bound ? t("wechatBound") : t("wechatNotBound")}
               </span>
               <NeuButton
                 loading={wechatLoading}
                 onClick={handleWechatBind}
-                style={{ flexShrink: 0 }}
+                disabled={!WECHAT_AUTH_ENABLED}
+                className="profile-btn-shrink"
               >
                 {profile.wechat_bound ? t("changeWechat") : t("bindWechat")}
+                {!WECHAT_AUTH_ENABLED && ` (${t("underDevelopment")})`}
               </NeuButton>
             </div>
           </SectionCard>
@@ -587,18 +513,18 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               key={profile.preferred_locale}
               layout="vertical"
             >
-              <Form.Item name="preferredLocale" style={{ marginBottom: 12 }}>
+              <Form.Item name="preferredLocale" className="profile-form-item-submit">
                 <Radio.Group>
-                  <Radio value="en-US">English</Radio>
-                  <Radio value="zh-CN">中文</Radio>
+                  <Radio value="en-US">{t("localeEnglish")}</Radio>
+                  <Radio value="zh-CN">{t("localeChinese")}</Radio>
                 </Radio.Group>
               </Form.Item>
-              <Form.Item style={{ marginBottom: 0 }}>
+              <Form.Item className="profile-form-item-none">
                 <NeuButton
                   type="primary"
                   htmlType="submit"
                   loading={localeLoading}
-                  style={{ width: "100%" }}
+                  className="profile-btn-full"
                 >
                   {t("saveLanguage")}
                 </NeuButton>
@@ -610,7 +536,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             danger
             icon={<LogoutOutlined />}
             onClick={onLogout}
-            style={{ width: "100%", marginTop: 8 }}
+            className="profile-logout-btn"
           >
             {t("logout")}
           </NeuButton>

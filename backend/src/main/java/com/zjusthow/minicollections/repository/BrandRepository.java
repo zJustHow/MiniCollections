@@ -21,6 +21,7 @@ public interface BrandRepository extends ListCrudRepository<BrandEntity, Long> {
     @Query("""
             SELECT * FROM brands
             WHERE LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
             ORDER BY id ASC
             LIMIT :limit OFFSET :offset
@@ -33,6 +34,7 @@ public interface BrandRepository extends ListCrudRepository<BrandEntity, Long> {
     @Query("""
             SELECT COUNT(*) FROM brands
             WHERE LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
             """)
     long countSearch(@Param("keyword") String keyword);

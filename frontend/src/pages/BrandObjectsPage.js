@@ -141,12 +141,11 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     (displayObjects.length > 0 || showFilterColumn || objectsSearch.loading);
 
   useEffect(() => {
-    if (!brand) {
-      getBrandByBrandId(brandId)
-        .then(setBrand)
-        .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
-    }
-  }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (brand?.id === Number(brandId)) return;
+    getBrandByBrandId(brandId)
+      .then(setBrand)
+      .catch((err) => message.error(err?.message || t("failedToLoadBrands")));
+  }, [brandId, brand?.id, message, t]);
 
   useEffect(() => {
     if (isAdmin || !brandId) return;

@@ -1,22 +1,25 @@
-import NeuButton, { neuBtnProps } from "../../components/NeuButton";
-import { App, Popconfirm, Space, Table } from "antd";
+import NeuButton from "../../components/NeuButton";
+import AdminDeleteAction from "../../components/admin/AdminDeleteAction";
+import AdminEditButton from "../../components/admin/AdminEditButton";
+import { App, Space, Table } from "antd";
 import {
   ArrowLeftOutlined,
-  DeleteOutlined,
-  EditOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   adminDeleteBrandObject,
   getBrandByBrandId,
-  getBrandObjectsByBrandId,
+  getBrandObjectsPage,
 } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import { radius } from "../../theme/radius";
+import usePagedList from "../../hooks/usePagedList";
 import BrandObjectModal from "../../components/ObjectList/modals/BrandObjectModal";
 import SeriesModal from "../../components/ObjectList/modals/SeriesModal";
+
+const ADMIN_TABLE_PAGE_SIZE = 20;
 
 export default function AdminBrandObjectsPage() {
   const { brandId } = useParams();
@@ -25,8 +28,6 @@ export default function AdminBrandObjectsPage() {
   const { message } = App.useApp();
   const { t } = useLocale();
   const [brand, setBrand] = useState(location.state?.brand ?? null);
-  const [objects, setObjects] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [objectModalOpen, setObjectModalOpen] = useState(false);
   const [editingObject, setEditingObject] = useState(null);
   const [seriesModalOpen, setSeriesModalOpen] = useState(false);
@@ -40,28 +41,33 @@ export default function AdminBrandObjectsPage() {
       .catch(() => setBrand(null));
   }, [brandId, brand?.id]);
 
-  const fetchObjects = async () => {
-    if (!brandId) return;
-    setLoading(true);
-    try {
-      const data = await getBrandObjectsByBrandId(brandId);
-      setObjects(Array.isArray(data) ? data : []);
-    } catch (err) {
-      message.error(err?.message || t("failedToLoadBrandObjects"));
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchPage = useCallback(
+    ({ size, page }) => getBrandObjectsPage(brandId, { size, page }),
+    [brandId],
+  );
 
-  useEffect(() => {
-    fetchObjects();
-  }, [brandId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const {
+    items: objects,
+    page: objectsPage,
+    totalElements,
+    loading,
+    loadPage,
+    onPageChange,
+  } = usePagedList(fetchPage, {
+    resetKey: `admin-brand-objects:${brandId}`,
+    enabled: Boolean(brandId),
+    pageSize: ADMIN_TABLE_PAGE_SIZE,
+  });
+
+  const refreshObjects = useCallback(() => {
+    loadPage(objectsPage);
+  }, [loadPage, objectsPage]);
 
   const handleDeleteObject = async (obj) => {
     try {
       await adminDeleteBrandObject(obj.id);
       message.success(t("brandObjectDeleted"));
-      fetchObjects();
+      refreshObjects();
     } catch (err) {
       message.error(err?.message || t("failedToDeleteBrandObject"));
     }
@@ -81,28 +87,20 @@ export default function AdminBrandObjectsPage() {
       width: 90,
       render: (_, record) => (
         <Space size={4}>
-          <NeuButton
-            size="small"
-            icon={<EditOutlined />}
+          <AdminEditButton
             onClick={() => {
               setEditingObject(record);
               setObjectModalOpen(true);
             }}
           />
-          <Popconfirm
+          <AdminDeleteAction
             title={t("deleteBrandObjectTitle")}
             description={t("deleteBrandObjectContent").replace(
               "{name}",
               record.name_en
             )}
             onConfirm={() => handleDeleteObject(record)}
-            okText={t("delete")}
-            okButtonProps={neuBtnProps({ danger: true })}
-            cancelButtonProps={neuBtnProps()}
-            cancelText={t("cancel")}
-          >
-            <NeuButton size="small" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
+          />
         </Space>
       ),
     },
@@ -169,7 +167,13 @@ export default function AdminBrandObjectsPage() {
           columns={columns}
           loading={loading}
           size="middle"
-          pagination={{ pageSize: 20, showSizeChanger: false }}
+          pagination={{
+            current: objectsPage + 1,
+            pageSize: ADMIN_TABLE_PAGE_SIZE,
+            total: totalElements,
+            showSizeChanger: false,
+            onChange: (page) => onPageChange(page),
+          }}
         />
       </div>
 
@@ -182,7 +186,7 @@ export default function AdminBrandObjectsPage() {
           setObjectModalOpen(false);
           setEditingObject(null);
         }}
-        onSuccess={fetchObjects}
+        onSuccess={refreshObjects}
       />
       <SeriesModal
         open={seriesModalOpen}

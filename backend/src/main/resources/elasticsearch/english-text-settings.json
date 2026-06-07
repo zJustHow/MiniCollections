@@ -17,23 +17,27 @@
         "type": "custom",
         "char_filter": ["normalize_scale_ratio"],
         "filter": ["lowercase"]
+      },
+      "lowercase_normalizer": {
+        "type": "custom",
+        "filter": ["lowercase"]
       }
     },
     "filter": {
-      "brand_wdg": {
+      "word_delimiter_catenate": {
         "type": "word_delimiter_graph",
         "catenate_all": true,
         "preserve_original": true
       }
     },
     "analyzer": {
-      "brand_name_index": {
+      "english_text_index": {
         "type": "custom",
         "char_filter": ["remove_hyphens"],
         "tokenizer": "keyword",
-        "filter": ["brand_wdg", "lowercase"]
+        "filter": ["word_delimiter_catenate", "lowercase"]
       },
-      "brand_name_search": {
+      "english_text_search": {
         "type": "custom",
         "char_filter": ["remove_hyphens"],
         "tokenizer": "whitespace",

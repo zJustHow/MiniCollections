@@ -2,8 +2,6 @@ package com.zjusthow.minicollections.service;
 
 import com.zjusthow.minicollections.config.S3Properties;
 import com.zjusthow.minicollections.exception.UnsupportedImageTypeException;
-import com.zjusthow.minicollections.image.BrandLogoNormalizer;
-import com.zjusthow.minicollections.image.NormalizedBrandLogo;
 import com.zjusthow.minicollections.storage.BrandStorageKeys;
 import com.zjusthow.minicollections.storage.StoredObjectUrls;
 import com.zjusthow.minicollections.storage.UserStorageKeys;
@@ -73,10 +71,9 @@ public class ImageStorageService {
      */
     public String uploadBrandAsset(long brandId, String brandNameEn, MultipartFile file) throws IOException {
         String contentType = resolveContentType(file);
-        NormalizedBrandLogo normalized = BrandLogoNormalizer.normalize(file.getBytes(), contentType);
-        String ext = extensionForContentType(normalized.contentType());
+        String ext = extensionForContentType(contentType);
         String key = BrandStorageKeys.logoObjectKey(brandId, brandNameEn, ext);
-        return putObject(key, normalized.contentType(), normalized.bytes());
+        return putObject(key, contentType, file.getBytes());
     }
 
     /**

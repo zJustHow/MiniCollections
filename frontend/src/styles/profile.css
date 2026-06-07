@@ -1,0 +1,127 @@
+.profile-page-header {
+  display: flex;
+  align-items: center;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+.profile-page-content {
+  overflow-y: auto;
+  padding: 32px 24px 48px;
+}
+
+.profile-page-inner {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.profile-section-label {
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--neu-text-2);
+  margin-bottom: 14px;
+}
+
+.profile-section-card {
+  background: var(--neu-bg);
+  border-radius: 0;
+  padding: 22px 24px;
+  box-shadow: var(--raised-sm);
+  margin-bottom: 16px;
+}
+
+.profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-bottom: 28px;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+}
+
+.profile-avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+}
+
+.profile-display-name {
+  margin-top: 12px;
+  font-size: 18px;
+  color: var(--neu-text);
+}
+
+.profile-display-email {
+  font-size: 13px;
+  color: var(--neu-text-2);
+  margin-top: 3px;
+}
+
+.profile-divider {
+  margin: 0 0 24px;
+}
+
+.profile-form-item-tight {
+  margin-bottom: 10px;
+}
+
+.profile-form-item-submit {
+  margin-bottom: 12px;
+}
+
+.profile-form-item-none {
+  margin-bottom: 0;
+}
+
+.profile-inline-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-inline-grow {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-btn-full {
+  width: 100%;
+}
+
+.profile-btn-shrink {
+  flex-shrink: 0;
+}
+
+.profile-wechat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-wechat-status {
+  font-size: 13px;
+}
+
+.profile-wechat-status--bound {
+  color: var(--neu-accent);
+}
+
+.profile-wechat-status--unbound {
+  color: var(--neu-text-2);
+}
+
+.profile-logout-btn {
+  width: 100%;
+  margin-top: 8px;
+}

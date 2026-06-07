@@ -8,7 +8,7 @@ import {
   TagsOutlined,
   UnorderedListOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getAdminSubmissions, getBrands } from "../utils";
 import { useLocale } from "../LocaleContext";
@@ -39,8 +39,10 @@ export default function AdminPage() {
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
 
   const [brands, setBrands] = useState([]);
+  const [brandsLoading, setBrandsLoading] = useState(false);
+  const [brandsLoaded, setBrandsLoaded] = useState(false);
 
-  const fetchSubmissions = async (status) => {
+  const fetchSubmissions = useCallback(async (status) => {
     setSubmissionsLoading(true);
     try {
       const data = await getAdminSubmissions(status === "ALL" ? null : status);
@@ -50,21 +52,30 @@ export default function AdminPage() {
     } finally {
       setSubmissionsLoading(false);
     }
-  };
+  }, [message, t]);
 
-  const fetchBrands = async () => {
+  const fetchBrands = useCallback(async () => {
+    setBrandsLoading(true);
     try {
       const data = await getBrands();
       setBrands(Array.isArray(data) ? data : []);
-    } catch {
-      // silently fail
+      setBrandsLoaded(true);
+    } catch (err) {
+      message.error(err?.message || t("failedToLoadBrands"));
+    } finally {
+      setBrandsLoading(false);
     }
-  };
+  }, [message, t]);
 
   useEffect(() => {
     fetchSubmissions(activeStatus);
-    fetchBrands();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [fetchSubmissions, activeStatus]);
+
+  useEffect(() => {
+    if ((activeView === "brands" || approveModalOpen) && !brandsLoaded && !brandsLoading) {
+      fetchBrands();
+    }
+  }, [activeView, approveModalOpen, brandsLoaded, brandsLoading, fetchBrands]);
 
   useEffect(() => {
     if (location.state?.adminView === "brands") {
@@ -74,7 +85,6 @@ export default function AdminPage() {
 
   const handleTabChange = (key) => {
     setActiveStatus(key);
-    fetchSubmissions(key);
   };
 
   const handleSubmissionSuccess = () => {
@@ -219,7 +229,11 @@ export default function AdminPage() {
               pagination={{ pageSize: 20, showSizeChanger: false }}
             />
           ) : (
-            <BrandsPanel brands={brands} onBrandsChanged={fetchBrands} />
+            <BrandsPanel
+              brands={brands}
+              loading={brandsLoading}
+              onBrandsChanged={fetchBrands}
+            />
           )}
         </div>
       </div>

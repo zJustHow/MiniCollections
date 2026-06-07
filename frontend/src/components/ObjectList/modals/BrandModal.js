@@ -15,9 +15,11 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
 
   const { form, loading, handleOk } = useModalForm({
     onSubmit: async (values) => {
+      const abbreviation = values.abbreviation?.trim() || null;
       const payload = {
         name_en: values.nameEn,
         name_zh: values.nameZh || null,
+        abbreviation,
         image_url: imageUrl || null,
       };
       if (isEdit) {
@@ -26,6 +28,7 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
         const created = await adminCreateBrand({
           name_en: payload.name_en,
           name_zh: payload.name_zh,
+          abbreviation,
           image_url: null,
         });
         if (pendingLogoFile && created?.id) {
@@ -43,10 +46,14 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
   useEffect(() => {
     if (open) {
       form.setFieldsValue(brand
-        ? { nameEn: brand.name_en, nameZh: brand.name_zh }
-        : { nameEn: "", nameZh: "" }
+        ? {
+          nameEn: brand.name_en,
+          nameZh: brand.name_zh,
+          abbreviation: brand.abbreviation ?? "",
+        }
+        : { nameEn: "", nameZh: "", abbreviation: "" }
       );
-      setImageUrl(brand?.image_url || null);
+      setImageUrl(brand?.image_url ?? brand?.imageUrl ?? null);
       setPendingLogoFile(null);
     }
   }, [open, brand, form]);
@@ -68,6 +75,9 @@ export default function BrandModal({ open, brand, onClose, onSuccess }) {
         </Form.Item>
         <Form.Item label={t("nameZh")} name="nameZh">
           <NeuInput />
+        </Form.Item>
+        <Form.Item label={t("abbreviation")} name="abbreviation">
+          <NeuInput placeholder={t("abbreviationPlaceholder")} />
         </Form.Item>
         <Form.Item label={t("image")}>
           <BrandLogoUploadField

@@ -47,6 +47,7 @@ CREATE TABLE brands
     id                  SERIAL PRIMARY KEY  NOT NULL,
     name_en             VARCHAR(512)        NOT NULL,
     name_zh             VARCHAR(512),
+    abbreviation        VARCHAR(64),
     image_url           TEXT,
     view_count          BIGINT              NOT NULL DEFAULT 0
 );
@@ -79,22 +80,37 @@ CREATE TABLE categories
 --   diorama (8)   – scene sets / dioramas
 --   figure (11)   – figurines
 --   book (9)      – catalogues, yearbooks, CD-ROMs, etc.
---   boat (14)     – boats, ships, watercraft
+--   fixed-wing-aircraft (5) – fixed-wing airplanes
+--   helicopter (17)         – helicopters and rotorcraft
+--   civilian-ship (14)      – civilian boats and ships
+--   warship (18)            – military surface combatants
+--   submarine (19)          – submarines
+--   tank (15)               – tanks and armored fighting vehicles
+--   artillery (16)          – towed/self-propelled guns and artillery
+--   military-car (20)       – military light vehicles (jeeps, HMMWV, staff cars, military trucks, etc.)
+--   emergency-vehicle (21)  – police, fire, ambulance, and other civilian emergency services
 INSERT INTO categories (id, slug, name_en, name_zh, sort_order) VALUES
-(1,  'car',                  'Car',                  '汽车',     1),
-(4,  'motorbike',            'Motorbike',            '摩托车',   2),
-(12, 'construction-vehicle', 'Construction Vehicle', '工程车辆', 3),
-(2,  'truck',                'Truck',                '卡车',     4),
-(3,  'bus',                  'Bus',                  '巴士',     5),
-(6,  'tractor',              'Tractor',              '拖拉机',   6),
-(13, 'train',                'Train',                '火车',     7),
-(5,  'aircraft',             'Aircraft',             '飞机',     8),
-(14, 'boat',                 'Boat',                 '船',       9),
-(8,  'diorama',              'Diorama',              '场景',     10),
-(11, 'figure',               'Figure',               '人仔',     11),
-(7,  'accessory',            'Accessory',            '配件',     12),   -- diorama-scale props
-(9,  'book',                 'Book',                 '书籍',     13),
-(10, 'other',                'Other',                '其他',     14);  -- cases, stands, standalone display pieces
+(1,  'car',                  'Car',                  '汽车',       1),
+(4,  'motorbike',            'Motorbike',            '摩托车',     2),
+(12, 'construction-vehicle', 'Construction Vehicle', '工程车辆',   3),
+(2,  'truck',                'Truck',                '卡车',       4),
+(3,  'bus',                  'Bus',                  '巴士',       5),
+(21, 'emergency-vehicle',    'Emergency Vehicle',    '应急车辆',   6),
+(6,  'tractor',              'Tractor',              '拖拉机',     7),
+(13, 'train',                'Train',                '火车',       8),
+(15, 'tank',                 'Tank',                 '坦克',       9),
+(20, 'military-car',         'Military Car',         '军用汽车',   10),
+(16, 'artillery',            'Artillery',            '火炮',       11),
+(5,  'fixed-wing-aircraft',  'Fixed-Wing Aircraft',  '固定翼飞机', 12),
+(17, 'helicopter',           'Helicopter',           '直升机',     13),
+(14, 'civilian-ship',        'Civilian Ship',        '民用船只',   14),
+(18, 'warship',              'Warship',              '军舰',       15),
+(19, 'submarine',            'Submarine',            '潜艇',       16),
+(8,  'diorama',              'Diorama',              '场景',       17),
+(11, 'figure',               'Figure',               '人仔',       18),
+(7,  'accessory',            'Accessory',            '配件',       19),   -- diorama-scale props
+(9,  'book',                 'Book',                 '书籍',       20),
+(10, 'other',                'Other',                '其他',       21);  -- cases, stands, standalone display pieces
 
 SELECT setval(pg_get_serial_sequence('categories', 'id'), (SELECT COALESCE(MAX(id), 1) FROM categories));
 
@@ -204,6 +220,7 @@ CREATE TABLE brand_objects
 );
 
 CREATE INDEX idx_brand_objects_view_count ON brand_objects (view_count DESC);
+CREATE INDEX idx_brand_objects_brand_id ON brand_objects (brand_id, id);
 CREATE INDEX idx_brand_objects_series_id ON brand_objects (series_id);
 CREATE INDEX idx_brand_objects_category_id ON brand_objects (category_id);
 CREATE INDEX idx_brand_objects_scale_id ON brand_objects (scale_id);
@@ -250,6 +267,9 @@ CREATE TABLE user_objects
     CONSTRAINT fk_brand_object FOREIGN KEY (brand_object_id) REFERENCES brand_objects (id) ON DELETE SET NULL
 );
 
+CREATE INDEX idx_user_objects_brand_object_id ON user_objects (brand_object_id)
+    WHERE brand_object_id IS NOT NULL;
+
 CREATE TABLE authorities
 (
     user_id             INTEGER             NOT NULL,
@@ -290,315 +310,315 @@ CREATE TABLE object_submissions
 );
 
 -- MINI GT (MGT): 1242 products in minigt/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (1, 'MINI GT (MGT)', NULL, 'http://localhost:9000/minicollections-media/brands/minigt/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (1, 'MINI GT', NULL, 'MGT', 'http://localhost:9000/minicollections-media/brands/minigt/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- LCD: 137 products in lcd/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (2, 'LCD', NULL, 'http://localhost:9000/minicollections-media/brands/lcd/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (2, 'LCD', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/lcd/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- AutoArt (AA): 290 products in autoart/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (3, 'AutoArt (AA)', NULL, 'http://localhost:9000/minicollections-media/brands/autoart/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (3, 'AutoArt', NULL, 'AA', 'http://localhost:9000/minicollections-media/brands/autoart/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Tomica Limited Vintage (TLV): 1081 products in tomica-limited-vintage/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (4, 'Tomica Limited Vintage (TLV)', NULL, 'http://localhost:9000/minicollections-media/brands/tomica-limited-vintage/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (4, 'Tomica Limited Vintage', NULL, 'TLV', 'http://localhost:9000/minicollections-media/brands/tomica-limited-vintage/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Kyosho: 1484 products in kyosho/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (5, 'Kyosho', NULL, 'http://localhost:9000/minicollections-media/brands/kyosho/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (5, 'Kyosho', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/kyosho/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Minichamps: 4107 products in minichamps/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (6, 'Minichamps', NULL, 'http://localhost:9000/minicollections-media/brands/minichamps/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (6, 'Minichamps', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/minichamps/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- XCarToys: 711 products in xcartoys/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (7, 'XCarToys', '拓意', 'http://localhost:9000/minicollections-media/brands/xcartoys/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (7, 'XCarToys', '拓意', NULL, 'http://localhost:9000/minicollections-media/brands/xcartoys/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Inno Models: 559 products in inno-models/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (8, 'Inno Models', NULL, 'http://localhost:9000/minicollections-media/brands/inno-models/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (8, 'Inno Models', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/inno-models/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Ignition Model (IG): 2789 products in ignition-model/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (9, 'Ignition Model (IG)', NULL, 'http://localhost:9000/minicollections-media/brands/ignition-model/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (9, 'Ignition Model', NULL, 'IG', 'http://localhost:9000/minicollections-media/brands/ignition-model/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Hot Wheels: 239 products in hot-wheels/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (10, 'Hot Wheels', NULL, 'http://localhost:9000/minicollections-media/brands/hot-wheels/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (10, 'Hot Wheels', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/hot-wheels/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- BBR MODELS: 914 products in bbr-models/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (11, 'BBR MODELS', NULL, 'http://localhost:9000/minicollections-media/brands/bbr-models/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (11, 'BBR MODELS', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/bbr-models/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- MOTORHELIX: 151 products in motorhelix/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (12, 'MOTORHELIX', NULL, 'http://localhost:9000/minicollections-media/brands/motorhelix/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (12, 'MOTORHELIX', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/motorhelix/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- TARMAC WORKS (TW): 473 products in tarmac-works/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (13, 'TARMAC WORKS (TW)', NULL, 'http://localhost:9000/minicollections-media/brands/tarmac-works/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (13, 'TARMAC WORKS', NULL, 'TW', 'http://localhost:9000/minicollections-media/brands/tarmac-works/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Time Micro (TM): 153 products in time-micro/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (14, 'Time Micro (TM)', NULL, 'http://localhost:9000/minicollections-media/brands/time-micro/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (14, 'Time Micro', NULL, 'TM', 'http://localhost:9000/minicollections-media/brands/time-micro/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- PRIVATE GOODS MODEL (PGM): 87 products in private-goods-model/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (15, 'PRIVATE GOODS MODEL (PGM)', NULL, 'http://localhost:9000/minicollections-media/brands/private-goods-model/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (15, 'PRIVATE GOODS MODEL', NULL, 'PGM', 'http://localhost:9000/minicollections-media/brands/private-goods-model/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Pop Race: 15 products in pop-race/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (16, 'Pop Race', NULL, 'http://localhost:9000/minicollections-media/brands/pop-race/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (16, 'Pop Race', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/pop-race/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Tiny: 1274 products in tiny/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (17, 'Tiny', '微影', 'http://localhost:9000/minicollections-media/brands/tiny/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (17, 'Tiny', '微影', NULL, 'http://localhost:9000/minicollections-media/brands/tiny/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Matchbox: 1125 products in matchbox/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (18, 'Matchbox', '火柴盒', 'http://localhost:9000/minicollections-media/brands/matchbox/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (18, 'Matchbox', '火柴盒', NULL, 'http://localhost:9000/minicollections-media/brands/matchbox/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- AUTO WORLD: 487 products in autoworld/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (19, 'AUTO WORLD', NULL, 'http://localhost:9000/minicollections-media/brands/autoworld/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (19, 'AUTO WORLD', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/autoworld/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Almost Real (AR): 315 products in almost-real/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (20, 'Almost Real (AR)', NULL, 'http://localhost:9000/minicollections-media/brands/almost-real/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (20, 'Almost Real', NULL, 'AR', 'http://localhost:9000/minicollections-media/brands/almost-real/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Tomica: 313 products in tomica/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (21, 'Tomica', '多美卡', 'http://localhost:9000/minicollections-media/brands/tomica/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (21, 'Tomica', '多美卡', NULL, 'http://localhost:9000/minicollections-media/brands/tomica/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- FrontiArt (FA): 261 products in frontiart/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (22, 'FrontiArt (FA)', NULL, 'http://localhost:9000/minicollections-media/brands/frontiart/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (22, 'FrontiArt', NULL, 'FA', 'http://localhost:9000/minicollections-media/brands/frontiart/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Looksmart: 1925 products in looksmart/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (23, 'Looksmart', NULL, 'http://localhost:9000/minicollections-media/brands/looksmart/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (23, 'Looksmart', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/looksmart/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Norev: 3362 products in norev/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (24, 'Norev', '诺威尔', 'http://localhost:9000/minicollections-media/brands/norev/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (24, 'Norev', '诺威尔', NULL, 'http://localhost:9000/minicollections-media/brands/norev/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Spark (incl. Sparky lineup): 10264 products in spark/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (25, 'Spark', NULL, 'http://localhost:9000/minicollections-media/brands/spark/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (25, 'Spark', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/spark/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- IXO MODELS: 3485 products in ixo-models/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (26, 'IXO MODELS', NULL, 'http://localhost:9000/minicollections-media/brands/ixo-models/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (26, 'IXO MODELS', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/ixo-models/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- TSM Model: 436 products in tsm-model/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (27, 'TSM Model', NULL, 'http://localhost:9000/minicollections-media/brands/tsm-model/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (27, 'TSM Model', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/tsm-model/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Exoto: 635 products in exoto/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (28, 'Exoto', '依珂索托', 'http://localhost:9000/minicollections-media/brands/exoto/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (28, 'Exoto', '依珂索托', NULL, 'http://localhost:9000/minicollections-media/brands/exoto/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Amalgam: 729 products in amalgam/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (29, 'Amalgam', NULL, 'http://localhost:9000/minicollections-media/brands/amalgam/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (29, 'Amalgam', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/amalgam/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- CMC: 157 products in cmc/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (30, 'CMC', '西姆斯', 'http://localhost:9000/minicollections-media/brands/cmc/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (30, 'CMC', '西姆斯', NULL, 'http://localhost:9000/minicollections-media/brands/cmc/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Micro Turbo (MT): 50 products in micro-turbo/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (31, 'Micro Turbo (MT)', NULL, 'http://localhost:9000/minicollections-media/brands/micro-turbo/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (31, 'Micro Turbo', NULL, 'MT', 'http://localhost:9000/minicollections-media/brands/micro-turbo/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Bburago: 154 products in bburago/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (32, 'Bburago', NULL, 'http://localhost:9000/minicollections-media/brands/bburago/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (32, 'Bburago', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/bburago/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- KENGFai: 34 products in kengfai/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (33, 'KENGFai', NULL, 'http://localhost:9000/minicollections-media/brands/kengfai/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (33, 'KENGFai', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/kengfai/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- GCD: 90 products in gcd/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (34, 'GCD', NULL, 'http://localhost:9000/minicollections-media/brands/gcd/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (34, 'GCD', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/gcd/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Make Up: 536 products in make-up/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (35, 'Make Up', NULL, 'http://localhost:9000/minicollections-media/brands/make-up/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (35, 'Make Up', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/make-up/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- GreenLight: 3521 products in greenlight/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (36, 'GreenLight', NULL, 'http://localhost:9000/minicollections-media/brands/greenlight/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (36, 'GreenLight', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/greenlight/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- MR Collection: 1610 products in mr-collection/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (37, 'MR Collection', NULL, 'http://localhost:9000/minicollections-media/brands/mr-collection/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (37, 'MR Collection', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/mr-collection/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- TopSpeed Model: 362 products in topspeed-model/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (38, 'TopSpeed Model', NULL, 'http://localhost:9000/minicollections-media/brands/topspeed-model/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (38, 'TopSpeed Model', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/topspeed-model/logo.svg');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Hobby Japan: 747 products in hobby-japan/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (39, 'Hobby Japan', NULL, 'http://localhost:9000/minicollections-media/brands/hobby-japan/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (39, 'Hobby Japan', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/hobby-japan/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- TOPART COLLECTION: 1 products in topart-collection/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (40, 'TOPART COLLECTION', NULL, 'http://localhost:9000/minicollections-media/brands/topart-collection/logo.gif');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (40, 'TOPART COLLECTION', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/topart-collection/logo.gif');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- KJ Miniatures: 4 products in kj-miniatures/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (41, 'KJ Miniatures', NULL, 'http://localhost:9000/minicollections-media/brands/kj-miniatures/logo.gif');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (41, 'KJ Miniatures', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/kj-miniatures/logo.gif');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- FIGART MODEL: 1 products in figart-model/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (44, 'FIGART MODEL', NULL, 'http://localhost:9000/minicollections-media/brands/figart-model/logo.gif');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (44, 'FIGART MODEL', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/figart-model/logo.gif');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- BMC: 195 products in bmc/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (43, 'BMC', NULL, 'http://localhost:9000/minicollections-media/brands/bmc/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (43, 'BMC', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/bmc/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Welly: 1295 products in welly/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (45, 'Welly', NULL, 'http://localhost:9000/minicollections-media/brands/welly/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (45, 'Welly', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/welly/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Rhino Models: 37 products in rhino-models/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (42, 'Rhino Models', NULL, 'http://localhost:9000/minicollections-media/brands/rhino-models/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (42, 'Rhino Models', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/rhino-models/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -613,7 +633,7 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- Maisto: 5469 products in maisto/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (46, 'Maisto', '美驰图', 'http://localhost:9000/minicollections-media/brands/maisto/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (46, 'Maisto', '美驰图', NULL, 'http://localhost:9000/minicollections-media/brands/maisto/logo.png');
 
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
@@ -760,25 +780,25 @@ SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MA
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- POLAR MASTER: 3 products in polar-master/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (47, 'POLAR MASTER', NULL, 'http://localhost:9000/minicollections-media/brands/polar-master/logo.gif');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (47, 'POLAR MASTER', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/polar-master/logo.gif');
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- MODELCOLLECT: 16 products in modelcollect/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (48, 'MODELCOLLECT', NULL, 'http://localhost:9000/minicollections-media/brands/modelcollect/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (48, 'MODELCOLLECT', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/modelcollect/logo.png');
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- KILOworks: 11 products in kiloworks/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (49, 'KILOworks', NULL, 'http://localhost:9000/minicollections-media/brands/kiloworks/logo.png');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (49, 'KILOworks', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/kiloworks/logo.png');
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));
 
 -- WERK83: 4 products in werk83/brand-objects.sql
-INSERT INTO brands (id, name_en, name_zh, image_url) VALUES (50, 'WERK83', NULL, 'http://localhost:9000/minicollections-media/brands/werk83/logo.svg');
+INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (50, 'WERK83', NULL, NULL, 'http://localhost:9000/minicollections-media/brands/werk83/logo.svg');
 SELECT setval(pg_get_serial_sequence('brands', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brands));
 SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), (SELECT COALESCE(MAX(id), 1) FROM brand_objects));
 SELECT setval(pg_get_serial_sequence('series', 'id'), (SELECT COALESCE(MAX(id), 1) FROM series));

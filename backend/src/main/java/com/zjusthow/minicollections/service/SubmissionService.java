@@ -166,6 +166,7 @@ public class SubmissionService {
                 brandObjectSearchRepository.save(BrandObjectDocument.from(
                         saved,
                         brand != null ? brand.nameEn() : null,
+                        brand != null ? brand.abbreviation() : null,
                         brand != null ? brand.nameZh() : null,
                         series != null ? series.nameEn() : null,
                         series != null ? series.nameZh() : null,

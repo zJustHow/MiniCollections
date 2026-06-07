@@ -1,14 +1,16 @@
-import NeuButton, { neuBtnProps } from "../../components/NeuButton";
-import { App, Popconfirm, Space, Table } from "antd";
-import { DeleteOutlined, EditOutlined, PlusOutlined, TagsOutlined } from "@ant-design/icons";
+import NeuButton from "../../components/NeuButton";
+import AdminDeleteAction from "../../components/admin/AdminDeleteAction";
+import AdminEditButton from "../../components/admin/AdminEditButton";
+import { App, Space, Table } from "antd";
+import { PlusOutlined, TagsOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { adminDeleteBrand } from "../../utils";
 import { useLocale } from "../../LocaleContext";
-import { radius } from "../../theme/radius";
+import GroovedImage from "../../components/GroovedImage";
 import BrandModal from "../../components/ObjectList/modals/BrandModal";
 
-export default function BrandsPanel({ brands, onBrandsChanged }) {
+export default function BrandsPanel({ brands, loading = false, onBrandsChanged }) {
   const { message } = App.useApp();
   const { t } = useLocale();
   const navigate = useNavigate();
@@ -31,8 +33,18 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
       title: t("image"),
       dataIndex: "image_url",
       width: 60,
-      render: (url) => url
-        ? <img src={url} alt="" style={{ width: 36, height: 36, objectFit: "contain", borderRadius: radius.sm }} />
+      render: (url, record) => url
+        ? (
+          <div className="admin-table-logo">
+            <GroovedImage
+              imageUrl={url}
+              alt={record.name_en ? `${record.name_en} ${t("brandLogo")}` : t("brandLogo")}
+              fixedGroove
+              wellClassName="neu-card-image-well neu-card-image-well--logo"
+              placeholderSize={16}
+            />
+          </div>
+        )
         : <span style={{ color: "var(--neu-text-2)", fontSize: 12 }}>—</span>,
     },
     { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },
@@ -52,22 +64,14 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
           >
             {t("viewObjects")}
           </NeuButton>
-          <NeuButton
-            size="small"
-            icon={<EditOutlined />}
+          <AdminEditButton
             onClick={() => { setEditingBrand(record); setBrandModalOpen(true); }}
           />
-          <Popconfirm
+          <AdminDeleteAction
             title={t("deleteBrandTitle")}
-            description={t("deleteBrandContent").replace("{name}", record.name_en)}
+            description={t("deleteBrandContent").replace("{name}", record.name_en ?? record.name ?? "—")}
             onConfirm={() => handleDeleteBrand(record)}
-            okText={t("delete")}
-            okButtonProps={neuBtnProps({ danger: true })}
-            cancelButtonProps={neuBtnProps()}
-            cancelText={t("cancel")}
-          >
-            <NeuButton size="small" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
+          />
         </Space>
       ),
     },
@@ -88,6 +92,7 @@ export default function BrandsPanel({ brands, onBrandsChanged }) {
         rowKey="id"
         dataSource={brands}
         columns={columns}
+        loading={loading}
         size="middle"
         pagination={{ pageSize: 20, showSizeChanger: false }}
       />

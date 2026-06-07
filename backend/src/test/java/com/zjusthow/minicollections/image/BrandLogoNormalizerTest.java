@@ -71,6 +71,57 @@ class BrandLogoNormalizerTest {
     }
 
     @Test
+    void convertsEdgeConnectedWhiteBackgroundToTransparency() throws IOException {
+        byte[] input = png(g -> {
+            g.setColor(Color.WHITE);
+            g.fillRect(0, 0, 120, 120);
+            g.setColor(Color.BLUE);
+            g.fillRect(40, 50, 40, 20);
+        }, 120, 120);
+
+        NormalizedBrandLogo result = BrandLogoNormalizer.normalize(input, "image/png");
+        BufferedImage output = ImageIO.read(new ByteArrayInputStream(result.bytes()));
+
+        assertEquals(0, output.getRGB(0, 0) >>> 24);
+        assertEquals(0, output.getRGB(119, 119) >>> 24);
+        assertTrue((output.getRGB(60, 60) >>> 24) >= 16);
+    }
+
+    @Test
+    void removeEdgeConnectedBackground_clearsWhiteBorderButKeepsInteriorMark() {
+        BufferedImage image = new BufferedImage(60, 60, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = image.createGraphics();
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, 60, 60);
+        g.setColor(Color.BLACK);
+        g.fillRect(20, 20, 20, 20);
+        g.setColor(Color.WHITE);
+        g.fillRect(26, 24, 8, 12);
+        g.dispose();
+
+        BrandLogoNormalizer.removeEdgeConnectedBackground(image);
+
+        assertEquals(0, image.getRGB(0, 0) >>> 24);
+        assertTrue((image.getRGB(30, 30) & 0xFF) >= 250);
+    }
+
+    @Test
+    void removeEdgeConnectedBackground_clearsBlackBorder() throws IOException {
+        byte[] input = png(g -> {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, 120, 120);
+            g.setColor(new Color(196, 164, 108));
+            g.fillRect(30, 40, 60, 40);
+        }, 120, 120);
+
+        NormalizedBrandLogo result = BrandLogoNormalizer.normalize(input, "image/png");
+        BufferedImage output = ImageIO.read(new ByteArrayInputStream(result.bytes()));
+
+        assertEquals(0, output.getRGB(0, 0) >>> 24);
+        assertTrue((output.getRGB(60, 60) >>> 24) >= 16);
+    }
+
+    @Test
     void findContentBounds_ignoresTransparentMargins() {
         BufferedImage image = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = image.createGraphics();

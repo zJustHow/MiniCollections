@@ -300,6 +300,7 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             WHERE LOWER(bo.name_en) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(bo.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(b.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(b.abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(b.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
             """)
     List<BrandObjectEntity> searchByNameOrBrandName(@Param("keyword") String keyword);

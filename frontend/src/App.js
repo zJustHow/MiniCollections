@@ -1,6 +1,7 @@
 import NeuPressableButton from "./components/NeuPressableButton";
-import { Layout, Avatar, Tooltip } from "antd";
-import { useState, useEffect, useRef } from "react";
+import PageLoader from "./components/PageLoader";
+import { Layout, Avatar, Tooltip, Spin } from "antd";
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
 import {
   Routes,
   Route,
@@ -13,20 +14,21 @@ import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import ObjectList from "./components/ObjectList";
 import GuestBrandsView from "./components/GuestBrandsView";
 import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import AdminPage from "./pages/AdminPage";
-import AdminBrandObjectsPage from "./pages/admin/AdminBrandObjectsPage";
-import FeedbackPage from "./pages/FeedbackPage";
-import ProfilePage from "./pages/ProfilePage";
 import BrandObjectsPage from "./pages/BrandObjectsPage";
-import BrandObjectDetailPage from "./pages/BrandObjectDetailPage";
 import GroupObjectsPage from "./pages/GroupObjectsPage";
-import GroupObjectDetailPage from "./pages/GroupObjectDetailPage";
-import WechatCallbackPage from "./pages/WechatCallbackPage";
 import { getMe, logout } from "./utils";
 import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
+
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const AdminBrandObjectsPage = lazy(() => import("./pages/admin/AdminBrandObjectsPage"));
+const FeedbackPage = lazy(() => import("./pages/FeedbackPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+const BrandObjectDetailPage = lazy(() => import("./pages/BrandObjectDetailPage"));
+const GroupObjectDetailPage = lazy(() => import("./pages/GroupObjectDetailPage"));
+const WechatCallbackPage = lazy(() => import("./pages/WechatCallbackPage"));
 
 const { Header, Content } = Layout;
 
@@ -319,7 +321,20 @@ export default function App() {
     // navigation to /profile is handled inside WechatCallbackPage
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <Layout
+        style={{
+          height: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Spin size="large" />
+      </Layout>
+    );
+  }
 
   return (
     <Routes>
@@ -335,11 +350,27 @@ export default function App() {
       />
       <Route
         path="/register"
-        element={authed ? <Navigate to="/" replace /> : <RegisterPage />}
+        element={
+          authed ? (
+            <Navigate to="/" replace />
+          ) : (
+            <Suspense fallback={<PageLoader />}>
+              <RegisterPage />
+            </Suspense>
+          )
+        }
       />
       <Route
         path="/forgot-password"
-        element={authed ? <Navigate to="/" replace /> : <ForgotPasswordPage />}
+        element={
+          authed ? (
+            <Navigate to="/" replace />
+          ) : (
+            <Suspense fallback={<PageLoader />}>
+              <ForgotPasswordPage />
+            </Suspense>
+          )
+        }
       />
       <Route
         path="/wechat-callback"
@@ -347,10 +378,12 @@ export default function App() {
           authed && localStorage.getItem("wechat_intent") !== "bind" ? (
             <Navigate to="/" replace />
           ) : (
-            <WechatCallbackPage
-              onSuccess={handleLoginSuccess}
-              onBind={handleWechatBind}
-            />
+            <Suspense fallback={<PageLoader />}>
+              <WechatCallbackPage
+                onSuccess={handleLoginSuccess}
+                onBind={handleWechatBind}
+              />
+            </Suspense>
           )
         }
       />
@@ -360,11 +393,13 @@ export default function App() {
           !authed ? (
             <Navigate to="/login" replace />
           ) : (
-            <ProfilePage
-              profile={profile}
-              onProfileChange={handleProfileChange}
-              onLogout={handleLogout}
-            />
+            <Suspense fallback={<PageLoader />}>
+              <ProfilePage
+                profile={profile}
+                onProfileChange={handleProfileChange}
+                onLogout={handleLogout}
+              />
+            </Suspense>
           )
         }
       />
@@ -402,10 +437,12 @@ export default function App() {
         <Route
           path="brands/:brandId/objects/:objectId"
           element={
-            <BrandObjectDetailPage
-              isAdmin={isAdmin && authed}
-              authed={authed}
-            />
+            <Suspense fallback={<PageLoader />}>
+              <BrandObjectDetailPage
+                isAdmin={isAdmin && authed}
+                authed={authed}
+              />
+            </Suspense>
           }
         />
         <Route
@@ -418,7 +455,9 @@ export default function App() {
           path="groups/:groupId/objects/:objectId"
           element={
             authed ? (
-              <GroupObjectDetailPage />
+              <Suspense fallback={<PageLoader />}>
+                <GroupObjectDetailPage />
+              </Suspense>
             ) : (
               <Navigate to="/login" replace />
             )
@@ -426,7 +465,15 @@ export default function App() {
         />
         <Route
           path="feedback"
-          element={authed ? <FeedbackPage /> : <Navigate to="/login" replace />}
+          element={
+            authed ? (
+              <Suspense fallback={<PageLoader />}>
+                <FeedbackPage />
+              </Suspense>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
         <Route
           path="admin/brands/:brandId"
@@ -436,7 +483,9 @@ export default function App() {
             ) : !isAdmin ? (
               <Navigate to="/" replace />
             ) : (
-              <AdminBrandObjectsPage />
+              <Suspense fallback={<PageLoader />}>
+                <AdminBrandObjectsPage />
+              </Suspense>
             )
           }
         />
@@ -448,7 +497,9 @@ export default function App() {
             ) : !isAdmin ? (
               <Navigate to="/" replace />
             ) : (
-              <AdminPage />
+              <Suspense fallback={<PageLoader />}>
+                <AdminPage />
+              </Suspense>
             )
           }
         />

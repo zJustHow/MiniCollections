@@ -927,7 +927,7 @@ public class BrandService {
     @CacheEvict(value = "brands", allEntries = true)
     public BrandDto createBrand(BrandBody req, String effectiveLocale) {
         var entity = new com.zjusthow.minicollections.entity.BrandEntity(
-                null, req.nameEn(), req.nameZh(), req.imageUrl(), 0L);
+                null, req.nameEn(), req.nameZh(), req.abbreviation(), req.imageUrl(), 0L);
         var saved = brandRepository.save(entity);
         if (brandEsEnabled()) {
             brandSearchRepository.save(BrandDocument.from(saved));
@@ -940,7 +940,7 @@ public class BrandService {
         BrandEntity existing = brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
         deleteReplacedStoredImage(existing.imageUrl(), req.imageUrl());
         var updated = new com.zjusthow.minicollections.entity.BrandEntity(
-                id, req.nameEn(), req.nameZh(), req.imageUrl(), existing.viewCount());
+                id, req.nameEn(), req.nameZh(), req.abbreviation(), req.imageUrl(), existing.viewCount());
         var saved = brandRepository.save(updated);
         if (brandEsEnabled()) {
             brandSearchRepository.save(BrandDocument.from(saved));
@@ -956,7 +956,8 @@ public class BrandService {
         }
         BrandEntity brand = brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
         String imageUrl = imageStorageService.uploadBrandAsset(id, brand.nameEn(), file);
-        var updated = new BrandEntity(id, brand.nameEn(), brand.nameZh(), imageUrl, brand.viewCount());
+        var updated = new BrandEntity(
+                id, brand.nameEn(), brand.nameZh(), brand.abbreviation(), imageUrl, brand.viewCount());
         var saved = brandRepository.save(updated);
         if (brandEsEnabled()) {
             brandSearchRepository.save(BrandDocument.from(saved));
@@ -1171,6 +1172,7 @@ public class BrandService {
         brandObjectSearchRepository.save(BrandObjectDocument.from(
                 saved,
                 brand != null ? brand.nameEn() : null,
+                brand != null ? brand.abbreviation() : null,
                 brand != null ? brand.nameZh() : null,
                 series != null ? series.nameEn() : null,
                 series != null ? series.nameZh() : null,

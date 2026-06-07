@@ -33,6 +33,7 @@ export default function usePagedList(fetchPage, options = {}) {
   const [loading, setLoading] = useState(false);
   const prevResetKeyRef = useRef(null);
   const pendingScrollRef = useRef(false);
+  const loadPageRef = useRef(() => {});
 
   const applyPage = useCallback((response) => {
     setItems(Array.isArray(response?.content) ? response.content : []);
@@ -101,6 +102,8 @@ export default function usePagedList(fetchPage, options = {}) {
     ],
   );
 
+  loadPageRef.current = loadPage;
+
   const reset = useCallback(() => {
     setItems([]);
     setPage(0);
@@ -140,15 +143,15 @@ export default function usePagedList(fetchPage, options = {}) {
 
     if (resetKeyChanged) {
       clearPageParam();
-      loadPage(0);
+      loadPageRef.current(0);
       return;
     }
 
     const initialPage = pageParamKey
       ? parsePageParam(searchParams, pageParamKey)
       : 0;
-    loadPage(initialPage);
-  }, [resetKey, enabled, reservedFirstPageSlots]); // eslint-disable-line react-hooks/exhaustive-deps
+    loadPageRef.current(initialPage);
+  }, [resetKey, enabled, reservedFirstPageSlots, searchParams, pageParamKey, clearPageParam, reset]);
 
   useEffect(() => {
     if (!pendingScrollRef.current || loading) return;
