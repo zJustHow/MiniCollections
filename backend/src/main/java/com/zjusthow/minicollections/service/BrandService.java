@@ -163,9 +163,7 @@ public class BrandService {
             try {
                 EsSearchPageResult esResult = brandElasticsearchQueryService.searchPage(
                         trimmed, safePage, pageSize);
-                if (!esResult.ids().isEmpty() || safePage > 0) {
-                    return fromEsBrandPage(esResult, preferZh, safePage, pageSize);
-                }
+                return fromEsBrandPage(esResult, preferZh, safePage, pageSize);
             } catch (Exception e) {
                 log.warn("Elasticsearch brand search failed, using SQL fallback: {}", e.getMessage());
             }
@@ -679,9 +677,7 @@ public class BrandService {
             try {
                 EsSearchPageResult esResult = brandObjectElasticsearchQueryService.searchPage(
                         trimmed, filter, safePage, pageSize);
-                if (!esResult.ids().isEmpty() || safePage > 0) {
-                    return fromEsBrandObjectPage(esResult, preferZh, safePage, pageSize);
-                }
+                return fromEsBrandObjectPage(esResult, preferZh, safePage, pageSize);
             } catch (Exception e) {
                 log.warn("Elasticsearch search failed, using SQL fallback: {}", e.getMessage());
             }
@@ -776,9 +772,7 @@ public class BrandService {
         if (brandEsEnabled()) {
             try {
                 EsSearchPageResult esResult = brandElasticsearchQueryService.searchPage(keyword, 0, 1);
-                if (esResult.totalElements() > 0) {
-                    return new BrandSearchTotals(esResult.totalElements(), esResult.totalExact());
-                }
+                return new BrandSearchTotals(esResult.totalElements(), esResult.totalExact());
             } catch (Exception e) {
                 log.warn("Elasticsearch brand count failed, using SQL fallback: {}", e.getMessage());
             }
@@ -791,9 +785,7 @@ public class BrandService {
             try {
                 EsSearchPageResult esResult =
                         brandObjectElasticsearchQueryService.searchPage(keyword, filter, 0, 1);
-                if (esResult.totalElements() > 0) {
-                    return new ObjectSearchTotals(esResult.totalElements(), esResult.totalExact());
-                }
+                return new ObjectSearchTotals(esResult.totalElements(), esResult.totalExact());
             } catch (Exception e) {
                 log.warn("Elasticsearch object count failed, using SQL fallback: {}", e.getMessage());
             }
@@ -813,12 +805,10 @@ public class BrandService {
             try {
                 EsSearchPageResult esResult =
                         brandElasticsearchQueryService.searchSlice(keyword, offset, limit);
-                if (!esResult.ids().isEmpty() || offset > 0) {
-                    return loadByIdsInOrder(
-                            esResult.ids(),
-                            brandRepository::findAllById,
-                            e -> toBrandDto(e, preferZh));
-                }
+                return loadByIdsInOrder(
+                        esResult.ids(),
+                        brandRepository::findAllById,
+                        e -> toBrandDto(e, preferZh));
             } catch (Exception e) {
                 log.warn("Elasticsearch brand slice failed, using SQL fallback: {}", e.getMessage());
             }
@@ -841,12 +831,10 @@ public class BrandService {
             try {
                 EsSearchPageResult esResult =
                         brandObjectElasticsearchQueryService.searchSlice(keyword, filter, offset, limit);
-                if (!esResult.ids().isEmpty() || offset > 0) {
-                    return loadByIdsInOrder(
-                            esResult.ids(),
-                            brandObjectRepository::findAllById,
-                            e -> toBrandObjectDto(e, preferZh));
-                }
+                return loadByIdsInOrder(
+                        esResult.ids(),
+                        brandObjectRepository::findAllById,
+                        e -> toBrandObjectDto(e, preferZh));
             } catch (Exception e) {
                 log.warn("Elasticsearch object slice failed, using SQL fallback: {}", e.getMessage());
             }
@@ -949,6 +937,7 @@ public class BrandService {
         return toBrandDto(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
+    /** Admin upload stores the file as-is (no {@link com.zjusthow.minicollections.image.BrandLogoNormalizer}). */
     @CacheEvict(value = "brands", allEntries = true)
     public BrandDto uploadBrandLogo(long id, MultipartFile file, String effectiveLocale) throws IOException {
         if (imageStorageService == null) {

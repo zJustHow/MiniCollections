@@ -89,28 +89,32 @@ CREATE TABLE categories
 --   artillery (16)          – towed/self-propelled guns and artillery
 --   military-car (20)       – military light vehicles (jeeps, HMMWV, staff cars, military trucks, etc.)
 --   emergency-vehicle (21)  – police, fire, ambulance, and other civilian emergency services
+--   civilian-car (1)        – street / passenger / consumer vehicles (non-racing)
+--   race-car (22)           – competition vehicles (F1, endurance, GT, rally, touring, etc.)
+--   truck (2)               – heavy trucks, semi tractors, and container haulers
 INSERT INTO categories (id, slug, name_en, name_zh, sort_order) VALUES
-(1,  'car',                  'Car',                  '汽车',       1),
-(4,  'motorbike',            'Motorbike',            '摩托车',     2),
-(12, 'construction-vehicle', 'Construction Vehicle', '工程车辆',   3),
-(2,  'truck',                'Truck',                '卡车',       4),
-(3,  'bus',                  'Bus',                  '巴士',       5),
-(21, 'emergency-vehicle',    'Emergency Vehicle',    '应急车辆',   6),
-(6,  'tractor',              'Tractor',              '拖拉机',     7),
-(13, 'train',                'Train',                '火车',       8),
-(15, 'tank',                 'Tank',                 '坦克',       9),
-(20, 'military-car',         'Military Car',         '军用汽车',   10),
-(16, 'artillery',            'Artillery',            '火炮',       11),
-(5,  'fixed-wing-aircraft',  'Fixed-Wing Aircraft',  '固定翼飞机', 12),
-(17, 'helicopter',           'Helicopter',           '直升机',     13),
-(14, 'civilian-ship',        'Civilian Ship',        '民用船只',   14),
-(18, 'warship',              'Warship',              '军舰',       15),
-(19, 'submarine',            'Submarine',            '潜艇',       16),
-(8,  'diorama',              'Diorama',              '场景',       17),
-(11, 'figure',               'Figure',               '人仔',       18),
-(7,  'accessory',            'Accessory',            '配件',       19),   -- diorama-scale props
-(9,  'book',                 'Book',                 '书籍',       20),
-(10, 'other',                'Other',                '其他',       21);  -- cases, stands, standalone display pieces
+(1,  'civilian-car',         'Civilian Car',         '民用车',     1),
+(22, 'race-car',             'Race Car',             '赛车',       2),
+(4,  'motorbike',            'Motorbike',            '摩托车',     3),
+(12, 'construction-vehicle', 'Construction Vehicle', '工程车辆',   4),
+(2,  'truck',                'Truck',                '重卡',       5),
+(3,  'bus',                  'Bus',                  '巴士',       6),
+(21, 'emergency-vehicle',    'Emergency Vehicle',    '应急车辆',   7),
+(6,  'tractor',              'Tractor',              '拖拉机',     8),
+(13, 'train',                'Train',                '火车',       9),
+(15, 'tank',                 'Tank',                 '坦克',       10),
+(20, 'military-car',         'Military Car',         '军用汽车',   11),
+(16, 'artillery',            'Artillery',            '火炮',       12),
+(5,  'fixed-wing-aircraft',  'Fixed-Wing Aircraft',  '固定翼飞机', 13),
+(17, 'helicopter',           'Helicopter',           '直升机',     14),
+(14, 'civilian-ship',        'Civilian Ship',        '民用船只',   15),
+(18, 'warship',              'Warship',              '军舰',       16),
+(19, 'submarine',            'Submarine',            '潜艇',       17),
+(8,  'diorama',              'Diorama',              '场景',       18),
+(11, 'figure',               'Figure',               '人仔',       19),
+(7,  'accessory',            'Accessory',            '配件',       20),   -- diorama-scale props
+(9,  'book',                 'Book',                 '书籍',       21),
+(10, 'other',                'Other',                '其他',       22);  -- cases, stands, standalone display pieces
 
 SELECT setval(pg_get_serial_sequence('categories', 'id'), (SELECT COALESCE(MAX(id), 1) FROM categories));
 
