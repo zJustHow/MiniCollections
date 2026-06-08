@@ -1,7 +1,5 @@
 package com.zjusthow.minicollections.service;
 
-import com.zjusthow.minicollections.elasticsearch.BrandObjectIndexService;
-import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.entity.CategoryEntity;
 import com.zjusthow.minicollections.entity.ObjectSubmissionEntity;
 import com.zjusthow.minicollections.entity.ScaleEntity;
@@ -14,10 +12,11 @@ import com.zjusthow.minicollections.exception.SeriesNotFoundException;
 import com.zjusthow.minicollections.exception.SubmissionAlreadyReviewedException;
 import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.model.ApprovalBody;
+import com.zjusthow.minicollections.model.BrandObjectBody;
 import com.zjusthow.minicollections.model.ObjectSubmissionDto;
 import com.zjusthow.minicollections.model.PageResponse;
 import com.zjusthow.minicollections.model.SubmissionBody;
-import com.zjusthow.minicollections.repository.BrandObjectRepository;
+import com.zjusthow.minicollections.model.SubmissionStatusCounts;
 import com.zjusthow.minicollections.repository.BrandRepository;
 import com.zjusthow.minicollections.repository.CategoryRepository;
 import com.zjusthow.minicollections.repository.ObjectSubmissionRepository;
@@ -32,9 +31,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 
 @Service
 public class SubmissionService {
@@ -43,39 +46,33 @@ public class SubmissionService {
     private static final int MAX_PAGE_SIZE = 100;
 
     private final ObjectSubmissionRepository submissionRepository;
-    private final BrandObjectRepository brandObjectRepository;
     private final BrandRepository brandRepository;
     private final SeriesRepository seriesRepository;
     private final CategoryRepository categoryRepository;
     private final ScaleRepository scaleRepository;
     private final UserRepository userRepository;
-    private final BrandObjectIndexService brandObjectIndexService;
+    private final BrandService brandService;
     private final ImageStorageService imageStorageService;
-
-    @Value("${app.elasticsearch.enabled:true}")
-    private boolean elasticsearchEnabled;
 
     @Value("${app.limits.max-submissions-per-day}")
     private int maxSubmissionsPerDay;
 
     public SubmissionService(
             ObjectSubmissionRepository submissionRepository,
-            BrandObjectRepository brandObjectRepository,
             BrandRepository brandRepository,
             SeriesRepository seriesRepository,
             CategoryRepository categoryRepository,
             ScaleRepository scaleRepository,
             UserRepository userRepository,
-            @Autowired(required = false) BrandObjectIndexService brandObjectIndexService,
+            BrandService brandService,
             @Autowired(required = false) ImageStorageService imageStorageService) {
         this.submissionRepository = submissionRepository;
-        this.brandObjectRepository = brandObjectRepository;
         this.brandRepository = brandRepository;
         this.seriesRepository = seriesRepository;
         this.categoryRepository = categoryRepository;
         this.scaleRepository = scaleRepository;
         this.userRepository = userRepository;
-        this.brandObjectIndexService = brandObjectIndexService;
+        this.brandService = brandService;
         this.imageStorageService = imageStorageService;
     }
 
@@ -106,8 +103,25 @@ public class SubmissionService {
         long total = submissionRepository.countBySubmittedByUserId(userId);
         List<ObjectSubmissionEntity> entities = submissionRepository.findPageBySubmittedByUserId(
                 userId, pageSize, offset(safePage, pageSize));
-        List<ObjectSubmissionDto> content = entities.stream().map(this::toDto).toList();
-        return PageResponse.of(content, safePage, pageSize, total, true);
+        return PageResponse.of(toDtos(entities), safePage, pageSize, total, true);
+    }
+
+    public PageResponse<ObjectSubmissionDto> listByStatusPage(String status, int page, int size) {
+        int pageSize = clampSize(size);
+        int safePage = clampPage(page);
+        String normalizedStatus = normalizeStatusFilter(status);
+        long total = submissionRepository.countByStatusFilter(normalizedStatus);
+        List<ObjectSubmissionEntity> entities = submissionRepository.findPageByStatus(
+                normalizedStatus, pageSize, offset(safePage, pageSize));
+        return PageResponse.of(toDtos(entities), safePage, pageSize, total, true);
+    }
+
+    public SubmissionStatusCounts getStatusCounts() {
+        return new SubmissionStatusCounts(
+                submissionRepository.countByStatus("PENDING"),
+                submissionRepository.countByStatus("APPROVED"),
+                submissionRepository.countByStatus("REJECTED"),
+                submissionRepository.count());
     }
 
     @Transactional
@@ -119,13 +133,6 @@ public class SubmissionService {
         }
         deleteUserImage(userId, submission.imageUrl());
         submissionRepository.deleteById(submissionId);
-    }
-
-    public List<ObjectSubmissionDto> listByStatus(String status) {
-        List<ObjectSubmissionEntity> entities = status != null
-                ? submissionRepository.findByStatus(status)
-                : submissionRepository.findAll();
-        return entities.stream().map(this::toDto).toList();
     }
 
     @Transactional
@@ -143,15 +150,12 @@ public class SubmissionService {
             if (body.brandId() == null || body.nameEn() == null || body.nameEn().isBlank()) {
                 throw new ValidationException("error.approval_missing_fields");
             }
-            BrandObjectEntity brandObject = new BrandObjectEntity(
-                    null, body.nameEn(), body.nameZh(), body.imageUrl(), body.imageSource(),
+            BrandObjectBody brandObjectBody = new BrandObjectBody(
+                    body.nameEn(), body.nameZh(), body.imageUrl(), body.imageSource(),
                     body.releasePriceCny(), body.releasePriceUsd(), body.releaseDate(),
-                    body.brandId(), body.seriesId(), body.categoryId(), body.scaleId(), 0L
+                    body.seriesId(), body.categoryId(), body.scaleId()
             );
-            BrandObjectEntity saved = brandObjectRepository.save(brandObject);
-            if (elasticsearchEnabled && brandObjectIndexService != null) {
-                brandObjectIndexService.index(saved);
-            }
+            brandService.createBrandObject(body.brandId(), brandObjectBody, "en-US");
         }
 
         return toDto(submissionRepository.save(
@@ -169,6 +173,13 @@ public class SubmissionService {
         return toDto(submissionRepository.save(
                 withStatus(submission, "REJECTED", adminUserId, reason, null)
         ));
+    }
+
+    private String normalizeStatusFilter(String status) {
+        if (status == null || status.isBlank() || "ALL".equalsIgnoreCase(status)) {
+            return null;
+        }
+        return status;
     }
 
     private void validateCategoryId(Long categoryId) {
@@ -237,37 +248,102 @@ public class SubmissionService {
         return Math.min(size, MAX_PAGE_SIZE);
     }
 
-    private ObjectSubmissionDto toDto(ObjectSubmissionEntity e) {
-        String submitterName = userRepository.findById(e.submittedByUserId())
-                .map(u -> u.displayName())
-                .orElse("Unknown");
-        String brandName = e.brandId() != null
-                ? brandRepository.findById(e.brandId()).map(b -> b.nameEn()).orElse(null)
-                : e.customBrandName();
-        SeriesEntity series = e.seriesId() != null
-                ? seriesRepository.findById(e.seriesId()).orElse(null)
-                : null;
-        CategoryEntity category = e.categoryId() != null
-                ? categoryRepository.findById(e.categoryId()).orElse(null)
-                : null;
-        ScaleEntity scale = e.scaleId() != null
-                ? scaleRepository.findById(e.scaleId()).orElse(null)
-                : null;
+    private List<ObjectSubmissionDto> toDtos(List<ObjectSubmissionEntity> entities) {
+        if (entities.isEmpty()) {
+            return List.of();
+        }
+
+        Set<Long> userIds = new HashSet<>();
+        Set<Long> brandIds = new HashSet<>();
+        Set<Long> seriesIds = new HashSet<>();
+        Set<Long> categoryIds = new HashSet<>();
+        Set<Long> scaleIds = new HashSet<>();
+        for (ObjectSubmissionEntity entity : entities) {
+            userIds.add(entity.submittedByUserId());
+            if (entity.brandId() != null) {
+                brandIds.add(entity.brandId());
+            }
+            if (entity.seriesId() != null) {
+                seriesIds.add(entity.seriesId());
+            }
+            if (entity.categoryId() != null) {
+                categoryIds.add(entity.categoryId());
+            }
+            if (entity.scaleId() != null) {
+                scaleIds.add(entity.scaleId());
+            }
+        }
+
+        Map<Long, String> submitterNamesByUserId = new HashMap<>();
+        userRepository.findAllById(userIds)
+                .forEach(user -> submitterNamesByUserId.put(user.id(), user.displayName()));
+
+        Map<Long, String> brandNamesById = new HashMap<>();
+        if (!brandIds.isEmpty()) {
+            brandRepository.findAllById(brandIds)
+                    .forEach(brand -> brandNamesById.put(brand.id(), brand.nameEn()));
+        }
+
+        Map<Long, SeriesEntity> seriesById = new HashMap<>();
+        if (!seriesIds.isEmpty()) {
+            seriesRepository.findAllById(seriesIds).forEach(series -> seriesById.put(series.id(), series));
+        }
+
+        Map<Long, CategoryEntity> categoryById = new HashMap<>();
+        if (!categoryIds.isEmpty()) {
+            categoryRepository.findAllById(categoryIds)
+                    .forEach(category -> categoryById.put(category.id(), category));
+        }
+
+        Map<Long, ScaleEntity> scaleById = new HashMap<>();
+        if (!scaleIds.isEmpty()) {
+            scaleRepository.findAllById(scaleIds).forEach(scale -> scaleById.put(scale.id(), scale));
+        }
+
+        return entities.stream()
+                .map(entity -> toDto(
+                        entity,
+                        submitterNamesByUserId,
+                        brandNamesById,
+                        seriesById,
+                        categoryById,
+                        scaleById))
+                .toList();
+    }
+
+    private ObjectSubmissionDto toDto(ObjectSubmissionEntity entity) {
+        return toDtos(List.of(entity)).get(0);
+    }
+
+    private ObjectSubmissionDto toDto(
+            ObjectSubmissionEntity entity,
+            Map<Long, String> submitterNamesByUserId,
+            Map<Long, String> brandNamesById,
+            Map<Long, SeriesEntity> seriesById,
+            Map<Long, CategoryEntity> categoryById,
+            Map<Long, ScaleEntity> scaleById) {
+        String submitterName = submitterNamesByUserId.getOrDefault(entity.submittedByUserId(), "Unknown");
+        String brandName = entity.brandId() != null
+                ? brandNamesById.get(entity.brandId())
+                : entity.customBrandName();
+        SeriesEntity series = entity.seriesId() != null ? seriesById.get(entity.seriesId()) : null;
+        CategoryEntity category = entity.categoryId() != null ? categoryById.get(entity.categoryId()) : null;
+        ScaleEntity scale = entity.scaleId() != null ? scaleById.get(entity.scaleId()) : null;
         return new ObjectSubmissionDto(
-                e.id(), e.submittedByUserId(), submitterName,
-                e.submissionType(),
-                e.nameEn(), e.nameZh(), e.imageUrl(),
-                e.releasePriceCny(), e.releasePriceUsd(), e.releaseDate(),
-                e.brandId(), brandName,
-                e.seriesId(),
+                entity.id(), entity.submittedByUserId(), submitterName,
+                entity.submissionType(),
+                entity.nameEn(), entity.nameZh(), entity.imageUrl(),
+                entity.releasePriceCny(), entity.releasePriceUsd(), entity.releaseDate(),
+                entity.brandId(), brandName,
+                entity.seriesId(),
                 series != null ? series.nameEn() : null,
                 series != null ? series.nameZh() : null,
-                e.categoryId(),
+                entity.categoryId(),
                 category != null ? category.nameEn() : null,
                 category != null ? category.nameZh() : null,
-                e.scaleId(),
+                entity.scaleId(),
                 scale != null ? scale.code() : null,
-                e.notes(), e.status(), e.submittedAt(), e.rejectReason(), e.adminNote()
+                entity.notes(), entity.status(), entity.submittedAt(), entity.rejectReason(), entity.adminNote()
         );
     }
 }

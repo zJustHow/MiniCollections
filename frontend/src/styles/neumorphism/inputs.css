@@ -1,0 +1,296 @@
+/* neumorphism/inputs.css */
+/* ── INPUTS ───────────────────────────────────────────────── */
+/* Shared form control motion — mirrors buttons (raised → inset-sm → inset) */
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-select:not(.ant-select-customize-input) .ant-select-selector,
+.ant-picker,
+textarea.ant-input,
+input.ant-input {
+  transition: var(--neu-btn-transition);
+  transform: scale(1);
+}
+
+.ant-input,
+.ant-input-number-input {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  color: var(--neu-text);
+}
+
+input.ant-input,
+textarea.ant-input {
+  box-shadow: var(--raised-sm);
+}
+
+/* Outlined class lives on standalone inputs; affix/search inner inputs omit it */
+input.ant-input.ant-input-outlined {
+  box-shadow: var(--raised-sm);
+}
+
+.ant-input::placeholder,
+.ant-input-number-input::placeholder {
+  color: var(--neu-text-2);
+}
+
+.ant-input-affix-wrapper,
+.ant-input-number {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  box-shadow: var(--raised-sm);
+}
+
+.ant-input-affix-wrapper .ant-input,
+.ant-input-number .ant-input-number-input {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  transition: none;
+  transform: none;
+}
+
+.ant-input-affix-wrapper .ant-input:hover,
+.ant-input-affix-wrapper .ant-input:focus,
+.ant-input-number .ant-input-number-input:hover,
+.ant-input-number .ant-input-number-input:focus {
+  box-shadow: none;
+  transform: none;
+  outline: none;
+}
+
+.ant-input-affix-wrapper:hover:not(.ant-input-affix-wrapper-disabled):not(
+    .ant-input-affix-wrapper-focused
+  ):not(:focus-within),
+.ant-input-number:hover:not(.ant-input-number-disabled):not(
+    .ant-input-number-focused
+  ):not(:focus-within),
+.ant-select:not(.ant-select-disabled):not(.ant-select-customize-input):not(
+    .ant-select-focused
+  ):not(.ant-select-open):hover
+  .ant-select-selector,
+.ant-picker:hover:not(.ant-picker-disabled):not(.ant-picker-focused):not(
+    .ant-picker-open
+  ),
+textarea.ant-input:hover:not(:disabled):not([disabled]):not(:focus) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+/* Standalone input only — affix inner inputs omit ant-input-outlined */
+input.ant-input.ant-input-outlined:hover:not(:disabled):not([disabled]):not(
+    :focus
+  ) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper:focus-within,
+.ant-input-affix-wrapper-focused,
+input.ant-input.ant-input-outlined:focus:not(:disabled):not([disabled]),
+textarea.ant-input:focus:not(:disabled):not([disabled]),
+.ant-input-number:focus-within,
+.ant-input-number-focused,
+.ant-input-number.ant-input-number-focused,
+.ant-picker.ant-picker-focused,
+.ant-picker.ant-picker-open {
+  border: none;
+  outline: none;
+  box-shadow: var(--inset) !important;
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-input-prefix,
+.ant-input-suffix {
+  color: var(--neu-text-2);
+}
+
+/* search — flex layout (antd group defaults to display:table, gap has no effect) */
+.ant-input-group-wrapper.ant-input-search {
+  display: flex;
+  max-width: 100%;
+}
+
+.ant-input-search > .ant-input-group,
+.ant-input-group-wrapper.ant-input-search > .ant-input-wrapper.ant-input-group {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  gap: 6px;
+}
+
+.ant-input-search > .ant-input-group > .ant-input-affix-wrapper,
+.ant-input-group-wrapper.ant-input-search
+  > .ant-input-wrapper.ant-input-group
+  > .ant-input-affix-wrapper {
+  display: inline-flex;
+  width: auto;
+}
+
+.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child,
+.ant-input-group-wrapper.ant-input-search .ant-input-group-addon:last-child {
+  display: flex;
+  align-items: stretch;
+  flex: 0 0 32px;
+  flex-shrink: 0;
+  width: 32px;
+  min-width: 32px;
+  white-space: nowrap;
+  position: static;
+  inset-inline-start: auto;
+  margin-inline-start: 0;
+}
+
+.ant-input-search .ant-input-affix-wrapper,
+.ant-input-search .ant-input-affix-wrapper:not(:last-child) {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 auto;
+  min-width: 0;
+  border-radius: 0;
+}
+
+.ant-input-group-addon,
+.ant-input-search > .ant-input-group > .ant-input-group-addon:last-child {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.ant-input-group-addon .ant-btn:not(.neu-btn),
+.ant-input-search-button:not(.neu-btn),
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:not(.neu-btn) {
+  background: var(--neu-bg);
+  border: none;
+  color: var(--neu-text);
+  border-radius: 0;
+  box-shadow: var(--raised-sm);
+}
+
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button,
+.ant-input-group-wrapper.ant-input-search
+  .ant-input-group-addon:last-child
+  .ant-input-search-button,
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-btn.neu-btn,
+.ant-input-group-wrapper.ant-input-search
+  .ant-input-group-addon:last-child
+  .ant-btn.neu-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding-block: 0;
+  margin-inline-end: 0;
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-btn.neu-btn.ant-btn-icon-only,
+.ant-input-group-wrapper.ant-input-search
+  .ant-input-group-addon:last-child
+  .ant-btn.neu-btn.ant-btn-icon-only {
+  flex-shrink: 0;
+  width: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  aspect-ratio: 1;
+  padding-inline: 0;
+}
+
+.ant-input-group-addon
+  .ant-btn:hover:not([disabled]):not(:active):not(.neu-btn),
+.ant-input-search-button:not(.neu-btn):hover:not([disabled]):not(:active),
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:not(.neu-btn):hover:not([disabled]):not(:active) {
+  color: var(--neu-accent);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-input-group-addon .ant-btn:active:not([disabled]):not(.neu-btn),
+.ant-input-search-button:not(.neu-btn):active:not([disabled]),
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:not(.neu-btn):active:not([disabled]) {
+  color: var(--neu-text-2);
+  box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-input-group-addon .ant-btn:focus,
+.ant-input-group-addon .ant-btn:focus-visible,
+.ant-input-search-button:not(.neu-btn):focus,
+.ant-input-search-button:not(.neu-btn):focus-visible,
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:not(.neu-btn):focus,
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:not(.neu-btn):focus-visible {
+  outline: none;
+  border-color: transparent;
+}
+
+.ant-input-group-addon .ant-btn:focus-visible:not(:active),
+.ant-input-search-button:not(.neu-btn):focus-visible:not(:active),
+.ant-input-search
+  > .ant-input-group
+  > .ant-input-group-addon:last-child
+  .ant-input-search-button:not(.neu-btn):focus-visible:not(:active) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+/* textarea */
+textarea.ant-input {
+  border-radius: 0;
+}
+
+/* NeuFormControl — disabled: inset (antd default removes shadow) */
+.ant-input[disabled],
+.ant-input-disabled,
+textarea.ant-input[disabled],
+.ant-input-affix-wrapper-disabled,
+.ant-input-affix-wrapper.ant-input-disabled,
+.ant-input-number-disabled,
+.ant-input-number.ant-input-number-disabled,
+.ant-select.ant-select-disabled:not(.ant-select-customize-input)
+  .ant-select-selector,
+.ant-picker.ant-picker-disabled {
+  background: var(--neu-bg) !important;
+  border: none !important;
+  box-shadow: var(--inset) !important;
+  color: var(--neu-text-2);
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none !important;
+}
+
+.ant-input-number-disabled .ant-input-number-input,
+.ant-input-number.ant-input-number-disabled .ant-input-number-input {
+  color: var(--neu-text-2);
+  cursor: not-allowed;
+}
+

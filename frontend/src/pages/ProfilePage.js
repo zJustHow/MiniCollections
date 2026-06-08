@@ -444,7 +444,6 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                     <NeuSelect
                       fullWidth={false}
                       style={{ width: 110 }}
-                      optionLabelProp="label"
                       disabled={!PHONE_AUTH_ENABLED}
                       options={COUNTRIES.map((c) => ({
                         value: c.code,

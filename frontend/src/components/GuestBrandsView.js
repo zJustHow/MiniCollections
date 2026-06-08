@@ -13,7 +13,6 @@ export default function GuestBrandsView() {
     searchValue,
     brandsListPage,
     combinedSearchPage,
-    showObjectFilters,
     searchFacets,
     facetsLoading,
     selectedCategoryIds,
@@ -29,7 +28,6 @@ export default function GuestBrandsView() {
   return (
     <BrandsTab
       brands={brands}
-      loading={loadingBrands}
       onSearch={handleBrandSearch}
       onBrandClick={handleBrandClick}
       searchActive={searchActive}
@@ -38,7 +36,6 @@ export default function GuestBrandsView() {
       searchValue={searchValue}
       brandsListPage={brandsListPage}
       combinedSearchPage={combinedSearchPage}
-      showObjectFilters={showObjectFilters}
       searchFacets={searchFacets}
       facetsLoading={facetsLoading}
       selectedCategoryIds={selectedCategoryIds}

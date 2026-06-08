@@ -10,23 +10,28 @@ import {
   PlusOutlined,
 } from "@ant-design/icons";
 import DetailImage from "../components/DetailImage";
+import ObjectDetailPageSkeleton from "../components/ObjectDetailPageSkeleton";
 import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";
-import AddToGroupModal from "../components/ObjectList/modals/AddToGroupModal";
-import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
+import { createLazyModal } from "../utils/lazyModal";
+
+const AddToGroupModal = createLazyModal(
+  () => import("../components/ObjectList/modals/AddToGroupModal"),
+);
+const BrandObjectModal = createLazyModal(
+  () => import("../components/ObjectList/modals/BrandObjectModal"),
+);
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
+import { resolveMediaUrl } from "../utils/constants";
+import { getBrandObjectById, recordModelView } from "../utils/brandsApi";
+import { getGroupsPage, createUserObject } from "../utils/groupsApi";
+import { adminDeleteBrandObject } from "../utils/adminApi";
 import {
-  getBrandObjectById,
-  getGroupsPage,
-  createUserObject,
-  adminDeleteBrandObject,
   purchasePriceFromFormValue,
   formatReleasePrice,
-  discardUploadedImage,
-  recordModelView,
   formatViewCount,
-  resolveMediaUrl,
-} from "../utils";
+} from "../utils/format";
+import { discardUploadedImage } from "../utils/uploadsApi";
 
 const { useBreakpoint } = Grid;
 
@@ -42,6 +47,9 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const [brandObject, setBrandObject] = useState(
     location.state?.brandObject ?? null,
   );
+  const [loading, setLoading] = useState(
+    !location.state?.brandObject?.brand,
+  );
 
   const [groups, setGroups] = useState([]);
   const [addToGroupVisible, setAddToGroupVisible] = useState(false);
@@ -52,11 +60,14 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const [brandObjectModalOpen, setBrandObjectModalOpen] = useState(false);
 
   const fetchBrandObject = useCallback(async () => {
+    setLoading(true);
     try {
       const data = await getBrandObjectById(objectId);
       setBrandObject(data);
     } catch (err) {
       message.error(err?.message || t("failedToLoadModels"));
+    } finally {
+      setLoading(false);
     }
   }, [objectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -172,6 +183,10 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       // validation failed
     }
   };
+
+  if (loading && !brandObject?.brand) {
+    return <ObjectDetailPageSkeleton />;
+  }
 
   return (
     <div>

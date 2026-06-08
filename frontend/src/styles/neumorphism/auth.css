@@ -1,0 +1,158 @@
+/* neumorphism/auth.css */
+/* ── LOGIN PANEL ──────────────────────────────────────────── */
+.neu-login-panel {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  padding: 48px 44px;
+  box-shadow: var(--raised-lg);
+  max-width: 400px;
+  margin: 60px auto 0;
+}
+
+.neu-login-title {
+  text-align: center;
+  color: var(--neu-text);
+  font-size: var(--neu-fs-22);
+  font-weight: 400;
+  margin-bottom: 32px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.neu-login-title span {
+  color: var(--neu-accent);
+}
+
+.neu-auth-page-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.neu-auth-skeleton-title {
+  display: block;
+  width: 42%;
+  height: 24px;
+  margin: 0 auto 32px;
+}
+
+.neu-auth-skeleton-hint {
+  display: block;
+  width: 88%;
+  height: 36px;
+  margin: -16px auto 24px;
+}
+
+.neu-auth-skeleton-toggle {
+  display: flex;
+  gap: 8px;
+  padding: 5px;
+  margin-bottom: 24px;
+  box-shadow: var(--inset);
+}
+
+.neu-auth-skeleton-toggle--compact {
+  margin-bottom: 0;
+}
+
+.neu-auth-skeleton-toggle-btn {
+  display: block;
+  flex: 1;
+  height: 36px;
+  background: var(--neu-bg);
+  overflow: hidden;
+}
+
+.neu-auth-skeleton-toggle-btn-fill {
+  width: 100%;
+  height: 100%;
+}
+
+.neu-auth-skeleton-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.neu-auth-skeleton-field {
+  display: block;
+  width: 100%;
+  height: var(--neu-control-height-lg);
+}
+
+.neu-auth-skeleton-code-row {
+  display: flex;
+  gap: 8px;
+}
+
+.neu-auth-skeleton-code-input {
+  display: block;
+  flex: 1;
+  height: var(--neu-control-height-lg);
+}
+
+.neu-auth-skeleton-code-btn {
+  display: block;
+  flex-shrink: 0;
+  width: 120px;
+  height: var(--neu-control-height-lg);
+  background: var(--neu-bg);
+  box-shadow: var(--raised-sm);
+  overflow: hidden;
+}
+
+.neu-auth-skeleton-code-btn-fill {
+  width: 100%;
+  height: 100%;
+}
+
+.neu-auth-skeleton-language {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.neu-auth-skeleton-language-label {
+  display: block;
+  width: 72px;
+  height: 12px;
+}
+
+.neu-auth-skeleton-primary-btn {
+  display: block;
+  width: 100%;
+  height: var(--neu-control-height-lg);
+  background: var(--neu-accent);
+  box-shadow: var(--raised-sm);
+  overflow: hidden;
+}
+
+.neu-auth-skeleton-primary-btn-fill {
+  width: 100%;
+  height: 100%;
+}
+
+.neu-auth-skeleton-footer-link {
+  display: block;
+  width: 72px;
+  height: 13px;
+  margin: 16px auto 0;
+}
+
+.neu-auth-callback-skeleton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--neu-bg);
+}
+
+.neu-auth-callback-skeleton-status {
+  display: block;
+  width: min(220px, 60vw);
+  height: 16px;
+}
+

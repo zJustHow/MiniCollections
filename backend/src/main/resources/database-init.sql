@@ -42,6 +42,8 @@ CREATE TABLE groups
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
+CREATE INDEX idx_groups_user_id ON groups (user_id, id);
+
 CREATE TABLE brands
 (
     id                  SERIAL PRIMARY KEY  NOT NULL,
@@ -278,6 +280,8 @@ CREATE TABLE user_objects
 
 CREATE INDEX idx_user_objects_brand_object_id ON user_objects (brand_object_id)
     WHERE brand_object_id IS NOT NULL;
+CREATE INDEX idx_user_objects_group_id ON user_objects (group_id, id);
+CREATE INDEX idx_user_objects_user_id ON user_objects (user_id, id);
 
 CREATE TABLE authorities
 (
@@ -317,6 +321,9 @@ CREATE TABLE object_submissions
     CONSTRAINT fk_submission_category FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE SET NULL,
     CONSTRAINT fk_submission_scale FOREIGN KEY (scale_id) REFERENCES scales (id) ON DELETE SET NULL
 );
+
+CREATE INDEX idx_submissions_user_submitted ON object_submissions (submitted_by_user_id, submitted_at DESC, id DESC);
+CREATE INDEX idx_submissions_status ON object_submissions (status, submitted_at DESC, id DESC);
 
 -- MINI GT (MGT): 1242 products in minigt/brand-objects.sql
 INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (1, 'MINI GT', NULL, 'MGT', 'http://localhost:9000/minicollections-media/brands/minigt/logo.svg');

@@ -1,6 +1,6 @@
 import { lazy } from "react";
 
-function isChunkLoadError(error) {
+export function isChunkLoadError(error) {
   const message = error?.message ?? "";
   return (
     error?.name === "ChunkLoadError" ||

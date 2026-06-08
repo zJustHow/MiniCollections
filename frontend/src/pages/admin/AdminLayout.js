@@ -16,7 +16,7 @@ import {
   useNavigate,
   useOutletContext,
 } from "react-router-dom";
-import { getAdminSubmissions } from "../../utils";
+import { getAdminSubmissionCounts } from "../../utils/submissionsApi";
 import { useLocale } from "../../LocaleContext";
 import { neuRem } from "../../theme/fontScale";
 
@@ -68,13 +68,23 @@ export default function AdminLayout() {
   const [activeStatus, setActiveStatus] = useState(
     () => location.state?.adminStatus ?? "PENDING",
   );
-  const [submissions, setSubmissions] = useState([]);
+  const [statusCounts, setStatusCounts] = useState({
+    PENDING: 0,
+    APPROVED: 0,
+    REJECTED: 0,
+    ALL: 0,
+  });
   const [sidebarReady, setSidebarReady] = useState(false);
 
   const fetchSubmissions = useCallback(async () => {
     try {
-      const data = await getAdminSubmissions(null);
-      setSubmissions(Array.isArray(data) ? data : []);
+      const data = await getAdminSubmissionCounts();
+      setStatusCounts({
+        PENDING: data?.pending ?? 0,
+        APPROVED: data?.approved ?? 0,
+        REJECTED: data?.rejected ?? 0,
+        ALL: data?.total ?? 0,
+      });
     } catch (err) {
       message.error(err?.message || t("failedToLoadSubmissions"));
     } finally {
@@ -83,8 +93,9 @@ export default function AdminLayout() {
   }, [message, t]);
 
   useEffect(() => {
+    if (!showSidebar) return;
     fetchSubmissions();
-  }, [fetchSubmissions]);
+  }, [showSidebar, fetchSubmissions]);
 
   useEffect(() => {
     if (location.state?.adminStatus) {
@@ -95,13 +106,6 @@ export default function AdminLayout() {
   useEffect(() => {
     setPendingPath(location.pathname);
   }, [location.pathname]);
-
-  const statusCounts = {
-    PENDING: submissions.filter((s) => s.status === "PENDING").length,
-    APPROVED: submissions.filter((s) => s.status === "APPROVED").length,
-    REJECTED: submissions.filter((s) => s.status === "REJECTED").length,
-    ALL: submissions.length,
-  };
 
   const statusOptions = [
     { key: "PENDING", label: t("submissionsPending"), icon: <ClockCircleOutlined /> },

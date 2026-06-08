@@ -13,6 +13,7 @@ export default function DetailImage({ imageUrl, alt, placeholderSize = 48, onCli
         alt={alt}
         wellClassName="neu-detail-image-well"
         placeholderSize={placeholderSize}
+        loading="eager"
       />
     </div>
   );

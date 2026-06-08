@@ -145,7 +145,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#result")
+    @CacheEvict(value = {"users", "userDetails"}, key = "#result")
     public Long resetPassword(String email, String phone, String code, String newPassword) {
         final String normalizedEmail = (email != null && !email.isBlank()) ? email.toLowerCase().strip() : null;
         final String normalizedPhone = (phone != null && !phone.isBlank()) ? phone.strip() : null;
@@ -166,7 +166,7 @@ public class UserService {
     }
 
     @Transactional
-    @CacheEvict(value = "users", key = "#userId", beforeInvocation = true)
+    @CacheEvict(value = {"users", "userDetails"}, key = "#userId", beforeInvocation = true)
     public UserProfileDto updatePassword(Long userId, String currentPassword, String newPassword) {
         UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         if (!passwordEncoder.matches(currentPassword, user.password())) {
@@ -289,6 +289,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = "userDetails", key = "#userId")
     public void grantAdminRole(Long userId) {
         userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
         jdbc.update(
@@ -298,6 +299,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = "userDetails", key = "#targetUserId")
     public void revokeAdminRole(Long targetUserId) {
         userRepository.findById(targetUserId).orElseThrow(UserNotFoundException::new);
         if (!isAdmin(targetUserId)) {

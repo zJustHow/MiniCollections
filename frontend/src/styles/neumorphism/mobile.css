@@ -1,0 +1,131 @@
+/* neumorphism/mobile.css */
+/* ── MOBILE HAMBURGER MENU ────────────────────────────────── */
+.mobile-menu-btn {
+  display: none;
+}
+
+.mobile-menu-overlay {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  /* Header: single row with logo + hamburger */
+  .ant-layout-header {
+    height: var(--header-height-mobile) !important;
+    line-height: normal !important;
+    padding: 0 14px !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+    align-items: center !important;
+  }
+
+  .header-logo-wrap {
+    flex: 1;
+  }
+
+  .header-logo {
+    letter-spacing: 1.5px !important;
+  }
+
+  /* Hide desktop tabs and header profile on mobile */
+  .header-tabs,
+  .header-right {
+    display: none !important;
+  }
+
+  /* Hamburger button — visibility only; styles from neu-pressable-btn + neu-header-bar-btn */
+  .mobile-menu-btn {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .ant-layout-header > .mobile-menu-btn.neu-header-bar-btn {
+    padding: 0 12px;
+  }
+
+  /* Dropdown overlay */
+  .mobile-menu-overlay {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: var(--header-height-mobile);
+    left: 0;
+    right: 0;
+    background: var(--neu-bg);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+    border-bottom: 1px solid var(--neu-border);
+    z-index: 1000;
+    padding: 8px 0;
+  }
+
+  .mobile-menu-item {
+    width: calc(100% - 16px);
+    margin: 0 8px 5px;
+    text-align: left;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    font-size: var(--neu-fs-17);
+    font-weight: 400;
+    color: var(--neu-dark);
+    cursor: pointer;
+    box-shadow: none;
+    transition: var(--neu-btn-transition);
+  }
+
+  .mobile-menu-item:hover:not(.active),
+  .mobile-menu-item:active:not(.active) {
+    color: var(--neu-dark);
+    background: var(--neu-item-hover-bg);
+    box-shadow: var(--inset);
+  }
+
+  .mobile-menu-item.active {
+    background: transparent;
+    color: var(--neu-accent);
+    box-shadow: var(--inset);
+  }
+
+  .mobile-menu-divider {
+    height: 1px;
+    background: var(--neu-border);
+    margin: 6px 0;
+  }
+
+  .mobile-menu-profile {
+    display: flex;
+    justify-content: flex-start;
+    padding: 8px 8px 12px 24px;
+  }
+
+  .neu-panel-tab-btn {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    white-space: nowrap;
+  }
+
+  .header-tabs .neu-header-bar-btn {
+    height: auto;
+    padding: 7px 12px;
+  }
+
+  .header-slot-actions .neu-header-bar-btn {
+    padding: 0 12px;
+  }
+
+  .neu-drawer-toolbar {
+    min-height: var(--header-height-mobile);
+  }
+
+  .neu-drawer-toolbar .neu-header-bar-btn {
+    padding: 0 12px;
+  }
+
+  /* Login panel */
+  .neu-login-panel {
+    padding: 32px 24px !important;
+    margin: 16px auto 0 !important;
+    border-radius: 0 !important;
+  }
+}

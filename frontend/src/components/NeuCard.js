@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { PlusOutlined } from "@ant-design/icons";
 import { Card } from "antd";
 import GroovedImage from "./GroovedImage";
@@ -162,7 +163,7 @@ function buildImageSlotProps({
 /**
  * Neumorphic card — tile (grid), row (related model), or upload trigger.
  */
-export default function NeuCard({
+function NeuCard({
   variant = "tile",
   hoverable = true,
   className = "",
@@ -250,3 +251,5 @@ export default function NeuCard({
     />
   );
 }
+
+export default memo(NeuCard);

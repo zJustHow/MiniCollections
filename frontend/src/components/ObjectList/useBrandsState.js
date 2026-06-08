@@ -6,12 +6,13 @@ import useSearchParam from "../../hooks/useSearchParam";
 import useObjectFilterParams from "../../hooks/useObjectFilterParams";
 import usePagedList from "../../hooks/usePagedList";
 import useCombinedBrandSearch from "../../hooks/useCombinedBrandSearch";
+import useSearchObjectFacets from "../../hooks/useSearchObjectFacets";
+import { PAGE_SIZE } from "../../utils/apiClient";
 import {
   getBrandsPage,
   searchBrandsCombinedPage,
   searchBrandObjectsFacets,
-  PAGE_SIZE,
-} from "../../utils";
+} from "../../utils/brandsApi";
 import { filterKeyFromIds } from "../../utils/filterParams";
 
 export default function useBrandsState({ isAdmin = false } = {}) {
@@ -34,17 +35,16 @@ export default function useBrandsState({ isAdmin = false } = {}) {
   } = useObjectFilterParams();
   const [searchActive, setSearchActive] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [searchFacets, setSearchFacets] = useState(null);
-  const [facetsLoading, setFacetsLoading] = useState(false);
-
   const [brandModalOpen, setBrandModalOpen] = useState(false);
   const syncedKeywordRef = useRef((searchValue ?? "").trim());
+
+  const onBrandsTab = location.pathname === "/";
 
   const brandsList = usePagedList(
     ({ size, page }) => getBrandsPage({ size, page }),
     {
       resetKey: "brands-list",
-      enabled: !searchActive,
+      enabled: onBrandsTab && !searchActive,
       pageSize: PAGE_SIZE,
       pageParamKey: "page",
       reservedFirstPageSlots: isAdmin ? 1 : 0,
@@ -70,7 +70,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       }),
     {
       resetKey: `combined-search:${searchKeyword}:${objectFilterKey}`,
-      enabled: searchActive && Boolean(searchKeyword),
+      enabled: onBrandsTab && searchActive && Boolean(searchKeyword),
       pageSize: PAGE_SIZE,
       pageParamKey: "searchPage",
     },
@@ -90,44 +90,20 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       syncedKeywordRef.current = "";
       setSearchKeyword("");
       setSearchActive(false);
-      setSearchFacets(null);
     }
   }, [location.pathname, searchValue, clearObjectFilters]);
 
-  useEffect(() => {
-    if (!searchActive || !searchKeyword) {
-      setSearchFacets(null);
-      return undefined;
-    }
-
-    let cancelled = false;
-    setFacetsLoading(true);
-    searchBrandObjectsFacets(searchKeyword, {
-      categoryIds: selectedCategoryIds,
-      brandIds: selectedBrandIds,
-      scaleIds: selectedScaleIds,
-      seriesIds: selectedSeriesIds,
-    })
-      .then((data) => {
-        if (!cancelled) {
-          setSearchFacets(data);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setSearchFacets({ total: 0, categories: [], brands: [], scales: [], series: [] });
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setFacetsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [searchKeyword, searchActive, objectFilterKey]);
+  const { searchFacets, facetsLoading } = useSearchObjectFacets({
+    enabled: onBrandsTab && searchActive && Boolean(searchKeyword),
+    fetchFacets: () =>
+      searchBrandObjectsFacets(searchKeyword, {
+        categoryIds: selectedCategoryIds,
+        brandIds: selectedBrandIds,
+        scaleIds: selectedScaleIds,
+        seriesIds: selectedSeriesIds,
+      }),
+    deps: [onBrandsTab, searchKeyword, searchActive, objectFilterKey],
+  });
 
   const handleBrandClick = (brand) => {
     const returnSearch = location.search;
@@ -158,7 +134,6 @@ export default function useBrandsState({ isAdmin = false } = {}) {
         clearSearchAndFilters();
         setSearchKeyword("");
         setSearchActive(false);
-        setSearchFacets(null);
         syncedKeywordRef.current = "";
         return;
       }
@@ -180,15 +155,6 @@ export default function useBrandsState({ isAdmin = false } = {}) {
 
   const loadingBrands = searchActive ? combinedSearch.loading : brandsList.loading;
 
-  const showObjectFilters =
-    searchActive &&
-    Boolean(searchKeyword) &&
-    searchFacets != null &&
-    ((searchFacets.categories?.length ?? 0) > 0 ||
-      (searchFacets.brands?.length ?? 0) > 0 ||
-      (searchFacets.scales?.length ?? 0) > 0 ||
-      (searchFacets.series?.length ?? 0) > 0);
-
   return useMemo(
     () => ({
       brands: brandsList.items,
@@ -204,7 +170,6 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       searchValue,
       brandsListPage: brandsList,
       combinedSearchPage: combinedSearch,
-      showObjectFilters,
       searchFacets,
       facetsLoading,
       selectedCategoryIds,
@@ -225,7 +190,6 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       brandModalOpen,
       searchActive,
       searchValue,
-      showObjectFilters,
       searchFacets,
       facetsLoading,
       selectedCategoryIds,

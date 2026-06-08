@@ -1,4 +1,4 @@
-@import "./styles/neumorphism.css";
+@import "./styles/neumorphism/index.css";
 
 body {
   margin: 0;

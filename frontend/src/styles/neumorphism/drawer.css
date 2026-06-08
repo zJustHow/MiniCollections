@@ -1,0 +1,77 @@
+/* neumorphism/drawer.css */
+/* ── DRAWER ───────────────────────────────────────────────── */
+/* No dimmed backdrop — drawer floats above the page with edge shadow */
+.ant-drawer-mask {
+  background: transparent !important;
+}
+
+.ant-drawer-content-wrapper {
+  box-shadow: var(--raised-lg);
+}
+
+.ant-drawer-content {
+  background: var(--neu-bg);
+}
+
+.neu-drawer-toolbar {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  min-height: var(--header-height);
+  padding-inline-start: 6px;
+  background: var(--neu-bg);
+  border-bottom: 1px solid var(--neu-border);
+  flex-shrink: 0;
+}
+
+.neu-drawer-body-content {
+  padding: 24px;
+}
+
+.ant-drawer-body:has(.neu-drawer-toolbar) {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ant-drawer-body:has(.neu-drawer-toolbar) .neu-drawer-body-content {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.neu-drawer-toolbar .header-slot-bar {
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+.neu-drawer-toolbar .header-slot-actions-end {
+  padding-inline-end: 6px;
+}
+
+.neu-drawer-toolbar .neu-header-bar-btn {
+  flex: 0 0 auto;
+  align-self: stretch;
+  height: auto;
+  padding: 0 16px;
+}
+
+.confirm-delete-btn--header.neu-header-bar-btn,
+.header-slot-actions .confirm-delete-btn--header.neu-header-bar-btn,
+.neu-drawer-toolbar .confirm-delete-btn--header.neu-header-bar-btn {
+  flex: 0 0 var(--neu-header-action-btn-width);
+  width: var(--neu-header-action-btn-width);
+  min-width: var(--neu-header-action-btn-width);
+  max-width: var(--neu-header-action-btn-width);
+  padding-inline: 0;
+  overflow: hidden;
+}
+
+.ant-drawer-body {
+  background: var(--neu-bg);
+}
+

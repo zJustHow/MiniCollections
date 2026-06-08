@@ -197,8 +197,7 @@ public class GroupService {
 
     @Transactional
     public GroupDto createGroup(Long userId, String name, String imageUrl) {
-        int current = groupRepository.findByUserId(userId)
-                .map(List::size).orElse(0);
+        long current = groupRepository.countByUserId(userId);
         if (current >= maxGroupsPerUser) {
             throw new LimitExceededException("error.group.limit", maxGroupsPerUser);
         }
@@ -308,8 +307,7 @@ public class GroupService {
             throw new NoPermissionException("No permission to add user object to this group");
         }
 
-        int current = userObjectRepository.findByGroupId(groupId)
-                .map(List::size).orElse(0);
+        long current = userObjectRepository.countByGroupId(groupId);
         if (current >= maxObjectsPerGroup) {
             throw new LimitExceededException("error.object.limit", maxObjectsPerGroup);
         }

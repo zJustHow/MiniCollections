@@ -1,0 +1,23 @@
+/* neumorphism/scrollbar.css */
+/* ── SCROLLBAR ────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--neu-bg);
+  border-radius: 0;
+  box-shadow: var(--inset);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neu-text-2), #93a5be);
+  border-radius: 0;
+  border: 2px solid var(--neu-bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #93a5be, var(--neu-text-2));
+}
+

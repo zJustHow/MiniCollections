@@ -1,0 +1,57 @@
+/* neumorphism/nameplate.css */
+/* ── CARD COVER nameplate ─────────────────────────────────── */
+.neu-nameplate {
+  --neu-nameplate-subtitle-slot: calc(var(--neu-fs-11) * 1.25 + 2px);
+  padding: 6px 24px 12px;
+  min-width: 0;
+  background: transparent;
+  color: var(--neu-text);
+  font-weight: 400;
+  text-align: left;
+}
+
+.neu-nameplate--catalog {
+  display: flex;
+  flex-direction: column;
+}
+
+.neu-nameplate--catalog::before {
+  content: "";
+  display: block;
+  flex-shrink: 0;
+  height: var(--neu-nameplate-subtitle-slot);
+}
+
+.neu-nameplate--catalog .neu-nameplate-title {
+  white-space: nowrap;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+}
+
+.neu-nameplate-subtitle {
+  color: var(--neu-text-2);
+  font-size: var(--neu-fs-11);
+  font-weight: 400;
+  letter-spacing: 0.2px;
+  line-height: 1.25;
+  min-height: calc(1em * 1.25);
+  margin-bottom: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.neu-nameplate-title {
+  font-size: var(--neu-fs-15);
+  font-weight: 400;
+  letter-spacing: 0.3px;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+

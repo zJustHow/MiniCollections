@@ -28,4 +28,24 @@ public interface ObjectSubmissionRepository extends ListCrudRepository<ObjectSub
 
     @Query("SELECT COUNT(*) FROM object_submissions WHERE submitted_by_user_id = :userId AND submitted_at >= :since")
     int countBySubmittedByUserIdAndSubmittedAtAfter(Long userId, OffsetDateTime since);
+
+    @Query("SELECT COUNT(*) FROM object_submissions WHERE status = :status")
+    long countByStatus(@Param("status") String status);
+
+    @Query("""
+            SELECT COUNT(*) FROM object_submissions
+            WHERE (:status IS NULL OR status = :status)
+            """)
+    long countByStatusFilter(@Param("status") String status);
+
+    @Query("""
+            SELECT * FROM object_submissions
+            WHERE (:status IS NULL OR status = :status)
+            ORDER BY submitted_at DESC, id DESC
+            LIMIT :limit OFFSET :offset
+            """)
+    List<ObjectSubmissionEntity> findPageByStatus(
+            @Param("status") String status,
+            @Param("limit") int limit,
+            @Param("offset") int offset);
 }

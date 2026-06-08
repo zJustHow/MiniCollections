@@ -1,0 +1,282 @@
+/* neumorphism/date-picker.css */
+/* ── DATE PICKER ──────────────────────────────────────────── */
+
+/* trigger — raised → inset-sm → inset (same as Input) */
+.ant-picker {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  box-shadow: var(--raised-sm);
+  color: var(--neu-text);
+}
+
+.ant-picker-input > input {
+  color: var(--neu-text);
+  background: transparent;
+  box-shadow: none;
+}
+
+.ant-picker-input > input::placeholder {
+  color: var(--neu-text-2);
+}
+
+.ant-picker-suffix,
+.ant-picker-separator {
+  color: var(--neu-text-2);
+}
+
+.ant-picker-clear {
+  color: var(--neu-text-2);
+  background: transparent;
+  transition: color 0.15s ease;
+}
+
+.ant-picker-clear:hover {
+  color: var(--neu-accent);
+}
+
+.ant-picker-active-bar {
+  display: none;
+}
+
+/* dropdown panel — recessed groove shell (inset via ::after) */
+.ant-picker-dropdown .ant-picker-panel-container {
+  position: relative;
+  padding: 8px;
+}
+
+.ant-picker-panel {
+  background: transparent;
+  border: none;
+}
+
+.ant-picker-panel-layout {
+  background: transparent;
+}
+
+/* header */
+.ant-picker-dropdown .ant-picker-header {
+  border-bottom: none;
+  color: var(--neu-text);
+  padding: 0 12px 8px;
+}
+
+.ant-picker-dropdown .ant-picker-header-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-weight: 400;
+  color: var(--neu-dark);
+}
+
+/* header + footer tab buttons — neu-pressable-btn + neu-panel-tab-btn via NeuDatePicker */
+.ant-picker-dropdown .ant-picker-header-view .neu-panel-tab-btn,
+.ant-picker-dropdown .ant-picker-footer .neu-panel-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: unset;
+  height: auto;
+  margin: 0;
+  border-radius: 0;
+}
+
+/* year / month — beat antd `.ant-picker-header button { padding: 0 }` and
+   `.ant-picker-header-view > button:not(:first-child) { margin-inline-start }` */
+.ant-picker-dropdown
+  .ant-picker-header-view
+  .ant-picker-month-btn.neu-panel-tab-btn,
+.ant-picker-dropdown
+  .ant-picker-header-view
+  .ant-picker-year-btn.neu-panel-tab-btn {
+  padding: 8px 14px;
+  margin: 0 !important;
+  margin-inline-start: 0 !important;
+  font-size: var(--neu-fs-13);
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+/* nav arrows — compact square; beat antd `.ant-picker-header > button { min-width: 1.6em }` */
+.ant-picker-dropdown .ant-picker-header > button.neu-panel-tab-btn {
+  position: relative;
+  width: 32px;
+  height: 28px;
+  min-width: 0;
+  padding: 0 4px;
+  flex: none;
+  vertical-align: top;
+  color: var(--neu-text-2);
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-prev-btn.neu-panel-tab-btn {
+  padding-inline-start: 6px;
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-next-btn.neu-panel-tab-btn {
+  padding-inline-end: 6px;
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-prev-btn
+  > span,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-next-btn
+  > span,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-prev-btn
+  > span,
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-next-btn
+  > span {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-prev-btn
+  .ant-picker-prev-icon {
+  transform: translate(calc(-50% + 1px), -50%) rotate(-45deg);
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-next-btn
+  .ant-picker-next-icon {
+  transform: translate(calc(-50% - 1px), -50%) rotate(135deg);
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-prev-btn
+  .ant-picker-super-prev-icon {
+  width: 11px;
+  height: 11px;
+  transform: translate(calc(-50% + 1px), -50%) rotate(-45deg);
+}
+
+.ant-picker-dropdown
+  .ant-picker-header
+  > button.ant-picker-header-super-next-btn
+  .ant-picker-super-next-icon {
+  width: 11px;
+  height: 11px;
+  transform: translate(calc(-50% - 1px), -50%) rotate(135deg);
+}
+
+/* calendar grid */
+.ant-picker-content th {
+  color: var(--neu-text-2);
+  font-size: var(--neu-fs-11);
+  font-weight: 400;
+  letter-spacing: 0.4px;
+}
+
+.ant-picker-cell {
+  color: var(--neu-text-2);
+}
+
+.ant-picker-cell-in-view {
+  color: var(--neu-text);
+}
+
+/* calendar grid — layout; interaction via pickerPopup.js + pickerCellStyles.js */
+.ant-picker-dropdown .neu-picker-date-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0 auto;
+  font-size: var(--neu-fs-13);
+  font-weight: 400;
+  line-height: 1;
+  border-radius: 0;
+}
+
+.ant-picker-month-panel .neu-picker-date-cell,
+.ant-picker-year-panel .neu-picker-date-cell,
+.ant-picker-decade-panel .neu-picker-date-cell {
+  min-width: unset;
+  width: auto;
+  height: auto;
+  padding: 6px 12px;
+}
+
+.ant-picker-dropdown .ant-picker-cell-disabled .neu-picker-date-cell {
+  box-shadow: none;
+}
+
+.ant-picker-cell-in-range::before {
+  background: rgba(85, 146, 204, 0.12);
+}
+
+.ant-picker-cell-range-hover-start .ant-picker-cell-inner,
+.ant-picker-cell-range-hover-end .ant-picker-cell-inner,
+.ant-picker-cell-range-hover .ant-picker-cell-inner {
+  background: rgba(85, 146, 204, 0.1);
+}
+
+.ant-picker-cell-disabled {
+  opacity: 0.45;
+}
+
+/* time panel */
+.ant-picker-time-panel-column {
+  scrollbar-width: thin;
+  scrollbar-color: #93a5be var(--neu-bg);
+}
+
+.ant-picker-time-panel-column > li .ant-picker-time-panel-cell-inner {
+  border-radius: 0;
+  transition: var(--neu-btn-transition);
+}
+
+.ant-picker-time-panel-column
+  > li.ant-picker-time-panel-cell-selected
+  .ant-picker-time-panel-cell-inner {
+  background: var(--neu-accent);
+  color: #fff;
+  box-shadow: var(--inset-accent);
+}
+
+.ant-picker-time-panel-column > li .ant-picker-time-panel-cell-inner:hover {
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+
+/* footer */
+.ant-picker-footer {
+  border-top: none;
+  padding-top: 8px;
+}
+
+.ant-picker-ranges .ant-picker-preset > .ant-tag {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--neu-text);
+  transition: var(--neu-btn-transition);
+}
+
+.ant-picker-ranges .ant-picker-preset > .ant-tag:hover {
+  color: var(--neu-dark);
+  background: var(--neu-item-hover-bg);
+  box-shadow: var(--inset);
+}
+

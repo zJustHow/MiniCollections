@@ -1,38 +1,51 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useObjectFilterParams from "../hooks/useObjectFilterParams";
-import usePagedList from "../hooks/usePagedList";
+import useReturnSearchRef from "../hooks/useReturnSearchRef";
+import useObjectListPageSearch from "../hooks/useObjectListPageSearch";
+import useDualModePagedList from "../hooks/useDualModePagedList";
+import useSearchObjectFacets from "../hooks/useSearchObjectFacets";
 import { App } from "antd";
-import NeuCardGridSkeleton from "../components/NeuCardGridSkeleton";
 import NeuCard from "../components/NeuCard";
 import BrandObjectsPageHeader from "../components/pageHeaders/BrandObjectsPageHeader";
-import { NeuInput } from "../components/NeuFormControl";
-import ListPagination from "../components/ListPagination";
-import ObjectSearchFilterLayout from "../components/ObjectSearchFilterLayout";
-import ObjectSearchFilterPanel from "../components/ObjectSearchFilterPanel";
-import ObjectListPageLayout from "../components/ObjectListPageLayout";
-import SearchResultsSummary from "../components/SearchResultsSummary";
+import ObjectListPageShell from "../components/listPage/ObjectListPageShell";
+import NoSearchResults from "../components/listPage/NoSearchResults";
+import ObjectBrowseSection from "../components/listPage/ObjectBrowseSection";
+import ActivePagePagination from "../components/listPage/ActivePagePagination";
+import FilteredObjectSearchSection from "../components/listPage/FilteredObjectSearchSection";
+import ObjectSearchFilterPanelSlot from "../components/listPage/ObjectSearchFilterPanelSlot";
 import { filterKeyFromIds } from "../utils/filterParams";
-import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
-import BrandModal from "../components/ObjectList/modals/BrandModal";
-import BrandObjectModal from "../components/ObjectList/modals/BrandObjectModal";
+import {
+  buildFilterLayoutProps,
+  resolveFilterColumnState,
+} from "../utils/objectFilterUtils";
+import { withAddCardSlot } from "../utils/listPageUtils";
+import { createLazyModal } from "../utils/lazyModal";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import { pickBrandName } from "../utils/displayLocale";
+import { PAGE_SIZE } from "../utils/apiClient";
 import {
   getBrandByBrandId,
   getBrandObjectsPage,
   searchBrandObjectsByBrandIdPage,
   searchBrandObjectsByBrandIdFacets,
-  adminDeleteBrand,
-  PAGE_SIZE,
   recordBrandView,
-} from "../utils";
+} from "../utils/brandsApi";
+import { adminDeleteBrand } from "../utils/adminApi";
 import { scrollAppToTop } from "../utils/scroll";
 import { neuRem } from "../theme/fontScale";
 
-const { Search } = NeuInput;
+const SubmitObjectModal = createLazyModal(
+  () => import("../components/ObjectList/modals/SubmitObjectModal"),
+);
+const BrandModal = createLazyModal(
+  () => import("../components/ObjectList/modals/BrandModal"),
+);
+const BrandObjectModal = createLazyModal(
+  () => import("../components/ObjectList/modals/BrandObjectModal"),
+);
 
 export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const { brandId } = useParams();
@@ -55,31 +68,38 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     onToggleSeries,
   } = useObjectFilterParams({ includeBrands: false });
   const [brand, setBrand] = useState(location.state?.brand ?? null);
-  const [searchActive, setSearchActive] = useState(
-    Boolean((searchValue ?? "").trim()),
-  );
-  const [searchKeyword, setSearchKeyword] = useState(
-    (searchValue ?? "").trim(),
-  );
-  const [draftQuery, setDraftQuery] = useState(searchValue);
-  const [searchFacets, setSearchFacets] = useState(null);
-  const [facetsLoading, setFacetsLoading] = useState(false);
-  const syncedKeywordRef = useRef(searchKeyword);
-  const returnSearchRef = useRef(location.state?.returnSearch ?? "");
+  const returnSearchRef = useReturnSearchRef(location.state?.returnSearch);
 
-  useEffect(() => {
-    if (location.state?.returnSearch != null) {
-      returnSearchRef.current = location.state.returnSearch;
+  const onSearchCleared = useCallback(() => {
+    if (
+      selectedCategoryIds.length > 0 ||
+      selectedScaleIds.length > 0 ||
+      selectedSeriesIds.length > 0
+    ) {
+      clearObjectFilters();
     }
-  }, [location.state?.returnSearch]);
+  }, [
+    selectedCategoryIds,
+    selectedScaleIds,
+    selectedSeriesIds,
+    clearObjectFilters,
+  ]);
 
-  const [submitModalVisible, setSubmitModalVisible] = useState(false);
-
-  const [brandModalOpen, setBrandModalOpen] = useState(false);
-  const [editingBrand, setEditingBrand] = useState(null);
-
-  const [brandObjectModalOpen, setBrandObjectModalOpen] = useState(false);
-  const [editingBrandObject, setEditingBrandObject] = useState(null);
+  const {
+    searchActive,
+    searchKeyword,
+    draftQuery,
+    runSearch,
+    handleDraftChange,
+  } = useObjectListPageSearch({
+    entityKey: brandId,
+    searchValue,
+    applySearch: setSearchQueryClearingFilters,
+    clearSearch: clearSearchAndFilters,
+    onFiltersReset: clearObjectFilters,
+    onSearchCleared,
+    resetFiltersOnKeywordChange: true,
+  });
 
   const objectFilterKey = filterKeyFromIds(
     selectedCategoryIds,
@@ -88,19 +108,17 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     selectedSeriesIds,
   );
 
-  const objectsList = usePagedList(
-    ({ size, page }) => getBrandObjectsPage(brandId, { size, page }),
-    {
-      resetKey: `brand-objects:${brandId}`,
-      enabled: !searchActive,
-      pageSize: PAGE_SIZE,
-      pageParamKey: "page",
-      reservedFirstPageSlots: isAdmin ? 1 : 0,
-    },
-  );
-
-  const objectsSearch = usePagedList(
-    ({ size, page }) =>
+  const { activePage, displayObjects, objectsSearch } = useDualModePagedList({
+    entityKey: brandId,
+    searchActive,
+    searchKeyword,
+    pageSize: PAGE_SIZE,
+    listResetKey: "brand-objects",
+    searchResetKey: "brand-objects-search",
+    searchResetExtra: `:${objectFilterKey}`,
+    fetchListPage: ({ size, page }) =>
+      getBrandObjectsPage(brandId, { size, page }),
+    fetchSearchPage: ({ size, page }) =>
       searchBrandObjectsByBrandIdPage(brandId, searchKeyword, {
         size,
         page,
@@ -108,35 +126,44 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         scaleIds: selectedScaleIds,
         seriesIds: selectedSeriesIds,
       }),
-    {
-      resetKey: `brand-objects-search:${brandId}:${searchKeyword}:${objectFilterKey}`,
-      enabled: searchActive && Boolean(searchKeyword),
-      pageSize: PAGE_SIZE,
-      pageParamKey: "page",
-    },
+    listOptions: { reservedFirstPageSlots: isAdmin ? 1 : 0 },
+  });
+
+  const { searchFacets, facetsLoading } = useSearchObjectFacets({
+    enabled: searchActive && Boolean(searchKeyword),
+    fetchFacets: () =>
+      searchBrandObjectsByBrandIdFacets(brandId, searchKeyword, {
+        categoryIds: selectedCategoryIds,
+        scaleIds: selectedScaleIds,
+        seriesIds: selectedSeriesIds,
+      }),
+    deps: [brandId, searchKeyword, objectFilterKey],
+  });
+
+  const { showFilterColumn } = resolveFilterColumnState({
+    searchActive,
+    searchKeyword,
+    searchFacets,
+    facetsLoading,
+    includeBrands: false,
+  });
+
+  const listData = withAddCardSlot(
+    displayObjects,
+    isAdmin && !searchActive && activePage.page === 0,
   );
-
-  const activePage = searchActive ? objectsSearch : objectsList;
-  const displayObjects = activePage.items;
-  const showAddCard =
-    isAdmin && !searchActive && activePage.page === 0;
-  const listData = showAddCard
-    ? [{ id: "__add__" }, ...displayObjects]
-    : displayObjects;
-
-  const showObjectFilters =
-    searchActive &&
-    Boolean(searchKeyword) &&
-    searchFacets != null &&
-    ((searchFacets.categories?.length ?? 0) > 0 ||
-      (searchFacets.scales?.length ?? 0) > 0 ||
-      (searchFacets.series?.length ?? 0) > 0);
-
-  const showFilterColumn = showObjectFilters || (searchActive && facetsLoading);
 
   const showSearchObjectsSection =
     searchActive &&
-    (displayObjects.length > 0 || showFilterColumn || objectsSearch.loading);
+    (displayObjects.length > 0 ||
+      showFilterColumn ||
+      objectsSearch.loading);
+
+  const [submitModalVisible, setSubmitModalVisible] = useState(false);
+  const [brandModalOpen, setBrandModalOpen] = useState(false);
+  const [editingBrand, setEditingBrand] = useState(null);
+  const [brandObjectModalOpen, setBrandObjectModalOpen] = useState(false);
+  const [editingBrandObject, setEditingBrandObject] = useState(null);
 
   useEffect(() => {
     if (brand?.id === Number(brandId)) return;
@@ -152,65 +179,6 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     sessionStorage.setItem(key, "1");
     recordBrandView(brandId);
   }, [brandId, isAdmin]);
-
-  useEffect(() => {
-    const keyword = (searchValue ?? "").trim();
-    if (keyword) {
-      if (keyword !== syncedKeywordRef.current) {
-        clearObjectFilters();
-        syncedKeywordRef.current = keyword;
-      }
-      setDraftQuery(keyword);
-      setSearchKeyword(keyword);
-      setSearchActive(true);
-    } else {
-      syncedKeywordRef.current = "";
-      setSearchKeyword("");
-      setSearchActive(false);
-      setSearchFacets(null);
-      if (
-        selectedCategoryIds.length > 0 ||
-        selectedScaleIds.length > 0 ||
-        selectedSeriesIds.length > 0
-      ) {
-        clearObjectFilters();
-      }
-    }
-  }, [brandId, searchValue]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!searchActive || !searchKeyword) {
-      setSearchFacets(null);
-      return undefined;
-    }
-
-    let cancelled = false;
-    setFacetsLoading(true);
-    searchBrandObjectsByBrandIdFacets(brandId, searchKeyword, {
-      categoryIds: selectedCategoryIds,
-      scaleIds: selectedScaleIds,
-      seriesIds: selectedSeriesIds,
-    })
-      .then((data) => {
-        if (!cancelled) {
-          setSearchFacets(data);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setSearchFacets({ total: 0, categories: [], brands: [], scales: [], series: [] });
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setFacetsLoading(false);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [brandId, searchKeyword, objectFilterKey]);
 
   const handleAdminDeleteBrand = async () => {
     if (!brand) return;
@@ -247,26 +215,35 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     activePage.loadPage(activePage.page);
   }, [activePage]);
 
-  const runSearch = useCallback(
-    (keyword) => {
-      const trimmed = keyword.trim();
-      if (!trimmed) {
-        clearSearchAndFilters();
-        setSearchActive(false);
-        setSearchKeyword("");
-        syncedKeywordRef.current = "";
-        return;
-      }
-      setSearchQueryClearingFilters(trimmed);
-      syncedKeywordRef.current = trimmed;
-      setSearchKeyword(trimmed);
-      setSearchActive(true);
-    },
-    [clearSearchAndFilters, setSearchQueryClearingFilters],
-  );
-
   const objectCardBrandSubtitle = (obj) =>
     pickBrandName(obj, locale) || brand?.name;
+
+  const renderObjectCard = (item) => (
+    <NeuCard
+      key={item.id}
+      name={item.name}
+      subtitle={objectCardBrandSubtitle(item)}
+      nameplateVariant="object"
+      imageUrl={item.image_url}
+      onClick={() =>
+        navigate(`/brands/${brandId}/objects/${item.id}`, {
+          state: { brandObject: item, brand },
+        })
+      }
+    />
+  );
+
+  const filterLayoutProps = buildFilterLayoutProps({
+    showFilterColumn,
+    searchFacets,
+    facetsLoading,
+    selectedCategoryIds,
+    selectedScaleIds,
+    selectedSeriesIds,
+    onToggleCategory,
+    onToggleScale,
+    onToggleSeries,
+  });
 
   const spinning = searchActive
     ? objectsSearch.loading || facetsLoading
@@ -274,180 +251,69 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
 
   return (
     <div>
-      <div style={{ position: "relative", minHeight: 200, width: "100%" }}>
-        <ObjectListPageLayout
-            showFilterColumn={searchActive && showFilterColumn}
-            summary={
-              <SearchResultsSummary
-                active={searchActive}
-                keyword={searchKeyword}
-                count={activePage.totalElements}
-                exact={activePage.totalExact}
-                loading={searchActive && activePage.loading}
-              />
-            }
-            search={
-            <Search
-              id="brand-objects-search"
-              name="brandObjectsSearch"
-              placeholder={t("searchModels")}
-              allowClear
-              value={draftQuery}
-              onChange={(e) => {
-                const v = e.target.value;
-                setDraftQuery(v);
-                if (v === "") {
-                  clearSearchAndFilters();
-                  setSearchActive(false);
-                  setSearchKeyword("");
-                  syncedKeywordRef.current = "";
-                }
-              }}
-              onSearch={(v) => {
-                const keyword = (v ?? "").trim();
-                setDraftQuery(keyword);
-                runSearch(keyword);
-              }}
-            />
-          }
-          filter={
-            searchActive && showFilterColumn ? (
-              <ObjectSearchFilterPanel
-                facets={searchFacets}
-                loading={facetsLoading}
-                selectedCategoryIds={selectedCategoryIds}
-                selectedBrandIds={[]}
-                selectedScaleIds={selectedScaleIds}
-                selectedSeriesIds={selectedSeriesIds}
-                onToggleCategory={onToggleCategory}
-                onToggleBrand={() => {}}
-                onToggleScale={onToggleScale}
-                onToggleSeries={onToggleSeries}
-              />
-            ) : null
-          }
-        >
+      <ObjectListPageShell
+        framed
+        showFilterColumn={searchActive && showFilterColumn}
+        searchActive={searchActive}
+        searchKeyword={searchKeyword}
+        resultPage={activePage}
+        searchFieldId="brand-objects-search"
+        searchFieldName="brandObjectsSearch"
+        searchPlaceholder={t("searchModels")}
+        draftQuery={draftQuery}
+        onDraftChange={handleDraftChange}
+        onSearch={runSearch}
+        filter={
+          <ObjectSearchFilterPanelSlot
+            visible={searchActive && showFilterColumn}
+            facets={searchFacets}
+            loading={facetsLoading}
+            selectedCategoryIds={selectedCategoryIds}
+            selectedScaleIds={selectedScaleIds}
+            selectedSeriesIds={selectedSeriesIds}
+            onToggleCategory={onToggleCategory}
+            onToggleScale={onToggleScale}
+            onToggleSeries={onToggleSeries}
+          />
+        }
+      >
           {searchActive ? (
             <>
-              {spinning ? (
-                <ObjectSearchFilterLayout
-                  showFilterColumn={showFilterColumn}
-                  facets={searchFacets}
-                  loading={facetsLoading}
-                  selectedCategoryIds={selectedCategoryIds}
-                  selectedBrandIds={[]}
-                  selectedScaleIds={selectedScaleIds}
-                  selectedSeriesIds={selectedSeriesIds}
-                  onToggleCategory={onToggleCategory}
-                  onToggleBrand={() => {}}
-                  onToggleScale={onToggleScale}
-                  onToggleSeries={onToggleSeries}
-                >
-                  <NeuCardGridSkeleton
-                    variant="object"
-                    withFilter={showFilterColumn}
-                    className="neu-search-section-grid"
-                  />
-                </ObjectSearchFilterLayout>
-              ) : showSearchObjectsSection ? (
-                <ObjectSearchFilterLayout
-                  showFilterColumn={showFilterColumn}
-                  facets={searchFacets}
-                  loading={facetsLoading}
-                  selectedCategoryIds={selectedCategoryIds}
-                  selectedBrandIds={[]}
-                  selectedScaleIds={selectedScaleIds}
-                  selectedSeriesIds={selectedSeriesIds}
-                  onToggleCategory={onToggleCategory}
-                  onToggleBrand={() => {}}
-                  onToggleScale={onToggleScale}
-                  onToggleSeries={onToggleSeries}
-                >
-                  {displayObjects.map((item) => (
-                    <NeuCard
-                      key={item.id}
-                      name={item.name}
-                      subtitle={objectCardBrandSubtitle(item)}
-                      nameplateVariant="object"
-                      imageUrl={item.image_url}
-                      onClick={() =>
-                        navigate(`/brands/${brandId}/objects/${item.id}`, {
-                          state: { brandObject: item, brand },
-                        })
-                      }
-                    />
-                  ))}
-                </ObjectSearchFilterLayout>
-              ) : (
-                !objectsSearch.loading && (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "var(--neu-text-2)",
-                      padding: "32px 0",
-                    }}
-                  >
-                    {t("noSearchResults")}
-                  </div>
-                )
+              <FilteredObjectSearchSection
+                filterLayoutProps={filterLayoutProps}
+                loading={spinning}
+                showContent={showSearchObjectsSection}
+              >
+                {displayObjects.map(renderObjectCard)}
+              </FilteredObjectSearchSection>
+              {!spinning && !showSearchObjectsSection && !objectsSearch.loading && (
+                <NoSearchResults />
               )}
-              <ListPagination
-                page={activePage.page}
-                totalElements={activePage.totalElements}
-                totalPages={activePage.totalPages}
-                totalExact={activePage.totalExact}
-                loading={activePage.loading}
-                onPageChange={activePage.onPageChange}
-                pageSize={PAGE_SIZE}
-              />
+              <ActivePagePagination activePage={activePage} />
             </>
           ) : (
             <>
-              {spinning ? (
-                <NeuCardGridSkeleton variant="object" />
-              ) : (
-                <div className="neu-list-page-browse-grid">
-                  {listData.map((item) =>
-                    item.id === "__add__" ? (
-                      <NeuCard
-                        key="__add__"
-                        add
-                        name={t("addBrandObject")}
-                        onClick={() => {
-                          setEditingBrandObject(null);
-                          setBrandObjectModalOpen(true);
-                        }}
-                      />
-                    ) : (
-                      <NeuCard
-                        key={item.id}
-                        name={item.name}
-                        subtitle={objectCardBrandSubtitle(item)}
-                        nameplateVariant="object"
-                        imageUrl={item.image_url}
-                        onClick={() =>
-                          navigate(`/brands/${brandId}/objects/${item.id}`, {
-                            state: { brandObject: item, brand },
-                          })
-                        }
-                      />
-                    ),
-                  )}
-                </div>
-              )}
-              <ListPagination
-                page={activePage.page}
-                totalElements={activePage.totalElements}
-                totalPages={activePage.totalPages}
-                totalExact={activePage.totalExact}
-                loading={activePage.loading}
-                onPageChange={activePage.onPageChange}
-                pageSize={PAGE_SIZE}
-              />
+              <ObjectBrowseSection loading={spinning}>
+                {listData.map((item) =>
+                  item.id === "__add__" ? (
+                    <NeuCard
+                      key="__add__"
+                      add
+                      name={t("addBrandObject")}
+                      onClick={() => {
+                        setEditingBrandObject(null);
+                        setBrandObjectModalOpen(true);
+                      }}
+                    />
+                  ) : (
+                    renderObjectCard(item)
+                  ),
+                )}
+              </ObjectBrowseSection>
+              <ActivePagePagination activePage={activePage} />
             </>
           )}
-          </ObjectListPageLayout>
-      </div>
+      </ObjectListPageShell>
 
       {authed && (
         <div

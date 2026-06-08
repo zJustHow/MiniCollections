@@ -70,7 +70,8 @@ export {
   getMySubmissionsPage,
   submitFeedback,
   deleteMySubmission,
-  getAdminSubmissions,
+  getAdminSubmissionCounts,
+  getAdminSubmissionsPage,
   approveSubmission,
   rejectSubmission,
 } from "./utils/submissionsApi";

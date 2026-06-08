@@ -1,0 +1,147 @@
+/* neumorphism/neu-btn.css */
+/* ── NEU BTN ──────────────────────────────────────────────── */
+.ant-btn.neu-btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: var(--neu-control-height);
+  padding-block: 0;
+  padding-inline: 15px;
+  font-size: var(--neu-fs-14);
+  line-height: 1.5714285714285714;
+  position: relative;
+  transition: var(--neu-btn-transition);
+  transform: scale(1);
+  border: none !important;
+}
+
+.ant-btn.neu-btn.ant-btn-lg {
+  height: var(--neu-control-height-lg);
+  padding-inline: 15px;
+  font-size: var(--neu-fs-16);
+}
+
+.ant-btn.neu-btn.ant-btn-sm {
+  height: var(--neu-control-height-sm);
+  padding-inline: 7px;
+  font-size: var(--neu-fs-14);
+}
+
+.ant-btn.neu-btn.ant-btn-icon-only:not(.neu-btn--pagination) {
+  width: var(--neu-control-height);
+  min-width: var(--neu-control-height);
+  padding-inline: 0;
+}
+
+.ant-btn.neu-btn.ant-btn-icon-only.ant-btn-lg:not(.neu-btn--pagination) {
+  width: var(--neu-control-height-lg);
+  min-width: var(--neu-control-height-lg);
+}
+
+.ant-btn.neu-btn.ant-btn-icon-only.ant-btn-sm:not(.neu-btn--pagination) {
+  width: var(--neu-control-height-sm);
+  min-width: var(--neu-control-height-sm);
+}
+
+.ant-btn.neu-btn:hover:not([disabled]):not(:active):not(
+    .neu-btn--pagination-current
+  ) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn.neu-btn:active:not([disabled]) {
+  box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn.neu-btn:focus-visible:not(:active):not(.neu-btn--pagination-current) {
+  outline: none;
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn.neu-btn[disabled],
+.ant-btn.neu-btn.ant-btn-disabled,
+.ant-btn.neu-btn[disabled]:hover,
+.ant-btn.neu-btn.ant-btn-disabled:hover {
+  transform: none;
+  cursor: not-allowed;
+}
+
+.ant-btn.neu-btn.ant-btn-default:hover:not([disabled]):not(:active):not(
+    .neu-btn--pagination-current
+  ) {
+  color: var(--neu-text-2);
+  border-color: var(--neu-bg);
+}
+
+.ant-btn.neu-btn.ant-btn-default:active:not([disabled]) {
+  color: var(--neu-accent);
+  border-color: var(--neu-bg);
+}
+
+.ant-btn.neu-btn.ant-btn-primary:hover:not([disabled]):not(:active) {
+  background: var(--neu-accent-light);
+  color: #fff;
+  border-color: var(--neu-accent-light);
+  box-shadow: var(--inset-accent-sm);
+}
+
+.ant-btn.neu-btn.ant-btn-primary:active:not([disabled]) {
+  background: var(--neu-accent-light);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: var(--neu-accent-light);
+  box-shadow: var(--inset-accent);
+}
+
+.ant-btn.neu-btn.ant-btn-primary:focus-visible:not(:active) {
+  background: var(--neu-accent);
+  color: #fff;
+  border-color: var(--neu-accent);
+  box-shadow: var(--inset-accent-sm);
+}
+
+.ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous:hover:not(
+    [disabled]
+  ):not(:active) {
+  background: var(--neu-danger-light);
+  color: #fff;
+  border-color: var(--neu-danger-light);
+  box-shadow: var(--inset-danger-sm);
+}
+
+.ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not(
+    [disabled]
+  ) {
+  background: var(--neu-danger-light);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: var(--neu-danger-light);
+  box-shadow: var(--inset-danger);
+}
+
+.ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous:focus-visible:not(
+    :active
+  ) {
+  background: var(--neu-danger);
+  color: #fff;
+  border-color: var(--neu-danger);
+  box-shadow: var(--inset-danger-sm);
+}
+
+.ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous[disabled],
+.ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous.ant-btn-disabled,
+.ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous[disabled]:hover,
+.ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous.ant-btn-disabled:hover {
+  box-shadow: var(--inset-danger);
+}
+
+.ant-btn.neu-btn.neu-btn--pagination-current,
+.ant-btn.neu-btn.neu-btn--pagination-current:hover:not([disabled]) {
+  color: var(--neu-accent);
+  box-shadow: var(--inset);
+  transform: scale(1);
+}
+

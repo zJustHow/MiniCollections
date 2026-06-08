@@ -12,21 +12,28 @@ import DetailImage from "../components/DetailImage";
 import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";
 import RelatedModelCard from "../components/RelatedModelCard";
 import RelatedModelCardSkeleton from "../components/RelatedModelCardSkeleton";
-import EditUserObjectModal from "../components/ObjectList/modals/EditUserObjectModal";
+import ObjectDetailPageSkeleton from "../components/ObjectDetailPageSkeleton";
+import { createLazyModal } from "../utils/lazyModal";
+
+const EditUserObjectModal = createLazyModal(
+  () => import("../components/ObjectList/modals/EditUserObjectModal"),
+);
 import useRemoteModelSelectSearch from "../hooks/useRemoteModelSelectSearch";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
+import { resolveMediaUrl } from "../utils/constants";
+import { getBrandObjectById } from "../utils/brandsApi";
 import {
   getGroupById,
   getUserObjectById,
-  getBrandObjectById,
   updateUserObject,
   deleteUserObject,
+} from "../utils/groupsApi";
+import {
   purchasePriceFromFormValue,
   displayPurchasePriceFromObject,
-  discardUploadedImage,
-  resolveMediaUrl,
-} from "../utils";
+} from "../utils/format";
+import { discardUploadedImage } from "../utils/uploadsApi";
 
 const { useBreakpoint } = Grid;
 
@@ -42,6 +49,7 @@ export default function GroupObjectDetailPage() {
   const [userObject, setUserObject] = useState(
     location.state?.userObject ?? null,
   );
+  const [loading, setLoading] = useState(!location.state?.userObject);
   const [group, setGroup] = useState(location.state?.group ?? null);
   const returnSearchRef = useRef(location.state?.returnSearch ?? "");
 
@@ -68,11 +76,14 @@ export default function GroupObjectDetailPage() {
   });
 
   const fetchUserObject = useCallback(async () => {
+    setLoading(true);
     try {
       const found = await getUserObjectById(groupId, objectId);
       setUserObject(found);
     } catch (err) {
       message.error(err?.message || t("failedToLoadGroupModels"));
+    } finally {
+      setLoading(false);
     }
   }, [groupId, objectId, message, t]);
 
@@ -247,6 +258,10 @@ export default function GroupObjectDetailPage() {
     ? (userObject.otherNotes ?? userObject.other_notes)
     : null;
   const imageUrl = userObject?.imageUrl ?? userObject?.image_url ?? null;
+
+  if (loading && !userObject) {
+    return <ObjectDetailPageSkeleton showRelatedModel />;
+  }
 
   return (
     <div>

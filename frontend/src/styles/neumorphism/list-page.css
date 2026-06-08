@@ -1,0 +1,326 @@
+/* neumorphism/list-page.css */
+/* ── SEARCH FILTER PANEL (matches model card width in 4-col grid) ── */
+.neu-filter-panel {
+  padding: 18px 14px;
+  width: 100%;
+  min-width: 0;
+  align-self: flex-start;
+  position: sticky;
+  top: 16px;
+}
+
+.neu-filter-panel--drawer {
+  padding: 0;
+  position: static;
+  top: auto;
+}
+
+.neu-filter-mobile-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.neu-filter-mobile-bar-summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.neu-filter-mobile-bar-actions {
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.neu-filter-panel-title {
+  font-size: var(--neu-fs-14);
+  font-weight: 400;
+  color: var(--neu-text);
+  margin-bottom: 14px;
+  letter-spacing: 0.3px;
+}
+
+.neu-filter-section-title {
+  font-size: var(--neu-fs-11);
+  font-weight: 400;
+  color: var(--neu-text-2);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.neu-filter-section {
+  margin-bottom: 16px;
+}
+
+.neu-filter-section:last-child {
+  margin-bottom: 0;
+}
+
+.neu-filter-options-inset {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: 148px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 5px 15px;
+  border-radius: 0;
+  background: var(--neu-bg);
+  box-shadow: var(--inset);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #93a5be var(--neu-bg);
+}
+
+.neu-filter-options-inset::-webkit-scrollbar {
+  width: 6px;
+}
+
+.neu-filter-options-inset::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 0;
+}
+
+.neu-filter-options-inset::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #93a5be, var(--neu-text-2));
+  border-radius: 0;
+  border: 1px solid var(--neu-bg);
+}
+
+.neu-filter-options-inset .neu-panel-tab-btn.neu-filter-tab-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin-bottom: 5px;
+  font-size: var(--neu-fs-13);
+  font-weight: 400;
+  text-align: left;
+  flex-shrink: 0;
+}
+
+.neu-filter-options-inset .neu-filter-tab-option:last-child {
+  margin-bottom: 0;
+}
+
+.neu-filter-options-inset .neu-filter-tab-option.active,
+.neu-filter-options-inset .neu-filter-tab-option:active {
+  font-weight: 400;
+}
+
+.neu-filter-tab-option .neu-filter-option-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+.neu-filter-tab-option .neu-filter-option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.neu-filter-tab-option .neu-filter-option-count {
+  color: var(--neu-text-2);
+  flex-shrink: 0;
+  font-size: var(--neu-fs-12);
+  font-weight: 400;
+}
+
+.neu-filter-tab-option.active .neu-filter-option-count {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ── LIST PAGE LAYOUT (toolbar full width; filter col 1 + cards cols 2–4) ── */
+.neu-list-page-layout {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-areas: "content content content content";
+  gap: 16px;
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+}
+
+.neu-list-page-layout--with-toolbar {
+  grid-template-areas:
+    "toolbar toolbar toolbar toolbar"
+    "content content content content";
+}
+
+.neu-list-page-layout--with-toolbar.neu-list-page-layout--with-filter {
+  grid-template-areas:
+    "toolbar toolbar toolbar toolbar"
+    "filter content content content";
+}
+
+.neu-list-page-layout--with-filter:not(.neu-list-page-layout--with-toolbar) {
+  grid-template-areas: "filter content content content";
+}
+
+.neu-list-page-toolbar {
+  grid-area: toolbar;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.neu-list-page-summary,
+.neu-search-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--neu-fs-13);
+  color: var(--neu-text-2);
+}
+
+.neu-list-page-filter {
+  grid-area: filter;
+  min-width: 0;
+}
+
+.neu-list-page-content {
+  grid-area: content;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Spin wrappers shrink-wrap to one card unless forced full width */
+#main-content .ant-spin-nested-loading,
+#main-content .ant-spin-container {
+  width: 100%;
+  min-width: 0;
+}
+
+.neu-list-page-search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.neu-list-page-search .ant-input-group-wrapper.ant-input-search {
+  width: 100%;
+  max-width: 100%;
+}
+
+@media (min-width: 1200px) {
+  .neu-list-page-search {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .neu-list-page-search .ant-input-group-wrapper.ant-input-search {
+    width: 260px;
+  }
+}
+
+.neu-list-page-browse-grid,
+.neu-list-page-content > .neu-search-objects-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.neu-list-page-layout--with-filter .neu-list-page-browse-grid,
+.neu-list-page-layout--with-filter .neu-search-objects-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.neu-list-page-layout--stacked {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+}
+
+.neu-list-page-layout--stacked .neu-list-page-browse-grid,
+.neu-list-page-layout--stacked .neu-search-objects-cards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.neu-search-objects-cards {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.neu-search-section-label {
+  grid-column: 1 / -1;
+  font-size: var(--neu-fs-13);
+  font-weight: 400;
+  color: var(--neu-text-2);
+  margin-bottom: -4px;
+}
+
+.neu-search-section-label--spaced {
+  margin-top: 8px;
+}
+
+.neu-search-section-grid {
+  display: contents;
+}
+
+.neu-search-section-divider {
+  grid-column: 1 / -1;
+  margin: 8px 0;
+  border: none;
+  border-top: 1px solid var(--neu-border);
+}
+
+@media (max-width: 1199px) {
+  .neu-list-page-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .neu-list-page-search {
+    width: 100%;
+  }
+}
+
+@media (max-width: 992px) {
+  .neu-list-page-layout:not(.neu-list-page-layout--stacked) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "content";
+  }
+
+  .neu-list-page-layout--with-toolbar:not(.neu-list-page-layout--stacked) {
+    grid-template-areas:
+      "toolbar"
+      "content";
+  }
+
+  .neu-list-page-layout--with-toolbar.neu-list-page-layout--with-filter:not(
+      .neu-list-page-layout--stacked
+    ) {
+    grid-template-areas:
+      "toolbar"
+      "filter"
+      "content";
+  }
+
+  .neu-list-page-layout--with-filter:not(
+      .neu-list-page-layout--with-toolbar
+    ):not(.neu-list-page-layout--stacked) {
+    grid-template-areas:
+      "filter"
+      "content";
+  }
+
+  .neu-list-page-browse-grid,
+  .neu-list-page-content > .neu-search-objects-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+

@@ -1,0 +1,98 @@
+/* neumorphism/segmented-controls.css */
+/* ── SEGMENTED ────────────────────────────────────────────── */
+.ant-segmented {
+  background: var(--neu-bg);
+  border-radius: 0;
+  box-shadow: var(--inset);
+  padding: 3px;
+  border: none;
+}
+
+.ant-segmented-item {
+  color: var(--neu-text-2);
+  border-radius: 0;
+  font-weight: 400;
+  font-size: var(--neu-fs-13);
+  transition: var(--neu-btn-transition);
+}
+
+.ant-segmented-item:hover:not(.ant-segmented-item-selected) {
+  color: var(--neu-text);
+}
+
+.ant-segmented-item-selected {
+  color: var(--neu-accent);
+}
+
+.ant-segmented-item-label {
+  padding: 0 14px;
+}
+
+.ant-segmented-thumb {
+  background: var(--neu-bg);
+  box-shadow: var(--inset);
+  border-radius: 0;
+  transition: var(--neu-btn-transition);
+}
+
+/* ── RADIO & CHECKBOX ─────────────────────────────────────── */
+.ant-radio-wrapper,
+.ant-checkbox-wrapper {
+  color: var(--neu-text);
+}
+
+.ant-radio-inner,
+.ant-checkbox-inner {
+  background: var(--neu-bg);
+  border: none;
+  box-shadow: var(--inset);
+}
+
+.ant-radio-checked .ant-radio-inner,
+.ant-checkbox-checked .ant-checkbox-inner {
+  background: var(--neu-accent);
+  border-color: var(--neu-accent);
+  box-shadow: var(--raised-sm);
+}
+
+.ant-radio-button-wrapper {
+  background: var(--neu-bg);
+  border: none;
+  color: var(--neu-text-2);
+  font-weight: 400;
+  box-shadow: var(--raised-sm);
+}
+
+.ant-radio-button-wrapper:not(:first-child)::before {
+  display: none;
+}
+
+.ant-radio-button-wrapper:hover:not(.ant-radio-button-wrapper-checked):not(
+    .ant-radio-button-wrapper-disabled
+  ) {
+  color: var(--neu-text);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-radio-button-wrapper:active:not(.ant-radio-button-wrapper-checked):not(
+    .ant-radio-button-wrapper-disabled
+  ) {
+  box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-radio-button-wrapper-checked:not(.ant-radio-button-wrapper-disabled) {
+  color: var(--neu-accent);
+  background: var(--neu-bg);
+  box-shadow: var(--inset);
+}
+
+.ant-radio-button-wrapper:first-child {
+  border-radius: 0 0 0 0;
+}
+
+.ant-radio-button-wrapper:last-child {
+  border-radius: 0 0 0 0;
+}
+

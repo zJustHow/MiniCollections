@@ -1,0 +1,19 @@
+/* neumorphism/empty.css */
+/* ── EMPTY ────────────────────────────────────────────────── */
+.ant-empty-description {
+  color: var(--neu-text-2);
+}
+
+.ant-empty-img-default-ellipse {
+  fill: rgba(184, 185, 190, 0.25);
+}
+
+.ant-empty-img-default-path-1 {
+  fill: rgba(184, 185, 190, 0.25);
+}
+
+.ant-empty-img-default-path-3,
+.ant-empty-img-default-path-4,
+.ant-empty-img-default-path-5 {
+  fill: rgba(184, 185, 190, 0.45);
+}

@@ -8,15 +8,16 @@ import AdminTableActions, {
 import { App, Table } from "antd";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import {
-  adminDeleteBrandObject,
-  getBrandByBrandId,
-  getBrandObjectsPage,
-} from "../../utils";
+import { getBrandByBrandId, getBrandObjectsPage } from "../../utils/brandsApi";
+import { adminDeleteBrandObject } from "../../utils/adminApi";
 import { useLocale } from "../../LocaleContext";
 import { useHeader } from "../../HeaderContext";
 import usePagedList from "../../hooks/usePagedList";
-import BrandObjectModal from "../../components/ObjectList/modals/BrandObjectModal";
+import { createLazyModal } from "../../utils/lazyModal";
+
+const BrandObjectModal = createLazyModal(
+  () => import("../../components/ObjectList/modals/BrandObjectModal"),
+);
 import AdminBrandAddDrawer from "./AdminBrandAddDrawer";
 import { useAdminLayoutContext } from "./AdminLayout";
 import { scrollAppToTop } from "../../utils/scroll";

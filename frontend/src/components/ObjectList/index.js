@@ -4,9 +4,11 @@ import { useHeader } from "../../HeaderContext";
 import useObjectListState from "./useObjectListState";
 import BrandsTab from "./BrandsTab";
 import GroupsTab from "./GroupsTab";
-import BrandModal from "./modals/BrandModal";
-import CreateGroupModal from "./modals/CreateGroupModal";
-import { discardUploadedImage } from "../../utils";
+import { createLazyModal } from "../../utils/lazyModal";
+import { discardUploadedImage } from "../../utils/uploadsApi";
+
+const BrandModal = createLazyModal(() => import("./modals/BrandModal"));
+const CreateGroupModal = createLazyModal(() => import("./modals/CreateGroupModal"));
 
 export default function ObjectList({ isAdmin }) {
   const location = useLocation();
@@ -32,7 +34,6 @@ export default function ObjectList({ isAdmin }) {
     searchValue,
     brandsListPage,
     combinedSearchPage,
-    showObjectFilters,
     searchFacets,
     facetsLoading,
     selectedCategoryIds,
@@ -66,7 +67,6 @@ export default function ObjectList({ isAdmin }) {
       <div hidden={activeTab !== "brands"}>
         <BrandsTab
           brands={brands}
-          loading={loadingBrands}
           onSearch={handleBrandSearch}
           onBrandClick={handleBrandClick}
           isAdmin={isAdmin}
@@ -77,7 +77,6 @@ export default function ObjectList({ isAdmin }) {
           searchValue={searchValue}
           brandsListPage={brandsListPage}
           combinedSearchPage={combinedSearchPage}
-          showObjectFilters={showObjectFilters}
           searchFacets={searchFacets}
           facetsLoading={facetsLoading}
           selectedCategoryIds={selectedCategoryIds}
@@ -93,7 +92,6 @@ export default function ObjectList({ isAdmin }) {
       <div hidden={activeTab !== "groups"}>
         <GroupsTab
           groups={groups}
-          loading={loadingGroups}
           onSearch={handleGroupSearch}
           onGroupClick={handleGroupClick}
           onCreateGroup={() => {

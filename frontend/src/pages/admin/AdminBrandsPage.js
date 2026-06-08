@@ -8,10 +8,15 @@ import AdminTableActions, {
 import { App, Table } from "antd";
 import { useCallback, useLayoutEffect, useState } from "react";
 import { useAdminLayoutContext } from "./AdminLayout";
-import { adminDeleteBrand, getBrandsPage, SELECT_PAGE_SIZE } from "../../utils";
+import { getBrandsPage, SELECT_PAGE_SIZE } from "../../utils/brandsApi";
+import { adminDeleteBrand } from "../../utils/adminApi";
 import { useLocale } from "../../LocaleContext";
 import { useHeader } from "../../HeaderContext";
-import BrandModal from "../../components/ObjectList/modals/BrandModal";
+import { createLazyModal } from "../../utils/lazyModal";
+
+const BrandModal = createLazyModal(
+  () => import("../../components/ObjectList/modals/BrandModal"),
+);
 import usePagedList from "../../hooks/usePagedList";
 import { scrollAppToTop } from "../../utils/scroll";
 import AdminTableSkeleton from "../../components/AdminTableSkeleton";

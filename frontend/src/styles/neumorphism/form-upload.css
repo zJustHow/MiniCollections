@@ -1,0 +1,153 @@
+/* neumorphism/form-upload.css */
+/* ── FORM ─────────────────────────────────────────────────── */
+.ant-form-item-label > label {
+  color: var(--neu-text);
+  font-weight: 400;
+  font-size: var(--neu-fs-13);
+  letter-spacing: 0.3px;
+}
+
+.ant-form-item-explain-error {
+  color: var(--neu-danger);
+  font-size: var(--neu-fs-12);
+}
+
+/* ── UPLOAD (picture-card — neu-card--upload on inner surface) ─ */
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select,
+.neu-image-upload .ant-upload.ant-upload-select {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  padding: 0 !important;
+  transition: none;
+  transform: none;
+}
+
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover,
+.neu-image-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover,
+.ant-upload-wrapper.ant-upload-picture-card-wrapper
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active,
+.neu-image-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active {
+  border: none !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+.neu-image-upload.ant-upload-picture-card-wrapper {
+  display: inline-block;
+  width: 168px;
+  max-width: 100%;
+  vertical-align: top;
+}
+
+.neu-image-upload-body {
+  display: block;
+  width: 100%;
+}
+
+.neu-image-upload .ant-upload.ant-upload-select {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.neu-image-upload .neu-card-cover {
+  position: relative;
+  overflow: visible;
+}
+
+.neu-image-upload
+  .neu-card-image-well:has(.neu-image-upload-remove--on-groove) {
+  overflow: visible;
+  padding-bottom: calc(
+    var(--neu-image-upload-remove-gap, 10px) + var(--neu-control-height-sm) +
+      8px
+  );
+}
+
+.neu-card--upload {
+  display: block;
+  width: 100%;
+  border-radius: 0;
+}
+
+.neu-card-image-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  justify-content: center;
+  flex: 0 0 auto;
+  max-height: 100%;
+  gap: var(--neu-image-upload-remove-gap, 10px);
+}
+
+.neu-card-image-stack--fill {
+  align-items: stretch;
+  width: calc(100% - var(--neu-card-well-inset) * 2);
+  max-height: calc(100% - var(--neu-card-well-inset) * 2);
+}
+
+.neu-image-upload .neu-card-image-stack--fill {
+  height: calc(100% - var(--neu-card-well-inset) * 2);
+}
+
+.neu-card-image-stack--fill .neu-card-image-frame--fill {
+  position: relative;
+  inset: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: auto;
+}
+
+.neu-image-upload-remove--on-groove {
+  position: relative;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  width: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.confirm-delete-btn--upload.neu-pressable-btn {
+  width: 100%;
+  height: calc(10px + var(--neu-fs-16));
+  min-height: calc(10px + var(--neu-fs-16));
+  max-height: calc(10px + var(--neu-fs-16));
+  box-sizing: border-box;
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  font-size: var(--neu-fs-16);
+  line-height: 1;
+  overflow: hidden;
+}
+
+.confirm-delete-btn--upload .confirm-delete-label {
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  font-size: var(--neu-confirm-fs-h);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* ── SPIN ─────────────────────────────────────────────────── */
+.ant-spin-dot-item {
+  background-color: var(--neu-accent);
+}
+

@@ -1,59 +1,107 @@
-import AuthPageSkeleton from "./AuthPageSkeleton";
+import { lazy, Suspense } from "react";
 import SplashLoader from "./SplashLoader";
-import AdminLayoutSkeleton from "./AdminLayoutSkeleton";
-import AdminTableSkeleton from "./AdminTableSkeleton";
-import FeedbackPageSkeleton from "./FeedbackPageSkeleton";
-import NeuCardGridSkeleton from "./NeuCardGridSkeleton";
-import ObjectDetailPageSkeleton from "./ObjectDetailPageSkeleton";
-import ProfilePageSkeleton from "./ProfilePageSkeleton";
+
+const AuthPageSkeleton = lazy(() => import("./AuthPageSkeleton"));
+const FeedbackPageSkeleton = lazy(() => import("./FeedbackPageSkeleton"));
+const ProfilePageSkeleton = lazy(() => import("./ProfilePageSkeleton"));
+const AdminLayoutSkeleton = lazy(() => import("./AdminLayoutSkeleton"));
+const AdminTableSkeleton = lazy(() => import("./AdminTableSkeleton"));
+const NeuCardGridSkeleton = lazy(() => import("./NeuCardGridSkeleton"));
+const ObjectDetailPageSkeleton = lazy(() => import("./ObjectDetailPageSkeleton"));
+
+function LazySkeleton({ children }) {
+  return <Suspense fallback={<SplashLoader />}>{children}</Suspense>;
+}
 
 export default function PageLoader({ variant = "splash" }) {
   if (variant === "register") {
-    return <AuthPageSkeleton variant="register" />;
+    return (
+      <LazySkeleton>
+        <AuthPageSkeleton variant="register" />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "forgotPassword") {
-    return <AuthPageSkeleton variant="forgotPassword" />;
+    return (
+      <LazySkeleton>
+        <AuthPageSkeleton variant="forgotPassword" />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "wechatCallback") {
-    return <AuthPageSkeleton variant="wechatCallback" />;
+    return (
+      <LazySkeleton>
+        <AuthPageSkeleton variant="wechatCallback" />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "feedback") {
-    return <FeedbackPageSkeleton />;
+    return (
+      <LazySkeleton>
+        <FeedbackPageSkeleton />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "profile") {
-    return <ProfilePageSkeleton />;
+    return (
+      <LazySkeleton>
+        <ProfilePageSkeleton />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "admin") {
-    return <AdminLayoutSkeleton />;
+    return (
+      <LazySkeleton>
+        <AdminLayoutSkeleton />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "adminTable") {
     return (
-      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-        <AdminTableSkeleton />
-      </div>
+      <LazySkeleton>
+        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+          <AdminTableSkeleton />
+        </div>
+      </LazySkeleton>
     );
   }
 
   if (variant === "brands" || variant === "groups") {
-    return <NeuCardGridSkeleton />;
+    return (
+      <LazySkeleton>
+        <NeuCardGridSkeleton />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "brandObjects" || variant === "groupObjects") {
-    return <NeuCardGridSkeleton variant="object" />;
+    return (
+      <LazySkeleton>
+        <NeuCardGridSkeleton variant="object" />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "brandObjectDetail") {
-    return <ObjectDetailPageSkeleton />;
+    return (
+      <LazySkeleton>
+        <ObjectDetailPageSkeleton />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "groupObjectDetail") {
-    return <ObjectDetailPageSkeleton showRelatedModel />;
+    return (
+      <LazySkeleton>
+        <ObjectDetailPageSkeleton showRelatedModel />
+      </LazySkeleton>
+    );
   }
 
   return <SplashLoader />;

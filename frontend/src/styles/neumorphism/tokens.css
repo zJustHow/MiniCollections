@@ -1,0 +1,125 @@
+/* neumorphism/tokens.css */
+/* ============================================================
+   NEUMORPHISM THEME — MiniCollections
+   ============================================================ */
+
+:root {
+  /* ── Surface & shadows ── */
+  --neu-bg: #fcfbf8;
+  --neu-sd: #b8b9be;
+  --neu-sl: #ffffff;
+
+  /* ── Brand accent (primary actions) ── */
+  --neu-accent: #5592cc;
+  --neu-accent-dark: #3d78b8;
+  --neu-accent-light: #6aa8dc;
+  --neu-accent-lighter: #9ec5ea;
+
+  --neu-secondary: #10ab7c;
+  --neu-info: #1e90ff;
+  --neu-warning: #f5b759;
+  --neu-warning-dark: #d48806;
+  --neu-warning-lighter: #ffebbb;
+  --neu-success: #00bf9a;
+  --neu-success-dark: #007a62;
+  --neu-success-lighter: #8aebd6;
+  --neu-danger: #fa5252;
+  --neu-danger-light: #fb6b6b;
+  --neu-danger-lighter: #fda5a5;
+  --neu-danger-dark: #d93636;
+  --neu-volcano: #ff9c6e;
+  --neu-volcano-dark: #d4380d;
+  --neu-volcano-lighter: #ffd0b3;
+  --neu-purple: #b37feb;
+  --neu-purple-dark: #531dab;
+  --neu-purple-lighter: #ddc8f8;
+  --neu-cyan: #5cdbd3;
+  --neu-cyan-dark: #08979c;
+  --neu-cyan-lighter: #b0f2ec;
+  --neu-dark: #2a354f;
+
+  --neu-text: #44476a;
+  --neu-text-2: #66799e;
+  --neu-border: #d1d9e6;
+
+  /* raised / inset — box-shadow-soft & shadow-inset */
+  --raised: 6px 6px 12px var(--neu-sd), -6px -6px 12px var(--neu-sl);
+  --raised-lg: 8px 8px 16px var(--neu-sd), -8px -8px 16px var(--neu-sl);
+  --raised-sm: 3px 3px 6px var(--neu-sd), -3px -3px 6px var(--neu-sl);
+  --raised-xs: 1px 1px 3px var(--neu-sd), -1px -1px 3px var(--neu-sl);
+
+  --inset: inset 2px 2px 5px var(--neu-sd), inset -3px -3px 7px var(--neu-sl);
+  --inset-sm:
+    inset 1px 1px 3px var(--neu-sd), inset -2px -2px 4px var(--neu-sl);
+  --inset-lg:
+    inset 4px 4px 10px var(--neu-sd), inset -5px -5px 12px var(--neu-sl);
+  /* circular avatars / photos — dark inset only (no white highlight) */
+  --inset-avatar: inset 2px 2px 6px var(--neu-sd);
+  /* tinted inset for colored surfaces (avoid white highlight on accent/danger) */
+  --inset-accent:
+    inset 2px 2px 5px var(--neu-accent-dark),
+    inset -3px -3px 7px var(--neu-accent-lighter);
+  --inset-accent-sm:
+    inset 1px 1px 3px var(--neu-accent-dark),
+    inset -2px -2px 4px var(--neu-accent-lighter);
+  --inset-danger:
+    inset 2px 2px 5px var(--neu-danger-dark),
+    inset -3px -3px 7px var(--neu-danger-lighter);
+  --inset-danger-sm:
+    inset 1px 1px 3px var(--neu-danger-dark),
+    inset -2px -2px 4px var(--neu-danger-lighter);
+  --inset-accent-lg:
+    inset 4px 4px 10px var(--neu-accent-dark),
+    inset -5px -5px 12px var(--neu-accent-lighter);
+  --inset-danger-lg:
+    inset 4px 4px 10px var(--neu-danger-dark),
+    inset -5px -5px 12px var(--neu-danger-lighter);
+  --inset-volcano-sm:
+    inset 1px 1px 3px var(--neu-volcano-dark),
+    inset -2px -2px 4px var(--neu-volcano-lighter);
+  --inset-purple-sm:
+    inset 1px 1px 3px var(--neu-purple-dark),
+    inset -2px -2px 4px var(--neu-purple-lighter);
+  --inset-warning-sm:
+    inset 1px 1px 3px var(--neu-warning-dark),
+    inset -2px -2px 4px var(--neu-warning-lighter);
+  --inset-success-sm:
+    inset 1px 1px 3px var(--neu-success-dark),
+    inset -2px -2px 4px var(--neu-success-lighter);
+  --inset-cyan-sm:
+    inset 1px 1px 3px var(--neu-cyan-dark),
+    inset -2px -2px 4px var(--neu-cyan-lighter);
+
+  /* Button motion ($transition-base) */
+  --neu-btn-transition: all 0.2s ease;
+  --neu-btn-scale-hover: 0.98;
+
+  /* Match antd controlHeight tokens (32 / 40 / 24) */
+  --neu-control-height: 32px;
+  --neu-control-height-lg: 40px;
+  --neu-control-height-sm: 24px;
+  --neu-header-action-btn-width: calc(32px + 1em);
+
+  /* navbar dropdown-item hover tint (rgba(230,231,238,.1)) */
+  --neu-item-hover-bg: rgba(230, 231, 238, 0.1);
+
+  /* layout */
+  --header-height: 80px;
+  --header-height-mobile: 64px;
+  --header-tab-width: 120px;
+
+  --neu-font-scale: 1;
+}
+
+@media (max-width: 992px) {
+  :root {
+    --neu-font-scale: 0.9375;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --neu-font-scale: 0.875;
+  }
+}
+

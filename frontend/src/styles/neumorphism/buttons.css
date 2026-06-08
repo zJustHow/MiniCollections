@@ -1,0 +1,251 @@
+/* neumorphism/buttons.css */
+/* ── BUTTONS (raised → inset on hover) ─────────── */
+.neu-avatar-btn {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+  flex-shrink: 0;
+  transition: var(--neu-btn-transition);
+}
+
+.neu-avatar-btn .ant-avatar {
+  box-shadow: var(--raised-sm);
+  transition: var(--neu-btn-transition);
+}
+
+.neu-avatar-btn:hover:not(:active) .ant-avatar {
+  box-shadow: var(--inset-avatar);
+}
+
+.neu-avatar-btn:active .ant-avatar {
+  box-shadow: var(--inset-avatar);
+}
+
+.neu-avatar-btn--accent:hover:not(:active) .ant-avatar {
+  box-shadow: var(--inset-accent-sm);
+}
+
+.neu-avatar-btn--accent:active .ant-avatar {
+  box-shadow: var(--inset-accent);
+}
+
+/* Shared interactive controls — unlayered so they beat @layer antd (StyleProvider) */
+.ant-btn,
+.ant-input-group-addon .ant-btn,
+.ant-input-search-button,
+.neu-fab,
+.neu-add-btn,
+.ant-radio-button-wrapper,
+.ant-pagination .ant-pagination-item,
+.ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next .ant-pagination-item-link {
+  position: relative;
+  transition: var(--neu-btn-transition);
+  transform: scale(1);
+}
+
+.ant-btn {
+  border: 1px solid var(--neu-bg);
+  border-radius: 0;
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  background: var(--neu-bg);
+  color: var(--neu-text);
+  box-shadow: var(--raised-sm);
+}
+
+.ant-btn-lg,
+.ant-btn-sm,
+.ant-btn-icon-only,
+.ant-btn-icon-only.ant-btn-lg,
+.ant-btn-icon-only.ant-btn-sm {
+  border-radius: 0;
+}
+
+.ant-btn-block {
+  width: 100%;
+}
+
+/* Default buttons — accent text on hover; border stays invisible */
+.ant-btn-default:hover:not([disabled]):not(:active) {
+  color: var(--neu-accent);
+  border-color: var(--neu-bg);
+}
+
+.ant-btn:hover:not([disabled]):not(:active):not(.neu-btn) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn:active:not([disabled]):not(.neu-btn),
+.ant-btn.btn-counting-down,
+.ant-btn.btn-counting-down:hover,
+.ant-btn.btn-counting-down:focus,
+.ant-btn.btn-counting-down:focus-visible {
+  box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn-default:active:not([disabled]),
+.ant-btn.btn-counting-down,
+.ant-btn.btn-counting-down:hover,
+.ant-btn.btn-counting-down:focus,
+.ant-btn.btn-counting-down:focus-visible {
+  color: var(--neu-text-2);
+  border-color: var(--neu-bg);
+}
+
+.ant-btn:focus-visible:not(:active):not(.neu-btn) {
+  outline: none;
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn:focus,
+.ant-btn:focus-visible {
+  outline: none;
+}
+
+.ant-btn.ant-btn-default {
+  border-color: var(--neu-bg);
+}
+
+.ant-btn-primary {
+  background: var(--neu-accent);
+  color: #fff;
+  border-color: var(--neu-accent);
+  box-shadow: var(--raised-sm);
+}
+
+.ant-btn-primary:hover:not([disabled]):not(:active):not(.neu-btn) {
+  background: var(--neu-accent-light);
+  color: #fff;
+  border-color: var(--neu-accent-light);
+  box-shadow: var(--inset-accent-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn-primary:active:not([disabled]):not(.neu-btn) {
+  background: var(--neu-accent-light);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: var(--neu-accent-light);
+  box-shadow: var(--inset-accent);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn-primary:focus-visible:not(:active):not(.neu-btn) {
+  background: var(--neu-accent);
+  color: #fff;
+  border-color: var(--neu-accent);
+  box-shadow: var(--inset-accent-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous {
+  background: var(--neu-danger);
+  color: #fff;
+  border-color: var(--neu-danger);
+  box-shadow: var(--raised-sm);
+}
+
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:hover:not([disabled]):not(
+    :active
+  ) {
+  background: var(--neu-danger-light);
+  color: #fff;
+  border-color: var(--neu-danger-light);
+  box-shadow: var(--inset-danger-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:active:not([disabled]) {
+  background: var(--neu-danger-light);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: var(--neu-danger-light);
+  box-shadow: var(--inset-danger);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous:focus-visible:not(:active) {
+  background: var(--neu-danger);
+  color: #fff;
+  border-color: var(--neu-danger);
+  box-shadow: var(--inset-danger-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-btn[disabled],
+.ant-btn-disabled {
+  transform: none;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.ant-btn-default[disabled],
+.ant-btn-default.ant-btn-disabled,
+.ant-btn-default[disabled]:hover,
+.ant-btn-default.ant-btn-disabled:hover {
+  box-shadow: var(--inset);
+  background: var(--neu-bg);
+  color: var(--neu-text-2);
+  border-color: var(--neu-bg);
+}
+
+.ant-btn-primary[disabled],
+.ant-btn-primary.ant-btn-disabled,
+.ant-btn-primary[disabled]:hover,
+.ant-btn-primary.ant-btn-disabled:hover {
+  box-shadow: var(--inset-accent);
+  background: var(--neu-accent-light);
+  color: #fff;
+  border-color: var(--neu-accent-light);
+}
+
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous[disabled],
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous.ant-btn-disabled,
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous[disabled]:hover,
+.ant-btn.ant-btn-dangerous.ant-btn-color-dangerous.ant-btn-disabled:hover {
+  box-shadow: var(--inset-danger);
+  background: var(--neu-danger-light);
+  color: #fff;
+  border-color: var(--neu-danger-light);
+}
+
+/* Link buttons — no neumorphic shadow / lift */
+.ant-btn-link,
+.ant-btn-text {
+  box-shadow: none;
+  background: transparent;
+  border-color: transparent;
+  transform: none;
+}
+
+.ant-btn-link:hover:not([disabled]),
+.ant-btn-link:active:not([disabled]),
+.ant-btn-link:focus,
+.ant-btn-text:hover:not([disabled]),
+.ant-btn-text:active:not([disabled]),
+.ant-btn-text:focus {
+  box-shadow: none;
+  transform: none;
+  color: var(--neu-accent);
+}
+
+.ant-btn-link[disabled],
+.ant-btn-link.ant-btn-disabled,
+.ant-btn-text[disabled],
+.ant-btn-text.ant-btn-disabled,
+.ant-btn-link[disabled]:hover,
+.ant-btn-link.ant-btn-disabled:hover,
+.ant-btn-text[disabled]:hover,
+.ant-btn-text.ant-btn-disabled:hover {
+  opacity: 1;
+  box-shadow: none;
+  color: var(--neu-text-2);
+  background: transparent;
+  border-color: transparent;
+}
+

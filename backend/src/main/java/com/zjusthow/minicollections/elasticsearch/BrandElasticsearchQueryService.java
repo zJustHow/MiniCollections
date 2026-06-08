@@ -36,6 +36,13 @@ public class BrandElasticsearchQueryService {
         return searchAtOffset(keyword, (long) safePage * size, size);
     }
 
+    public EsSearchPageResult searchCount(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return new EsSearchPageResult(List.of(), 0L, true);
+        }
+        return countOnly(keyword.trim());
+    }
+
     public EsSearchPageResult searchSlice(String keyword, int offset, int size) {
         if (keyword == null || keyword.isBlank() || size <= 0) {
             return new EsSearchPageResult(List.of(), 0L, true);

@@ -198,8 +198,20 @@ public class BrandService {
         BrandObjectSearchFilter filter =
                 BrandObjectSearchFilter.global(categoryIds, brandIds, scaleIds, seriesIds);
 
-        BrandSearchTotals brandTotals = resolveBrandSearchTotals(trimmed);
-        ObjectSearchTotals objectTotals = resolveObjectSearchTotals(trimmed, filter);
+        if (brandEsEnabled() && esEnabled()) {
+            return searchCombinedPageOptimized(trimmed, filter, preferZh, safePage, pageSize);
+        }
+        return searchCombinedPageLegacy(trimmed, filter, preferZh, safePage, pageSize);
+    }
+
+    private BrandCombinedSearchDto buildCombinedSearchResult(
+            String trimmed,
+            BrandObjectSearchFilter filter,
+            boolean preferZh,
+            int safePage,
+            int pageSize,
+            BrandSearchTotals brandTotals,
+            ObjectSearchTotals objectTotals) {
         long totalBrands = brandTotals.total();
         long totalObjects = objectTotals.total();
         long totalElements = totalBrands + totalObjects;
@@ -223,6 +235,94 @@ public class BrandService {
             objects = fetchBrandObjectSearchSlice(trimmed, filter, preferZh, objectOffset, remaining);
         }
 
+        return new BrandCombinedSearchDto(
+                brands,
+                objects,
+                safePage,
+                pageSize,
+                totalBrands,
+                totalObjects,
+                totalElements,
+                totalPages,
+                totalExact);
+    }
+
+    private BrandCombinedSearchDto searchCombinedPageLegacy(
+            String trimmed,
+            BrandObjectSearchFilter filter,
+            boolean preferZh,
+            int safePage,
+            int pageSize) {
+        BrandSearchTotals brandTotals = resolveBrandSearchTotals(trimmed);
+        ObjectSearchTotals objectTotals = resolveObjectSearchTotals(trimmed, filter);
+        return buildCombinedSearchResult(
+                trimmed, filter, preferZh, safePage, pageSize, brandTotals, objectTotals);
+    }
+
+    private BrandCombinedSearchDto searchCombinedPageOptimized(
+            String trimmed,
+            BrandObjectSearchFilter filter,
+            boolean preferZh,
+            int safePage,
+            int pageSize) {
+        long globalStart = (long) safePage * pageSize;
+        long totalBrands = -1;
+        boolean brandTotalExact = true;
+        long totalObjects = -1;
+        boolean objectTotalExact = true;
+        List<BrandDto> brands = List.of();
+        List<BrandObjectDto> objects = List.of();
+        int remaining = pageSize;
+
+        try {
+            if (globalStart == 0) {
+                EsSearchPageResult brandResult =
+                        brandElasticsearchQueryService.searchSlice(trimmed, 0, pageSize);
+                totalBrands = brandResult.totalElements();
+                brandTotalExact = brandResult.totalExact();
+                brands = loadByIdsInOrder(
+                        brandResult.ids(),
+                        brandRepository::findAllById,
+                        entity -> toBrandDto(entity, preferZh));
+                remaining -= brands.size();
+            } else {
+                EsSearchPageResult brandCount = brandElasticsearchQueryService.searchCount(trimmed);
+                totalBrands = brandCount.totalElements();
+                brandTotalExact = brandCount.totalExact();
+                if (globalStart < totalBrands && remaining > 0) {
+                    int brandOffset = (int) globalStart;
+                    int brandLimit = (int) Math.min(remaining, totalBrands - globalStart);
+                    EsSearchPageResult brandResult =
+                            brandElasticsearchQueryService.searchSlice(trimmed, brandOffset, brandLimit);
+                    brands = loadByIdsInOrder(
+                            brandResult.ids(),
+                            brandRepository::findAllById,
+                            entity -> toBrandDto(entity, preferZh));
+                    remaining -= brands.size();
+                }
+            }
+
+            if (remaining > 0) {
+                int objectOffset = (int) Math.max(0L, globalStart - totalBrands);
+                EsSearchPageResult objectResult = brandObjectElasticsearchQueryService.searchSlice(
+                        trimmed, filter, objectOffset, remaining);
+                totalObjects = objectResult.totalElements();
+                objectTotalExact = objectResult.totalExact();
+                objects = loadBrandObjectsByIdsInOrder(objectResult.ids(), filter, preferZh);
+            } else {
+                EsSearchPageResult objectCount =
+                        brandObjectElasticsearchQueryService.searchCount(trimmed, filter);
+                totalObjects = objectCount.totalElements();
+                objectTotalExact = objectCount.totalExact();
+            }
+        } catch (Exception e) {
+            log.warn("Elasticsearch combined search failed, using SQL fallback: {}", e.getMessage());
+            return searchCombinedPageLegacy(trimmed, filter, preferZh, safePage, pageSize);
+        }
+
+        long totalElements = totalBrands + totalObjects;
+        boolean totalExact = brandTotalExact && objectTotalExact;
+        int totalPages = pageSize <= 0 ? 0 : (int) Math.ceil((double) totalElements / pageSize);
         return new BrandCombinedSearchDto(
                 brands,
                 objects,
@@ -1110,18 +1210,15 @@ public class BrandService {
             BrandObjectEntity entity,
             boolean preferZh,
             long viewCount) {
-        BrandEntity brand = brandRepository.findById(entity.brandId()).orElse(null);
-        SeriesEntity series = entity.seriesId() != null
-                ? seriesRepository.findById(entity.seriesId()).orElse(null)
-                : null;
-        CategoryEntity category = entity.categoryId() != null
-                ? categoryRepository.findById(entity.categoryId()).orElse(null)
-                : null;
-        ScaleEntity scale = entity.scaleId() != null
-                ? scaleRepository.findById(entity.scaleId()).orElse(null)
-                : null;
+        BrandObjectRelationMaps maps = buildBrandObjectRelationMaps(List.of(entity));
         return BrandObjectDto.from(
-                entity, brand, series, category, scale, preferZh, viewCount);
+                entity,
+                maps.brandById().get(entity.brandId()),
+                entity.seriesId() != null ? maps.seriesById().get(entity.seriesId()) : null,
+                entity.categoryId() != null ? maps.categoryById().get(entity.categoryId()) : null,
+                entity.scaleId() != null ? maps.scaleById().get(entity.scaleId()) : null,
+                preferZh,
+                viewCount);
     }
 
     private BrandDto toBrandDto(BrandEntity entity, boolean preferZh) {
@@ -1135,6 +1232,19 @@ public class BrandService {
         if (entities.isEmpty()) {
             return List.of();
         }
+        BrandObjectRelationMaps maps = buildBrandObjectRelationMaps(entities);
+        return entities.stream()
+                .map(entity -> BrandObjectDto.from(
+                        entity,
+                        maps.brandById().get(entity.brandId()),
+                        entity.seriesId() != null ? maps.seriesById().get(entity.seriesId()) : null,
+                        entity.categoryId() != null ? maps.categoryById().get(entity.categoryId()) : null,
+                        entity.scaleId() != null ? maps.scaleById().get(entity.scaleId()) : null,
+                        preferZh))
+                .toList();
+    }
+
+    private BrandObjectRelationMaps buildBrandObjectRelationMaps(List<BrandObjectEntity> entities) {
         Set<Long> brandIds = new HashSet<>();
         Set<Long> seriesIds = new HashSet<>();
         Set<Long> categoryIds = new HashSet<>();
@@ -1153,30 +1263,28 @@ public class BrandService {
         }
         Map<Long, BrandEntity> brandById = new HashMap<>();
         if (!brandIds.isEmpty()) {
-            brandRepository.findAllById(brandIds).forEach(b -> brandById.put(b.id(), b));
+            brandRepository.findAllById(brandIds).forEach(brand -> brandById.put(brand.id(), brand));
         }
         Map<Long, SeriesEntity> seriesById = new HashMap<>();
         if (!seriesIds.isEmpty()) {
-            seriesRepository.findAllById(seriesIds).forEach(s -> seriesById.put(s.id(), s));
+            seriesRepository.findAllById(seriesIds).forEach(series -> seriesById.put(series.id(), series));
         }
         Map<Long, CategoryEntity> categoryById = new HashMap<>();
         if (!categoryIds.isEmpty()) {
-            categoryRepository.findAllById(categoryIds).forEach(c -> categoryById.put(c.id(), c));
+            categoryRepository.findAllById(categoryIds).forEach(category -> categoryById.put(category.id(), category));
         }
         Map<Long, ScaleEntity> scaleById = new HashMap<>();
         if (!scaleIds.isEmpty()) {
-            scaleRepository.findAllById(scaleIds).forEach(s -> scaleById.put(s.id(), s));
+            scaleRepository.findAllById(scaleIds).forEach(scale -> scaleById.put(scale.id(), scale));
         }
-        return entities.stream()
-                .map(e -> BrandObjectDto.from(
-                        e,
-                        brandById.get(e.brandId()),
-                        seriesById.get(e.seriesId()),
-                        categoryById.get(e.categoryId()),
-                        scaleById.get(e.scaleId()),
-                        preferZh))
-                .toList();
+        return new BrandObjectRelationMaps(brandById, seriesById, categoryById, scaleById);
     }
+
+    private record BrandObjectRelationMaps(
+            Map<Long, BrandEntity> brandById,
+            Map<Long, SeriesEntity> seriesById,
+            Map<Long, CategoryEntity> categoryById,
+            Map<Long, ScaleEntity> scaleById) {}
 
     private void reindexBrandObjectsForBrand(BrandEntity brand) {
         brandObjectIndexService.reindexForBrand(brand.id());

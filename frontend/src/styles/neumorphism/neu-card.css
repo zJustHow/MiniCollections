@@ -1,0 +1,185 @@
+/* neumorphism/neu-card.css */
+/* ── NEU CARD ─────────────────────────────────────────────── */
+.neu-card {
+  --neu-card-shadow: var(--raised-sm);
+  --neu-card-shadow-hover: var(--raised-lg);
+  --neu-card-shadow-active: var(--raised-xs);
+  --neu-card-hover-scale: 1.01;
+  --neu-card-active-scale: 0.99;
+  --neu-card-transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.ant-card.neu-card {
+  border-radius: 0;
+  box-shadow: var(--neu-card-shadow);
+  transition: var(--neu-card-transition);
+}
+
+.ant-card.neu-card.ant-card-hoverable:hover {
+  transform: scale(var(--neu-card-hover-scale));
+  box-shadow: var(--neu-card-shadow-hover);
+}
+
+.ant-card.neu-card.ant-card-hoverable:active {
+  transform: scale(var(--neu-card-active-scale));
+  box-shadow: var(--neu-card-shadow-active);
+}
+
+.ant-card.neu-card .ant-card-cover {
+  padding-bottom: 12px;
+}
+
+.ant-card.neu-card .ant-card-body {
+  border-top: none;
+  padding: 0;
+  min-height: 0;
+}
+
+button.neu-card.neu-card--row,
+div.neu-card.neu-card--row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 0;
+  background: var(--neu-bg);
+  box-shadow: var(--neu-card-shadow);
+  text-align: left;
+}
+
+button.neu-card.neu-card--row {
+  cursor: pointer;
+  transition: var(--neu-card-transition);
+}
+
+.neu-related-model-skeleton {
+  pointer-events: none;
+}
+
+.neu-related-model-skeleton-name {
+  display: block;
+  width: 55%;
+  height: 1.25em;
+}
+
+.neu-related-model-skeleton-meta {
+  display: block;
+  width: 38%;
+  height: 1em;
+  margin-top: 6px;
+}
+
+button.neu-card.neu-card--row:hover:not(:disabled) {
+  transform: scale(var(--neu-card-hover-scale));
+  box-shadow: var(--neu-card-shadow-hover);
+}
+
+button.neu-card.neu-card--row:active:not(:disabled) {
+  transform: scale(var(--neu-card-active-scale));
+  box-shadow: var(--neu-card-shadow-active);
+}
+
+button.neu-card.neu-card--avatar,
+.neu-card.neu-card--avatar {
+  display: inline-flex;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+  flex-shrink: 0;
+  box-shadow: var(--neu-card-shadow);
+  transition: var(--neu-card-transition);
+  transform: scale(1);
+}
+
+button.neu-card.neu-card--avatar .ant-avatar,
+.neu-card.neu-card--avatar .ant-avatar {
+  box-shadow: none;
+}
+
+button.neu-card.neu-card--avatar:hover:not(:disabled),
+.neu-card.neu-card--avatar:hover:not(:disabled) {
+  transform: scale(var(--neu-card-hover-scale));
+  box-shadow: var(--neu-card-shadow-hover);
+}
+
+button.neu-card.neu-card--avatar:active:not(:disabled),
+.neu-card.neu-card--avatar:active:not(:disabled) {
+  transform: scale(var(--neu-card-active-scale));
+  box-shadow: var(--neu-card-shadow-active);
+}
+
+.profile-avatar-upload .ant-upload.ant-upload-select {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  padding: 0 !important;
+  transition: none;
+  transform: none;
+}
+
+.profile-avatar-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover,
+.profile-avatar-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active {
+  border: none !important;
+  box-shadow: none !important;
+  transform: none;
+}
+
+.profile-avatar-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover
+  .neu-card.neu-card--avatar {
+  transform: scale(var(--neu-card-hover-scale));
+  box-shadow: var(--neu-card-shadow-hover);
+}
+
+.profile-avatar-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active
+  .neu-card.neu-card--avatar {
+  transform: scale(var(--neu-card-active-scale));
+  box-shadow: var(--neu-card-shadow-active);
+}
+
+.neu-card-row-body {
+  min-width: 0;
+  flex: 1;
+}
+
+.neu-card-row-name {
+  font-size: var(--neu-fs-13);
+  font-weight: 400;
+  color: var(--neu-text);
+}
+
+.neu-card-row-meta {
+  margin-top: 2px;
+  font-size: var(--neu-fs-12);
+  color: var(--neu-text-2);
+}
+
+.neu-card.neu-card--upload {
+  background: var(--neu-bg);
+  box-shadow: var(--neu-card-shadow);
+  transition: var(--neu-card-transition);
+}
+
+.neu-image-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):not(:active):hover
+  .neu-card.neu-card--upload {
+  transform: scale(var(--neu-card-hover-scale));
+  box-shadow: var(--neu-card-shadow-hover);
+}
+
+.neu-image-upload
+  .ant-upload.ant-upload-select:not(.ant-upload-disabled):active
+  .neu-card.neu-card--upload {
+  transform: scale(var(--neu-card-active-scale));
+  box-shadow: var(--neu-card-shadow-active);
+}
+

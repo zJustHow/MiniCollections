@@ -1,0 +1,116 @@
+/* neumorphism/base.css */
+/* ── GLOBAL ───────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  font-size: 16px;
+}
+
+body {
+  background-color: var(--neu-bg);
+  color: var(--neu-text);
+  font-size: 16px;
+  font-family:
+    "Nunito Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.ant-typography h1,
+.ant-typography h2,
+.ant-typography h3,
+.ant-typography h4,
+.ant-typography h5,
+.ant-typography h6 {
+  color: var(--neu-dark);
+}
+
+strong,
+b,
+th,
+.ant-typography strong {
+  font-weight: 400;
+}
+
+.ant-btn,
+.ant-modal-title,
+.ant-drawer-title,
+.ant-form-item-label > label,
+.ant-tabs-tab-btn,
+.ant-menu-title-content,
+.ant-table-thead > tr > th,
+.ant-select-selection-item,
+.ant-pagination-item a {
+  font-weight: 400;
+}
+
+a {
+  color: var(--neu-accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+a:hover {
+  color: var(--neu-accent-light);
+}
+
+.header-logo-wrap {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.header-logo-icon {
+  display: block;
+  width: var(--neu-size-28);
+  height: var(--neu-size-28);
+  flex-shrink: 0;
+  border: none;
+  outline: none;
+}
+
+.header-logo {
+  font-size: var(--neu-fs-20);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--neu-dark);
+  flex-shrink: 0;
+}
+
+.header-logo-accent {
+  color: var(--neu-accent);
+}
+
+/* ── LAYOUT ───────────────────────────────────────────────── */
+.ant-layout {
+  background: var(--neu-bg);
+}
+
+.ant-layout-content {
+  background: var(--neu-bg);
+}
+

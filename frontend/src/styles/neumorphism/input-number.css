@@ -1,0 +1,29 @@
+/* neumorphism/input-number.css */
+/* ── INPUT NUMBER ─────────────────────────────────────────── */
+.ant-input-number-handler-wrap {
+  display: none;
+}
+
+.ant-input-number .ant-input-number-input {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  transition: none;
+}
+
+/* Beat antd css-injs focus ring (0 0 0 0) — same specificity as outlined variants */
+.ant-select-outlined:not(.ant-select-disabled):not(
+    .ant-select-customize-input
+  ):not(.ant-pagination-size-changer).ant-select-focused.ant-select
+  .ant-select-selector,
+.ant-select-outlined:not(.ant-select-disabled):not(
+    .ant-select-customize-input
+  ):not(.ant-pagination-size-changer).ant-select-open.ant-select
+  .ant-select-selector,
+.ant-input-number-outlined.ant-input-number:focus-within,
+.ant-input-number-outlined.ant-input-number-focused {
+  border: none !important;
+  box-shadow: var(--inset) !important;
+  outline: none !important;
+}
+

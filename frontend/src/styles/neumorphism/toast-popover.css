@@ -1,0 +1,63 @@
+/* neumorphism/toast-popover.css */
+/* ── MESSAGE TOAST ────────────────────────────────────────── */
+.ant-message-notice-content {
+  position: relative;
+  isolation: isolate;
+  background: var(--neu-bg) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: var(--neu-text);
+}
+
+.ant-message-notice-content::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: var(--inset);
+}
+
+.ant-message-success .anticon {
+  color: var(--neu-success);
+}
+
+.ant-message-error .anticon {
+  color: var(--neu-danger);
+}
+
+/* ── POPOVER ──────────────────────────────────────────────── */
+.ant-popover-inner {
+  position: relative;
+  isolation: isolate;
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.ant-popover-inner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: var(--inset);
+}
+
+.ant-popover-inner-content {
+  padding: 0;
+}
+
+.ant-popover-arrow {
+  display: none;
+}
+
+/* ── LIST ─────────────────────────────────────────────────── */
+.ant-list-item {
+  border-bottom: none;
+}
+

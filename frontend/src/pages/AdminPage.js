@@ -2,12 +2,14 @@ import ListPagination from "../components/ListPagination";
 import { App, Table } from "antd";
 import NeuTag from "../components/NeuTag";
 import { useCallback, useEffect, useState } from "react";
-import { getAdminSubmissions } from "../utils";
+import { getAdminSubmissionsPage } from "../utils/submissionsApi";
 import { useLocale } from "../LocaleContext";
 import { STATUS_COLOR, TYPE_COLOR, useStatusLabel, useTypeLabel } from "./admin/constants";
-import ApproveModal from "./admin/ApproveModal";
-import ResolveModal from "./admin/ResolveModal";
-import RejectModal from "./admin/RejectModal";
+import { createLazyModal } from "../utils/lazyModal";
+
+const ApproveModal = createLazyModal(() => import("./admin/ApproveModal"));
+const ResolveModal = createLazyModal(() => import("./admin/ResolveModal"));
+const RejectModal = createLazyModal(() => import("./admin/RejectModal"));
 import DetailDrawer from "./admin/DetailDrawer";
 import { useAdminLayoutContext } from "./admin/AdminLayout";
 import AdminTableSkeleton from "../components/AdminTableSkeleton";
@@ -23,6 +25,7 @@ export default function AdminPage() {
 
   const [submissions, setSubmissions] = useState([]);
   const [submissionsPage, setSubmissionsPage] = useState(0);
+  const [submissionsTotalPages, setSubmissionsTotalPages] = useState(0);
   const [submissionsLoading, setSubmissionsLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [approveModalOpen, setApproveModalOpen] = useState(false);
@@ -32,14 +35,19 @@ export default function AdminPage() {
   const fetchSubmissions = useCallback(async () => {
     setSubmissionsLoading(true);
     try {
-      const data = await getAdminSubmissions(null);
-      setSubmissions(Array.isArray(data) ? data : []);
+      const data = await getAdminSubmissionsPage({
+        status: activeStatus,
+        page: submissionsPage,
+        size: SUBMISSIONS_PAGE_SIZE,
+      });
+      setSubmissions(Array.isArray(data?.content) ? data.content : []);
+      setSubmissionsTotalPages(data?.total_pages ?? 0);
     } catch (err) {
       message.error(err?.message || t("failedToLoadSubmissions"));
     } finally {
       setSubmissionsLoading(false);
     }
-  }, [message, t]);
+  }, [activeStatus, submissionsPage, message, t]);
 
   useEffect(() => {
     fetchSubmissions();
@@ -54,17 +62,6 @@ export default function AdminPage() {
     fetchSubmissions();
     refreshSubmissions?.();
   };
-
-  const visibleSubmissions =
-    activeStatus === "ALL"
-      ? submissions
-      : submissions.filter((s) => s.status === activeStatus);
-
-  const submissionsTotalPages = Math.ceil(visibleSubmissions.length / SUBMISSIONS_PAGE_SIZE);
-  const paginatedSubmissions = visibleSubmissions.slice(
-    submissionsPage * SUBMISSIONS_PAGE_SIZE,
-    (submissionsPage + 1) * SUBMISSIONS_PAGE_SIZE,
-  );
 
   const submissionColumns = [
     { title: "#", dataIndex: "id", width: 60 },
@@ -99,7 +96,7 @@ export default function AdminPage() {
         <div className="neu-panel">
           <Table
             rowKey="id"
-            dataSource={paginatedSubmissions}
+            dataSource={submissions}
             columns={submissionColumns}
             size="middle"
             onRow={(record) => ({

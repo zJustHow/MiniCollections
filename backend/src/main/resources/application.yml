@@ -201,6 +201,9 @@ spring:
   config:
     activate:
       on-profile: prod
+  sql:
+    init:
+      mode: never
 app:
   s3:
     # In production, set S3_PUBLIC_BASE_URL to your CDN or public MinIO URL (required — no localhost default).

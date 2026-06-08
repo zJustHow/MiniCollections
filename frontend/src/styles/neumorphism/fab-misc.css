@@ -1,0 +1,64 @@
+/* neumorphism/fab-misc.css */
+/* ── FAB (Floating Action Button) ─────────────────────────── */
+.neu-fab {
+  background: var(--neu-accent);
+  border: none;
+  color: #fff;
+  box-shadow: var(--raised-sm);
+}
+
+.neu-fab:hover:not(:active) {
+  background: var(--neu-accent-light);
+  box-shadow: var(--inset-accent-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-fab:active {
+  background: var(--neu-accent-light);
+  color: #fff;
+  box-shadow: var(--inset-accent);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+/* ── CLICKABLE CARD (generic interactive surface) ────────── */
+.neu-clickable {
+  background: var(--neu-bg);
+  border: none;
+  cursor: pointer;
+  box-shadow: var(--raised-sm);
+  transition:
+    box-shadow 0.18s ease,
+    color 0.18s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.neu-clickable:hover {
+  box-shadow: var(--raised);
+}
+
+.neu-clickable:active {
+  box-shadow: var(--inset);
+}
+
+/* ── CARD ADD BUTTON (image overlay) ─────────────────────── */
+.neu-add-btn {
+  background: var(--neu-accent);
+  border: none;
+  color: #fff;
+  box-shadow: var(--raised-sm);
+}
+
+.neu-add-btn:hover:not(:active) {
+  background: var(--neu-accent-light);
+  box-shadow: var(--inset-accent-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-add-btn:active {
+  background: var(--neu-accent-light);
+  color: #fff;
+  box-shadow: var(--inset-accent);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+

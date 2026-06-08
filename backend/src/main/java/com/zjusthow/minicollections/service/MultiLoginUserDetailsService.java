@@ -4,6 +4,7 @@ import com.zjusthow.minicollections.entity.UserEntity;
 import com.zjusthow.minicollections.entity.UserIdentifierEntity;
 import com.zjusthow.minicollections.repository.UserIdentifierRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -37,6 +38,7 @@ public class MultiLoginUserDetailsService implements UserDetailsService {
         return loadUserById(ident.userId());
     }
 
+    @Cacheable(value = "userDetails", key = "#userId")
     public UserDetails loadUserById(Long userId) throws UsernameNotFoundException {
         UserEntity user = userRepo.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));

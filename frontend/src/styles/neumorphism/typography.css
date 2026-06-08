@@ -1,0 +1,36 @@
+/* neumorphism/typography.css */
+/* ── FLUID TYPE (viewport-width tokens; card placeholders still use cqi) ── */
+:root {
+  --neu-fs-8: clamp(7px, 0.8vw, calc(8px * var(--neu-font-scale, 1)));
+  --neu-fs-10: clamp(8px, 1vw, calc(10px * var(--neu-font-scale, 1)));
+  --neu-fs-11: clamp(8px, 1.1vw, calc(11px * var(--neu-font-scale, 1)));
+  --neu-fs-12: clamp(9px, 1.2vw, calc(12px * var(--neu-font-scale, 1)));
+  --neu-fs-13: clamp(9px, 1.3vw, calc(13px * var(--neu-font-scale, 1)));
+  --neu-fs-14: clamp(10px, 1.4vw, calc(14px * var(--neu-font-scale, 1)));
+  --neu-fs-15: clamp(10px, 1.5vw, calc(15px * var(--neu-font-scale, 1)));
+  --neu-fs-16: clamp(11px, 1.6vw, calc(16px * var(--neu-font-scale, 1)));
+  --neu-fs-17: clamp(11px, 1.7vw, calc(17px * var(--neu-font-scale, 1)));
+  --neu-fs-18: clamp(12px, 1.8vw, calc(18px * var(--neu-font-scale, 1)));
+  --neu-fs-20: clamp(13px, 2vw, calc(20px * var(--neu-font-scale, 1)));
+  --neu-fs-22: clamp(14px, 2.2vw, calc(22px * var(--neu-font-scale, 1)));
+  --neu-fs-36: clamp(22px, 3.6vw, calc(36px * var(--neu-font-scale, 1)));
+  --neu-size-28: clamp(24px, 2.8vw, calc(28px * var(--neu-font-scale, 1)));
+  --neu-confirm-fs: clamp(6px, 1vw, calc(10px * var(--neu-font-scale, 1)));
+  --neu-confirm-fs-compact: clamp(5px, 0.8vw, calc(8px * var(--neu-font-scale, 1)));
+  --neu-confirm-fs-h: clamp(8px, 1.1vw, calc(11px * var(--neu-font-scale, 1)));
+
+  --ant-font-size: var(--neu-fs-14);
+  --ant-font-size-sm: var(--neu-fs-12);
+  --ant-font-size-lg: var(--neu-fs-16);
+  --ant-font-size-xl: var(--neu-fs-20);
+  --ant-font-size-heading-1: clamp(22px, 3.8vw, calc(38px * var(--neu-font-scale, 1)));
+  --ant-font-size-heading-2: clamp(18px, 3vw, calc(30px * var(--neu-font-scale, 1)));
+  --ant-font-size-heading-3: clamp(16px, 2.4vw, calc(24px * var(--neu-font-scale, 1)));
+  --ant-font-size-heading-4: var(--neu-fs-20);
+  --ant-font-size-heading-5: var(--neu-fs-16);
+}
+
+.ant-layout-header {
+  --neu-header-action-btn-width: clamp(34px, calc(2.8vw + 0.75em), 50px);
+}
+

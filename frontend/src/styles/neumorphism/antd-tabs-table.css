@@ -1,0 +1,110 @@
+/* neumorphism/antd-tabs-table.css */
+/* ── TABS (antd — kept for compatibility) ─────────────────── */
+.ant-tabs-nav::before {
+  border-bottom: none;
+}
+
+.ant-tabs-nav {
+  margin-bottom: 0;
+  padding: 0 4px;
+}
+
+.ant-tabs-tab {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0 0 0 0;
+  padding: 10px 24px;
+  margin-right: 6px;
+  color: var(--neu-text-2);
+  font-weight: 400;
+  box-shadow: var(--raised-sm);
+  transition: all 0.18s ease;
+  position: relative;
+}
+
+.ant-tabs-tab:hover:not(.ant-tabs-tab-active) {
+  color: var(--neu-text);
+}
+
+.ant-tabs-tab.ant-tabs-tab-active {
+  box-shadow: var(--inset);
+  background: var(--neu-bg);
+}
+
+.ant-tabs-tab-btn {
+  color: inherit;
+}
+
+.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: var(--neu-accent);
+  text-shadow: none;
+}
+
+.ant-tabs-ink-bar {
+  background: var(--neu-accent);
+  height: 3px;
+  border-radius: 0;
+  bottom: 0;
+}
+
+/* tab content area */
+.ant-tabs-content-holder {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0 0 0 0;
+  padding: 24px;
+  box-shadow: var(--inset);
+}
+
+/* ── TABLE ────────────────────────────────────────────────── */
+.ant-table {
+  background: transparent;
+  border-radius: 0;
+}
+
+.ant-table-container {
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.ant-table-thead > tr > th,
+.ant-table-thead > tr > .ant-table-cell {
+  background: rgba(184, 185, 190, 0.12);
+  border-bottom: 1px solid var(--neu-border);
+  color: var(--neu-text-2);
+  font-size: var(--neu-fs-11);
+  font-weight: 400;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.ant-table-tbody > tr > td,
+.ant-table-tbody > tr > .ant-table-cell {
+  background: transparent;
+  border-bottom: 1px solid rgba(184, 185, 190, 0.2);
+  color: var(--neu-text);
+  font-size: var(--neu-fs-13);
+  transition: background 0.15s;
+}
+
+.ant-table-tbody > tr:last-child > td,
+.ant-table-tbody > tr:last-child > .ant-table-cell {
+  border-bottom: none;
+}
+
+.ant-table-tbody > tr.ant-table-row:hover > td,
+.ant-table-tbody > tr.ant-table-row:hover > .ant-table-cell {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.ant-table-pagination.ant-pagination {
+  margin: 16px 0 0;
+}
+
+/* ── DRAWER FOOTER ────────────────────────────────────────── */
+.ant-drawer-footer {
+  background: var(--neu-bg);
+  border-top: 1px solid var(--neu-border);
+  padding: 16px 24px;
+}
+

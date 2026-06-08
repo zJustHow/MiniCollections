@@ -1,0 +1,348 @@
+/* neumorphism/cards-images.css */
+/* ── CARDS ────────────────────────────────────────────────── */
+.ant-card {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  box-shadow: var(--raised);
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+  overflow: hidden;
+}
+
+.ant-card-hoverable:hover:not(.neu-card) {
+  transform: translateY(-3px);
+  box-shadow:
+    10px 10px 22px var(--neu-sd),
+    -6px -6px 16px var(--neu-sl);
+}
+
+.ant-card-hoverable:active:not(.neu-card) {
+  transform: translateY(0);
+  box-shadow: var(--inset);
+}
+
+.ant-card-body {
+  background: var(--neu-bg);
+  border-top: 1px solid var(--neu-border);
+  color: var(--neu-text);
+}
+
+/* Cover pad — image groove + nameplate share horizontal inset (pad-x + nameplate 6px = well-inset) */
+.neu-card-cover {
+  --neu-card-cover-pad-x: 2.5%;
+  --neu-card-cover-pad-y: 2.5%;
+  --neu-card-cover-pad-bottom: 2%;
+  padding: var(--neu-card-cover-pad-y) var(--neu-card-cover-pad-x)
+    var(--neu-card-cover-pad-bottom);
+}
+
+/* Tile cards — placeholder icon scales with card width; nameplate type uses --neu-fs-* (vw) */
+.ant-card.neu-card .ant-card-cover {
+  container-type: inline-size;
+  container-name: neu-card-tile;
+}
+
+.ant-card.neu-card .ant-card-cover .neu-nameplate {
+  padding-block: clamp(2px, 0.4vw, 6px) clamp(6px, 1vw, 12px);
+  padding-inline: clamp(16px, 1.8vw, 24px);
+}
+
+.ant-card.neu-card .ant-card-cover .neu-card-image-placeholder {
+  font-size: clamp(18px, 13cqi, var(--neu-placeholder-icon-size, 36px));
+}
+
+/* Upload tile (div.neu-card--upload, no .ant-card-cover wrapper) */
+.neu-card.neu-card--upload .neu-card-cover {
+  container-type: inline-size;
+  container-name: neu-card-tile;
+}
+
+.neu-card.neu-card--upload .neu-card-cover .neu-card-image-placeholder {
+  font-size: clamp(18px, 13cqi, var(--neu-placeholder-icon-size, 36px));
+}
+
+.neu-card-image-well,
+.neu-detail-image-well {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0;
+  --neu-card-well-inset: 6px;
+  --neu-groove-pad: 4px;
+}
+
+.neu-card-image-well {
+  padding-top: 75%;
+}
+
+.neu-card-image-slot {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-card-image-preload {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.neu-detail-image-well {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+}
+
+.neu-panel {
+  border-radius: 0;
+  box-shadow: var(--raised-sm);
+  background: var(--neu-bg);
+  padding: 14px 16px;
+}
+
+.neu-panel-label {
+  font-size: var(--neu-fs-13);
+  color: var(--neu-text-2);
+  margin: 0 0 8px;
+}
+
+/* ── Tags ─────────────────────────────────────────────────── */
+.neu-tag {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 1px 8px;
+  font-size: var(--neu-fs-12);
+  font-weight: 600;
+  line-height: 20px;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  color: #fff;
+  background: var(--neu-tag-bg, var(--neu-text-2));
+  box-shadow: var(--neu-tag-inset, var(--inset-sm));
+}
+
+.neu-tag--blue {
+  --neu-tag-bg: var(--neu-accent-light);
+  --neu-tag-inset: var(--inset-accent-sm);
+}
+
+.neu-tag--volcano {
+  --neu-tag-bg: var(--neu-volcano);
+  --neu-tag-inset: var(--inset-volcano-sm);
+}
+
+.neu-tag--purple {
+  --neu-tag-bg: var(--neu-purple);
+  --neu-tag-inset: var(--inset-purple-sm);
+}
+
+.neu-tag--orange {
+  --neu-tag-bg: var(--neu-warning);
+  --neu-tag-inset: var(--inset-warning-sm);
+}
+
+.neu-tag--green {
+  --neu-tag-bg: var(--neu-success);
+  --neu-tag-inset: var(--inset-success-sm);
+}
+
+.neu-tag--red {
+  --neu-tag-bg: var(--neu-danger-light);
+  --neu-tag-inset: var(--inset-danger-sm);
+}
+
+.neu-tag--cyan {
+  --neu-tag-bg: var(--neu-cyan);
+  --neu-tag-inset: var(--inset-cyan-sm);
+}
+
+.neu-panel-body {
+  font-size: var(--neu-fs-13);
+  font-weight: 400;
+  color: var(--neu-text);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.neu-panel-section {
+  margin-top: 16px;
+}
+
+.neu-detail-follow-on {
+  margin-top: 0;
+}
+
+.neu-panel + .neu-detail-follow-on {
+  margin-top: 24px;
+}
+
+.neu-object-detail-skeleton-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.neu-object-detail-skeleton-image-col {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+
+.neu-object-detail-skeleton-info-col {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.neu-object-detail-skeleton-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.neu-object-detail-skeleton-row {
+  width: 72%;
+  height: 14px;
+}
+
+.neu-object-detail-skeleton-notes {
+  width: 92%;
+  height: 48px;
+}
+
+.neu-object-detail-skeleton-label {
+  display: block;
+  width: 96px;
+  height: 13px;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .neu-object-detail-skeleton-image-col {
+    flex: 0 0 45%;
+    max-width: 45%;
+  }
+
+  .neu-object-detail-skeleton-info-col {
+    flex: 1 1 0;
+  }
+}
+
+.neu-card-thumb {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 0;
+  background: var(--neu-bg);
+}
+
+.neu-card-thumb-well {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 0;
+  --neu-card-well-inset: 3px;
+  --neu-groove-pad: 2px;
+}
+
+.neu-card-thumb-well .neu-card-image-placeholder {
+  --neu-placeholder-icon-size: 18px;
+}
+
+.neu-card-thumb-well .neu-card-image-placeholder svg,
+.neu-card-thumb-well .neu-card-image-placeholder .anticon {
+  font-size: inherit;
+}
+
+.neu-image-groove-well .neu-card-image-frame {
+  position: relative;
+  flex: 0 0 auto;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 0;
+  padding: var(--neu-groove-pad);
+  background: var(--neu-bg);
+  line-height: 0;
+}
+
+/* Inset rim drawn above the photo */
+.neu-image-groove-well .neu-card-image-groove {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: var(--inset);
+  background: transparent;
+}
+
+.neu-image-groove-well .neu-card-image-frame--fill {
+  position: absolute;
+  inset: var(--neu-card-well-inset);
+  box-shadow: var(--inset);
+}
+
+.neu-image-groove-well .neu-card-image-frame img {
+  position: relative;
+  z-index: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: contain;
+  object-position: center;
+}
+
+.neu-card-image-well--cover .neu-card-image-frame img {
+  object-fit: cover;
+}
+
+/* Brand logos: smaller artwork + lift off the light groove background */
+.neu-card-image-well--logo .neu-card-image-frame--fill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-card-image-well--logo .neu-card-image-frame img {
+  width: 68%;
+  height: 68%;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.35))
+    drop-shadow(0 1px 3px rgba(0, 0, 0, 0.2));
+}
+
+.neu-card-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--neu-placeholder-icon-size, 18px);
+}
+
+.neu-image-groove-well .neu-card-image-placeholder .anticon,
+.neu-image-groove-well .neu-card-image-placeholder svg {
+  font-size: inherit !important;
+  width: 1em !important;
+  height: 1em !important;
+  line-height: 1;
+}
+
+.admin-table-logo {
+  width: 36px;
+  height: 36px;
+}
+
+.admin-table-logo .neu-image-groove-well {
+  width: 100%;
+  height: 100%;
+}
+

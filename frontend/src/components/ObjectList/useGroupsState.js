@@ -7,7 +7,12 @@ import { mutateSearchParams } from "../../utils/searchParams";
 import usePagedList from "../../hooks/usePagedList";
 import useCombinedBrandSearch from "../../hooks/useCombinedBrandSearch";
 import { App, Form } from "antd";
-import { getGroupsPage, searchGroupsCombinedPage, createGroup, PAGE_SIZE } from "../../utils";
+import { PAGE_SIZE } from "../../utils/apiClient";
+import {
+  getGroupsPage,
+  searchGroupsCombinedPage,
+  createGroup,
+} from "../../utils/groupsApi";
 import { useLocale } from "../../LocaleContext";
 
 export default function useGroupsState() {
@@ -26,14 +31,15 @@ export default function useGroupsState() {
   const [groupForm] = Form.useForm();
   const [groupImageData, setGroupImageData] = useState(null);
 
+  const onGroupsTab = location.pathname === "/groups";
   const groupSearchActive =
-    location.pathname === "/groups" && Boolean((searchValue ?? "").trim());
+    onGroupsTab && Boolean((searchValue ?? "").trim());
 
   const groupsList = usePagedList(
     ({ size, page }) => getGroupsPage({ size, page }),
     {
       resetKey: "groups-list",
-      enabled: !groupSearchActive,
+      enabled: onGroupsTab && !groupSearchActive,
       pageSize: PAGE_SIZE,
       pageParamKey: "page",
       reservedFirstPageSlots: 1,

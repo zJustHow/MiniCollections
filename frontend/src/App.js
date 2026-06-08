@@ -19,20 +19,31 @@ import {
   Outlet,
 } from "react-router-dom";
 import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
-import ObjectList from "./components/ObjectList";
-import GuestBrandsView from "./components/GuestBrandsView";
 import SiteLogo from "./components/SiteLogo";
-import LoginPage from "./pages/LoginPage";
-import BrandObjectsPage from "./pages/BrandObjectsPage";
-import BrandObjectDetailPage from "./pages/BrandObjectDetailPage";
-import GroupObjectsPage from "./pages/GroupObjectsPage";
-import GroupObjectDetailPage from "./pages/GroupObjectDetailPage";
-import ProfilePage from "./pages/ProfilePage";
-import { getMe, logout } from "./utils";
+import { getMe } from "./utils/usersApi";
+import { logout } from "./utils/authApi";
 import { scrollAppToTop } from "./utils/scroll";
 import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
 
+const ObjectList = lazyWithRetry(() => import("./components/ObjectList"));
+const GuestBrandsView = lazyWithRetry(
+  () => import("./components/GuestBrandsView"),
+);
+const LoginPage = lazyWithRetry(() => import("./pages/LoginPage"));
+const BrandObjectsPage = lazyWithRetry(
+  () => import("./pages/BrandObjectsPage"),
+);
+const BrandObjectDetailPage = lazyWithRetry(
+  () => import("./pages/BrandObjectDetailPage"),
+);
+const GroupObjectsPage = lazyWithRetry(
+  () => import("./pages/GroupObjectsPage"),
+);
+const GroupObjectDetailPage = lazyWithRetry(
+  () => import("./pages/GroupObjectDetailPage"),
+);
+const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"));
 const RegisterPage = lazyWithRetry(() => import("./pages/RegisterPage"));
 const ForgotPasswordPage = lazyWithRetry(
   () => import("./pages/ForgotPasswordPage"),
@@ -51,6 +62,11 @@ const WechatCallbackPage = lazyWithRetry(
 );
 
 const { Header, Content } = Layout;
+
+function LazyPageFallback() {
+  const location = useLocation();
+  return <RouteSkeleton pathname={location.pathname} />;
+}
 
 function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
   const navigate = useNavigate();
@@ -397,7 +413,9 @@ export default function App() {
           authed ? (
             <Navigate to="/" replace />
           ) : (
-            <LoginPage onSuccess={handleLoginSuccess} />
+            <Suspense fallback={<PageLoader variant="splash" />}>
+              <LoginPage onSuccess={handleLoginSuccess} />
+            </Suspense>
           )
         }
       />
@@ -451,16 +469,37 @@ export default function App() {
             !authed ? (
               <Navigate to="/login" replace />
             ) : (
-              <ProfilePage
-                profile={profile}
-                onProfileChange={handleProfileChange}
-                onLogout={handleLogout}
-              />
+              <Suspense fallback={<PageLoader variant="profile" />}>
+                <ProfilePage
+                  profile={profile}
+                  onProfileChange={handleProfileChange}
+                  onLogout={handleLogout}
+                />
+              </Suspense>
             )
           }
         />
-        <Route element={authed ? <ObjectList isAdmin={isAdmin} /> : <Outlet />}>
-          <Route index element={authed ? null : <GuestBrandsView />} />
+        <Route
+          element={
+            authed ? (
+              <Suspense fallback={<LazyPageFallback />}>
+                <ObjectList isAdmin={isAdmin} />
+              </Suspense>
+            ) : (
+              <Outlet />
+            )
+          }
+        >
+          <Route
+            index
+            element={
+              authed ? null : (
+                <Suspense fallback={<PageLoader variant="brands" />}>
+                  <GuestBrandsView />
+                </Suspense>
+              )
+            }
+          />
           <Route
             path="groups"
             element={authed ? null : <Navigate to="/login" replace />}
@@ -469,29 +508,41 @@ export default function App() {
         <Route
           path="brands/:brandId"
           element={
-            <BrandObjectsPage isAdmin={isAdmin && authed} authed={authed} />
+            <Suspense fallback={<PageLoader variant="brandObjects" />}>
+              <BrandObjectsPage isAdmin={isAdmin && authed} authed={authed} />
+            </Suspense>
           }
         />
         <Route
           path="brands/:brandId/objects/:objectId"
           element={
-            <BrandObjectDetailPage
-              isAdmin={isAdmin && authed}
-              authed={authed}
-            />
+            <Suspense fallback={<PageLoader variant="brandObjectDetail" />}>
+              <BrandObjectDetailPage
+                isAdmin={isAdmin && authed}
+                authed={authed}
+              />
+            </Suspense>
           }
         />
         <Route
           path="groups/:groupId"
           element={
-            authed ? <GroupObjectsPage /> : <Navigate to="/login" replace />
+            authed ? (
+              <Suspense fallback={<PageLoader variant="groupObjects" />}>
+                <GroupObjectsPage />
+              </Suspense>
+            ) : (
+              <Navigate to="/login" replace />
+            )
           }
         />
         <Route
           path="groups/:groupId/objects/:objectId"
           element={
             authed ? (
-              <GroupObjectDetailPage />
+              <Suspense fallback={<PageLoader variant="groupObjectDetail" />}>
+                <GroupObjectDetailPage />
+              </Suspense>
             ) : (
               <Navigate to="/login" replace />
             )

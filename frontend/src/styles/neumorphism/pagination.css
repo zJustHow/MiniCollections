@@ -1,0 +1,110 @@
+/* neumorphism/pagination.css */
+/* ── LIST PAGINATION (neu-btn--pagination) ────────────────── */
+.neu-pagination-row {
+  --neu-grid-cols: 4;
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: repeat(var(--neu-grid-cols), minmax(0, 1fr));
+  gap: 16px;
+}
+
+.neu-pagination-controls {
+  grid-column: -1;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.neu-pagination-controls .ant-btn.neu-btn--pagination {
+  box-sizing: border-box;
+  height: 36px;
+  min-width: 36px;
+  padding-inline: 12px;
+}
+
+.neu-pagination-controls .ant-btn.neu-btn--pagination.ant-btn-icon-only {
+  width: 36px;
+  padding-inline: 0;
+}
+
+.neu-pagination-ellipsis {
+  min-width: 24px;
+  text-align: center;
+  color: var(--neu-text-2);
+  font-size: var(--neu-fs-13);
+  user-select: none;
+}
+
+@media (max-width: 992px) {
+  .neu-pagination-controls {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ── PAGINATION (antd table) ──────────────────────────────── */
+.ant-pagination .ant-pagination-item {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  box-shadow: var(--raised-sm);
+}
+
+.ant-pagination .ant-pagination-item a {
+  color: var(--neu-text);
+  transition: var(--neu-btn-transition);
+}
+
+.ant-pagination .ant-pagination-item:hover:not(.ant-pagination-item-active) {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-pagination .ant-pagination-item:active:not(.ant-pagination-item-active) {
+  box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-pagination .ant-pagination-item-active {
+  box-shadow: var(--inset);
+  background: var(--neu-bg);
+}
+
+.ant-pagination .ant-pagination-item-active a {
+  color: var(--neu-accent);
+  font-weight: 400;
+}
+
+.ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next .ant-pagination-item-link {
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  color: var(--neu-text-2);
+  box-shadow: var(--raised-sm);
+}
+
+.ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
+  color: var(--neu-accent);
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.ant-pagination .ant-pagination-prev:active .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next:active .ant-pagination-item-link {
+  box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+/* ── TOOLTIP ──────────────────────────────────────────────── */
+.ant-tooltip .ant-tooltip-inner {
+  background: var(--neu-dark);
+  border-radius: 0;
+  box-shadow: var(--raised-sm);
+  font-weight: 400;
+}
+

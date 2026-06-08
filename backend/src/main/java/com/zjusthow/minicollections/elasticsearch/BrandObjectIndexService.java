@@ -19,10 +19,13 @@ import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -124,20 +127,7 @@ public class BrandObjectIndexService {
     }
 
     public void index(BrandObjectEntity entity) {
-        if (!isEnabled()) {
-            return;
-        }
-        BrandEntity brand = brandRepository.findById(entity.brandId()).orElse(null);
-        SeriesEntity series = entity.seriesId() != null
-                ? seriesRepository.findById(entity.seriesId()).orElse(null)
-                : null;
-        CategoryEntity category = entity.categoryId() != null
-                ? categoryRepository.findById(entity.categoryId()).orElse(null)
-                : null;
-        ScaleEntity scale = entity.scaleId() != null
-                ? scaleRepository.findById(entity.scaleId()).orElse(null)
-                : null;
-        brandObjectSearchRepository.save(toDocument(entity, brand, series, category, scale));
+        indexAll(List.of(entity));
     }
 
     public void delete(long id) {
@@ -151,17 +141,74 @@ public class BrandObjectIndexService {
         if (!isEnabled()) {
             return;
         }
-        brandObjectRepository.findByBrandId(brandId)
-                .orElse(List.of())
-                .forEach(this::index);
+        indexAll(brandObjectRepository.findByBrandId(brandId).orElse(List.of()));
     }
 
     public void reindexForSeries(long seriesId) {
         if (!isEnabled()) {
             return;
         }
-        brandObjectRepository.findBySeriesId(seriesId).forEach(this::index);
+        indexAll(brandObjectRepository.findBySeriesId(seriesId));
     }
+
+    private void indexAll(List<BrandObjectEntity> entities) {
+        if (!isEnabled() || entities.isEmpty()) {
+            return;
+        }
+        RelationMaps maps = buildRelationMaps(entities);
+        List<BrandObjectDocument> docs = entities.stream()
+                .map(entity -> toDocument(
+                        entity,
+                        maps.brandById.get(entity.brandId()),
+                        entity.seriesId() != null ? maps.seriesById.get(entity.seriesId()) : null,
+                        entity.categoryId() != null ? maps.categoryById.get(entity.categoryId()) : null,
+                        entity.scaleId() != null ? maps.scaleById.get(entity.scaleId()) : null))
+                .toList();
+        brandObjectSearchRepository.saveAll(docs);
+    }
+
+    private RelationMaps buildRelationMaps(List<BrandObjectEntity> entities) {
+        Set<Long> brandIds = new HashSet<>();
+        Set<Long> seriesIds = new HashSet<>();
+        Set<Long> categoryIds = new HashSet<>();
+        Set<Long> scaleIds = new HashSet<>();
+        for (BrandObjectEntity entity : entities) {
+            brandIds.add(entity.brandId());
+            if (entity.seriesId() != null) {
+                seriesIds.add(entity.seriesId());
+            }
+            if (entity.categoryId() != null) {
+                categoryIds.add(entity.categoryId());
+            }
+            if (entity.scaleId() != null) {
+                scaleIds.add(entity.scaleId());
+            }
+        }
+        Map<Long, BrandEntity> brandById = new HashMap<>();
+        if (!brandIds.isEmpty()) {
+            brandRepository.findAllById(brandIds).forEach(brand -> brandById.put(brand.id(), brand));
+        }
+        Map<Long, SeriesEntity> seriesById = new HashMap<>();
+        if (!seriesIds.isEmpty()) {
+            seriesRepository.findAllById(seriesIds).forEach(series -> seriesById.put(series.id(), series));
+        }
+        Map<Long, CategoryEntity> categoryById = new HashMap<>();
+        if (!categoryIds.isEmpty()) {
+            categoryRepository.findAllById(categoryIds)
+                    .forEach(category -> categoryById.put(category.id(), category));
+        }
+        Map<Long, ScaleEntity> scaleById = new HashMap<>();
+        if (!scaleIds.isEmpty()) {
+            scaleRepository.findAllById(scaleIds).forEach(scale -> scaleById.put(scale.id(), scale));
+        }
+        return new RelationMaps(brandById, seriesById, categoryById, scaleById);
+    }
+
+    private record RelationMaps(
+            Map<Long, BrandEntity> brandById,
+            Map<Long, SeriesEntity> seriesById,
+            Map<Long, CategoryEntity> categoryById,
+            Map<Long, ScaleEntity> scaleById) {}
 
     private boolean shouldRebuild(IndexOperations indexOps, long indexedCount, long dbCount) {
         if (!indexOps.exists()) {

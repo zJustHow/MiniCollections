@@ -1,19 +1,14 @@
-import { useEffect, useState } from "react";
 import NeuCard from "../NeuCard";
-import NeuCardGridSkeleton from "../NeuCardGridSkeleton";
-import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
-import ListPagination from "../ListPagination";
-import ObjectListPageLayout from "../ObjectListPageLayout";
-import SearchResultsSummary from "../SearchResultsSummary";
+import useTabListSearchField from "../../hooks/useTabListSearchField";
+import ObjectListPageShell from "../listPage/ObjectListPageShell";
+import TabListPageBody from "../listPage/TabListPageBody";
+import TabCombinedSearchSection from "../listPage/TabCombinedSearchSection";
+import { withAddCardSlot } from "../../utils/listPageUtils";
 import { useLocale } from "../../LocaleContext";
-import { PAGE_SIZE } from "../../utils";
-
-const { Search } = NeuInput;
 
 export default function GroupsTab({
   groups,
-  loading,
   onSearch,
   onGroupClick,
   onCreateGroup,
@@ -26,11 +21,10 @@ export default function GroupsTab({
 }) {
   const { t } = useLocale();
   const navigate = useNavigate();
-  const [draftQuery, setDraftQuery] = useState(searchValue ?? "");
-
-  useEffect(() => {
-    setDraftQuery(searchValue ?? "");
-  }, [searchValue]);
+  const { draftQuery, handleDraftChange } = useTabListSearchField(
+    searchValue,
+    onSearch,
+  );
 
   const renderGroupCard = (group) =>
     group.id === "__add__" ? (
@@ -43,20 +37,6 @@ export default function GroupsTab({
         onClick={() => onGroupClick(group)}
       />
     );
-
-  const hasGroupResults = (combinedSearchPage?.totalBrands ?? 0) > 0;
-  const showObjectsSection =
-    searchActive &&
-    (searchResultObjects.length > 0 ||
-      combinedSearchPage?.loading ||
-      (combinedSearchPage?.totalObjects ?? 0) > 0);
-  const showGroupCards = searchResultGroups.length > 0;
-  const showObjectCards =
-    searchResultObjects.length > 0 || combinedSearchPage?.loading;
-
-  const spinning = searchActive
-    ? Boolean(combinedSearchPage?.loading)
-    : Boolean(groupsListPage?.loading);
 
   const renderObjectCard = (obj) => (
     <NeuCard
@@ -79,102 +59,62 @@ export default function GroupsTab({
     />
   );
 
-  const showAddCard = (groupsListPage?.page ?? 0) === 0;
-  const browseData = showAddCard ? [{ id: "__add__" }, ...groups] : groups;
-  const activePage = searchActive ? combinedSearchPage : groupsListPage;
+  const hasGroupResults = (combinedSearchPage?.totalBrands ?? 0) > 0;
+  const showObjectsSection =
+    searchActive &&
+    (searchResultObjects.length > 0 ||
+      combinedSearchPage?.loading ||
+      (combinedSearchPage?.totalObjects ?? 0) > 0);
+  const showGroupCards = searchResultGroups.length > 0;
+  const showObjectCards =
+    searchResultObjects.length > 0 || combinedSearchPage?.loading;
+
+  const spinning = searchActive
+    ? Boolean(combinedSearchPage?.loading)
+    : Boolean(groupsListPage?.loading);
+
+  const browseData = withAddCardSlot(
+    groups,
+    (groupsListPage?.page ?? 0) === 0,
+  );
 
   return (
-    <div style={{ position: "relative", minHeight: 200, width: "100%" }}>
-      <ObjectListPageLayout
-          summary={
-            <SearchResultsSummary
-              active={searchActive}
-              keyword={searchValue}
-              count={combinedSearchPage?.totalElements ?? 0}
-              exact={combinedSearchPage?.totalExact}
-              loading={searchActive && combinedSearchPage?.loading}
-            />
-          }
-          search={
-            <Search
-              id="groups-search"
-              name="groupsSearch"
-              placeholder={t("searchGroups")}
-              allowClear
-              value={draftQuery}
-              onSearch={onSearch}
-              onChange={(e) => {
-                const v = e.target.value;
-                setDraftQuery(v);
-                if (v === "") onSearch("");
-              }}
-            />
-          }
-        >
-          {searchActive ? (
-            <>
-              {spinning ? (
-                <NeuCardGridSkeleton variant="object" />
-              ) : (hasGroupResults || showObjectsSection) && (
-                <div className="neu-search-objects-cards">
-                  {showGroupCards && (
-                    <div className="neu-search-section-grid">
-                      {searchResultGroups.map(renderGroupCard)}
-                    </div>
-                  )}
-                  {showGroupCards &&
-                    showObjectsSection &&
-                    showObjectCards && (
-                      <div
-                        className="neu-search-section-divider"
-                        role="separator"
-                      />
-                    )}
-                  {showObjectsSection && showObjectCards && (
-                    <div className="neu-search-section-grid">
-                      {searchResultObjects.map(renderObjectCard)}
-                    </div>
-                  )}
-                </div>
-              )}
-              <ListPagination
-                page={activePage?.page ?? 0}
-                totalPages={activePage?.totalPages ?? 0}
-                loading={activePage?.loading}
-                onPageChange={activePage?.onPageChange}
-                pageSize={PAGE_SIZE}
-              />
-              {!spinning && !hasGroupResults && !showObjectsSection && (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "var(--neu-text-2)",
-                      padding: "32px 0",
-                    }}
-                  >
-                    {t("noSearchResults")}
-                  </div>
-                )}
-            </>
-          ) : (
-            <>
-              {spinning ? (
-                <NeuCardGridSkeleton />
-              ) : (
-                <div className="neu-list-page-browse-grid">
-                  {browseData.map(renderGroupCard)}
-                </div>
-              )}
-              <ListPagination
-                page={activePage?.page ?? 0}
-                totalPages={activePage?.totalPages ?? 0}
-                loading={activePage?.loading}
-                onPageChange={activePage?.onPageChange}
-                pageSize={PAGE_SIZE}
-              />
-            </>
-          )}
-        </ObjectListPageLayout>
-    </div>
+    <ObjectListPageShell
+      framed
+      searchActive={searchActive}
+      searchKeyword={searchValue}
+      resultPage={combinedSearchPage}
+      searchFieldId="groups-search"
+      searchFieldName="groupsSearch"
+      searchPlaceholder={t("searchGroups")}
+      draftQuery={draftQuery}
+      onDraftChange={handleDraftChange}
+      onSearch={onSearch}
+    >
+      <TabListPageBody
+        searchActive={searchActive}
+        spinning={spinning}
+        searchHasResults={hasGroupResults || showObjectsSection}
+        searchPaginationPage={combinedSearchPage}
+        browsePaginationPage={groupsListPage}
+        browsePaginationIncludeTotals={false}
+        browseItems={browseData}
+        renderBrowseItem={renderGroupCard}
+        searchContent={
+          <TabCombinedSearchSection
+            spinning={spinning}
+            hasResults={hasGroupResults || showObjectsSection}
+            showPrimaryCards={showGroupCards}
+            showObjectSection={showObjectsSection}
+            showObjectCards={showObjectCards}
+            showDivider={
+              showGroupCards && showObjectsSection && showObjectCards
+            }
+            primaryCards={searchResultGroups.map(renderGroupCard)}
+            objectCards={searchResultObjects.map(renderObjectCard)}
+          />
+        }
+      />
+    </ObjectListPageShell>
   );
 }

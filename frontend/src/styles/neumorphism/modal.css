@@ -1,0 +1,48 @@
+/* neumorphism/modal.css */
+/* ── MODAL ────────────────────────────────────────────────── */
+.ant-modal-content {
+  position: relative;
+  isolation: isolate;
+  background: var(--neu-bg);
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.ant-modal-content::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: var(--inset-lg);
+}
+
+.ant-modal-header {
+  background: var(--neu-bg);
+  border-bottom: 1px solid var(--neu-border);
+  border-radius: 0 0 0 0;
+  padding: 18px 24px;
+}
+
+.ant-modal-title {
+  color: var(--neu-text);
+  font-weight: 400;
+  font-size: var(--neu-fs-17);
+}
+
+.ant-modal-close-x {
+  color: var(--neu-text-2);
+}
+
+.ant-modal-body {
+  background: var(--neu-bg);
+}
+
+.ant-modal-footer {
+  background: var(--neu-bg);
+  border-top: 1px solid var(--neu-border);
+}
+

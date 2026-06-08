@@ -9,8 +9,17 @@ import usePagedList from "../hooks/usePagedList";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
 import DetailImage from "../components/DetailImage";
-import { deleteMySubmission, getMySubmissionsPage, FEEDBACK_PAGE_SIZE, resolveMediaUrl } from "../utils";
-import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
+import { FEEDBACK_PAGE_SIZE } from "../utils/apiClient";
+import { resolveMediaUrl } from "../utils/constants";
+import {
+  deleteMySubmission,
+  getMySubmissionsPage,
+} from "../utils/submissionsApi";
+import { createLazyModal } from "../utils/lazyModal";
+
+const SubmitObjectModal = createLazyModal(
+  () => import("../components/ObjectList/modals/SubmitObjectModal"),
+);
 import { FeedbackListSkeleton } from "../components/FeedbackPageSkeleton";
 import NeuFormDrawer from "../components/NeuFormDrawer";
 import dayjs from "dayjs";

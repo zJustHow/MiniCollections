@@ -1,0 +1,96 @@
+/* neumorphism/overlays.css */
+/* ── DIVIDER ──────────────────────────────────────────────── */
+.ant-divider {
+  border-color: var(--neu-border);
+}
+
+/* ── MODAL MASK ───────────────────────────────────────────── */
+.ant-modal-mask {
+  background: rgba(90, 100, 120, 0.22);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* ── MODAL & DRAWER ANIMATIONS ────────────────────────────── */
+/* antd v5 Modal uses transitionName="ant-zoom" (not zoom-big-fast) */
+/* Replace scale(0) start with a gentler scale+lift feel.           */
+
+@keyframes neu-modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes neu-modal-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+}
+
+/* Override initial hidden state (antd defaults to scale(0)) */
+.ant-zoom-enter,
+.ant-zoom-appear {
+  transform: scale(0.94) translateY(14px);
+  opacity: 0;
+}
+
+/* Modal enter */
+.ant-zoom-enter.ant-zoom-enter-active,
+.ant-zoom-appear.ant-zoom-appear-active {
+  animation-name: neu-modal-in;
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1); /* expo-out */
+  animation-fill-mode: both;
+}
+
+/* Modal leave */
+.ant-zoom-leave.ant-zoom-leave-active {
+  animation-name: neu-modal-out;
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.36, 0, 0.66, 0); /* sine-in */
+  animation-fill-mode: both;
+}
+
+/* Backdrop (mask) fade — sync with modal timing */
+.ant-fade-enter.ant-fade-enter-active,
+.ant-fade-appear.ant-fade-appear-active {
+  animation-duration: 260ms;
+  animation-timing-function: ease-out;
+}
+
+.ant-fade-leave.ant-fade-leave-active {
+  animation-duration: 200ms;
+  animation-timing-function: ease-in;
+}
+
+/* Drawer slide — smoother easing for future drawer usage */
+.ant-slide-right-enter.ant-slide-right-enter-active,
+.ant-slide-right-appear.ant-slide-right-appear-active,
+.ant-slide-left-enter.ant-slide-left-enter-active,
+.ant-slide-left-appear.ant-slide-left-appear-active,
+.ant-slide-up-enter.ant-slide-up-enter-active,
+.ant-slide-up-appear.ant-slide-up-appear-active,
+.ant-slide-down-enter.ant-slide-down-enter-active,
+.ant-slide-down-appear.ant-slide-down-appear-active {
+  animation-duration: 260ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ant-slide-right-leave.ant-slide-right-leave-active,
+.ant-slide-left-leave.ant-slide-left-leave-active,
+.ant-slide-up-leave.ant-slide-up-leave-active,
+.ant-slide-down-leave.ant-slide-down-leave-active {
+  animation-duration: 200ms;
+  animation-timing-function: cubic-bezier(0.36, 0, 0.66, 0);
+}
+

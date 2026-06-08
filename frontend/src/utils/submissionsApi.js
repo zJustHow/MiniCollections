@@ -23,9 +23,17 @@ export const deleteMySubmission = async (id) => {
   return handleResponse(response);
 };
 
-export const getAdminSubmissions = async (status) => {
-  const url = status ? `/admin/submissions?status=${status}` : "/admin/submissions";
-  const response = await fetch(url, { headers: authHeaders() });
+export const getAdminSubmissionCounts = async () => {
+  const response = await fetch("/admin/submissions/counts", { headers: authHeaders() });
+  return handleResponse(response);
+};
+
+export const getAdminSubmissionsPage = async ({ status, page = 0, size = FEEDBACK_PAGE_SIZE } = {}) => {
+  const params = new URLSearchParams({ page: String(page), size: String(size) });
+  if (status && status !== "ALL") {
+    params.set("status", status);
+  }
+  const response = await fetch(`/admin/submissions?${params}`, { headers: authHeaders() });
   return handleResponse(response);
 };
 

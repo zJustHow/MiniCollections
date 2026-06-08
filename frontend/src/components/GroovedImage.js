@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { PictureOutlined } from "@ant-design/icons";
 import {
   useAdaptiveImageFrame,
@@ -6,7 +6,7 @@ import {
 } from "./useAdaptiveImageFrame";
 import { resolveMediaUrl } from "../utils";
 
-export default function GroovedImage({
+function GroovedImage({
   imageUrl,
   alt = "",
   wellClassName = "neu-card-image-well",
@@ -67,7 +67,7 @@ export default function GroovedImage({
             className="neu-card-image-display"
             src={src}
             alt={alt}
-            loading="eager"
+            loading={loading}
             onLoad={onImageLoad}
             onError={onImageError}
           />
@@ -89,7 +89,9 @@ export default function GroovedImage({
           className="neu-card-image-display"
           src={src}
           alt={alt}
-          loading="eager"
+          loading={loading}
+          onLoad={onImageLoad}
+          onError={onImageError}
         />
         <div className="neu-card-image-groove" aria-hidden="true" />
       </div>
@@ -145,3 +147,5 @@ export default function GroovedImage({
     </div>
   );
 }
+
+export default memo(GroovedImage);
