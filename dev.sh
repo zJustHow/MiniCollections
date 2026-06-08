@@ -23,7 +23,7 @@ cleanup() {
 trap cleanup INT TERM
 
 # 1. Start infrastructure
-log "Starting Docker services (postgres / elasticsearch / minio)..."
+log "Starting Docker services (postgres / elasticsearch / redis / minio)..."
 docker compose -f "$ROOT/docker-compose.yml" up -d
 
 log "Waiting for Elasticsearch to be ready..."
@@ -37,6 +37,18 @@ until curl -sf "http://localhost:9200/_cluster/health?wait_for_status=yellow&tim
   sleep 2
 done
 log "Elasticsearch is ready."
+
+log "Waiting for Redis to be ready..."
+REDIS_RETRIES=0
+until nc -z 127.0.0.1 6379 2>/dev/null; do
+  REDIS_RETRIES=$((REDIS_RETRIES + 1))
+  if [ "$REDIS_RETRIES" -ge 30 ]; then
+    echo -e "${RED}[dev]${NC} Redis did not become ready after 60s. Try: docker compose -f \"$ROOT/docker-compose.yml\" up -d redis --force-recreate" >&2
+    exit 1
+  fi
+  sleep 2
+done
+log "Redis is ready."
 
 log "Uploading seed brand logos to MinIO..."
 if ! "$ROOT/scripts/upload-brand-logos.sh"; then

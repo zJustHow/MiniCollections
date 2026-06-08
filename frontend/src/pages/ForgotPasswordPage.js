@@ -194,6 +194,7 @@ export default function ForgotPasswordPage() {
                 prefix={<MailOutlined />}
                 placeholder={t("email")}
                 size="large"
+                autoComplete="email"
               />
             </Form.Item>
 
@@ -235,6 +236,7 @@ export default function ForgotPasswordPage() {
                     placeholder={t("phoneNumber")}
                     size="large"
                     style={{ flex: 1, minWidth: 0 }}
+                    autoComplete="tel-national"
                   />
                 </Form.Item>
               </div>
@@ -253,6 +255,7 @@ export default function ForgotPasswordPage() {
                     size="large"
                     style={{ flex: 1 }}
                     maxLength={6}
+                    autoComplete="one-time-code"
                   />
                 </Form.Item>
                 <NeuButton
@@ -278,6 +281,7 @@ export default function ForgotPasswordPage() {
                 prefix={<LockOutlined />}
                 placeholder={t("newPassword")}
                 size="large"
+                autoComplete="new-password"
               />
             </Form.Item>
 
@@ -300,6 +304,7 @@ export default function ForgotPasswordPage() {
                 prefix={<LockOutlined />}
                 placeholder={t("confirmPassword")}
                 size="large"
+                autoComplete="new-password"
               />
             </Form.Item>
 

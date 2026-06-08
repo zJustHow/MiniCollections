@@ -1,4 +1,5 @@
 import NeuPressableButton from "../components/NeuPressableButton";
+import ListPagination from "../components/ListPagination";
 import { App, Table } from "antd";
 import NeuTag from "../components/NeuTag";
 import {
@@ -21,6 +22,8 @@ import DetailDrawer from "./admin/DetailDrawer";
 import BrandsPanel from "./admin/BrandsPanel";
 import { neuRem } from "../theme/fontScale";
 
+const SUBMISSIONS_PAGE_SIZE = 20;
+
 export default function AdminPage() {
   const { message } = App.useApp();
   const { t } = useLocale();
@@ -33,6 +36,7 @@ export default function AdminPage() {
   const [activeStatus, setActiveStatus] = useState("PENDING");
 
   const [submissions, setSubmissions] = useState([]);
+  const [submissionsPage, setSubmissionsPage] = useState(0);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [approveModalOpen, setApproveModalOpen] = useState(false);
@@ -52,6 +56,7 @@ export default function AdminPage() {
   }, [message, t]);
 
   useEffect(() => {
+    setSubmissionsPage(0);
     fetchSubmissions(activeStatus);
   }, [fetchSubmissions, activeStatus]);
 
@@ -71,6 +76,11 @@ export default function AdminPage() {
   };
 
   const pendingCount = submissions.filter((s) => s.status === "PENDING").length;
+  const submissionsTotalPages = Math.ceil(submissions.length / SUBMISSIONS_PAGE_SIZE);
+  const paginatedSubmissions = submissions.slice(
+    submissionsPage * SUBMISSIONS_PAGE_SIZE,
+    (submissionsPage + 1) * SUBMISSIONS_PAGE_SIZE,
+  );
 
   const statusOptions = [
     { key: "PENDING",  label: t("submissionsPending"),  icon: <ClockCircleOutlined /> },
@@ -196,15 +206,23 @@ export default function AdminPage() {
           }}
         >
           {activeView === "submissions" ? (
-            <Table
-              rowKey="id"
-              dataSource={submissions}
-              columns={submissionColumns}
-              loading={submissionsLoading}
-              size="middle"
-              onRow={(record) => ({ onClick: () => setSelectedSubmission(record), style: { cursor: "pointer" } })}
-              pagination={{ pageSize: 20, showSizeChanger: false }}
-            />
+            <>
+              <Table
+                rowKey="id"
+                dataSource={paginatedSubmissions}
+                columns={submissionColumns}
+                loading={submissionsLoading}
+                size="middle"
+                onRow={(record) => ({ onClick: () => setSelectedSubmission(record), style: { cursor: "pointer" } })}
+                pagination={false}
+              />
+              <ListPagination
+                page={submissionsPage}
+                totalPages={submissionsTotalPages}
+                loading={submissionsLoading}
+                onPageChange={(nextPage) => setSubmissionsPage(nextPage - 1)}
+              />
+            </>
           ) : (
             <BrandsPanel />
           )}

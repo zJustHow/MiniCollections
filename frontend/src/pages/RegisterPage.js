@@ -199,6 +199,7 @@ export default function RegisterPage() {
                 prefix={<MailOutlined />}
                 placeholder={t("email")}
                 size="large"
+                autoComplete="email"
               />
             </Form.Item>
 
@@ -241,6 +242,7 @@ export default function RegisterPage() {
                     placeholder={t("phoneNumber")}
                     size="large"
                     style={{ flex: 1, minWidth: 0 }}
+                    autoComplete="tel-national"
                   />
                 </Form.Item>
               </div>
@@ -260,6 +262,7 @@ export default function RegisterPage() {
                     size="large"
                     style={{ flex: 1 }}
                     maxLength={6}
+                    autoComplete="one-time-code"
                   />
                 </Form.Item>
                 <NeuButton
@@ -286,6 +289,7 @@ export default function RegisterPage() {
                 prefix={<LockOutlined />}
                 placeholder={t("password")}
                 size="large"
+                autoComplete="new-password"
               />
             </Form.Item>
 
@@ -298,12 +302,13 @@ export default function RegisterPage() {
                 prefix={<UserOutlined />}
                 placeholder={t("username")}
                 size="large"
+                autoComplete="nickname"
               />
             </Form.Item>
 
             {/* Language toggle */}
             <Form.Item name="preferred_locale" hidden>
-              <NeuInput />
+              <NeuInput autoComplete="off" />
             </Form.Item>
             <div style={{ marginBottom: 24 }}>
               <div

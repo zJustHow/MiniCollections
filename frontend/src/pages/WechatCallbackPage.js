@@ -46,12 +46,14 @@ export default function WechatCallbackPage({ onSuccess, onBind }) {
   if (error) {
     return (
       <div
+        className="neu-type-container"
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
+          width: "100%",
           gap: 16,
           background: "var(--neu-bg)",
         }}
@@ -81,11 +83,13 @@ export default function WechatCallbackPage({ onSuccess, onBind }) {
 
   return (
     <div
+      className="neu-type-container"
       style={{
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         minHeight: "100vh",
+        width: "100%",
         background: "var(--neu-bg)",
         color: "var(--neu-text-2)",
         fontSize: neuRem(14),

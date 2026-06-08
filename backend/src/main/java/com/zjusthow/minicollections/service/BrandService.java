@@ -2,9 +2,8 @@ package com.zjusthow.minicollections.service;
 
 import com.zjusthow.minicollections.elasticsearch.BrandDocument;
 import com.zjusthow.minicollections.elasticsearch.BrandElasticsearchQueryService;
-import com.zjusthow.minicollections.elasticsearch.BrandObjectDocument;
 import com.zjusthow.minicollections.elasticsearch.BrandObjectElasticsearchQueryService;
-import com.zjusthow.minicollections.elasticsearch.BrandObjectSearchRepository;
+import com.zjusthow.minicollections.elasticsearch.BrandObjectIndexService;
 import com.zjusthow.minicollections.elasticsearch.BrandSearchRepository;
 import com.zjusthow.minicollections.elasticsearch.EsFacetBucket;
 import com.zjusthow.minicollections.elasticsearch.EsSearchFacetsResult;
@@ -76,7 +75,7 @@ public class BrandService {
     private final ScaleRepository scaleRepository;
     private final DisplayLocaleResolver displayLocaleResolver;
     private final BrandObjectElasticsearchQueryService brandObjectElasticsearchQueryService;
-    private final BrandObjectSearchRepository brandObjectSearchRepository;
+    private final BrandObjectIndexService brandObjectIndexService;
     private final BrandElasticsearchQueryService brandElasticsearchQueryService;
     private final BrandSearchRepository brandSearchRepository;
     private final ImageStorageService imageStorageService;
@@ -94,7 +93,7 @@ public class BrandService {
             ScaleRepository scaleRepository,
             DisplayLocaleResolver displayLocaleResolver,
             @Autowired(required = false) BrandObjectElasticsearchQueryService brandObjectElasticsearchQueryService,
-            @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository,
+            @Autowired(required = false) BrandObjectIndexService brandObjectIndexService,
             @Autowired(required = false) BrandElasticsearchQueryService brandElasticsearchQueryService,
             @Autowired(required = false) BrandSearchRepository brandSearchRepository,
             @Autowired(required = false) ImageStorageService imageStorageService,
@@ -107,7 +106,7 @@ public class BrandService {
         this.scaleRepository = scaleRepository;
         this.displayLocaleResolver = displayLocaleResolver;
         this.brandObjectElasticsearchQueryService = brandObjectElasticsearchQueryService;
-        this.brandObjectSearchRepository = brandObjectSearchRepository;
+        this.brandObjectIndexService = brandObjectIndexService;
         this.brandElasticsearchQueryService = brandElasticsearchQueryService;
         this.brandSearchRepository = brandSearchRepository;
         this.imageStorageService = imageStorageService;
@@ -1058,7 +1057,7 @@ public class BrandService {
         String imageUrl = existing.imageUrl();
         brandObjectRepository.deleteById(existing.id());
         if (esEnabled()) {
-            brandObjectSearchRepository.deleteById(existing.id());
+            brandObjectIndexService.delete(existing.id());
         }
         deleteStoredImage(imageUrl);
     }
@@ -1146,12 +1145,7 @@ public class BrandService {
     }
 
     private void reindexBrandObjectsForBrand(BrandEntity brand) {
-        if (!esEnabled()) {
-            return;
-        }
-        brandObjectRepository.findByBrandId(brand.id())
-                .orElse(List.of())
-                .forEach(this::indexBrandObject);
+        brandObjectIndexService.reindexForBrand(brand.id());
     }
 
     private void validateSeriesForBrand(Long seriesId, Long brandId) {
@@ -1184,28 +1178,6 @@ public class BrandService {
     }
 
     private void indexBrandObject(BrandObjectEntity saved) {
-        if (!esEnabled()) {
-            return;
-        }
-        BrandEntity brand = brandRepository.findById(saved.brandId()).orElse(null);
-        SeriesEntity series = saved.seriesId() != null
-                ? seriesRepository.findById(saved.seriesId()).orElse(null)
-                : null;
-        CategoryEntity category = saved.categoryId() != null
-                ? categoryRepository.findById(saved.categoryId()).orElse(null)
-                : null;
-        ScaleEntity scale = saved.scaleId() != null
-                ? scaleRepository.findById(saved.scaleId()).orElse(null)
-                : null;
-        brandObjectSearchRepository.save(BrandObjectDocument.from(
-                saved,
-                brand != null ? brand.nameEn() : null,
-                brand != null ? brand.abbreviation() : null,
-                brand != null ? brand.nameZh() : null,
-                series != null ? series.nameEn() : null,
-                series != null ? series.nameZh() : null,
-                category != null ? category.nameEn() : null,
-                category != null ? category.nameZh() : null,
-                scale != null ? scale.code() : null));
+        brandObjectIndexService.index(saved);
     }
 }

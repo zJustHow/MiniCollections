@@ -1,10 +1,10 @@
 import { App, Upload } from "antd";
-import { DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
+import { LoadingOutlined } from "@ant-design/icons";
 import { useEffect, useId, useRef, useState } from "react";
 import { discardUploadedImage, uploadImage } from "../utils";
 import { useLocale } from "../LocaleContext";
 import NeuCard from "./NeuCard";
-import NeuPressableButton from "./NeuPressableButton";
+import ConfirmDeleteButton from "./ConfirmDeleteButton";
 
 export default function ImageUploadField({
   value,
@@ -49,8 +49,7 @@ export default function ImageUploadField({
     }
   };
 
-  const handleRemove = async (e) => {
-    e.stopPropagation();
+  const handleRemove = async () => {
     await discardSessionUrl(value);
     onChange?.(null);
     onRemove?.();
@@ -94,15 +93,7 @@ export default function ImageUploadField({
         fixedGroove={logoShadow}
         frameAction={
           value && !uploading ? (
-            <NeuPressableButton
-              variant=""
-              danger
-              className="neu-image-upload-remove-btn"
-              aria-label={t("delete")}
-              onClick={handleRemove}
-            >
-              <DeleteOutlined />
-            </NeuPressableButton>
+            <ConfirmDeleteButton variant="upload" onConfirm={handleRemove} />
           ) : null
         }
       >

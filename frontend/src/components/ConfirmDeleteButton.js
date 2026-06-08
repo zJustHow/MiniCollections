@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DeleteOutlined } from "@ant-design/icons";
+import { DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
 import NeuButton from "./NeuButton";
 import HeaderActionButton from "./HeaderActionButton";
+import NeuPressableButton from "./NeuPressableButton";
 import { useLocale } from "../LocaleContext";
 
 const AUTO_RESET_MS = 4000;
@@ -94,13 +95,38 @@ export default function ConfirmDeleteButton({
   const isBusy = disabled || loading || externalLoading;
   const buttonClassName = [
     "confirm-delete-btn",
-    variant === "header" ? "confirm-delete-btn--header" : "confirm-delete-btn--neu",
+    variant === "header" && "confirm-delete-btn--header",
+    variant === "neu" && "confirm-delete-btn--neu",
+    variant === "upload" && "confirm-delete-btn--upload",
     variant === "neu" && size === "small" && "confirm-delete-btn--sm",
     pending && "confirm-delete-btn--pending",
     className,
   ]
     .filter(Boolean)
     .join(" ");
+
+  if (variant === "upload") {
+    return (
+      <NeuPressableButton
+        ref={rootRef}
+        variant=""
+        danger
+        active={pending}
+        disabled={isBusy}
+        onClick={handleClick}
+        aria-label={pending ? pendingText : deleteText}
+        className={buttonClassName}
+      >
+        {loading ? (
+          <LoadingOutlined />
+        ) : pending ? (
+          <span className="confirm-delete-label">{pendingText}</span>
+        ) : (
+          <DeleteOutlined />
+        )}
+      </NeuPressableButton>
+    );
+  }
 
   if (variant === "header") {
     return (

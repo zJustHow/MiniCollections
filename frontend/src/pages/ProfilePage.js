@@ -268,6 +268,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 <NeuInput
                   prefix={<UserOutlined />}
                   placeholder={t("displayName")}
+                  autoComplete="nickname"
                 />
               </Form.Item>
               <Form.Item className="profile-form-item-none">
@@ -297,6 +298,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 <NeuInput.Password
                   prefix={<LockOutlined />}
                   placeholder={t("currentPassword")}
+                  autoComplete="current-password"
                 />
               </Form.Item>
               <Form.Item
@@ -310,6 +312,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 <NeuInput.Password
                   prefix={<LockOutlined />}
                   placeholder={t("newPassword")}
+                  autoComplete="new-password"
                 />
               </Form.Item>
               <Form.Item
@@ -330,6 +333,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 <NeuInput.Password
                   prefix={<LockOutlined />}
                   placeholder={t("confirmPassword")}
+                  autoComplete="new-password"
                 />
               </Form.Item>
               <Form.Item className="profile-form-item-none">
@@ -365,6 +369,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 <NeuInput
                   prefix={<MailOutlined />}
                   placeholder={t("emailAddress")}
+                  autoComplete="email"
                 />
               </Form.Item>
               <Form.Item className="profile-form-item-submit">
@@ -375,7 +380,10 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                     rules={[{ required: true, message: t("codeRequired") }]}
                     className="profile-inline-grow"
                   >
-                    <NeuInput placeholder={t("verificationCode")} />
+                    <NeuInput
+                      placeholder={t("verificationCode")}
+                      autoComplete="one-time-code"
+                    />
                   </Form.Item>
                   <NeuButton
                     loading={emailCodeLoading}
@@ -445,6 +453,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                       <NeuInput
                         placeholder={t("phoneNumber")}
                         disabled={!PHONE_AUTH_ENABLED}
+                        autoComplete="tel-national"
                       />
                     </Form.Item>
                   </div>

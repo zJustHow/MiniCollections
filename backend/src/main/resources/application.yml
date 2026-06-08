@@ -158,6 +158,8 @@ app:
     # When true, delete and rebuild ES indexes on every startup. Default false; indexes are
     # created only when missing or empty. Set true after mapping/analyzer changes.
     reindex-on-startup: ${ELASTICSEARCH_REINDEX_ON_STARTUP:false}
+    # Brand-object index version lives in BrandObjectIndexVersion.CURRENT — bump it when
+    # category/scale/series taxonomy or denormalized search fields change.
   s3:
     enabled: ${S3_ENABLED:true}
     # S3 endpoint is for the SDK (may be internal, e.g. http://minio:9000 in Docker).

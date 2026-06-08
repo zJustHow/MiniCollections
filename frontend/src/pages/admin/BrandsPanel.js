@@ -1,4 +1,5 @@
 import NeuButton from "../../components/NeuButton";
+import ListPagination from "../../components/ListPagination";
 import AdminDeleteAction from "../../components/admin/AdminDeleteAction";
 import AdminEditButton from "../../components/admin/AdminEditButton";
 import { App, Space, Table } from "antd";
@@ -25,7 +26,7 @@ export default function BrandsPanel() {
   const {
     items: brands,
     page,
-    totalElements,
+    totalPages,
     loading,
     loadPage,
     onPageChange,
@@ -96,13 +97,13 @@ export default function BrandsPanel() {
         columns={columns}
         loading={loading}
         size="middle"
-        pagination={{
-          current: page + 1,
-          total: totalElements,
-          pageSize: SELECT_PAGE_SIZE,
-          onChange: onPageChange,
-          showSizeChanger: false,
-        }}
+        pagination={false}
+      />
+      <ListPagination
+        page={page}
+        totalPages={totalPages}
+        loading={loading}
+        onPageChange={onPageChange}
       />
       <BrandModal
         open={brandModalOpen}

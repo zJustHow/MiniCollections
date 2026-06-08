@@ -93,7 +93,11 @@ function SignupForm({ linkMode = false }) {
               { type: "email", message: t("emailInvalid") },
             ] : []}
           >
-            <NeuInput prefix={<UserOutlined />} placeholder={t("email")} />
+            <NeuInput
+              prefix={<UserOutlined />}
+              placeholder={t("email")}
+              autoComplete="email"
+            />
           </Form.Item>
 
           <Form.Item
@@ -118,7 +122,10 @@ function SignupForm({ linkMode = false }) {
                     { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
                   ] : []}
                 >
-                  <NeuInput placeholder={t("phoneNumber")} />
+                  <NeuInput
+                    placeholder={t("phoneNumber")}
+                    autoComplete="tel-national"
+                  />
                 </Form.Item>
               </div>
             </div>
@@ -131,13 +138,21 @@ function SignupForm({ linkMode = false }) {
               { min: 6, message: t("newPasswordMin") },
             ]}
           >
-            <NeuInput.Password prefix={<LockOutlined />} placeholder={t("password")} />
+            <NeuInput.Password
+              prefix={<LockOutlined />}
+              placeholder={t("password")}
+              autoComplete="new-password"
+            />
           </Form.Item>
           <Form.Item
             name="name"
             rules={[{ required: true, message: t("signupNameRequired") }]}
           >
-            <NeuInput prefix={<UserOutlined />} placeholder={t("username")} />
+            <NeuInput
+              prefix={<UserOutlined />}
+              placeholder={t("username")}
+              autoComplete="nickname"
+            />
           </Form.Item>
           <Form.Item name="preferred_locale" label={t("language")}>
             <Radio.Group>

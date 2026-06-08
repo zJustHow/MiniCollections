@@ -16,9 +16,9 @@ export function scaleFontSize(px, scale) {
   return Math.round(px * scale);
 }
 
-/** Inline font sizes as rem (scales with html @media font-size in neumorphism.css) */
+/** Inline font sizes — scales via --neu-fs-* container query tokens in neumorphism.css */
 export function neuRem(px) {
-  return `${px / NEU_FONT_BASE_PX}rem`;
+  return `var(--neu-fs-${px})`;
 }
 
 export function useNeuFontScale() {

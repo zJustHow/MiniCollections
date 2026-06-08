@@ -1,7 +1,6 @@
 package com.zjusthow.minicollections.service;
 
-import com.zjusthow.minicollections.elasticsearch.BrandObjectDocument;
-import com.zjusthow.minicollections.elasticsearch.BrandObjectSearchRepository;
+import com.zjusthow.minicollections.elasticsearch.BrandObjectIndexService;
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.entity.CategoryEntity;
 import com.zjusthow.minicollections.entity.ObjectSubmissionEntity;
@@ -51,7 +50,7 @@ public class SubmissionService {
     private final CategoryRepository categoryRepository;
     private final ScaleRepository scaleRepository;
     private final UserRepository userRepository;
-    private final BrandObjectSearchRepository brandObjectSearchRepository;
+    private final BrandObjectIndexService brandObjectIndexService;
     private final ImageStorageService imageStorageService;
 
     @Value("${app.elasticsearch.enabled:true}")
@@ -68,7 +67,7 @@ public class SubmissionService {
             CategoryRepository categoryRepository,
             ScaleRepository scaleRepository,
             UserRepository userRepository,
-            @Autowired(required = false) BrandObjectSearchRepository brandObjectSearchRepository,
+            @Autowired(required = false) BrandObjectIndexService brandObjectIndexService,
             @Autowired(required = false) ImageStorageService imageStorageService) {
         this.submissionRepository = submissionRepository;
         this.brandObjectRepository = brandObjectRepository;
@@ -77,7 +76,7 @@ public class SubmissionService {
         this.categoryRepository = categoryRepository;
         this.scaleRepository = scaleRepository;
         this.userRepository = userRepository;
-        this.brandObjectSearchRepository = brandObjectSearchRepository;
+        this.brandObjectIndexService = brandObjectIndexService;
         this.imageStorageService = imageStorageService;
     }
 
@@ -152,27 +151,8 @@ public class SubmissionService {
                     body.brandId(), body.seriesId(), body.categoryId(), body.scaleId(), 0L
             );
             BrandObjectEntity saved = brandObjectRepository.save(brandObject);
-            if (elasticsearchEnabled && brandObjectSearchRepository != null) {
-                var brand = brandRepository.findById(body.brandId()).orElse(null);
-                SeriesEntity series = body.seriesId() != null
-                        ? seriesRepository.findById(body.seriesId()).orElse(null)
-                        : null;
-                CategoryEntity category = body.categoryId() != null
-                        ? categoryRepository.findById(body.categoryId()).orElse(null)
-                        : null;
-                ScaleEntity scale = body.scaleId() != null
-                        ? scaleRepository.findById(body.scaleId()).orElse(null)
-                        : null;
-                brandObjectSearchRepository.save(BrandObjectDocument.from(
-                        saved,
-                        brand != null ? brand.nameEn() : null,
-                        brand != null ? brand.abbreviation() : null,
-                        brand != null ? brand.nameZh() : null,
-                        series != null ? series.nameEn() : null,
-                        series != null ? series.nameZh() : null,
-                        category != null ? category.nameEn() : null,
-                        category != null ? category.nameZh() : null,
-                        scale != null ? scale.code() : null));
+            if (elasticsearchEnabled && brandObjectIndexService != null) {
+                brandObjectIndexService.index(saved);
             }
         }
 

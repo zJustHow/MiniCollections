@@ -125,6 +125,62 @@
   }
 }
 
+/* ── FLUID TYPE (container query tokens) ──────────────────── */
+:root {
+  --neu-fs-8: calc(8px * var(--neu-font-scale, 1));
+  --neu-fs-10: calc(10px * var(--neu-font-scale, 1));
+  --neu-fs-11: calc(11px * var(--neu-font-scale, 1));
+  --neu-fs-12: calc(12px * var(--neu-font-scale, 1));
+  --neu-fs-13: calc(13px * var(--neu-font-scale, 1));
+  --neu-fs-14: calc(14px * var(--neu-font-scale, 1));
+  --neu-fs-15: calc(15px * var(--neu-font-scale, 1));
+  --neu-fs-16: calc(16px * var(--neu-font-scale, 1));
+  --neu-fs-17: calc(17px * var(--neu-font-scale, 1));
+  --neu-fs-18: calc(18px * var(--neu-font-scale, 1));
+  --neu-fs-20: calc(20px * var(--neu-font-scale, 1));
+  --neu-fs-22: calc(22px * var(--neu-font-scale, 1));
+  --neu-fs-36: calc(36px * var(--neu-font-scale, 1));
+  --neu-size-28: calc(28px * var(--neu-font-scale, 1));
+}
+
+.neu-type-container,
+#main-content,
+.ant-layout-header,
+.ant-layout > .ant-layout-content:not(#main-content),
+.ant-drawer-content,
+.ant-modal-content,
+.neu-login-panel,
+.profile-page-inner,
+.mobile-menu-overlay {
+  container-type: inline-size;
+  container-name: neu-type;
+
+  --neu-fs-8: clamp(7px, 2.2cqi, 8px);
+  --neu-fs-10: clamp(8px, 2.8cqi, 10px);
+  --neu-fs-11: clamp(8px, 3.4cqi, 11px);
+  --neu-fs-12: clamp(9px, 3.8cqi, 12px);
+  --neu-fs-13: clamp(9px, 4.2cqi, 13px);
+  --neu-fs-14: clamp(10px, 4.8cqi, 14px);
+  --neu-fs-15: clamp(10px, 5.2cqi, 15px);
+  --neu-fs-16: clamp(11px, 5.6cqi, 16px);
+  --neu-fs-17: clamp(11px, 6cqi, 17px);
+  --neu-fs-18: clamp(12px, 6.5cqi, 18px);
+  --neu-fs-20: clamp(13px, 7.5cqi, 20px);
+  --neu-fs-22: clamp(14px, 8.5cqi, 22px);
+  --neu-fs-36: clamp(22px, 13cqi, 36px);
+  --neu-size-28: clamp(24px, 10cqi, 28px);
+
+  --ant-font-size: var(--neu-fs-14);
+  --ant-font-size-sm: var(--neu-fs-12);
+  --ant-font-size-lg: var(--neu-fs-16);
+  --ant-font-size-xl: var(--neu-fs-20);
+  --ant-font-size-heading-1: clamp(22px, 14cqi, 38px);
+  --ant-font-size-heading-2: clamp(18px, 11cqi, 30px);
+  --ant-font-size-heading-3: clamp(16px, 9cqi, 24px);
+  --ant-font-size-heading-4: var(--neu-fs-20);
+  --ant-font-size-heading-5: var(--neu-fs-16);
+}
+
 /* ── GLOBAL ───────────────────────────────────────────────── */
 *,
 *::before,
@@ -210,15 +266,15 @@ a:hover {
 
 .header-logo-icon {
   display: block;
-  width: calc(28px * var(--neu-font-scale, 1));
-  height: calc(28px * var(--neu-font-scale, 1));
+  width: var(--neu-size-28);
+  height: var(--neu-size-28);
   flex-shrink: 0;
   border: none;
   outline: none;
 }
 
 .header-logo {
-  font-size: calc(20px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-20);
   font-weight: 400;
   line-height: 1;
   letter-spacing: 2.5px;
@@ -319,7 +375,7 @@ a:hover {
 /* ── Layer 2: panel tab (login, admin, filters, modals) ── */
 .neu-panel-tab-btn {
   padding: 10px 16px;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   font-weight: 400;
   line-height: 1.4;
   letter-spacing: 0.2px;
@@ -328,7 +384,7 @@ a:hover {
 /* ── Layer 2: header bar variant (full-height top bar) ── */
 .neu-header-bar-btn,
 .header-slot-title {
-  font-size: calc(16px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-16);
   font-weight: 400;
   line-height: 1;
 }
@@ -398,7 +454,7 @@ a:hover {
   display: inline-block;
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  font-size: calc(10px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-10);
   font-weight: inherit;
   letter-spacing: 0.12em;
   line-height: 1;
@@ -408,13 +464,13 @@ a:hover {
 }
 
 .confirm-delete-btn--pending.ant-btn.neu-btn.ant-btn-sm .confirm-delete-label {
-  font-size: calc(8px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-8);
   letter-spacing: 0.04em;
   overflow: visible;
 }
 
 .confirm-delete-btn--pending.neu-header-bar-btn .confirm-delete-label {
-  font-size: calc(11px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-11);
   letter-spacing: 0.14em;
 }
 
@@ -550,7 +606,7 @@ a:hover {
   background: rgba(184, 185, 190, 0.12);
   border-bottom: 1px solid var(--neu-border);
   color: var(--neu-text-2);
-  font-size: calc(11px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-11);
   font-weight: 400;
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -561,7 +617,7 @@ a:hover {
   background: transparent;
   border-bottom: 1px solid rgba(184, 185, 190, 0.2);
   color: var(--neu-text);
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   transition: background 0.15s;
 }
 
@@ -703,7 +759,7 @@ a:hover {
 }
 
 .neu-panel-label {
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   color: var(--neu-text-2);
   margin: 0 0 8px;
 }
@@ -715,7 +771,7 @@ a:hover {
   flex-shrink: 0;
   margin: 0;
   padding: 1px 8px;
-  font-size: calc(12px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-12);
   font-weight: 600;
   line-height: 20px;
   letter-spacing: 0.2px;
@@ -761,7 +817,7 @@ a:hover {
 }
 
 .neu-panel-body {
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   font-weight: 400;
   color: var(--neu-text);
   line-height: 1.6;
@@ -1502,7 +1558,7 @@ textarea.ant-input[disabled],
   min-height: unset !important;
   padding: 8px 12px !important;
   margin-bottom: 4px;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   font-weight: 400 !important;
   text-align: left;
   border-radius: 0 !important;
@@ -1684,7 +1740,7 @@ textarea.ant-input[disabled],
   padding: 8px 14px;
   margin: 0 !important;
   margin-inline-start: 0 !important;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   font-weight: 400;
   line-height: 1.4;
 }
@@ -1770,7 +1826,7 @@ textarea.ant-input[disabled],
 /* calendar grid */
 .ant-picker-content th {
   color: var(--neu-text-2);
-  font-size: calc(11px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-11);
   font-weight: 400;
   letter-spacing: 0.4px;
 }
@@ -1792,7 +1848,7 @@ textarea.ant-input[disabled],
   height: 24px;
   padding: 0;
   margin: 0 auto;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   font-weight: 400;
   line-height: 1;
   border-radius: 0;
@@ -1977,7 +2033,7 @@ textarea.ant-input[disabled],
 .ant-modal-title {
   color: var(--neu-text);
   font-weight: 400;
-  font-size: calc(17px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-17);
 }
 
 .ant-modal-close-x {
@@ -1997,13 +2053,13 @@ textarea.ant-input[disabled],
 .ant-form-item-label > label {
   color: var(--neu-text);
   font-weight: 400;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   letter-spacing: 0.3px;
 }
 
 .ant-form-item-explain-error {
   color: var(--neu-danger);
-  font-size: calc(12px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-12);
 }
 
 /* ── UPLOAD (picture-card — neu-card--upload on inner surface) ─ */
@@ -2083,7 +2139,7 @@ textarea.ant-input[disabled],
   border-radius: 0;
   background: rgba(230, 231, 238, 0.72);
   pointer-events: none;
-  font-size: calc(36px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-36);
   color: var(--neu-text-2);
 }
 
@@ -2127,15 +2183,32 @@ textarea.ant-input[disabled],
   pointer-events: none;
 }
 
-.neu-image-upload-remove-btn {
+.confirm-delete-btn--upload.neu-pressable-btn {
   width: 100%;
+  height: calc(10px + var(--neu-fs-16));
+  min-height: calc(10px + var(--neu-fs-16));
+  max-height: calc(10px + var(--neu-fs-16));
+  box-sizing: border-box;
   pointer-events: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 8px;
-  font-size: calc(16px * var(--neu-font-scale, 1));
+  padding: 0 8px;
+  font-size: var(--neu-fs-16);
   line-height: 1;
+  overflow: hidden;
+}
+
+.confirm-delete-btn--upload .confirm-delete-label {
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  font-size: var(--neu-fs-11);
+  letter-spacing: 0.04em;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 
 /* ── SPIN ─────────────────────────────────────────────────── */
@@ -2332,7 +2405,7 @@ textarea.ant-input[disabled],
 .neu-login-title {
   text-align: center;
   color: var(--neu-text);
-  font-size: calc(22px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-22);
   font-weight: 400;
   margin-bottom: 32px;
   letter-spacing: 2px;
@@ -2366,7 +2439,7 @@ textarea.ant-input[disabled],
 }
 
 .neu-filter-panel-title {
-  font-size: calc(14px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-14);
   font-weight: 400;
   color: var(--neu-text);
   margin-bottom: 14px;
@@ -2374,7 +2447,7 @@ textarea.ant-input[disabled],
 }
 
 .neu-filter-section-title {
-  font-size: calc(11px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-11);
   font-weight: 400;
   color: var(--neu-text-2);
   margin-bottom: 8px;
@@ -2427,7 +2500,7 @@ textarea.ant-input[disabled],
   align-items: center;
   padding: 8px;
   margin-bottom: 5px;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   font-weight: 400;
   text-align: left;
   flex-shrink: 0;
@@ -2460,7 +2533,7 @@ textarea.ant-input[disabled],
 .neu-filter-tab-option .neu-filter-option-count {
   color: var(--neu-text-2);
   flex-shrink: 0;
-  font-size: calc(12px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-12);
   font-weight: 400;
 }
 
@@ -2508,7 +2581,7 @@ textarea.ant-input[disabled],
 .neu-search-summary {
   flex: 1;
   min-width: 0;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   color: var(--neu-text-2);
 }
 
@@ -2589,7 +2662,7 @@ textarea.ant-input[disabled],
 
 .neu-search-section-label {
   grid-column: 1 / -1;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   font-weight: 400;
   color: var(--neu-text-2);
   margin-bottom: -4px;
@@ -2691,11 +2764,11 @@ textarea.ant-input[disabled],
 
 .neu-nameplate-subtitle {
   color: var(--neu-text-2);
-  font-size: 11px;
+  font-size: var(--neu-fs-11);
   font-weight: 400;
   letter-spacing: 0.2px;
   line-height: 1.25;
-  min-height: calc(11px * 1.25);
+  min-height: calc(1em * 1.25);
   margin-bottom: 2px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2703,7 +2776,7 @@ textarea.ant-input[disabled],
 }
 
 .neu-nameplate-title {
-  font-size: 15px;
+  font-size: var(--neu-fs-15);
   font-weight: 400;
   letter-spacing: 0.3px;
   line-height: 1.35;
@@ -2718,7 +2791,7 @@ textarea.ant-input[disabled],
   background: var(--neu-bg);
   border: none;
   border-radius: 0;
-  font-size: calc(11px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-11);
   font-weight: 400;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -2858,7 +2931,7 @@ textarea.ant-input[disabled],
   color: var(--neu-text-2);
   border-radius: 0;
   font-weight: 400;
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   transition: var(--neu-btn-transition);
 }
 
@@ -3074,14 +3147,14 @@ button.neu-card.neu-card--avatar:active:not(:disabled),
 }
 
 .neu-card-row-name {
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   font-weight: 400;
   color: var(--neu-text);
 }
 
 .neu-card-row-meta {
   margin-top: 2px;
-  font-size: calc(12px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-12);
   color: var(--neu-text-2);
 }
 
@@ -3115,7 +3188,7 @@ button.neu-card.neu-card--avatar:active:not(:disabled),
   height: var(--neu-control-height);
   padding-block: 0;
   padding-inline: 15px;
-  font-size: calc(14px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-14);
   line-height: 1.5714285714285714;
   position: relative;
   transition: var(--neu-btn-transition);
@@ -3126,13 +3199,13 @@ button.neu-card.neu-card--avatar:active:not(:disabled),
 .ant-btn.neu-btn.ant-btn-lg {
   height: var(--neu-control-height-lg);
   padding-inline: 15px;
-  font-size: calc(16px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-16);
 }
 
 .ant-btn.neu-btn.ant-btn-sm {
   height: var(--neu-control-height-sm);
   padding-inline: 7px;
-  font-size: calc(14px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-14);
 }
 
 .ant-btn.neu-btn.ant-btn-icon-only:not(.neu-btn--pagination) {
@@ -3287,7 +3360,7 @@ button.neu-card.neu-card--avatar:active:not(:disabled),
   min-width: 24px;
   text-align: center;
   color: var(--neu-text-2);
-  font-size: calc(13px * var(--neu-font-scale, 1));
+  font-size: var(--neu-fs-13);
   user-select: none;
 }
 
@@ -3446,7 +3519,7 @@ button.neu-card.neu-card--avatar:active:not(:disabled),
     border: none;
     border-radius: 0;
     background: transparent;
-    font-size: calc(17px * var(--neu-font-scale, 1));
+    font-size: var(--neu-fs-17);
     font-weight: 400;
     color: var(--neu-dark);
     cursor: pointer;
@@ -3507,19 +3580,5 @@ button.neu-card.neu-card--avatar:active:not(:disabled),
     padding: 32px 24px !important;
     margin: 16px auto 0 !important;
     border-radius: 0 !important;
-  }
-}
-
-@media (max-width: 992px) {
-  html,
-  body {
-    font-size: 15px;
-  }
-}
-
-@media (max-width: 640px) {
-  html,
-  body {
-    font-size: 14px;
   }
 }

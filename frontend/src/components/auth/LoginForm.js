@@ -181,6 +181,7 @@ function LoginForm({ onSuccess }) {
             prefix={<MailOutlined />}
             placeholder={t("email")}
             size="large"
+            autoComplete="username"
           />
         </Form.Item>
 
@@ -223,6 +224,7 @@ function LoginForm({ onSuccess }) {
                 placeholder={t("phoneNumber")}
                 size="large"
                 style={{ flex: 1, minWidth: 0 }}
+                autoComplete="tel-national"
               />
             </Form.Item>
           </div>
@@ -237,6 +239,7 @@ function LoginForm({ onSuccess }) {
             prefix={<LockOutlined />}
             placeholder={t("password")}
             size="large"
+            autoComplete="current-password"
           />
         </Form.Item>
 

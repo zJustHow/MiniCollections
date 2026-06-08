@@ -1,4 +1,5 @@
 import NeuButton from "../../components/NeuButton";
+import ListPagination from "../../components/ListPagination";
 import AdminDeleteAction from "../../components/admin/AdminDeleteAction";
 import AdminEditButton from "../../components/admin/AdminEditButton";
 import { App, Space, Table } from "antd";
@@ -50,7 +51,7 @@ export default function AdminBrandObjectsPage() {
   const {
     items: objects,
     page: objectsPage,
-    totalElements,
+    totalPages,
     loading,
     loadPage,
     onPageChange,
@@ -165,13 +166,13 @@ export default function AdminBrandObjectsPage() {
           columns={columns}
           loading={loading}
           size="middle"
-          pagination={{
-            current: objectsPage + 1,
-            pageSize: ADMIN_TABLE_PAGE_SIZE,
-            total: totalElements,
-            showSizeChanger: false,
-            onChange: (page) => onPageChange(page),
-          }}
+          pagination={false}
+        />
+        <ListPagination
+          page={objectsPage}
+          totalPages={totalPages}
+          loading={loading}
+          onPageChange={onPageChange}
         />
       </div>
 
