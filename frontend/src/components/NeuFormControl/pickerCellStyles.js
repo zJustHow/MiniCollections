@@ -43,7 +43,7 @@ const CSS = `
   ):hover
   .ant-picker-cell-inner.neu-picker-date-cell {
   background-color: transparent !important;
-  color: #2a354f !important;
+  color: var(--neu-text-2) !important;
   box-shadow: inset 1px 1px 3px #b8b9be !important;
 }
 .ant-picker-dropdown

@@ -162,6 +162,55 @@ class GroupServiceTest {
         assertEquals(1L, result.totalObjects());
     }
 
+    @Test
+    void crossSearchPage_secondPageReturnsUserObjects() {
+        UserObjectSearchDto first = new UserObjectSearchDto(
+                100L, 1L, 5L, "Garage", 10L, "Custom1", null, null, null, null,
+                "M3", null, "BMW", null);
+        UserObjectSearchDto second = new UserObjectSearchDto(
+                101L, 1L, 5L, "Garage", 11L, "Custom2", null, null, null, null,
+                "M4", null, "BMW", null);
+        stubJdbcSearch(3L, List.of(first, second));
+        when(groupRepository.countSearchByKeyword(1L, "bmw")).thenReturn(2L);
+
+        GroupCombinedSearchDto result = groupService.crossSearchPage(1L, "bmw", 1, 2);
+
+        assertTrue(result.groups().isEmpty());
+        assertEquals(2, result.objects().size());
+        assertEquals("M3", result.objects().get(0).brandObjectNameEn());
+        assertEquals(1, result.page());
+        assertEquals(5L, result.totalElements());
+    }
+
+    @Test
+    void crossSearchPage_firstPagePrefersGroups() {
+        stubJdbcObjectCount(3L);
+        when(groupRepository.countSearchByKeyword(1L, "bmw")).thenReturn(2L);
+        when(groupRepository.searchPageByKeyword(1L, "bmw", 2, 0))
+                .thenReturn(List.of(
+                        new GroupEntity(2L, 1L, "G1", null),
+                        new GroupEntity(3L, 1L, "G2", null)));
+
+        GroupCombinedSearchDto result = groupService.crossSearchPage(1L, "bmw", 0, 2);
+
+        assertEquals(2, result.groups().size());
+        assertEquals("G1", result.groups().get(0).name());
+        assertTrue(result.objects().isEmpty());
+        assertEquals(2L, result.totalGroups());
+        assertEquals(3L, result.totalObjects());
+    }
+
+    @SuppressWarnings("unchecked")
+    private void stubJdbcObjectCount(long objectCount) {
+        JdbcClient.StatementSpec spec = mock(JdbcClient.StatementSpec.class);
+        JdbcClient.MappedQuerySpec<Long> countQuery = mock(JdbcClient.MappedQuerySpec.class);
+
+        when(jdbcClient.sql(anyString())).thenReturn(spec);
+        when(spec.param(anyString(), any())).thenReturn(spec);
+        when(spec.query(Long.class)).thenReturn(countQuery);
+        when(countQuery.single()).thenReturn(objectCount);
+    }
+
     @SuppressWarnings("unchecked")
     private void stubJdbcSearch(long objectCount, List<?> objectRows) {
         JdbcClient.StatementSpec spec = mock(JdbcClient.StatementSpec.class);

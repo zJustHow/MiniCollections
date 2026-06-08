@@ -90,7 +90,10 @@
   .ant-picker-month-btn.neu-panel-tab-btn,
 .ant-picker-dropdown
   .ant-picker-header-view
-  .ant-picker-year-btn.neu-panel-tab-btn {
+  .ant-picker-year-btn.neu-panel-tab-btn,
+.ant-picker-dropdown
+  .ant-picker-header-view
+  .ant-picker-decade-btn.neu-panel-tab-btn {
   padding: 8px 14px;
   margin: 0 !important;
   margin-inline-start: 0 !important;

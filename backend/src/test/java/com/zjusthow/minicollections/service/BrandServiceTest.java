@@ -390,4 +390,82 @@ class BrandServiceTest {
                 any(), anyBoolean(), anyList(), anyBoolean(), anyList(),
                 anyBoolean(), anyList(), anyBoolean(), anyList());
     }
+
+    @Test
+    void searchBrandObjectsFacets_fallsBackToSqlWhenElasticsearchFails() {
+        ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+        when(brandObjectElasticsearchQueryService.searchFacets(eq("bmw"), any()))
+                .thenThrow(new RuntimeException("ES unavailable"));
+        when(brandObjectRepository.countSearch(
+                eq("bmw"),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList()))
+                .thenReturn(4L);
+        when(brandObjectRepository.countByCategorySearch(
+                eq("bmw"),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList()))
+                .thenReturn(List.of());
+        when(brandObjectRepository.countByBrandSearch(
+                eq("bmw"),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList()))
+                .thenReturn(List.of());
+        when(brandObjectRepository.countByScaleSearch(
+                eq("bmw"),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList()))
+                .thenReturn(List.of());
+        when(brandObjectRepository.countBySeriesSearch(
+                eq("bmw"),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList()))
+                .thenReturn(List.of());
+
+        BrandObjectSearchFacetsDto result = brandService.searchBrandObjectsFacets(
+                "bmw", null, null, null, null, "en-US");
+
+        assertEquals(4L, result.total());
+        verify(brandObjectRepository).countSearch(
+                eq("bmw"),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList(),
+                anyBoolean(),
+                anyList());
+    }
 }

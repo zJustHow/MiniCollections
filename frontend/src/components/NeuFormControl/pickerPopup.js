@@ -4,6 +4,7 @@ import { mountPickerCellRuntimeStyle } from "./pickerCellStyles";
 const TAB_BTN_SELECTOR = [
   ".ant-picker-month-btn",
   ".ant-picker-year-btn",
+  ".ant-picker-decade-btn",
   ".ant-picker-header-prev-btn",
   ".ant-picker-header-next-btn",
   ".ant-picker-header-super-prev-btn",

@@ -1,66 +1,61 @@
 import { renderHook } from "@testing-library/react";
-import useDualModePagedList from "./useDualModePagedList";
 import usePagedList from "./usePagedList";
+import useDualModePagedList from "./useDualModePagedList";
 
 vi.mock("./usePagedList");
 
-const mockListPage = {
-  items: [{ id: "list" }],
-  loading: false,
-  loadPage: vi.fn(),
-};
-const mockSearchPage = {
-  items: [{ id: "search" }],
-  loading: false,
-  loadPage: vi.fn(),
-};
-
 describe("useDualModePagedList", () => {
   beforeEach(() => {
-    vi.mocked(usePagedList).mockImplementation((_fetchPage, options) => {
-      if (!options.enabled) {
-        return { items: [], loading: false, loadPage: vi.fn() };
-      }
-      if (String(options.resetKey).startsWith("object-search")) {
-        return mockSearchPage;
-      }
-      return mockListPage;
+    vi.mocked(usePagedList).mockImplementation((_fetch, options) => {
+      const isSearch = String(options.resetKey || "").includes("search");
+      const items = options.enabled
+        ? isSearch
+          ? [{ id: 2, name: "Search hit" }]
+          : [{ id: 1, name: "Browse item" }]
+        : [];
+      return {
+        items,
+        page: 0,
+        loading: false,
+        loadPage: vi.fn(),
+        onPageChange: vi.fn(),
+      };
     });
   });
 
   test("uses browse list when search is inactive", () => {
     const { result } = renderHook(() =>
       useDualModePagedList({
-        entityKey: "5",
+        entityKey: "9",
         searchActive: false,
         searchKeyword: "",
         fetchListPage: vi.fn(),
         fetchSearchPage: vi.fn(),
-        listResetKey: "objects",
-        searchResetKey: "object-search",
+        listResetKey: "brand-objects",
+        searchResetKey: "brand-objects-search",
         pageSize: 48,
       }),
     );
 
-    expect(result.current.displayObjects).toEqual([{ id: "list" }]);
+    expect(result.current.displayObjects).toEqual([{ id: 1, name: "Browse item" }]);
     expect(result.current.activePage).toBe(result.current.objectsList);
   });
 
   test("uses search list when search is active", () => {
     const { result } = renderHook(() =>
       useDualModePagedList({
-        entityKey: "5",
+        entityKey: "9",
         searchActive: true,
-        searchKeyword: "bmw",
+        searchKeyword: "m3",
         fetchListPage: vi.fn(),
         fetchSearchPage: vi.fn(),
-        listResetKey: "objects",
-        searchResetKey: "object-search",
+        listResetKey: "brand-objects",
+        searchResetKey: "brand-objects-search",
         pageSize: 48,
       }),
     );
 
-    expect(result.current.displayObjects).toEqual([{ id: "search" }]);
+    expect(result.current.displayObjects).toEqual([{ id: 2, name: "Search hit" }]);
     expect(result.current.activePage).toBe(result.current.objectsSearch);
   });
 });

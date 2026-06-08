@@ -74,4 +74,14 @@ describe("AdminPage", () => {
       size: 20,
     });
   });
+
+  test("shows loading skeleton before submissions load", () => {
+    vi.mocked(getAdminSubmissionsPage).mockImplementation(
+      () => new Promise(() => {}),
+    );
+
+    render(<AdminPage />);
+
+    expect(screen.getByTestId("admin-table-skeleton")).toBeInTheDocument();
+  });
 });

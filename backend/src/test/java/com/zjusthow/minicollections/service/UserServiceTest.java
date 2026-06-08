@@ -94,6 +94,32 @@ class UserServiceTest {
     }
 
     @Test
+    void tryBootstrapAdmin_signsUpAndGrantsAdminWhenMissing() {
+        when(jdbc.queryForObject(
+                "SELECT COUNT(*) > 0 FROM authorities WHERE authority = 'ROLE_ADMIN'",
+                Boolean.class)).thenReturn(false);
+        when(identifierRepository.findByTypeAndIdentifier("email", "admin@example.com"))
+                .thenReturn(Optional.empty());
+        when(identifierRepository.existsByTypeAndIdentifier("email", "admin@example.com"))
+                .thenReturn(false);
+        when(passwordEncoder.encode("secret")).thenReturn("hash");
+        when(userRepository.save(any())).thenAnswer(invocation -> {
+            UserEntity saved = invocation.getArgument(0);
+            return new UserEntity(9L, saved.displayName(), saved.password(), saved.enabled(),
+                    saved.preferredLocale(), saved.avatarUrl());
+        });
+        when(userRepository.findById(9L)).thenReturn(Optional.of(
+                new UserEntity(9L, "Admin", "hash", true, "en-US", null)));
+
+        assertTrue(userService.tryBootstrapAdmin("admin@example.com", "secret", "Admin", "en-US"));
+
+        verify(jdbc).update(
+                eq("INSERT INTO authorities (user_id, authority) VALUES (?, ?) ON CONFLICT DO NOTHING"),
+                eq(9L),
+                eq("ROLE_ADMIN"));
+    }
+
+    @Test
     void revokeAdminRole_blocksLastAdminRemoval() {
         UserEntity admin = new UserEntity(1L, "Admin", "hash", true, "en-US", null);
         when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
@@ -177,6 +203,18 @@ class UserServiceTest {
     }
 
     @Test
+    void sendPasswordResetCode_skipsDeliveryWhenUserHasNoPassword() {
+        when(identifierRepository.findByTypeAndIdentifier("email", "alice@example.com"))
+                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "alice@example.com")));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(
+                new UserEntity(5L, "Alice", null, true, "en-US", null)));
+
+        userService.sendPasswordResetCode("alice@example.com", "EMAIL");
+
+        verify(verificationService).sendResetCode("alice@example.com", "EMAIL", false);
+    }
+
+    @Test
     void updatePassword_rejectsWrongCurrentPassword() {
         UserEntity user = new UserEntity(3L, "Bob", "hash", true, "en-US", null);
         when(userRepository.findById(3L)).thenReturn(Optional.of(user));
@@ -256,6 +294,99 @@ class UserServiceTest {
 
         assertThrows(UserNotFoundException.class,
                 () -> userService.getProfileByEmail("missing@example.com"));
+    }
+
+    @Test
+    void getProfileByEmail_normalizesEmailAndReturnsProfile() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
+        when(identifierRepository.findByTypeAndIdentifier("email", "alice@example.com"))
+                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "alice@example.com")));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(identifierRepository.findByUserIdAndType(5L, "email"))
+                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "alice@example.com")));
+        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+
+        UserProfileDto profile = userService.getProfileByEmail("Alice@Example.com");
+
+        assertEquals("Alice", profile.displayName());
+        assertEquals("alice@example.com", profile.email());
+    }
+
+    @Test
+    void updateIdentifier_rejectsDuplicateIdentifier() {
+        when(identifierRepository.existsByTypeAndIdentifier("email", "taken@example.com"))
+                .thenReturn(true);
+
+        assertThrows(IdentifierExistsException.class,
+                () -> userService.updateIdentifier(5L, "email", "Taken@Example.com"));
+    }
+
+    @Test
+    void updateIdentifier_upsertsAndReturnsProfile() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
+        when(identifierRepository.existsByTypeAndIdentifier("email", "new@example.com"))
+                .thenReturn(false);
+        when(identifierRepository.findByUserIdAndType(5L, "email"))
+                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "old@example.com")))
+                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "new@example.com")));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+
+        UserProfileDto profile = userService.updateIdentifier(5L, "email", "  New@Example.com  ");
+
+        verify(identifierRepository).save(new UserIdentifierEntity(1L, 5L, "email", "new@example.com"));
+        assertEquals("new@example.com", profile.email());
+    }
+
+    @Test
+    void updatePreferredLocale_persistsAndReturnsProfile() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+
+        UserProfileDto profile = userService.updatePreferredLocale(5L, "  zh-CN  ");
+
+        verify(userRepository).updatePreferredLocaleById(5L, "zh-CN");
+        assertEquals("Alice", profile.displayName());
+    }
+
+    @Test
+    void updateAvatarUrl_replacesStoredImageAndReturnsProfile() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", "old.png");
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+
+        UserProfileDto profile = userService.updateAvatarUrl(5L, "new.png");
+
+        verify(imageStorageService).deleteReplacedUserImage(5L, "old.png", "new.png");
+        verify(userRepository).updateAvatarUrlById(5L, "new.png");
+        assertEquals("Alice", profile.displayName());
     }
 
     @Test
