@@ -24,6 +24,7 @@ import {
   purchasePriceFromFormValue,
   displayPurchasePriceFromObject,
   discardUploadedImage,
+  resolveMediaUrl,
 } from "../utils";
 
 const { useBreakpoint } = Grid;
@@ -257,7 +258,15 @@ export default function GroupObjectDetailPage() {
             maxWidth: screens.md ? "45%" : "100%",
           }}
         >
-          <DetailImage imageUrl={imageUrl} alt={userObject?.name ?? ""} />
+          <DetailImage
+            imageUrl={imageUrl}
+            alt={userObject?.name ?? ""}
+            onClick={
+              imageUrl
+                ? () => window.open(resolveMediaUrl(imageUrl), "_blank")
+                : undefined
+            }
+          />
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>

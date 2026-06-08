@@ -26,12 +26,22 @@ import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
 
 const RegisterPage = lazyWithRetry(() => import("./pages/RegisterPage"));
-const ForgotPasswordPage = lazyWithRetry(() => import("./pages/ForgotPasswordPage"));
+const ForgotPasswordPage = lazyWithRetry(
+  () => import("./pages/ForgotPasswordPage"),
+);
+const AdminLayout = lazyWithRetry(() => import("./pages/admin/AdminLayout"));
 const AdminPage = lazyWithRetry(() => import("./pages/AdminPage"));
-const AdminBrandObjectsPage = lazyWithRetry(() => import("./pages/admin/AdminBrandObjectsPage"));
+const AdminBrandObjectsPage = lazyWithRetry(
+  () => import("./pages/admin/AdminBrandObjectsPage"),
+);
+const AdminBrandsPage = lazyWithRetry(
+  () => import("./pages/admin/AdminBrandsPage"),
+);
 const FeedbackPage = lazyWithRetry(() => import("./pages/FeedbackPage"));
 const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"));
-const WechatCallbackPage = lazyWithRetry(() => import("./pages/WechatCallbackPage"));
+const WechatCallbackPage = lazyWithRetry(
+  () => import("./pages/WechatCallbackPage"),
+);
 
 const { Header, Content } = Layout;
 
@@ -63,6 +73,8 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
     "/brands/:brandId/objects/:objectId",
     "/groups/:groupId",
     "/groups/:groupId/objects/:objectId",
+    "/admin/brands",
+    "/admin/brands/:brandId",
   ].some((pattern) => matchPath(pattern, location.pathname));
 
   const activeTab =
@@ -425,11 +437,7 @@ export default function App() {
             )
           }
         />
-        <Route
-          element={
-            authed ? <ObjectList isAdmin={isAdmin} /> : <Outlet />
-          }
-        >
+        <Route element={authed ? <ObjectList isAdmin={isAdmin} /> : <Outlet />}>
           <Route index element={authed ? null : <GuestBrandsView />} />
           <Route
             path="groups"
@@ -471,25 +479,11 @@ export default function App() {
           path="feedback"
           element={
             authed ? (
-              <Suspense fallback={<PageLoader />}>
+              <Suspense fallback={<PageLoader variant="feedback" />}>
                 <FeedbackPage />
               </Suspense>
             ) : (
               <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="admin/brands/:brandId"
-          element={
-            !authed ? (
-              <Navigate to="/login" replace />
-            ) : !isAdmin ? (
-              <Navigate to="/" replace />
-            ) : (
-              <Suspense fallback={<PageLoader />}>
-                <AdminBrandObjectsPage />
-              </Suspense>
             )
           }
         />
@@ -501,12 +495,16 @@ export default function App() {
             ) : !isAdmin ? (
               <Navigate to="/" replace />
             ) : (
-              <Suspense fallback={<PageLoader />}>
-                <AdminPage />
+              <Suspense fallback={<PageLoader variant="admin" />}>
+                <AdminLayout />
               </Suspense>
             )
           }
-        />
+        >
+          <Route index element={<AdminPage />} />
+          <Route path="brands" element={<AdminBrandsPage />} />
+          <Route path="brands/:brandId" element={<AdminBrandObjectsPage />} />
+        </Route>
       </Route>
     </Routes>
   );

@@ -1,5 +1,4 @@
 import { App, Upload } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
 import { useEffect, useId, useRef, useState } from "react";
 import { discardUploadedImage, uploadImage } from "../utils";
 import { useLocale } from "../LocaleContext";
@@ -91,18 +90,13 @@ export default function ImageUploadField({
         imageUrl={value}
         logoShadow={logoShadow}
         fixedGroove={logoShadow}
+        imageShimmer={uploading}
         frameAction={
           value && !uploading ? (
             <ConfirmDeleteButton variant="upload" onConfirm={handleRemove} />
           ) : null
         }
-      >
-        {uploading && (
-          <div className="neu-image-upload-loading" aria-hidden="true">
-            <LoadingOutlined />
-          </div>
-        )}
-      </NeuCard>
+      />
     </Upload>
   );
 }

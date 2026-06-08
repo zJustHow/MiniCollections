@@ -25,6 +25,7 @@ import {
   discardUploadedImage,
   recordModelView,
   formatViewCount,
+  resolveMediaUrl,
 } from "../utils";
 
 const { useBreakpoint } = Grid;
@@ -191,6 +192,15 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
           <DetailImage
             imageUrl={brandObject?.image_url}
             alt={brandObject?.name}
+            onClick={
+              brandObject?.image_url
+                ? () =>
+                    window.open(
+                      resolveMediaUrl(brandObject.image_url),
+                      "_blank",
+                    )
+                : undefined
+            }
           />
         </div>
 

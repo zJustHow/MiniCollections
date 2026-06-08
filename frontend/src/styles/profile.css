@@ -112,8 +112,3 @@
 .profile-wechat-status--unbound {
   color: var(--neu-text-2);
 }
-
-.profile-logout-btn {
-  width: 100%;
-  margin-top: 8px;
-}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Spin } from "antd";
 import NeuCard from "../NeuCard";
+import NeuCardGridSkeleton from "../NeuCardGridSkeleton";
 import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
 import ListPagination from "../ListPagination";
@@ -96,25 +96,22 @@ export default function BrandsTab({
     combinedSearchPage?.loading;
 
   const spinning = searchActive
-    ? combinedSearchPage?.loading &&
-      searchResultBrands.length === 0 &&
-      searchResultObjects.length === 0 &&
-      !showFilterColumn
-    : brandsListPage?.loading && brands.length === 0;
+    ? combinedSearchPage?.loading || facetsLoading
+    : Boolean(brandsListPage?.loading);
 
   return (
-    <Spin spinning={spinning}>
+    <div style={{ position: "relative", minHeight: 200, width: "100%" }}>
       <ObjectListPageLayout
-        showFilterColumn={searchActive && showFilterColumn}
-        summary={
-          <SearchResultsSummary
-            active={searchActive}
-            keyword={searchValue}
-            count={combinedSearchPage?.totalElements ?? 0}
-            exact={combinedSearchPage?.totalExact}
-            loading={searchActive && combinedSearchPage?.loading}
-          />
-        }
+          showFilterColumn={searchActive && showFilterColumn}
+          summary={
+            <SearchResultsSummary
+              active={searchActive}
+              keyword={searchValue}
+              count={combinedSearchPage?.totalElements ?? 0}
+              exact={combinedSearchPage?.totalExact}
+              loading={searchActive && combinedSearchPage?.loading}
+            />
+          }
         search={
           <Search
             id="brands-search"
@@ -151,51 +148,68 @@ export default function BrandsTab({
       >
         {searchActive ? (
           <>
-            {(hasBrandResults || showObjectsSection) && (
-              <>
-                <ObjectSearchFilterLayout
-                  showFilterColumn={showFilterColumn}
-                  facets={searchFacets}
-                  loading={facetsLoading}
-                  selectedCategoryIds={selectedCategoryIds}
-                  selectedBrandIds={selectedBrandIds}
-                  selectedScaleIds={selectedScaleIds}
-                  selectedSeriesIds={selectedSeriesIds}
-                  onToggleCategory={onToggleCategory}
-                  onToggleBrand={onToggleBrand}
-                  onToggleScale={onToggleScale}
-                  onToggleSeries={onToggleSeries}
-                >
-                  {showBrandCards && (
-                    <div className="neu-search-section-grid">
-                      {searchResultBrands.map(renderBrandCard)}
-                    </div>
-                  )}
-                  {showBrandCards && showObjectsSection && showObjectCards && (
-                    <div
-                      className="neu-search-section-divider"
-                      role="separator"
-                    />
-                  )}
-                  {showObjectsSection && showObjectCards && (
-                    <div className="neu-search-section-grid">
-                      {searchResultObjects.map(renderObjectCard)}
-                    </div>
-                  )}
-                </ObjectSearchFilterLayout>
-                <ListPagination
-                  page={combinedSearchPage?.page ?? 0}
-                  totalPages={combinedSearchPage?.totalPages ?? 0}
-                  loading={combinedSearchPage?.loading}
-                  onPageChange={combinedSearchPage?.onPageChange}
-                  pageSize={PAGE_SIZE}
+            {spinning ? (
+              <ObjectSearchFilterLayout
+                showFilterColumn={showFilterColumn}
+                facets={searchFacets}
+                loading={facetsLoading}
+                selectedCategoryIds={selectedCategoryIds}
+                selectedBrandIds={selectedBrandIds}
+                selectedScaleIds={selectedScaleIds}
+                selectedSeriesIds={selectedSeriesIds}
+                onToggleCategory={onToggleCategory}
+                onToggleBrand={onToggleBrand}
+                onToggleScale={onToggleScale}
+                onToggleSeries={onToggleSeries}
+              >
+                <NeuCardGridSkeleton
+                  variant="object"
+                  withFilter={showFilterColumn}
+                  className="neu-search-section-grid"
                 />
-              </>
+              </ObjectSearchFilterLayout>
+            ) : (hasBrandResults || showObjectsSection) && (
+              <ObjectSearchFilterLayout
+                showFilterColumn={showFilterColumn}
+                facets={searchFacets}
+                loading={facetsLoading}
+                selectedCategoryIds={selectedCategoryIds}
+                selectedBrandIds={selectedBrandIds}
+                selectedScaleIds={selectedScaleIds}
+                selectedSeriesIds={selectedSeriesIds}
+                onToggleCategory={onToggleCategory}
+                onToggleBrand={onToggleBrand}
+                onToggleScale={onToggleScale}
+                onToggleSeries={onToggleSeries}
+              >
+                {showBrandCards && (
+                  <div className="neu-search-section-grid">
+                    {searchResultBrands.map(renderBrandCard)}
+                  </div>
+                )}
+                {showBrandCards && showObjectsSection && showObjectCards && (
+                  <div
+                    className="neu-search-section-divider"
+                    role="separator"
+                  />
+                )}
+                {showObjectsSection && showObjectCards && (
+                  <div className="neu-search-section-grid">
+                    {searchResultObjects.map(renderObjectCard)}
+                  </div>
+                )}
+              </ObjectSearchFilterLayout>
             )}
 
-            {!hasBrandResults &&
-              !showObjectsSection &&
-              !combinedSearchPage?.loading && (
+            <ListPagination
+              page={combinedSearchPage?.page ?? 0}
+              totalPages={combinedSearchPage?.totalPages ?? 0}
+              loading={combinedSearchPage?.loading}
+              onPageChange={combinedSearchPage?.onPageChange}
+              pageSize={PAGE_SIZE}
+            />
+
+            {!spinning && !hasBrandResults && !showObjectsSection && (
                 <div
                   style={{
                     textAlign: "center",
@@ -209,9 +223,13 @@ export default function BrandsTab({
           </>
         ) : (
           <>
-            <div className="neu-list-page-browse-grid">
-              {dataSource.map(renderBrandCard)}
-            </div>
+            {spinning ? (
+              <NeuCardGridSkeleton />
+            ) : (
+              <div className="neu-list-page-browse-grid">
+                {dataSource.map(renderBrandCard)}
+              </div>
+            )}
             <ListPagination
               page={brandsListPage?.page ?? 0}
               totalElements={brandsListPage?.totalElements ?? 0}
@@ -223,7 +241,7 @@ export default function BrandsTab({
             />
           </>
         )}
-      </ObjectListPageLayout>
-    </Spin>
+        </ObjectListPageLayout>
+    </div>
   );
 }

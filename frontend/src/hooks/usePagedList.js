@@ -31,9 +31,22 @@ export default function usePagedList(fetchPage, options = {}) {
   const [totalPages, setTotalPages] = useState(0);
   const [totalExact, setTotalExact] = useState(true);
   const [loading, setLoading] = useState(() => enabled);
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
   const prevResetKeyRef = useRef(null);
   const pendingScrollRef = useRef(false);
   const loadPageRef = useRef(() => {});
+
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
+    if (enabled) {
+      setItems([]);
+      setPage(0);
+      setTotalElements(0);
+      setTotalPages(0);
+      setTotalExact(true);
+      setLoading(true);
+    }
+  }
 
   const applyPage = useCallback((response) => {
     setItems(Array.isArray(response?.content) ? response.content : []);

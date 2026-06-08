@@ -28,7 +28,6 @@ export default function AddToGroupModal({ visible,
       confirmLoading={confirmLoading}
       onClose={onCancel}
       destroyOnClose
-      width={520}
     >
       <Form form={form} layout="vertical">
         <Form.Item

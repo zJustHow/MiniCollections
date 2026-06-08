@@ -3,7 +3,8 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import usePagedList from "../hooks/usePagedList";
 import useRemoteModelSelectSearch from "../hooks/useRemoteModelSelectSearch";
-import { App, Form, Spin } from "antd";
+import { App, Form } from "antd";
+import NeuCardGridSkeleton from "../components/NeuCardGridSkeleton";
 import NeuCard from "../components/NeuCard";
 import GroupObjectsPageHeader from "../components/pageHeaders/GroupObjectsPageHeader";
 import { NeuInput } from "../components/NeuFormControl";
@@ -242,10 +243,11 @@ export default function GroupObjectsPage() {
     setAddVisible(true);
   };
 
+  const spinning = activePage.loading;
+
   return (
     <div>
-      <Spin spinning={activePage.loading && displayObjects.length === 0}>
-        <ObjectListPageLayout
+      <ObjectListPageLayout
           summary={
             <SearchResultsSummary
               active={searchActive}
@@ -271,9 +273,11 @@ export default function GroupObjectsPage() {
             />
           }
         >
-          {searchActive &&
-          displayObjects.length === 0 &&
-          !activePage.loading ? (
+          {spinning ? (
+            <NeuCardGridSkeleton variant="object" />
+          ) : searchActive &&
+            displayObjects.length === 0 &&
+            !activePage.loading ? (
             <div
               style={{
                 textAlign: "center",
@@ -284,47 +288,44 @@ export default function GroupObjectsPage() {
               {t("noSearchResults")}
             </div>
           ) : (
-            <>
-              <div className="neu-list-page-browse-grid">
-                {listData.map((item) =>
-                  item.id === "__add__" ? (
-                    <NeuCard
-                      key="__add__"
-                      add
-                      name={t("addModel")}
-                      onClick={openAddUserObject}
-                    />
-                  ) : (
-                    <NeuCard
-                      key={item.id}
-                      name={item.name ?? "—"}
-                      subtitle={group?.name}
-                      nameplateVariant="object"
-                      imageUrl={item.image_url}
-                      onClick={() =>
-                        navigate(`/groups/${groupId}/objects/${item.id}`, {
-                          state: {
-                            userObject: item,
-                            group,
-                            returnSearch: location.search,
-                          },
-                        })
-                      }
-                    />
-                  ),
-                )}
-              </div>
-              <ListPagination
-                page={activePage.page}
-                totalPages={activePage.totalPages}
-                loading={activePage.loading}
-                onPageChange={activePage.onPageChange}
-                pageSize={PAGE_SIZE}
-              />
-            </>
+            <div className="neu-list-page-browse-grid">
+              {listData.map((item) =>
+                item.id === "__add__" ? (
+                  <NeuCard
+                    key="__add__"
+                    add
+                    name={t("addModel")}
+                    onClick={openAddUserObject}
+                  />
+                ) : (
+                  <NeuCard
+                    key={item.id}
+                    name={item.name ?? "—"}
+                    subtitle={group?.name}
+                    nameplateVariant="object"
+                    imageUrl={item.image_url}
+                    onClick={() =>
+                      navigate(`/groups/${groupId}/objects/${item.id}`, {
+                        state: {
+                          userObject: item,
+                          group,
+                          returnSearch: location.search,
+                        },
+                      })
+                    }
+                  />
+                ),
+              )}
+            </div>
           )}
+          <ListPagination
+            page={activePage.page}
+            totalPages={activePage.totalPages}
+            loading={activePage.loading}
+            onPageChange={activePage.onPageChange}
+            pageSize={PAGE_SIZE}
+          />
         </ObjectListPageLayout>
-      </Spin>
 
       <EditGroupModal
         visible={editGroupVisible}

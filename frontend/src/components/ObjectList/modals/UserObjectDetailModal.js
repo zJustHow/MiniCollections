@@ -33,7 +33,6 @@ export default function UserObjectDetailModal({
       open={visible}
       onClose={onCancel}
       footer={null}
-      width={600}
       extra={
         <div style={{ display: "flex", gap: 8 }}>
           <NeuButton size="small" icon={<EditOutlined />} onClick={onEdit} />

@@ -3,7 +3,8 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useObjectFilterParams from "../hooks/useObjectFilterParams";
 import usePagedList from "../hooks/usePagedList";
-import { App, Spin } from "antd";
+import { App } from "antd";
+import NeuCardGridSkeleton from "../components/NeuCardGridSkeleton";
 import NeuCard from "../components/NeuCard";
 import BrandObjectsPageHeader from "../components/pageHeaders/BrandObjectsPageHeader";
 import { NeuInput } from "../components/NeuFormControl";
@@ -267,21 +268,25 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const objectCardBrandSubtitle = (obj) =>
     pickBrandName(obj, locale) || brand?.name;
 
+  const spinning = searchActive
+    ? objectsSearch.loading || facetsLoading
+    : activePage.loading;
+
   return (
     <div>
-      <Spin spinning={activePage.loading && displayObjects.length === 0}>
+      <div style={{ position: "relative", minHeight: 200, width: "100%" }}>
         <ObjectListPageLayout
-          showFilterColumn={searchActive && showFilterColumn}
-          summary={
-            <SearchResultsSummary
-              active={searchActive}
-              keyword={searchKeyword}
-              count={activePage.totalElements}
-              exact={activePage.totalExact}
-              loading={searchActive && activePage.loading}
-            />
-          }
-          search={
+            showFilterColumn={searchActive && showFilterColumn}
+            summary={
+              <SearchResultsSummary
+                active={searchActive}
+                keyword={searchKeyword}
+                count={activePage.totalElements}
+                exact={activePage.totalExact}
+                loading={searchActive && activePage.loading}
+              />
+            }
+            search={
             <Search
               id="brand-objects-search"
               name="brandObjectsSearch"
@@ -324,7 +329,27 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         >
           {searchActive ? (
             <>
-              {showSearchObjectsSection ? (
+              {spinning ? (
+                <ObjectSearchFilterLayout
+                  showFilterColumn={showFilterColumn}
+                  facets={searchFacets}
+                  loading={facetsLoading}
+                  selectedCategoryIds={selectedCategoryIds}
+                  selectedBrandIds={[]}
+                  selectedScaleIds={selectedScaleIds}
+                  selectedSeriesIds={selectedSeriesIds}
+                  onToggleCategory={onToggleCategory}
+                  onToggleBrand={() => {}}
+                  onToggleScale={onToggleScale}
+                  onToggleSeries={onToggleSeries}
+                >
+                  <NeuCardGridSkeleton
+                    variant="object"
+                    withFilter={showFilterColumn}
+                    className="neu-search-section-grid"
+                  />
+                </ObjectSearchFilterLayout>
+              ) : showSearchObjectsSection ? (
                 <ObjectSearchFilterLayout
                   showFilterColumn={showFilterColumn}
                   facets={searchFacets}
@@ -378,34 +403,38 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
             </>
           ) : (
             <>
-              <div className="neu-list-page-browse-grid">
-                {listData.map((item) =>
-                  item.id === "__add__" ? (
-                    <NeuCard
-                      key="__add__"
-                      add
-                      name={t("addBrandObject")}
-                      onClick={() => {
-                        setEditingBrandObject(null);
-                        setBrandObjectModalOpen(true);
-                      }}
-                    />
-                  ) : (
-                    <NeuCard
-                      key={item.id}
-                      name={item.name}
-                      subtitle={objectCardBrandSubtitle(item)}
-                      nameplateVariant="object"
-                      imageUrl={item.image_url}
-                      onClick={() =>
-                        navigate(`/brands/${brandId}/objects/${item.id}`, {
-                          state: { brandObject: item, brand },
-                        })
-                      }
-                    />
-                  ),
-                )}
-              </div>
+              {spinning ? (
+                <NeuCardGridSkeleton variant="object" />
+              ) : (
+                <div className="neu-list-page-browse-grid">
+                  {listData.map((item) =>
+                    item.id === "__add__" ? (
+                      <NeuCard
+                        key="__add__"
+                        add
+                        name={t("addBrandObject")}
+                        onClick={() => {
+                          setEditingBrandObject(null);
+                          setBrandObjectModalOpen(true);
+                        }}
+                      />
+                    ) : (
+                      <NeuCard
+                        key={item.id}
+                        name={item.name}
+                        subtitle={objectCardBrandSubtitle(item)}
+                        nameplateVariant="object"
+                        imageUrl={item.image_url}
+                        onClick={() =>
+                          navigate(`/brands/${brandId}/objects/${item.id}`, {
+                            state: { brandObject: item, brand },
+                          })
+                        }
+                      />
+                    ),
+                  )}
+                </div>
+              )}
               <ListPagination
                 page={activePage.page}
                 totalElements={activePage.totalElements}
@@ -417,8 +446,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
               />
             </>
           )}
-        </ObjectListPageLayout>
-      </Spin>
+          </ObjectListPageLayout>
+      </div>
 
       {authed && (
         <div

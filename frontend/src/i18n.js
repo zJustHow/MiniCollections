@@ -185,6 +185,7 @@ const en = {
   confirmDelete: "CONFIRM",
   confirmReject: "CONFIRM",
   confirmClose: "CONFIRM",
+  confirmLogout: "CONFIRM",
 
   // Admin
   adminPanel: "Admin",
@@ -526,6 +527,7 @@ const zh = {
   confirmDelete: "确认删除",
   confirmReject: "确认拒绝",
   confirmClose: "确认关闭",
+  confirmLogout: "确认退出",
 
   // Admin
   adminPanel: "管理",

@@ -12,7 +12,6 @@ export default function BrandObjectDetailModal({ visible, onCancel, detail }) {
       open={visible}
       onClose={onCancel}
       footer={null}
-      width={600}
       zIndex={Z_INDEX.MODAL_BRAND_OBJECT_DETAIL}
     >
       <img

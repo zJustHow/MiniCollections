@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Spin } from "antd";
 import NeuCard from "../NeuCard";
+import NeuCardGridSkeleton from "../NeuCardGridSkeleton";
 import { NeuInput } from "../NeuFormControl";
 import { useNavigate } from "react-router-dom";
 import ListPagination from "../ListPagination";
@@ -55,10 +55,8 @@ export default function GroupsTab({
     searchResultObjects.length > 0 || combinedSearchPage?.loading;
 
   const spinning = searchActive
-    ? combinedSearchPage?.loading &&
-      searchResultGroups.length === 0 &&
-      searchResultObjects.length === 0
-    : groupsListPage?.loading && groups.length === 0;
+    ? Boolean(combinedSearchPage?.loading)
+    : Boolean(groupsListPage?.loading);
 
   const renderObjectCard = (obj) => (
     <NeuCard
@@ -87,8 +85,7 @@ export default function GroupsTab({
 
   return (
     <div style={{ position: "relative", minHeight: 200, width: "100%" }}>
-      <Spin spinning={spinning}>
-        <ObjectListPageLayout
+      <ObjectListPageLayout
           summary={
             <SearchResultsSummary
               active={searchActive}
@@ -116,40 +113,38 @@ export default function GroupsTab({
         >
           {searchActive ? (
             <>
-              {(hasGroupResults || showObjectsSection) && (
-                <>
-                  <div className="neu-search-objects-cards">
-                    {showGroupCards && (
-                      <div className="neu-search-section-grid">
-                        {searchResultGroups.map(renderGroupCard)}
-                      </div>
+              {spinning ? (
+                <NeuCardGridSkeleton variant="object" />
+              ) : (hasGroupResults || showObjectsSection) && (
+                <div className="neu-search-objects-cards">
+                  {showGroupCards && (
+                    <div className="neu-search-section-grid">
+                      {searchResultGroups.map(renderGroupCard)}
+                    </div>
+                  )}
+                  {showGroupCards &&
+                    showObjectsSection &&
+                    showObjectCards && (
+                      <div
+                        className="neu-search-section-divider"
+                        role="separator"
+                      />
                     )}
-                    {showGroupCards &&
-                      showObjectsSection &&
-                      showObjectCards && (
-                        <div
-                          className="neu-search-section-divider"
-                          role="separator"
-                        />
-                      )}
-                    {showObjectsSection && showObjectCards && (
-                      <div className="neu-search-section-grid">
-                        {searchResultObjects.map(renderObjectCard)}
-                      </div>
-                    )}
-                  </div>
-                  <ListPagination
-                    page={activePage?.page ?? 0}
-                    totalPages={activePage?.totalPages ?? 0}
-                    loading={activePage?.loading}
-                    onPageChange={activePage?.onPageChange}
-                    pageSize={PAGE_SIZE}
-                  />
-                </>
+                  {showObjectsSection && showObjectCards && (
+                    <div className="neu-search-section-grid">
+                      {searchResultObjects.map(renderObjectCard)}
+                    </div>
+                  )}
+                </div>
               )}
-              {!hasGroupResults &&
-                !showObjectsSection &&
-                !combinedSearchPage?.loading && (
+              <ListPagination
+                page={activePage?.page ?? 0}
+                totalPages={activePage?.totalPages ?? 0}
+                loading={activePage?.loading}
+                onPageChange={activePage?.onPageChange}
+                pageSize={PAGE_SIZE}
+              />
+              {!spinning && !hasGroupResults && !showObjectsSection && (
                   <div
                     style={{
                       textAlign: "center",
@@ -163,9 +158,13 @@ export default function GroupsTab({
             </>
           ) : (
             <>
-              <div className="neu-list-page-browse-grid">
-                {browseData.map(renderGroupCard)}
-              </div>
+              {spinning ? (
+                <NeuCardGridSkeleton />
+              ) : (
+                <div className="neu-list-page-browse-grid">
+                  {browseData.map(renderGroupCard)}
+                </div>
+              )}
               <ListPagination
                 page={activePage?.page ?? 0}
                 totalPages={activePage?.totalPages ?? 0}
@@ -176,7 +175,6 @@ export default function GroupsTab({
             </>
           )}
         </ObjectListPageLayout>
-      </Spin>
     </div>
   );
 }

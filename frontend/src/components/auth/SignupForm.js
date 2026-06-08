@@ -62,7 +62,6 @@ function SignupForm({ linkMode = false }) {
         onClose={handleCancel}
         footer={null}
         destroyOnClose
-        width={420}
       >
         <div style={{ marginBottom: 16, textAlign: "center" }}>
           <Radio.Group

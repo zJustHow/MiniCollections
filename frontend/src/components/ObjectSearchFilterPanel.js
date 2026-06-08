@@ -1,4 +1,4 @@
-import { Spin } from "antd";
+import FilterPanelSkeleton from "./FilterPanelSkeleton";
 import NeuPressableButton from "./NeuPressableButton";
 import { useLocale } from "../LocaleContext";
 
@@ -157,7 +157,9 @@ export default function ObjectSearchFilterPanel({
 
   return (
     <Tag className={panelClass}>
-      <Spin spinning={loading}>
+      {loading && !hasFacets ? (
+        <FilterPanelSkeleton />
+      ) : (
         <FilterContent
           facets={facets}
           loading={loading}
@@ -171,7 +173,7 @@ export default function ObjectSearchFilterPanel({
           onToggleSeries={onToggleSeries}
           showTitle={!isDrawer}
         />
-      </Spin>
+      )}
     </Tag>
   );
 }

@@ -121,64 +121,42 @@
 @media (max-width: 640px) {
   :root {
     --neu-font-scale: 0.875;
-    --neu-header-action-btn-width: calc(24px + 1em);
   }
 }
 
-/* ── FLUID TYPE (container query tokens) ──────────────────── */
+/* ── FLUID TYPE (viewport-width tokens; card placeholders still use cqi) ── */
 :root {
-  --neu-fs-8: calc(8px * var(--neu-font-scale, 1));
-  --neu-fs-10: calc(10px * var(--neu-font-scale, 1));
-  --neu-fs-11: calc(11px * var(--neu-font-scale, 1));
-  --neu-fs-12: calc(12px * var(--neu-font-scale, 1));
-  --neu-fs-13: calc(13px * var(--neu-font-scale, 1));
-  --neu-fs-14: calc(14px * var(--neu-font-scale, 1));
-  --neu-fs-15: calc(15px * var(--neu-font-scale, 1));
-  --neu-fs-16: calc(16px * var(--neu-font-scale, 1));
-  --neu-fs-17: calc(17px * var(--neu-font-scale, 1));
-  --neu-fs-18: calc(18px * var(--neu-font-scale, 1));
-  --neu-fs-20: calc(20px * var(--neu-font-scale, 1));
-  --neu-fs-22: calc(22px * var(--neu-font-scale, 1));
-  --neu-fs-36: calc(36px * var(--neu-font-scale, 1));
-  --neu-size-28: calc(28px * var(--neu-font-scale, 1));
-}
-
-.neu-type-container,
-#main-content,
-.ant-layout-header,
-.ant-layout > .ant-layout-content:not(#main-content),
-.ant-drawer-content,
-.ant-modal-content,
-.neu-login-panel,
-.profile-page-inner,
-.mobile-menu-overlay {
-  container-type: inline-size;
-  container-name: neu-type;
-
-  --neu-fs-8: clamp(7px, 2.2cqi, 8px);
-  --neu-fs-10: clamp(8px, 2.8cqi, 10px);
-  --neu-fs-11: clamp(8px, 3.4cqi, 11px);
-  --neu-fs-12: clamp(9px, 3.8cqi, 12px);
-  --neu-fs-13: clamp(9px, 4.2cqi, 13px);
-  --neu-fs-14: clamp(10px, 4.8cqi, 14px);
-  --neu-fs-15: clamp(10px, 5.2cqi, 15px);
-  --neu-fs-16: clamp(11px, 5.6cqi, 16px);
-  --neu-fs-17: clamp(11px, 6cqi, 17px);
-  --neu-fs-18: clamp(12px, 6.5cqi, 18px);
-  --neu-fs-20: clamp(13px, 7.5cqi, 20px);
-  --neu-fs-22: clamp(14px, 8.5cqi, 22px);
-  --neu-fs-36: clamp(22px, 13cqi, 36px);
-  --neu-size-28: clamp(24px, 10cqi, 28px);
+  --neu-fs-8: clamp(7px, 0.8vw, calc(8px * var(--neu-font-scale, 1)));
+  --neu-fs-10: clamp(8px, 1vw, calc(10px * var(--neu-font-scale, 1)));
+  --neu-fs-11: clamp(8px, 1.1vw, calc(11px * var(--neu-font-scale, 1)));
+  --neu-fs-12: clamp(9px, 1.2vw, calc(12px * var(--neu-font-scale, 1)));
+  --neu-fs-13: clamp(9px, 1.3vw, calc(13px * var(--neu-font-scale, 1)));
+  --neu-fs-14: clamp(10px, 1.4vw, calc(14px * var(--neu-font-scale, 1)));
+  --neu-fs-15: clamp(10px, 1.5vw, calc(15px * var(--neu-font-scale, 1)));
+  --neu-fs-16: clamp(11px, 1.6vw, calc(16px * var(--neu-font-scale, 1)));
+  --neu-fs-17: clamp(11px, 1.7vw, calc(17px * var(--neu-font-scale, 1)));
+  --neu-fs-18: clamp(12px, 1.8vw, calc(18px * var(--neu-font-scale, 1)));
+  --neu-fs-20: clamp(13px, 2vw, calc(20px * var(--neu-font-scale, 1)));
+  --neu-fs-22: clamp(14px, 2.2vw, calc(22px * var(--neu-font-scale, 1)));
+  --neu-fs-36: clamp(22px, 3.6vw, calc(36px * var(--neu-font-scale, 1)));
+  --neu-size-28: clamp(24px, 2.8vw, calc(28px * var(--neu-font-scale, 1)));
+  --neu-confirm-fs: clamp(6px, 1vw, calc(10px * var(--neu-font-scale, 1)));
+  --neu-confirm-fs-compact: clamp(5px, 0.8vw, calc(8px * var(--neu-font-scale, 1)));
+  --neu-confirm-fs-h: clamp(8px, 1.1vw, calc(11px * var(--neu-font-scale, 1)));
 
   --ant-font-size: var(--neu-fs-14);
   --ant-font-size-sm: var(--neu-fs-12);
   --ant-font-size-lg: var(--neu-fs-16);
   --ant-font-size-xl: var(--neu-fs-20);
-  --ant-font-size-heading-1: clamp(22px, 14cqi, 38px);
-  --ant-font-size-heading-2: clamp(18px, 11cqi, 30px);
-  --ant-font-size-heading-3: clamp(16px, 9cqi, 24px);
+  --ant-font-size-heading-1: clamp(22px, 3.8vw, calc(38px * var(--neu-font-scale, 1)));
+  --ant-font-size-heading-2: clamp(18px, 3vw, calc(30px * var(--neu-font-scale, 1)));
+  --ant-font-size-heading-3: clamp(16px, 2.4vw, calc(24px * var(--neu-font-scale, 1)));
   --ant-font-size-heading-4: var(--neu-fs-20);
   --ant-font-size-heading-5: var(--neu-fs-16);
+}
+
+.ant-layout-header {
+  --neu-header-action-btn-width: clamp(34px, calc(2.8vw + 0.75em), 50px);
 }
 
 /* ── GLOBAL ───────────────────────────────────────────────── */
@@ -411,6 +389,41 @@ a:hover {
 }
 
 /* ── Confirm delete (button morph) ─────────────────────────── */
+.neu-pressable-btn.admin-table-action-btn,
+.confirm-delete-btn--neu.neu-pressable-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  width: var(--neu-control-height-sm);
+  min-width: var(--neu-control-height-sm);
+  height: 100%;
+  min-height: var(--neu-control-height-sm);
+  padding: 0;
+  font-size: var(--neu-fs-14);
+  line-height: 1;
+  border-radius: 0;
+}
+
+.ant-table-tbody > tr > td.admin-table-actions-cell,
+.ant-table-tbody > tr > .ant-table-cell.admin-table-actions-cell {
+  padding: 0 !important;
+  height: 1px;
+}
+
+.admin-table-actions {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+}
+
+.admin-delete-action {
+  display: flex;
+  align-self: stretch;
+  height: 100%;
+  flex: 0 0 var(--neu-control-height-sm);
+}
+
 .confirm-delete-btn--neu.ant-btn.neu-btn {
   width: var(--neu-control-height);
   min-width: var(--neu-control-height);
@@ -422,6 +435,24 @@ a:hover {
   width: var(--neu-control-height-sm);
   min-width: var(--neu-control-height-sm);
   max-width: var(--neu-control-height-sm);
+}
+
+.confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn {
+  width: auto;
+  min-width: var(--neu-control-height-sm);
+  max-width: none;
+  height: 100%;
+  min-height: var(--neu-control-height-sm);
+  padding-block: 4px 2px;
+}
+
+.admin-table-actions .confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn {
+  width: var(--neu-control-height-sm);
+  min-width: var(--neu-control-height-sm);
+  max-width: var(--neu-control-height-sm);
+  height: 100%;
+  padding: 0;
+  overflow: hidden;
 }
 
 .confirm-delete-btn--pending.confirm-delete-btn--neu.ant-btn.neu-btn {
@@ -450,11 +481,12 @@ a:hover {
   box-shadow: var(--inset-danger);
 }
 
+/* Pending confirm copy — inherit --neu-confirm-fs from page/header/drawer container */
 .confirm-delete-label {
   display: inline-block;
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  font-size: var(--neu-fs-10);
+  font-size: var(--neu-confirm-fs);
   font-weight: inherit;
   letter-spacing: 0.12em;
   line-height: 1;
@@ -463,14 +495,22 @@ a:hover {
   overflow: hidden;
 }
 
-.confirm-delete-btn--pending.ant-btn.neu-btn.ant-btn-sm .confirm-delete-label {
-  font-size: var(--neu-fs-8);
+.confirm-delete-btn--pending.ant-btn.neu-btn.ant-btn-sm .confirm-delete-label,
+.confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn
+  .confirm-delete-label {
+  font-size: var(--neu-confirm-fs-compact);
   letter-spacing: 0.04em;
   overflow: visible;
 }
 
+.admin-table-actions
+  .confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn
+  .confirm-delete-label {
+  overflow: hidden;
+  max-height: 100%;
+}
+
 .confirm-delete-btn--pending.neu-header-bar-btn .confirm-delete-label {
-  font-size: var(--neu-fs-11);
   letter-spacing: 0.14em;
 }
 
@@ -681,25 +721,15 @@ a:hover {
     var(--neu-card-cover-pad-bottom);
 }
 
-/* Tile cards — typography + placeholder scale with card width */
+/* Tile cards — placeholder icon scales with card width; nameplate type uses --neu-fs-* (vw) */
 .ant-card.neu-card .ant-card-cover {
   container-type: inline-size;
   container-name: neu-card-tile;
 }
 
 .ant-card.neu-card .ant-card-cover .neu-nameplate {
-  /* Scale with tile width — same container as title/subtitle typography */
-  padding-block: clamp(2px, 1.5cqi, 6px) clamp(6px, 3.5cqi, 12px);
-  padding-inline: clamp(16px, 6.5cqi, 24px);
-}
-
-.ant-card.neu-card .ant-card-cover .neu-nameplate-title {
-  font-size: clamp(9px, 5.6cqi, 15px);
-}
-
-.ant-card.neu-card .ant-card-cover .neu-nameplate-subtitle {
-  font-size: clamp(8px, 4cqi, 11px);
-  min-height: calc(1em * 1.25);
+  padding-block: clamp(2px, 0.4vw, 6px) clamp(6px, 1vw, 12px);
+  padding-inline: clamp(16px, 1.8vw, 24px);
 }
 
 .ant-card.neu-card .ant-card-cover .neu-card-image-placeholder {
@@ -2128,21 +2158,6 @@ textarea.ant-input[disabled],
   border-radius: 0;
 }
 
-.neu-image-upload-loading {
-  position: absolute;
-  inset: var(--neu-card-cover-pad-y) var(--neu-card-cover-pad-x)
-    var(--neu-card-cover-pad-bottom);
-  z-index: 3;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0;
-  background: rgba(230, 231, 238, 0.72);
-  pointer-events: none;
-  font-size: var(--neu-fs-36);
-  color: var(--neu-text-2);
-}
-
 .neu-card-image-stack {
   display: inline-flex;
   flex-direction: column;
@@ -2202,7 +2217,7 @@ textarea.ant-input[disabled],
 .confirm-delete-btn--upload .confirm-delete-label {
   writing-mode: horizontal-tb;
   text-orientation: mixed;
-  font-size: var(--neu-fs-11);
+  font-size: var(--neu-confirm-fs-h);
   letter-spacing: 0.04em;
   line-height: 1;
   overflow: hidden;
@@ -2214,6 +2229,312 @@ textarea.ant-input[disabled],
 /* ── SPIN ─────────────────────────────────────────────────── */
 .ant-spin-dot-item {
   background-color: var(--neu-accent);
+}
+
+/* ── SKELETON ─────────────────────────────────────────────── */
+@keyframes neu-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.neu-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(209, 217, 230, 0.35) 0%,
+    rgba(255, 255, 255, 0.65) 45%,
+    rgba(209, 217, 230, 0.35) 90%
+  );
+  background-size: 200% 100%;
+  animation: neu-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.neu-card-skeleton.ant-card.neu-card {
+  width: 100%;
+  min-width: 0;
+  border: none;
+  background: var(--neu-bg);
+  box-shadow: var(--neu-card-shadow);
+}
+
+.neu-card-skeleton .ant-card-cover {
+  container-type: inline-size;
+  container-name: neu-card-tile;
+}
+
+.neu-card-image-frame--shimmer::before {
+  content: "";
+  position: absolute;
+  inset: var(--neu-groove-pad);
+  z-index: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(209, 217, 230, 0.35) 0%,
+    rgba(255, 255, 255, 0.65) 45%,
+    rgba(209, 217, 230, 0.35) 90%
+  );
+  background-size: 200% 100%;
+  animation: neu-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.neu-card-skeleton-line {
+  display: block;
+  border-radius: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(209, 217, 230, 0.35) 0%,
+    rgba(255, 255, 255, 0.65) 45%,
+    rgba(209, 217, 230, 0.35) 90%
+  );
+  background-size: 200% 100%;
+  animation: neu-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+.neu-card-skeleton-line--subtitle {
+  width: 42%;
+  height: calc(1em * 1.25);
+}
+
+.neu-card-skeleton-line--title {
+  width: 72%;
+  height: 1.35em;
+}
+
+.neu-page-loader {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 48px 0;
+}
+
+.neu-feedback-card-skeleton {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--neu-bg);
+  box-shadow: var(--raised-sm);
+  box-sizing: border-box;
+  min-height: 72px;
+}
+
+.neu-feedback-card-skeleton-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.neu-feedback-card-skeleton-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.neu-feedback-card-skeleton-main,
+.neu-feedback-card-skeleton-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.neu-feedback-card-skeleton-meta {
+  flex-shrink: 0;
+}
+
+.neu-feedback-card-skeleton-tag,
+.neu-feedback-card-skeleton-title,
+.neu-feedback-card-skeleton-brand,
+.neu-feedback-card-skeleton-date,
+.neu-feedback-card-skeleton-notes {
+  display: block;
+  flex-shrink: 0;
+}
+
+.neu-feedback-card-skeleton-tag {
+  width: 72px;
+  height: 22px;
+}
+
+.neu-feedback-card-skeleton-title {
+  width: min(180px, 42vw);
+  height: 14px;
+}
+
+.neu-feedback-card-skeleton-brand {
+  width: 64px;
+  height: 13px;
+}
+
+.neu-feedback-card-skeleton-date {
+  width: 72px;
+  height: 12px;
+}
+
+.neu-feedback-card-skeleton-notes {
+  width: 88%;
+  height: 13px;
+}
+
+.neu-feedback-page-skeleton-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.neu-feedback-page-skeleton-btn {
+  display: block;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+}
+
+.neu-feedback-page-skeleton-btn--wide {
+  width: 132px;
+}
+
+.neu-feedback-page-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 360px;
+}
+
+.neu-table-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+.neu-table-skeleton-header,
+.neu-table-skeleton-row {
+  display: grid;
+  gap: 16px;
+  align-items: center;
+  padding: 12px 16px;
+}
+
+.neu-table-skeleton-header {
+  border-bottom: 1px solid rgba(184, 182, 176, 0.25);
+}
+
+.neu-table-skeleton-row + .neu-table-skeleton-row {
+  border-top: 1px solid rgba(184, 182, 176, 0.15);
+}
+
+.neu-table-skeleton-cell {
+  height: 14px;
+  min-width: 0;
+}
+
+.neu-table-skeleton-cell--header {
+  height: 12px;
+}
+
+.neu-admin-layout-skeleton {
+  max-width: 1280;
+  margin: 0 auto;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.neu-admin-sidebar-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.neu-admin-sidebar-skeleton-section-title {
+  display: block;
+  flex-shrink: 0;
+  width: 72%;
+  height: 12px;
+  margin: 4px 10px 0;
+}
+
+.neu-admin-sidebar-skeleton-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  min-height: 38px;
+  box-sizing: border-box;
+}
+
+.neu-admin-sidebar-skeleton-nav-label {
+  display: block;
+  flex-shrink: 0;
+  width: 68%;
+  height: 14px;
+}
+
+.neu-admin-sidebar-skeleton-nav-count {
+  display: block;
+  flex-shrink: 0;
+  width: 24px;
+  height: 14px;
+}
+
+.neu-admin-sidebar-skeleton-divider {
+  height: 1px;
+  background: rgba(184, 182, 176, 0.25);
+  margin: 4px 8px;
+}
+
+.neu-admin-layout-skeleton-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.neu-filter-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.neu-filter-skeleton-title {
+  width: 56%;
+  height: 18px;
+}
+
+.neu-filter-skeleton-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.neu-filter-skeleton-section-title {
+  width: 38%;
+  height: 14px;
+}
+
+.neu-filter-skeleton-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  box-shadow: var(--inset-sm);
+}
+
+.neu-filter-skeleton-option {
+  width: 100%;
+  height: 32px;
 }
 
 /* ── MESSAGE TOAST ────────────────────────────────────────── */
@@ -2434,8 +2755,19 @@ textarea.ant-input[disabled],
 
 .neu-filter-mobile-bar {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 12px;
+}
+
+.neu-filter-mobile-bar-summary {
+  flex: 1;
+  min-width: 0;
+}
+
+.neu-filter-mobile-bar-actions {
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .neu-filter-panel-title {
@@ -2732,7 +3064,7 @@ textarea.ant-input[disabled],
 
 /* ── CARD COVER nameplate ─────────────────────────────────── */
 .neu-nameplate {
-  --neu-nameplate-subtitle-slot: calc(11px * 1.25 + 2px);
+  --neu-nameplate-subtitle-slot: calc(var(--neu-fs-11) * 1.25 + 2px);
   padding: 6px 24px 12px;
   min-width: 0;
   background: transparent;

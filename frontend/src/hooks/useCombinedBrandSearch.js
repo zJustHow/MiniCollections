@@ -31,9 +31,25 @@ export default function useCombinedBrandSearch(fetchPage, options = {}) {
   const [totalPages, setTotalPages] = useState(0);
   const [totalExact, setTotalExact] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
   const prevResetKeyRef = useRef(null);
   const pendingScrollRef = useRef(false);
   const loadPageRef = useRef(() => {});
+
+  if (resetKey !== prevResetKey) {
+    setPrevResetKey(resetKey);
+    if (enabled) {
+      setBrands([]);
+      setObjects([]);
+      setPage(0);
+      setTotalBrands(0);
+      setTotalObjects(0);
+      setTotalElements(0);
+      setTotalPages(0);
+      setTotalExact(true);
+      setLoading(true);
+    }
+  }
 
   const applyPage = useCallback((response) => {
     setBrands(Array.isArray(response?.brands) ? response.brands : []);

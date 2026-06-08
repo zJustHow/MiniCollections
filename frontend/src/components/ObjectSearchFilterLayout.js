@@ -5,6 +5,7 @@ import { FilterOutlined } from "@ant-design/icons";
 import ObjectSearchFilterPanel from "./ObjectSearchFilterPanel";
 import DrawerHeaderTitle from "./DrawerHeaderTitle";
 import { NeuDrawerBody } from "./drawerStyles";
+import { NEU_FORM_DRAWER_WIDTH } from "./NeuFormDrawer";
 import { useLocale } from "../LocaleContext";
 
 const { useBreakpoint } = Grid;
@@ -23,6 +24,7 @@ export default function ObjectSearchFilterLayout({
   onToggleSeries = () => {},
   children,
   cardsStyle,
+  summary,
 }) {
   const { t } = useLocale();
   const screens = useBreakpoint();
@@ -54,14 +56,19 @@ export default function ObjectSearchFilterLayout({
     <>
       {showMobileFilter && (
         <div className="neu-filter-mobile-bar">
-          <Badge count={activeFilterCount} size="small" offset={[-4, 4]}>
-            <NeuButton
-              icon={<FilterOutlined />}
-              onClick={() => setDrawerOpen(true)}
-            >
-              {t("searchFilters")}
-            </NeuButton>
-          </Badge>
+          {summary ? (
+            <div className="neu-filter-mobile-bar-summary">{summary}</div>
+          ) : null}
+          <div className="neu-filter-mobile-bar-actions">
+            <Badge count={activeFilterCount} size="small" offset={[-4, 4]}>
+              <NeuButton
+                icon={<FilterOutlined />}
+                onClick={() => setDrawerOpen(true)}
+              >
+                {t("searchFilters")}
+              </NeuButton>
+            </Badge>
+          </div>
         </div>
       )}
 
@@ -75,7 +82,7 @@ export default function ObjectSearchFilterLayout({
           open={drawerOpen}
           onClose={() => setDrawerOpen(false)}
           placement="right"
-          width={320}
+          width={NEU_FORM_DRAWER_WIDTH}
           destroyOnClose={false}
         >
           <DrawerHeaderTitle

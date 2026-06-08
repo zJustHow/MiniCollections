@@ -12,7 +12,8 @@ export default function ObjectListPageLayout({
   const screens = useBreakpoint();
   const withFilter = showFilterColumn && screens.lg;
   const stacked = !screens.lg;
-  const withToolbar = Boolean(search || summary);
+  const showSummaryInToolbar = Boolean(summary) && !(stacked && showFilterColumn);
+  const withToolbar = Boolean(search || showSummaryInToolbar);
 
   return (
     <div
@@ -24,7 +25,7 @@ export default function ObjectListPageLayout({
     >
       {withToolbar ? (
         <div className="neu-list-page-toolbar">
-          {summary ? (
+          {showSummaryInToolbar ? (
             <div className="neu-list-page-summary">{summary}</div>
           ) : null}
           {search ? <div className="neu-list-page-search">{search}</div> : null}

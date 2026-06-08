@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
-import NeuButton from "./NeuButton";
 import HeaderActionButton from "./HeaderActionButton";
 import NeuPressableButton from "./NeuPressableButton";
 import { useLocale } from "../LocaleContext";
@@ -14,6 +13,7 @@ export default function ConfirmDeleteButton({
   className = "",
   confirmLabel,
   deleteLabel,
+  icon,
   disabled = false,
   loading: externalLoading = false,
 }) {
@@ -92,6 +92,7 @@ export default function ConfirmDeleteButton({
 
   const pendingText = confirmLabel ?? t("confirmDelete");
   const deleteText = deleteLabel ?? t("delete");
+  const actionIcon = icon ?? <DeleteOutlined />;
   const isBusy = disabled || loading || externalLoading;
   const buttonClassName = [
     "confirm-delete-btn",
@@ -122,7 +123,7 @@ export default function ConfirmDeleteButton({
         ) : pending ? (
           <span className="confirm-delete-label">{pendingText}</span>
         ) : (
-          <DeleteOutlined />
+          actionIcon
         )}
       </NeuPressableButton>
     );
@@ -139,9 +140,7 @@ export default function ConfirmDeleteButton({
         onClick={handleClick}
         aria-label={pending ? pendingText : deleteText}
         className={buttonClassName}
-        icon={
-          pending ? undefined : <DeleteOutlined />
-        }
+        icon={pending ? undefined : actionIcon}
       >
         {pending && !loading ? (
           <span className="confirm-delete-label">{pendingText}</span>
@@ -151,20 +150,23 @@ export default function ConfirmDeleteButton({
   }
 
   return (
-    <NeuButton
+    <NeuPressableButton
       ref={rootRef}
-      size={size}
+      variant=""
       danger
-      loading={loading}
-      disabled={isBusy && !loading}
+      active={pending}
+      disabled={isBusy}
       onClick={handleClick}
       aria-label={pending ? pendingText : deleteText}
       className={buttonClassName}
-      icon={pending ? undefined : <DeleteOutlined />}
     >
-      {pending && !loading ? (
+      {loading ? (
+        <LoadingOutlined />
+      ) : pending ? (
         <span className="confirm-delete-label">{pendingText}</span>
-      ) : null}
-    </NeuButton>
+      ) : (
+        actionIcon
+      )}
+    </NeuPressableButton>
   );
 }

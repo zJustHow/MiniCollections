@@ -7,6 +7,7 @@ import {
   Upload,
 } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
+import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
 import NeuButton from "../components/NeuButton";
 import PageLoader from "../components/PageLoader";
 import { NeuInput, NeuSelect } from "../components/NeuFormControl";
@@ -201,11 +202,20 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             onClick={() => navigate(-1)}
           />
         </div>
+        <div className="header-slot-actions header-slot-actions-end">
+          <ConfirmDeleteButton
+            variant="header"
+            icon={<LogoutOutlined />}
+            onConfirm={onLogout}
+            confirmLabel={t("confirmLogout")}
+            deleteLabel={t("logout")}
+          />
+        </div>
         <span className="header-slot-title">{t("profileTitle")}</span>
       </div>,
     );
     return () => setHeaderSlot(null);
-  }, [t, navigate, setHeaderSlot]);
+  }, [t, navigate, setHeaderSlot, onLogout]);
 
   if (!profile) return <PageLoader />;
 
@@ -531,15 +541,6 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               </Form.Item>
             </Form>
           </SectionCard>
-
-          <NeuButton
-            danger
-            icon={<LogoutOutlined />}
-            onClick={onLogout}
-            className="profile-logout-btn"
-          >
-          {t("logout")}
-        </NeuButton>
       </div>
     </div>
   );

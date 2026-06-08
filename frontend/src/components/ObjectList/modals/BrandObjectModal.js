@@ -158,7 +158,6 @@ export default function BrandObjectModal({
       okText={isEdit ? t("edit") : t("addBrandObject")}
       cancelText={t("cancel")}
       confirmLoading={loading}
-      width={600}
       destroyOnClose
     >
       <Form layout="vertical" form={form}>

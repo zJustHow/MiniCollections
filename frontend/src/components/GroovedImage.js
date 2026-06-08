@@ -18,6 +18,7 @@ export default function GroovedImage({
   placeholderSize,
   loading = "lazy",
   frameAction,
+  shimmer = false,
 }) {
   const src = resolveMediaUrl(imageUrl);
   const { wellRef, frameSize, imageDisplayable, onImageLoad, onImageError } =
@@ -35,12 +36,23 @@ export default function GroovedImage({
       : undefined;
 
   const iconStyle = { color: "var(--neu-text-2)" };
+  const isLoading = Boolean(shimmer || (src && !imageDisplayable));
 
   const placeholder = (
-    <div className="neu-card-image-frame neu-card-image-frame--fill">
-      <div className="neu-card-image-placeholder" style={placeholderStyle}>
-        <PlaceholderIcon style={iconStyle} />
-      </div>
+    <div
+      className={[
+        "neu-card-image-frame",
+        "neu-card-image-frame--fill",
+        isLoading && "neu-card-image-frame--shimmer",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      {!isLoading ? (
+        <div className="neu-card-image-placeholder" style={placeholderStyle}>
+          <PlaceholderIcon style={iconStyle} />
+        </div>
+      ) : null}
       <div className="neu-card-image-groove" aria-hidden="true" />
     </div>
   );
@@ -48,6 +60,7 @@ export default function GroovedImage({
   const renderFrame = () => {
     if (!src) return placeholder;
     if (fixedGroove) {
+      if (!imageDisplayable || shimmer) return placeholder;
       return (
         <div className="neu-card-image-frame neu-card-image-frame--fill">
           <img
@@ -62,7 +75,7 @@ export default function GroovedImage({
         </div>
       );
     }
-    if (!imageDisplayable) return placeholder;
+    if (!imageDisplayable || shimmer) return placeholder;
     return (
       <div
         className="neu-card-image-frame"
@@ -94,7 +107,7 @@ export default function GroovedImage({
     .join(" ");
 
   const showFrameAction =
-    Boolean(frameAction) && (fixedGroove || imageDisplayable);
+    Boolean(frameAction) && !shimmer && (fixedGroove || imageDisplayable);
   const frameActionNode = showFrameAction ? (
     <div className="neu-image-upload-remove neu-image-upload-remove--on-groove">
       {frameAction}
@@ -116,7 +129,7 @@ export default function GroovedImage({
   return (
     <div ref={wellRef} className={wellClasses}>
       <div className="neu-card-image-slot">
-        {src && !fixedGroove && !imageDisplayable && (
+        {src && !imageDisplayable && (
           <img
             className="neu-card-image-preload"
             src={src}

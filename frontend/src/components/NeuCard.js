@@ -95,6 +95,7 @@ export function NeuCardImageSlot({
   objectFit = "contain",
   alt,
   frameAction,
+  imageShimmer = false,
 }) {
   const config = IMAGE_SLOT[slot] ?? IMAGE_SLOT.tile;
   const resolvedImageUrl = imageUrl ?? image_url;
@@ -114,6 +115,7 @@ export function NeuCardImageSlot({
           placeholderIcon={add ? PlusOutlined : undefined}
           placeholderSize={config.placeholderSize}
           frameAction={frameAction}
+          shimmer={imageShimmer}
         />
       </div>
       {config.showNameplate ? (
@@ -139,6 +141,7 @@ function buildImageSlotProps({
   objectFit,
   alt,
   frameAction,
+  imageShimmer,
 }) {
   return {
     slot: resolveImageSlot(variant),
@@ -152,6 +155,7 @@ function buildImageSlotProps({
     objectFit,
     alt: alt ?? name,
     frameAction,
+    imageShimmer,
   };
 }
 
@@ -175,6 +179,7 @@ export default function NeuCard({
   meta,
   cover,
   frameAction,
+  imageShimmer = false,
   children,
   onClick,
   disabled,
@@ -193,6 +198,7 @@ export default function NeuCard({
     fixedGroove,
     objectFit,
     frameAction,
+    imageShimmer,
   });
 
   if (variant === "upload") {

@@ -32,7 +32,6 @@ export default function EditUserObjectModal({ visible,
       confirmLoading={confirmLoading}
       onClose={onCancel}
       destroyOnClose
-      width={520}
     >
       <Form layout="vertical" form={form}>
         <Form.Item label={t("model")} name="brandObjectId">

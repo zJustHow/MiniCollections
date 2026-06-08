@@ -1,7 +1,7 @@
-import { App, Empty, Spin, Typography } from "antd";
+import { App, Empty, Typography } from "antd";
 import NeuTag from "../components/NeuTag";
 import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import NeuButton from "../components/NeuButton";
 import NeuCard from "../components/NeuCard";
 import ListPagination from "../components/ListPagination";
@@ -11,6 +11,7 @@ import { radius } from "../theme/radius";
 import DetailImage from "../components/DetailImage";
 import { deleteMySubmission, getMySubmissionsPage, FEEDBACK_PAGE_SIZE, resolveMediaUrl } from "../utils";
 import SubmitObjectModal from "../components/ObjectList/modals/SubmitObjectModal";
+import { FeedbackListSkeleton } from "../components/FeedbackPageSkeleton";
 import NeuFormDrawer from "../components/NeuFormDrawer";
 import dayjs from "dayjs";
 import { neuRem } from "../theme/fontScale";
@@ -166,6 +167,7 @@ export default function FeedbackPage() {
   const { message } = App.useApp(); const { t } = useLocale();
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [initialLoaded, setInitialLoaded] = useState(false);
 
   const fetchMySubmissionsPage = useCallback(async ({ page, size }) => {
     try {
@@ -184,6 +186,12 @@ export default function FeedbackPage() {
     loadPage,
     onPageChange,
   } = usePagedList(fetchMySubmissionsPage, { pageSize: FEEDBACK_PAGE_SIZE });
+
+  useEffect(() => {
+    if (!loading) setInitialLoaded(true);
+  }, [loading]);
+
+  const showInitialSkeleton = !initialLoaded;
 
   const handleSubmitSuccess = () => {
     setSubmitModalVisible(false);
@@ -212,27 +220,25 @@ export default function FeedbackPage() {
         </div>
       </div>
 
-      {loading ? (
-        <div style={{ textAlign: "center", padding: 48 }}>
-          <Spin size="large" />
-        </div>
+      {showInitialSkeleton ? (
+        <FeedbackListSkeleton />
       ) : submissions.length === 0 ? (
         <Empty description={t("myFeedbackEmpty")} style={{ padding: 48 }} />
       ) : (
-        <>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {submissions.map((item) => (
-              <SubmissionCard key={item.id} item={item} t={t} onClick={() => setSelectedItem(item)} />
-            ))}
-          </div>
-          <ListPagination
-            page={page}
-            totalPages={totalPages}
-            loading={loading}
-            onPageChange={onPageChange}
-            pageSize={FEEDBACK_PAGE_SIZE}
-          />
-        </>
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          {submissions.map((item) => (
+            <SubmissionCard key={item.id} item={item} t={t} onClick={() => setSelectedItem(item)} />
+          ))}
+        </div>
+      )}
+      {!showInitialSkeleton && submissions.length > 0 && (
+        <ListPagination
+          page={page}
+          totalPages={totalPages}
+          loading={loading}
+          onPageChange={onPageChange}
+          pageSize={FEEDBACK_PAGE_SIZE}
+        />
       )}
 
       <SubmissionDrawer

@@ -1,38 +1,40 @@
-import NeuButton from "../../components/NeuButton";
 import ListPagination from "../../components/ListPagination";
+import AdminBrandPageHeader from "../../components/pageHeaders/AdminBrandPageHeader";
 import AdminDeleteAction from "../../components/admin/AdminDeleteAction";
 import AdminEditButton from "../../components/admin/AdminEditButton";
-import { App, Space, Table } from "antd";
-import {
-  ArrowLeftOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import AdminTableActions, {
+  adminTableActionsCellProps,
+} from "../../components/admin/AdminTableActions";
+import { App, Table } from "antd";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
 import {
   adminDeleteBrandObject,
   getBrandByBrandId,
   getBrandObjectsPage,
 } from "../../utils";
 import { useLocale } from "../../LocaleContext";
-import { radius } from "../../theme/radius";
+import { useHeader } from "../../HeaderContext";
 import usePagedList from "../../hooks/usePagedList";
 import BrandObjectModal from "../../components/ObjectList/modals/BrandObjectModal";
-import SeriesModal from "../../components/ObjectList/modals/SeriesModal";
-import { neuRem } from "../../theme/fontScale";
+import AdminBrandAddDrawer from "./AdminBrandAddDrawer";
+import { useAdminLayoutContext } from "./AdminLayout";
+import { scrollAppToTop } from "../../utils/scroll";
+import AdminTableSkeleton from "../../components/AdminTableSkeleton";
 
 const ADMIN_TABLE_PAGE_SIZE = 20;
 
 export default function AdminBrandObjectsPage() {
   const { brandId } = useParams();
-  const navigate = useNavigate();
   const location = useLocation();
+  const { navigateAdmin } = useAdminLayoutContext();
   const { message } = App.useApp();
   const { t } = useLocale();
+  const { setHeaderSlot } = useHeader();
   const [brand, setBrand] = useState(location.state?.brand ?? null);
+  const [addDrawerOpen, setAddDrawerOpen] = useState(false);
   const [objectModalOpen, setObjectModalOpen] = useState(false);
   const [editingObject, setEditingObject] = useState(null);
-  const [seriesModalOpen, setSeriesModalOpen] = useState(false);
   const [seriesRefreshKey, setSeriesRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -75,6 +77,23 @@ export default function AdminBrandObjectsPage() {
     }
   };
 
+  const brandName = brand?.name_en ?? brand?.name ?? "…";
+
+  useLayoutEffect(() => {
+    scrollAppToTop();
+  }, [brandId]);
+
+  useLayoutEffect(() => {
+    setHeaderSlot(
+      <AdminBrandPageHeader
+        brandName={brandName}
+        onBack={() => navigateAdmin("/admin/brands")}
+        onAdd={() => setAddDrawerOpen(true)}
+      />,
+    );
+    return () => setHeaderSlot(null);
+  }, [brandName, navigateAdmin, setHeaderSlot]);
+
   const columns = [
     { title: "#", dataIndex: "id", width: 60 },
     { title: t("nameEn"), dataIndex: "name_en", ellipsis: true },
@@ -87,12 +106,9 @@ export default function AdminBrandObjectsPage() {
       title: "",
       key: "actions",
       width: 90,
-      onCell: () => ({
-        onClick: (event) => event.stopPropagation(),
-        onMouseDown: (event) => event.stopPropagation(),
-      }),
+      onCell: adminTableActionsCellProps,
       render: (_, record) => (
-        <Space size={4}>
+        <AdminTableActions>
           <AdminEditButton
             onClick={() => {
               setEditingObject(record);
@@ -100,81 +116,40 @@ export default function AdminBrandObjectsPage() {
             }}
           />
           <AdminDeleteAction onConfirm={() => handleDeleteObject(record)} />
-        </Space>
+        </AdminTableActions>
       ),
     },
   ];
 
-  const brandName = brand?.name_en ?? brand?.name ?? "—";
-
   return (
     <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 16,
-          marginBottom: 20,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <NeuButton
-            icon={<ArrowLeftOutlined />}
-            onClick={() =>
-              navigate("/admin", { state: { adminView: "brands" } })
-            }
+      {loading ? (
+        <AdminTableSkeleton columns={8} rows={10} />
+      ) : (
+        <div className="neu-panel">
+          <Table
+            rowKey="id"
+            dataSource={objects}
+            columns={columns}
+            size="middle"
+            pagination={false}
           />
-          <h2
-            style={{
-              margin: 0,
-              fontSize: neuRem(20),
-              color: "var(--neu-text)",
-            }}
-          >
-            {brandName} — {t("brandObjects")}
-          </h2>
         </div>
-        <Space>
-          <NeuButton onClick={() => setSeriesModalOpen(true)}>
-            {t("addSeries")}
-          </NeuButton>
-          <NeuButton
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              setEditingObject(null);
-              setObjectModalOpen(true);
-            }}
-          >
-            {t("addBrandObject")}
-          </NeuButton>
-        </Space>
-      </div>
+      )}
+      <ListPagination
+        page={objectsPage}
+        totalPages={totalPages}
+        loading={loading}
+        onPageChange={onPageChange}
+      />
 
-      <div
-        style={{
-          borderRadius: radius.card,
-          padding: 24,
-          boxShadow: "var(--inset)",
-        }}
-      >
-        <Table
-          rowKey="id"
-          dataSource={objects}
-          columns={columns}
-          loading={loading}
-          size="middle"
-          pagination={false}
-        />
-        <ListPagination
-          page={objectsPage}
-          totalPages={totalPages}
-          loading={loading}
-          onPageChange={onPageChange}
-        />
-      </div>
+      <AdminBrandAddDrawer
+        open={addDrawerOpen}
+        brandId={brand?.id ?? Number(brandId)}
+        onClose={() => setAddDrawerOpen(false)}
+        onObjectSuccess={refreshObjects}
+        onSeriesSuccess={() => setSeriesRefreshKey((k) => k + 1)}
+      />
 
       <BrandObjectModal
         open={objectModalOpen}
@@ -186,12 +161,6 @@ export default function AdminBrandObjectsPage() {
           setEditingObject(null);
         }}
         onSuccess={refreshObjects}
-      />
-      <SeriesModal
-        open={seriesModalOpen}
-        brandId={brand?.id ?? Number(brandId)}
-        onClose={() => setSeriesModalOpen(false)}
-        onSuccess={() => setSeriesRefreshKey((k) => k + 1)}
       />
     </div>
   );
