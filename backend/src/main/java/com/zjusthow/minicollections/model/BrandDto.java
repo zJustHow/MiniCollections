@@ -13,6 +13,10 @@ public record BrandDto(
         long viewCount
 ) {
 
+    public BrandDto withViewCount(long viewCount) {
+        return new BrandDto(id, name, nameEn, nameZh, abbreviation, imageUrl, viewCount);
+    }
+
     public static BrandDto from(BrandEntity entity, boolean preferZh) {
         return from(entity, preferZh, entity.viewCount());
     }

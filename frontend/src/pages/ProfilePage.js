@@ -35,6 +35,7 @@ import {
 } from "../utils";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
+import { scrollAppToTop } from "../utils/scroll";
 import { PHONE_AUTH_ENABLED, WECHAT_AUTH_ENABLED } from "../components/auth/authFeatures";
 import "../styles/profile.css";
 
@@ -194,6 +195,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   };
 
   useLayoutEffect(() => {
+    scrollAppToTop();
     setHeaderSlot(
       <div className="header-slot-bar">
         <div className="header-slot-actions">
@@ -217,7 +219,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
     return () => setHeaderSlot(null);
   }, [t, navigate, setHeaderSlot, onLogout]);
 
-  if (!profile) return <PageLoader />;
+  if (!profile) return <PageLoader variant="profile" />;
 
   return (
     <div className="profile-page-content">
@@ -278,7 +280,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 <NeuInput
                   prefix={<UserOutlined />}
                   placeholder={t("displayName")}
-                  autoComplete="nickname"
+                  autoComplete="name"
                 />
               </Form.Item>
               <Form.Item className="profile-form-item-none">

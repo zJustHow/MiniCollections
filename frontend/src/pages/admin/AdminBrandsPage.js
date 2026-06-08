@@ -106,7 +106,9 @@ export default function AdminBrandsPage() {
             pagination={false}
             onRow={(record) => ({
               onClick: () =>
-                navigateAdmin(String(record.id), { state: { brand: record } }),
+                navigateAdmin(`/admin/brands/${record.id}`, {
+                  state: { brand: record },
+                }),
               style: { cursor: "pointer" },
             })}
           />

@@ -573,6 +573,26 @@ a:hover {
   justify-self: end;
 }
 
+.neu-header-slot-skeleton-btn {
+  display: block;
+  flex-shrink: 0;
+  width: 48px;
+  height: 100%;
+  min-height: 40px;
+  border-radius: 0;
+}
+
+.neu-header-slot-skeleton-title {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: center;
+  align-self: center;
+  width: min(180px, 42%);
+  height: 16px;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
 /* ── TABS (antd — kept for compatibility) ─────────────────── */
 .ant-tabs-nav::before {
   border-bottom: none;
@@ -865,6 +885,57 @@ a:hover {
 
 .neu-panel + .neu-detail-follow-on {
   margin-top: 24px;
+}
+
+.neu-object-detail-skeleton-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.neu-object-detail-skeleton-image-col {
+  flex: 1 1 100%;
+  max-width: 100%;
+}
+
+.neu-object-detail-skeleton-info-col {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+.neu-object-detail-skeleton-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.neu-object-detail-skeleton-row {
+  width: 72%;
+  height: 14px;
+}
+
+.neu-object-detail-skeleton-notes {
+  width: 92%;
+  height: 48px;
+}
+
+.neu-object-detail-skeleton-label {
+  display: block;
+  width: 96px;
+  height: 13px;
+  margin-bottom: 8px;
+}
+
+@media (min-width: 768px) {
+  .neu-object-detail-skeleton-image-col {
+    flex: 0 0 45%;
+    max-width: 45%;
+  }
+
+  .neu-object-detail-skeleton-info-col {
+    flex: 1 1 0;
+  }
 }
 
 .neu-card-thumb {
@@ -2313,6 +2384,58 @@ textarea.ant-input[disabled],
   padding: 48px 0;
 }
 
+.neu-splash-loader {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: 48px 24px;
+  background: var(--neu-bg);
+}
+
+.neu-splash-loader-brand .header-logo-icon {
+  width: 40px;
+  height: 40px;
+}
+
+.neu-splash-loader-brand .header-logo {
+  font-size: var(--neu-fs-22);
+  letter-spacing: 2px;
+}
+
+.neu-splash-loader-progress {
+  width: min(240px, 72vw);
+  height: 4px;
+  box-shadow: var(--inset);
+  background: var(--neu-bg);
+  overflow: hidden;
+}
+
+.neu-splash-loader-progress-bar {
+  display: block;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    rgba(209, 217, 230, 0.2) 0%,
+    rgba(255, 255, 255, 0.75) 50%,
+    rgba(209, 217, 230, 0.2) 100%
+  );
+  animation: neu-splash-progress 1.4s ease-in-out infinite;
+}
+
+@keyframes neu-splash-progress {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 .neu-feedback-card-skeleton {
   display: block;
   width: 100%;
@@ -2398,10 +2521,22 @@ textarea.ant-input[disabled],
   flex-shrink: 0;
   width: 40px;
   height: 40px;
+  background: var(--neu-bg);
+  box-shadow: var(--raised-sm);
+  overflow: hidden;
 }
 
 .neu-feedback-page-skeleton-btn--wide {
   width: 132px;
+}
+
+.neu-feedback-page-skeleton-btn--primary {
+  background: var(--neu-accent);
+}
+
+.neu-feedback-page-skeleton-btn-fill {
+  width: 100%;
+  height: 100%;
 }
 
 .neu-feedback-page-skeleton-list {
@@ -2735,6 +2870,138 @@ textarea.ant-input[disabled],
 
 .neu-login-title span {
   color: var(--neu-accent);
+}
+
+.neu-auth-page-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.neu-auth-skeleton-title {
+  display: block;
+  width: 42%;
+  height: 24px;
+  margin: 0 auto 32px;
+}
+
+.neu-auth-skeleton-hint {
+  display: block;
+  width: 88%;
+  height: 36px;
+  margin: -16px auto 24px;
+}
+
+.neu-auth-skeleton-toggle {
+  display: flex;
+  gap: 8px;
+  padding: 5px;
+  margin-bottom: 24px;
+  box-shadow: var(--inset);
+}
+
+.neu-auth-skeleton-toggle--compact {
+  margin-bottom: 0;
+}
+
+.neu-auth-skeleton-toggle-btn {
+  display: block;
+  flex: 1;
+  height: 36px;
+  background: var(--neu-bg);
+  overflow: hidden;
+}
+
+.neu-auth-skeleton-toggle-btn-fill {
+  width: 100%;
+  height: 100%;
+}
+
+.neu-auth-skeleton-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.neu-auth-skeleton-field {
+  display: block;
+  width: 100%;
+  height: var(--neu-control-height-lg);
+}
+
+.neu-auth-skeleton-code-row {
+  display: flex;
+  gap: 8px;
+}
+
+.neu-auth-skeleton-code-input {
+  display: block;
+  flex: 1;
+  height: var(--neu-control-height-lg);
+}
+
+.neu-auth-skeleton-code-btn {
+  display: block;
+  flex-shrink: 0;
+  width: 120px;
+  height: var(--neu-control-height-lg);
+  background: var(--neu-bg);
+  box-shadow: var(--raised-sm);
+  overflow: hidden;
+}
+
+.neu-auth-skeleton-code-btn-fill {
+  width: 100%;
+  height: 100%;
+}
+
+.neu-auth-skeleton-language {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.neu-auth-skeleton-language-label {
+  display: block;
+  width: 72px;
+  height: 12px;
+}
+
+.neu-auth-skeleton-primary-btn {
+  display: block;
+  width: 100%;
+  height: var(--neu-control-height-lg);
+  background: var(--neu-accent);
+  box-shadow: var(--raised-sm);
+  overflow: hidden;
+}
+
+.neu-auth-skeleton-primary-btn-fill {
+  width: 100%;
+  height: 100%;
+}
+
+.neu-auth-skeleton-footer-link {
+  display: block;
+  width: 72px;
+  height: 13px;
+  margin: 16px auto 0;
+}
+
+.neu-auth-callback-skeleton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background: var(--neu-bg);
+}
+
+.neu-auth-callback-skeleton-status {
+  display: block;
+  width: min(220px, 60vw);
+  height: 16px;
 }
 
 /* ── SEARCH FILTER PANEL (matches model card width in 4-col grid) ── */
@@ -3383,7 +3650,8 @@ textarea.ant-input[disabled],
   min-height: 0;
 }
 
-button.neu-card.neu-card--row {
+button.neu-card.neu-card--row,
+div.neu-card.neu-card--row {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -3393,9 +3661,29 @@ button.neu-card.neu-card--row {
   border-radius: 0;
   background: var(--neu-bg);
   box-shadow: var(--neu-card-shadow);
-  cursor: pointer;
   text-align: left;
+}
+
+button.neu-card.neu-card--row {
+  cursor: pointer;
   transition: var(--neu-card-transition);
+}
+
+.neu-related-model-skeleton {
+  pointer-events: none;
+}
+
+.neu-related-model-skeleton-name {
+  display: block;
+  width: 55%;
+  height: 1.25em;
+}
+
+.neu-related-model-skeleton-meta {
+  display: block;
+  width: 38%;
+  height: 1em;
+  margin-top: 6px;
 }
 
 button.neu-card.neu-card--row:hover:not(:disabled) {

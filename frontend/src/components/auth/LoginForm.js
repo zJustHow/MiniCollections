@@ -260,14 +260,13 @@ function LoginForm({ onSuccess }) {
         {error && (
           <div
             style={{
-              color: "#e05d5d",
-              background: "rgba(224, 93, 93, 0.08)",
+              color: "#fff",
+              background: "var(--neu-danger-light)",
               borderRadius: radius.md,
               padding: "8px 14px",
               marginBottom: 16,
               fontSize: neuRem(13),
-              boxShadow:
-                "inset 2px 2px 6px rgba(163, 177, 198, 0.4), inset -2px -2px 5px rgba(255,255,255,0.6)",
+              boxShadow: "var(--inset-danger)",
             }}
           >
             {error}

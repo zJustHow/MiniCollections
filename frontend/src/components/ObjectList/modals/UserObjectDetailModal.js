@@ -1,11 +1,11 @@
 import NeuButton from "../../NeuButton";
 import ConfirmDeleteButton from "../../ConfirmDeleteButton";
-import { Spin } from "antd";
+import RelatedModelCard from "../../RelatedModelCard";
+import RelatedModelCardSkeleton from "../../RelatedModelCardSkeleton";
 import { EditOutlined } from "@ant-design/icons";
 import NeuFormDrawer from "../../NeuFormDrawer";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
-import { radius } from "../../../theme/radius";
 
 export default function UserObjectDetailModal({
   visible,
@@ -69,43 +69,20 @@ export default function UserObjectDetailModal({
       </p>
       <div style={{ marginTop: 16 }}>
         <strong>{t("brandModelLabel")}:</strong>
-        <Spin spinning={loadingBrandDetail}>
-          {brandDetail ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                marginTop: 8,
-                cursor: "pointer",
-              }}
+        {loadingBrandDetail ? (
+          <div style={{ marginTop: 8 }}>
+            <RelatedModelCardSkeleton />
+          </div>
+        ) : brandDetail ? (
+          <div style={{ marginTop: 8 }}>
+            <RelatedModelCard
+              brandObject={brandDetail}
               onClick={onBrandObjectClick}
-            >
-              <img
-                src={brandDetail.image_url}
-                alt={brandDetail.name}
-                style={{
-                  width: 60,
-                  height: 60,
-                  objectFit: "cover",
-                  borderRadius: radius.xs,
-                  marginRight: 12,
-                }}
-              />
-              <span>
-                {brandDetail.name}
-                {(brandDetail.category || brandDetail.scale) && (
-                  <span style={{ color: "#888", marginLeft: 8 }}>
-                    {[brandDetail.category, brandDetail.scale]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </span>
-                )}
-              </span>
-            </div>
-          ) : (
-            <p style={{ marginTop: 8 }}>{t("noRelatedBrandObjectFound")}</p>
-          )}
-        </Spin>
+            />
+          </div>
+        ) : (
+          <p style={{ marginTop: 8 }}>{t("noRelatedBrandObjectFound")}</p>
+        )}
       </div>
     </NeuFormDrawer>
   );

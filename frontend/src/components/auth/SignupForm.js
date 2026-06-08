@@ -150,7 +150,7 @@ function SignupForm({ linkMode = false }) {
             <NeuInput
               prefix={<UserOutlined />}
               placeholder={t("username")}
-              autoComplete="nickname"
+              autoComplete="username"
             />
           </Form.Item>
           <Form.Item name="preferred_locale" label={t("language")}>

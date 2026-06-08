@@ -42,16 +42,18 @@ export default function AdminLayout() {
   const skeletonColumns = adminTableSkeletonColumns(displayPath);
   const brandsNavActive = displayPath.startsWith("/admin/brands");
   const submissionsNavActive = !brandsNavActive;
+  const showSidebar = !brandsNavActive;
 
   const navigateAdmin = useCallback(
     (to, options) => {
+      let target = to;
       if (typeof to === "string") {
-        const resolved = to.startsWith("/")
+        target = to.startsWith("/")
           ? to
           : `${location.pathname.replace(/\/?$/, "/")}${to}`;
-        setPendingPath(resolved);
+        setPendingPath(target);
       }
-      startNavTransition(() => navigate(to, options));
+      startNavTransition(() => navigate(target, options));
     },
     [navigate, location.pathname],
   );
@@ -90,6 +92,10 @@ export default function AdminLayout() {
     }
   }, [location.state?.adminStatus]);
 
+  useEffect(() => {
+    setPendingPath(location.pathname);
+  }, [location.pathname]);
+
   const statusCounts = {
     PENDING: submissions.filter((s) => s.status === "PENDING").length,
     APPROVED: submissions.filter((s) => s.status === "APPROVED").length,
@@ -115,7 +121,8 @@ export default function AdminLayout() {
           alignItems: "flex-start",
         }}
       >
-        {sidebarReady ? (
+        {showSidebar &&
+          (sidebarReady ? (
           <div
             className="neu-panel"
             style={{
@@ -207,29 +214,37 @@ export default function AdminLayout() {
           </div>
         ) : (
           <AdminSidebarSkeleton />
-        )}
+        ))}
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {isNavPending ? (
-            <AdminTableSkeleton columns={skeletonColumns} rows={10} />
-          ) : (
-            <Suspense
-              fallback={
-                <AdminTableSkeleton
-                  columns={adminTableSkeletonColumns(location.pathname)}
-                  rows={10}
-                />
-              }
-            >
-              <Outlet
-                context={{
-                  activeStatus,
-                  setActiveStatus,
-                  refreshSubmissions: fetchSubmissions,
-                  navigateAdmin,
-                }}
+        <div style={{ flex: 1, minWidth: 0, position: "relative" }}>
+          <Suspense
+            fallback={
+              <AdminTableSkeleton
+                columns={adminTableSkeletonColumns(location.pathname)}
+                rows={10}
               />
-            </Suspense>
+            }
+          >
+            <Outlet
+              context={{
+                activeStatus,
+                setActiveStatus,
+                refreshSubmissions: fetchSubmissions,
+                navigateAdmin,
+              }}
+            />
+          </Suspense>
+          {isNavPending && (
+            <div
+              style={{
+                position: "absolute",
+                inset: 0,
+                zIndex: 1,
+                background: "var(--neu-bg)",
+              }}
+            >
+              <AdminTableSkeleton columns={skeletonColumns} rows={10} />
+            </div>
           )}
         </div>
       </div>

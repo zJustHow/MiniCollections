@@ -46,6 +46,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -84,6 +86,10 @@ public class BrandService {
 
     @Value("${app.elasticsearch.enabled:true}")
     private boolean elasticsearchEnabled;
+
+    @Autowired
+    @Lazy
+    private BrandService self;
 
     public BrandService(
             BrandRepository brandRepository,
@@ -134,14 +140,16 @@ public class BrandService {
         return PageResponse.of(content, safePage, pageSize, total, true);
     }
 
-    @Cacheable(
-            value = "brands",
-            key = "'id_' + #id + '_' + #effectiveLocale"
-    )
     public BrandDto getBrandById(long id, String effectiveLocale) {
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        BrandDto cached = self.getBrandByIdCached(id, preferZh);
+        return cached.withViewCount(viewCountService.displayBrandViewCount(id, cached.viewCount()));
+    }
+
+    @Cacheable(value = "brands", key = "'id_' + #id + '_' + #preferZh")
+    public BrandDto getBrandByIdCached(long id, boolean preferZh) {
         return brandRepository.findById(id)
-                .map(e -> toBrandDto(e, preferZh))
+                .map(entity -> BrandDto.from(entity, preferZh))
                 .orElseThrow(BrandNotFoundException::new);
     }
 
@@ -242,15 +250,17 @@ public class BrandService {
         return PageResponse.of(content, safePage, pageSize, total, true);
     }
 
-    @Cacheable(
-            value = "brandObjects",
-            key = "'id_' + #id + '_' + #effectiveLocale"
-    )
     public BrandObjectDto getBrandObjectById(long id, String effectiveLocale) {
         boolean preferZh = displayLocaleResolver.prefersZh(effectiveLocale);
+        BrandObjectDto cached = self.getBrandObjectByIdCached(id, preferZh);
+        return cached.withViewCount(viewCountService.displayModelViewCount(id, cached.viewCount()));
+    }
+
+    @Cacheable(value = "brandObjects", key = "'id_' + #id + '_' + #preferZh")
+    public BrandObjectDto getBrandObjectByIdCached(long id, boolean preferZh) {
         BrandObjectEntity entity = brandObjectRepository.findById(id)
                 .orElseThrow(BrandObjectNotFoundException::new);
-        return toBrandObjectDto(entity, preferZh);
+        return toBrandObjectDtoWithStoredViewCount(entity, preferZh);
     }
 
     public PageResponse<BrandObjectDto> searchBrandObjectsPage(
@@ -950,7 +960,6 @@ public class BrandService {
         return Math.min(size, MAX_SIZE);
     }
 
-    @CacheEvict(value = "brands", allEntries = true)
     public BrandDto createBrand(BrandBody req, String effectiveLocale) {
         var entity = new com.zjusthow.minicollections.entity.BrandEntity(
                 null, req.nameEn(), req.nameZh(), req.abbreviation(), req.imageUrl(), 0L);
@@ -961,7 +970,11 @@ public class BrandService {
         return toBrandDto(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
-    @CacheEvict(value = {"brands", "brandObjects"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "brands", key = "'id_' + #id + '_true'"),
+            @CacheEvict(value = "brands", key = "'id_' + #id + '_false'"),
+            @CacheEvict(value = "brandObjects", allEntries = true)
+    })
     public BrandDto updateBrand(long id, BrandBody req, String effectiveLocale) {
         BrandEntity existing = brandRepository.findById(id).orElseThrow(BrandNotFoundException::new);
         deleteReplacedStoredImage(existing.imageUrl(), req.imageUrl());
@@ -976,7 +989,10 @@ public class BrandService {
     }
 
     /** Admin upload stores the file as-is (no {@link com.zjusthow.minicollections.image.BrandLogoNormalizer}). */
-    @CacheEvict(value = "brands", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "brands", key = "'id_' + #id + '_true'"),
+            @CacheEvict(value = "brands", key = "'id_' + #id + '_false'")
+    })
     public BrandDto uploadBrandLogo(long id, MultipartFile file, String effectiveLocale) throws IOException {
         if (imageStorageService == null) {
             throw new IllegalStateException("Image storage is not configured");
@@ -992,7 +1008,7 @@ public class BrandService {
         return toBrandDto(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
-    @CacheEvict(value = {"brands", "brandObjects", "user_objects"}, allEntries = true)
+    @CacheEvict(value = {"brands", "brandObjects"}, allEntries = true)
     @Transactional
     public void deleteBrand(long id) {
         BrandEntity brand = brandRepository.findById(id)
@@ -1007,7 +1023,6 @@ public class BrandService {
         deleteStoredImage(brand.imageUrl());
     }
 
-    @CacheEvict(value = "brandObjects", allEntries = true)
     public BrandObjectDto createBrandObject(long brandId, BrandObjectBody req, String effectiveLocale) {
         validateSeriesForBrand(req.seriesId(), brandId);
         validateCategoryId(req.categoryId());
@@ -1023,7 +1038,10 @@ public class BrandService {
         return toBrandObjectDto(saved, preferZh);
     }
 
-    @CacheEvict(value = "brandObjects", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "brandObjects", key = "'id_' + #id + '_true'"),
+            @CacheEvict(value = "brandObjects", key = "'id_' + #id + '_false'")
+    })
     public BrandObjectDto updateBrandObject(long id, BrandObjectBody req, String effectiveLocale) {
         BrandObjectEntity existing = brandObjectRepository.findById(id)
                 .orElseThrow(BrandObjectNotFoundException::new);
@@ -1044,7 +1062,10 @@ public class BrandService {
         return toBrandObjectDto(saved, preferZh);
     }
 
-    @CacheEvict(value = {"brandObjects", "user_objects"}, allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(value = "brandObjects", key = "'id_' + #id + '_true'"),
+            @CacheEvict(value = "brandObjects", key = "'id_' + #id + '_false'")
+    })
     @Transactional
     public void deleteBrandObject(long id) {
         BrandObjectEntity existing = brandObjectRepository.findById(id)
@@ -1075,6 +1096,20 @@ public class BrandService {
     }
 
     private BrandObjectDto toBrandObjectDto(BrandObjectEntity entity, boolean preferZh) {
+        return toBrandObjectDtoWithViewCount(
+                entity,
+                preferZh,
+                viewCountService.displayModelViewCount(entity.id(), entity.viewCount()));
+    }
+
+    private BrandObjectDto toBrandObjectDtoWithStoredViewCount(BrandObjectEntity entity, boolean preferZh) {
+        return toBrandObjectDtoWithViewCount(entity, preferZh, entity.viewCount());
+    }
+
+    private BrandObjectDto toBrandObjectDtoWithViewCount(
+            BrandObjectEntity entity,
+            boolean preferZh,
+            long viewCount) {
         BrandEntity brand = brandRepository.findById(entity.brandId()).orElse(null);
         SeriesEntity series = entity.seriesId() != null
                 ? seriesRepository.findById(entity.seriesId()).orElse(null)
@@ -1086,8 +1121,7 @@ public class BrandService {
                 ? scaleRepository.findById(entity.scaleId()).orElse(null)
                 : null;
         return BrandObjectDto.from(
-                entity, brand, series, category, scale, preferZh,
-                viewCountService.displayModelViewCount(entity.id(), entity.viewCount()));
+                entity, brand, series, category, scale, preferZh, viewCount);
     }
 
     private BrandDto toBrandDto(BrandEntity entity, boolean preferZh) {

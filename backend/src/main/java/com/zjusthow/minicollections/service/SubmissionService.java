@@ -26,7 +26,6 @@ import com.zjusthow.minicollections.repository.SeriesRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,7 +129,6 @@ public class SubmissionService {
     }
 
     @Transactional
-    @CacheEvict(value = "brandObjects", allEntries = true)
     public ObjectSubmissionDto approve(Long submissionId, Long adminUserId, ApprovalBody body) {
         validateCategoryId(body.categoryId());
         validateScaleId(body.scaleId());

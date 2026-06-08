@@ -11,6 +11,7 @@ import dayjs from "dayjs";
 import DetailImage from "../components/DetailImage";
 import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";
 import RelatedModelCard from "../components/RelatedModelCard";
+import RelatedModelCardSkeleton from "../components/RelatedModelCardSkeleton";
 import EditUserObjectModal from "../components/ObjectList/modals/EditUserObjectModal";
 import useRemoteModelSelectSearch from "../hooks/useRemoteModelSelectSearch";
 import { useLocale } from "../LocaleContext";
@@ -50,6 +51,8 @@ export default function GroupObjectDetailPage() {
     }
   }, [location.state?.returnSearch]);
   const [brandObjectDetail, setBrandObjectDetail] = useState(null);
+  const [loadingBrandObjectDetail, setLoadingBrandObjectDetail] =
+    useState(false);
 
   const [editVisible, setEditVisible] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
@@ -88,11 +91,14 @@ export default function GroupObjectDetailPage() {
       userObject.brandObjectId ?? userObject.brand_object_id;
     if (!brandObjectId) {
       setBrandObjectDetail(null);
+      setLoadingBrandObjectDetail(false);
       return;
     }
+    setLoadingBrandObjectDetail(true);
     getBrandObjectById(brandObjectId)
       .then(setBrandObjectDetail)
-      .catch(() => setBrandObjectDetail(null));
+      .catch(() => setBrandObjectDetail(null))
+      .finally(() => setLoadingBrandObjectDetail(false));
   }, [userObject]);
 
   const handleDelete = async () => {
@@ -280,19 +286,23 @@ export default function GroupObjectDetailPage() {
             />
           </DetailPanel>
 
-          {brandObjectDetail ? (
+          {loadingBrandObjectDetail || brandObjectDetail ? (
             <div className="neu-detail-follow-on">
               <div className="neu-panel-label">{t("brandModelLabel")}</div>
-              <RelatedModelCard
-                brandObject={brandObjectDetail}
-                onClick={() => {
-                  const bId =
-                    brandObjectDetail.brand_id ?? brandObjectDetail.brandId;
-                  navigate(`/brands/${bId}/objects/${brandObjectDetail.id}`, {
-                    state: { brandObject: brandObjectDetail },
-                  });
-                }}
-              />
+              {loadingBrandObjectDetail ? (
+                <RelatedModelCardSkeleton />
+              ) : (
+                <RelatedModelCard
+                  brandObject={brandObjectDetail}
+                  onClick={() => {
+                    const bId =
+                      brandObjectDetail.brand_id ?? brandObjectDetail.brandId;
+                    navigate(`/brands/${bId}/objects/${brandObjectDetail.id}`, {
+                      state: { brandObject: brandObjectDetail },
+                    });
+                  }}
+                />
+              )}
             </div>
           ) : null}
         </div>

@@ -26,8 +26,12 @@ export default function FeedbackPageSkeleton({
     >
       {showToolbar ? (
         <div className="neu-feedback-page-skeleton-toolbar">
-          <span className="neu-card-skeleton-line neu-feedback-page-skeleton-btn" />
-          <span className="neu-card-skeleton-line neu-feedback-page-skeleton-btn neu-feedback-page-skeleton-btn--wide" />
+          <span className="neu-feedback-page-skeleton-btn">
+            <span className="neu-card-skeleton-line neu-feedback-page-skeleton-btn-fill" />
+          </span>
+          <span className="neu-feedback-page-skeleton-btn neu-feedback-page-skeleton-btn--wide neu-feedback-page-skeleton-btn--primary">
+            <span className="neu-card-skeleton-line neu-feedback-page-skeleton-btn-fill" />
+          </span>
         </div>
       ) : null}
       <FeedbackListSkeleton count={count} />

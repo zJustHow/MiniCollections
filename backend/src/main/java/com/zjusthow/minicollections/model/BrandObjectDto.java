@@ -37,6 +37,16 @@ public record BrandObjectDto(
         long viewCount
 ) {
 
+    public BrandObjectDto withViewCount(long viewCount) {
+        return new BrandObjectDto(
+                id, name, nameEn, nameZh, imageUrl, imageSource,
+                releasePriceCny, releasePriceUsd, releaseDate,
+                brandId, brand, brandEn, brandZh,
+                seriesId, series, seriesEn, seriesZh,
+                categoryId, category, categoryEn, categoryZh,
+                scaleId, scale, viewCount);
+    }
+
     public static BrandObjectDto from(
             BrandObjectEntity entity,
             BrandEntity brand,

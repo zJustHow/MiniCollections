@@ -302,7 +302,7 @@ export default function RegisterPage() {
                 prefix={<UserOutlined />}
                 placeholder={t("username")}
                 size="large"
-                autoComplete="nickname"
+                autoComplete="username"
               />
             </Form.Item>
 

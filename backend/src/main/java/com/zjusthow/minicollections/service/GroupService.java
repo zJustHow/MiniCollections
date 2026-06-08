@@ -195,10 +195,6 @@ public class GroupService {
                 .list();
     }
 
-    @CacheEvict(
-            value = "groups",
-            allEntries = true
-    )
     @Transactional
     public GroupDto createGroup(Long userId, String name, String imageUrl) {
         int current = groupRepository.findByUserId(userId)
@@ -211,10 +207,7 @@ public class GroupService {
         return new GroupDto(savedGroupEntity);
     }
 
-    @CacheEvict(
-            value = "groups",
-            allEntries = true
-    )
+    @CacheEvict(value = "groups", key = "'groups_' + #userId + '_' + #groupId")
     @Transactional
     public GroupDto updateGroup(Long userId, Long groupId, String name, String imageUrl) {
         GroupEntity groupEntity = groupRepository.findById(groupId)
@@ -236,10 +229,7 @@ public class GroupService {
         return new GroupDto(savedGroupEntity);
     }
 
-    @CacheEvict(
-            value = {"groups", "user_objects"},
-            allEntries = true
-    )
+    @CacheEvict(value = "groups", key = "'groups_' + #userId + '_' + #groupId")
     @Transactional
     public void deleteGroupById(Long userId, Long groupId) {
         GroupEntity groupEntity = groupRepository.findById(groupId)
@@ -300,10 +290,6 @@ public class GroupService {
         return new UserObjectDto(entity);
     }
 
-    @CacheEvict(
-            value = {"groups", "user_objects"},
-            allEntries = true
-    )
     @Transactional
     public UserObjectDto createUserObject(
             Long userId,
@@ -343,10 +329,6 @@ public class GroupService {
         return new UserObjectDto(savedUserObjectEntity);
     }
 
-    @CacheEvict(
-            value = {"groups", "user_objects"},
-            allEntries = true
-    )
     @Transactional
     public UserObjectDto updateUserObject(
             Long userId,
@@ -381,10 +363,6 @@ public class GroupService {
         return new UserObjectDto(saved);
     }
 
-    @CacheEvict(
-            value = {"groups", "user_objects"},
-            allEntries = true
-    )
     @Transactional
     public void deleteUserObjectById(Long userId, Long userObjectId) {
         UserObjectEntity userObjectEntity = userObjectRepository.findById(userObjectId)

@@ -1,6 +1,13 @@
 import NeuPressableButton from "./components/NeuPressableButton";
 import PageLoader from "./components/PageLoader";
-import { Layout, Avatar, Tooltip, Spin } from "antd";
+import RouteSkeleton from "./components/RouteSkeleton";
+import HeaderSlotSkeleton from "./components/HeaderSlotSkeleton";
+import { Layout, Avatar, Tooltip } from "antd";
+import {
+  resolveHeaderSkeletonEndActions,
+  usesCustomHeader,
+  usesMainLayout,
+} from "./utils/routeSkeleton";
 import { Suspense, useState, useEffect, useRef } from "react";
 import { lazyWithRetry } from "./utils/lazyWithRetry";
 import {
@@ -10,7 +17,6 @@ import {
   useNavigate,
   useLocation,
   Outlet,
-  matchPath,
 } from "react-router-dom";
 import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
 import ObjectList from "./components/ObjectList";
@@ -21,7 +27,9 @@ import BrandObjectsPage from "./pages/BrandObjectsPage";
 import BrandObjectDetailPage from "./pages/BrandObjectDetailPage";
 import GroupObjectsPage from "./pages/GroupObjectsPage";
 import GroupObjectDetailPage from "./pages/GroupObjectDetailPage";
+import ProfilePage from "./pages/ProfilePage";
 import { getMe, logout } from "./utils";
+import { scrollAppToTop } from "./utils/scroll";
 import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
 
@@ -38,14 +46,13 @@ const AdminBrandsPage = lazyWithRetry(
   () => import("./pages/admin/AdminBrandsPage"),
 );
 const FeedbackPage = lazyWithRetry(() => import("./pages/FeedbackPage"));
-const ProfilePage = lazyWithRetry(() => import("./pages/ProfilePage"));
 const WechatCallbackPage = lazyWithRetry(
   () => import("./pages/WechatCallbackPage"),
 );
 
 const { Header, Content } = Layout;
 
-function MainLayoutInner({ authed, profile, isAdmin }) {
+function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLocale();
@@ -67,15 +74,14 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  const hideProfileButton = [
-    "/profile",
-    "/brands/:brandId",
-    "/brands/:brandId/objects/:objectId",
-    "/groups/:groupId",
-    "/groups/:groupId/objects/:objectId",
-    "/admin/brands",
-    "/admin/brands/:brandId",
-  ].some((pattern) => matchPath(pattern, location.pathname));
+  const customHeaderRoute = usesCustomHeader(location.pathname);
+  const headerSkeletonEndActions = resolveHeaderSkeletonEndActions(
+    location.pathname,
+    { isAdmin },
+  );
+  const showDefaultHeaderNav = !customHeaderRoute && !headerSlot;
+
+  const hideProfileButton = customHeaderRoute;
 
   const activeTab =
     location.pathname === "/groups"
@@ -88,7 +94,11 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
 
   const goToLogin = () => navigate("/login");
 
-  const goToProfile = () => navigate(authed ? "/profile" : "/login");
+  const goToProfile = () => {
+    setMenuOpen(false);
+    scrollAppToTop();
+    navigate(authed ? "/profile" : "/login");
+  };
 
   const renderProfileBtn = (onClick) =>
     authed ? (
@@ -149,11 +159,15 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
         }}
       >
         {/* Logo — hidden when a page injects its own header slot */}
-        {!headerSlot && <SiteLogo />}
+        {showDefaultHeaderNav && <SiteLogo />}
 
-        {/* Center slot: either custom page content or default nav tabs */}
+        {/* Center slot: custom page header, skeleton, or default nav tabs */}
         {headerSlot ? (
           <div className="header-slot-wrap">{headerSlot}</div>
+        ) : customHeaderRoute ? (
+          <div className="header-slot-wrap">
+            <HeaderSlotSkeleton endActions={headerSkeletonEndActions} />
+          </div>
         ) : (
           <div className="header-tabs">
             <NeuPressableButton
@@ -215,7 +229,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
         )}
 
         {/* Mobile hamburger button — only visible on small screens */}
-        {!headerSlot && (
+        {showDefaultHeaderNav && (
           <NeuPressableButton
             variant="header-bar"
             className="mobile-menu-btn"
@@ -230,7 +244,7 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
       </Header>
 
       {/* Mobile dropdown menu */}
-      {menuOpen && !headerSlot && (
+      {menuOpen && showDefaultHeaderNav && (
         <div className="mobile-menu-overlay" ref={menuRef}>
           <button
             className={`mobile-menu-item${activeTab === "brands" ? " active" : ""}`}
@@ -280,16 +294,25 @@ function MainLayoutInner({ authed, profile, isAdmin }) {
           scrollbarGutter: "stable",
         }}
       >
-        <Outlet />
+        {authLoading ? (
+          <RouteSkeleton pathname={location.pathname} />
+        ) : (
+          <Outlet />
+        )}
       </Content>
     </Layout>
   );
 }
 
-function MainLayout({ authed, profile, isAdmin }) {
+function MainLayout({ authed, profile, isAdmin, authLoading = false }) {
   return (
     <HeaderProvider>
-      <MainLayoutInner authed={authed} profile={profile} isAdmin={isAdmin} />
+      <MainLayoutInner
+        authed={authed}
+        profile={profile}
+        isAdmin={isAdmin}
+        authLoading={authLoading}
+      />
     </HeaderProvider>
   );
 }
@@ -299,6 +322,7 @@ export default function App() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
   const { setLocale } = useLocale();
 
   const isAdmin = profile?.admin === true;
@@ -351,18 +375,18 @@ export default function App() {
   };
 
   if (loading) {
-    return (
-      <Layout
-        style={{
-          height: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Spin size="large" />
-      </Layout>
-    );
+    if (usesMainLayout(location.pathname)) {
+      return (
+        <MainLayout
+          authed={false}
+          profile={null}
+          isAdmin={false}
+          authLoading
+        />
+      );
+    }
+
+    return <RouteSkeleton pathname={location.pathname} />;
   }
 
   return (
@@ -383,7 +407,7 @@ export default function App() {
           authed ? (
             <Navigate to="/" replace />
           ) : (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<PageLoader variant="register" />}>
               <RegisterPage />
             </Suspense>
           )
@@ -395,7 +419,7 @@ export default function App() {
           authed ? (
             <Navigate to="/" replace />
           ) : (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<PageLoader variant="forgotPassword" />}>
               <ForgotPasswordPage />
             </Suspense>
           )
@@ -407,7 +431,7 @@ export default function App() {
           authed && localStorage.getItem("wechat_intent") !== "bind" ? (
             <Navigate to="/" replace />
           ) : (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<PageLoader variant="wechatCallback" />}>
               <WechatCallbackPage
                 onSuccess={handleLoginSuccess}
                 onBind={handleWechatBind}
@@ -427,13 +451,11 @@ export default function App() {
             !authed ? (
               <Navigate to="/login" replace />
             ) : (
-              <Suspense fallback={<PageLoader />}>
-                <ProfilePage
-                  profile={profile}
-                  onProfileChange={handleProfileChange}
-                  onLogout={handleLogout}
-                />
-              </Suspense>
+              <ProfilePage
+                profile={profile}
+                onProfileChange={handleProfileChange}
+                onLogout={handleLogout}
+              />
             )
           }
         />
