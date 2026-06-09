@@ -228,13 +228,13 @@ spring:
       - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
       - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration
       - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
-  opensearch:
-    uris: ${ELASTICSEARCH_URIS}
-    username: ${ELASTICSEARCH_USERNAME:}
-    password: ${ELASTICSEARCH_PASSWORD:}
   sql:
     init:
       mode: never
+opensearch:
+  uris: ${ELASTICSEARCH_URIS}
+  username: ${ELASTICSEARCH_USERNAME:}
+  password: ${ELASTICSEARCH_PASSWORD:}
 app:
   s3:
     # In production, set S3_PUBLIC_BASE_URL to your CDN or public MinIO URL (required — no localhost default).
