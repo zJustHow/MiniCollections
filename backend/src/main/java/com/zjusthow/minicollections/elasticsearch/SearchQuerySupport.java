@@ -12,7 +12,6 @@ import org.opensearch.index.query.Operator;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.aggregations.AggregationBuilders;
-import org.opensearch.search.aggregations.bucket.terms.LongTerms;
 import org.opensearch.search.aggregations.bucket.terms.Terms;
 import org.opensearch.search.sort.SortBuilders;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
@@ -309,12 +308,12 @@ public class SearchQuerySupport {
         if (!(aggregations instanceof org.opensearch.search.aggregations.Aggregations osAggs)) {
             return List.of();
         }
-        Terms terms = osAggs.get(aggName);
-        if (!(terms instanceof LongTerms longTerms)) {
+        var aggregation = osAggs.get(aggName);
+        if (!(aggregation instanceof Terms terms)) {
             return List.of();
         }
         List<EsFacetBucket> buckets = new ArrayList<>();
-        for (Terms.Bucket bucket : longTerms.getBuckets()) {
+        for (Terms.Bucket bucket : terms.getBuckets()) {
             long key = bucket.getKeyAsNumber().longValue();
             if (key != 0L) {
                 buckets.add(new EsFacetBucket(key, bucket.getDocCount()));
