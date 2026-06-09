@@ -35,6 +35,7 @@ import {
 } from "../utils/brandsApi";
 import { adminDeleteBrand } from "../utils/adminApi";
 import { scrollAppToTop } from "../utils/scroll";
+import { prefetchBrandObjectDetailPage } from "../utils/prefetchRoutes";
 import { neuRem } from "../theme/fontScale";
 
 const SubmitObjectModal = createLazyModal(
@@ -225,11 +226,14 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       subtitle={objectCardBrandSubtitle(item)}
       nameplateVariant="object"
       imageUrl={item.image_url}
-      onClick={() =>
+      onMouseEnter={prefetchBrandObjectDetailPage}
+      onFocus={prefetchBrandObjectDetailPage}
+      onClick={() => {
+        prefetchBrandObjectDetailPage();
         navigate(`/brands/${brandId}/objects/${item.id}`, {
           state: { brandObject: item, brand },
-        })
-      }
+        });
+      }}
     />
   );
 

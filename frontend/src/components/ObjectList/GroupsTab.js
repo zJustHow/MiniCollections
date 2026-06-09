@@ -6,6 +6,7 @@ import TabListPageBody from "../listPage/TabListPageBody";
 import TabCombinedSearchSection from "../listPage/TabCombinedSearchSection";
 import { withAddCardSlot } from "../../utils/listPageUtils";
 import { useLocale } from "../../LocaleContext";
+import { prefetchGroupObjectDetailPage } from "../../utils/prefetchRoutes";
 
 export default function GroupsTab({
   groups,
@@ -45,7 +46,10 @@ export default function GroupsTab({
       subtitle={obj.groupName ?? obj.group_name}
       nameplateVariant="object"
       imageUrl={obj.imageUrl ?? obj.image_url}
-      onClick={() =>
+      onMouseEnter={prefetchGroupObjectDetailPage}
+      onFocus={prefetchGroupObjectDetailPage}
+      onClick={() => {
+        prefetchGroupObjectDetailPage();
         navigate(`/groups/${obj.groupId ?? obj.group_id}/objects/${obj.id}`, {
           state: {
             userObject: obj,
@@ -54,8 +58,8 @@ export default function GroupsTab({
               name: obj.groupName ?? obj.group_name,
             },
           },
-        })
-      }
+        });
+      }}
     />
   );
 

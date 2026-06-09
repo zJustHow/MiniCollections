@@ -45,18 +45,32 @@ describe("resolveRouteHeader", () => {
     expect(header.props.returnSearch).toBe("?page=2");
   });
 
-  it("uses navigation state for object detail routes", () => {
-    const header = resolveRouteHeader({
-      location: {
-        pathname: "/brands/3/objects/9",
-        state: { brandObject: { name: "Model X" } },
-      },
-      navigate,
-      t,
-      isAdmin: false,
-      onLogout,
-    });
-    expect(header.props.title).toBe("Model X");
+  it("returns null for object detail routes so pages own their header", () => {
+    expect(
+      resolveRouteHeader({
+        location: {
+          pathname: "/brands/3/objects/9",
+          state: { brandObject: { name: "Model X" } },
+        },
+        navigate,
+        t,
+        isAdmin: false,
+        onLogout,
+      }),
+    ).toBeNull();
+
+    expect(
+      resolveRouteHeader({
+        location: {
+          pathname: "/groups/2/objects/5",
+          state: { userObject: { name: "My model" } },
+        },
+        navigate,
+        t,
+        isAdmin: false,
+        onLogout,
+      }),
+    ).toBeNull();
   });
 
   it("builds admin catalog headers", () => {

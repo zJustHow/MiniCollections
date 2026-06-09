@@ -275,9 +275,28 @@ public class SearchQuerySupport {
     }
 
     private QueryBuilder multiMatchBuilder(String query, List<String> fields) {
-        return QueryBuilders.multiMatchQuery(query, fields.toArray(String[]::new))
+        MultiMatchQueryBuilder builder = QueryBuilders.multiMatchQuery(query)
                 .type(MultiMatchQueryBuilder.Type.BEST_FIELDS)
                 .operator(Operator.OR);
+        for (String fieldSpec : fields) {
+            appendOpenSearchField(builder, fieldSpec);
+        }
+        return builder;
+    }
+
+    static void appendOpenSearchField(MultiMatchQueryBuilder builder, String fieldSpec) {
+        int caret = fieldSpec.lastIndexOf('^');
+        if (caret > 0 && caret < fieldSpec.length() - 1) {
+            String fieldName = fieldSpec.substring(0, caret);
+            String boostText = fieldSpec.substring(caret + 1);
+            try {
+                builder.field(fieldName, Float.parseFloat(boostText));
+                return;
+            } catch (NumberFormatException ignored) {
+                // Fall through to unboosted field when boost is malformed.
+            }
+        }
+        builder.field(fieldSpec);
     }
 
     private List<FieldValue> toFieldValues(List<Long> ids) {

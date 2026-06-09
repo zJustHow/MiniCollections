@@ -2,7 +2,6 @@ import { matchPath } from "react-router-dom";
 import BrandObjectsPageHeader from "../components/pageHeaders/BrandObjectsPageHeader";
 import GroupObjectsPageHeader from "../components/pageHeaders/GroupObjectsPageHeader";
 import AdminBrandPageHeader from "../components/pageHeaders/AdminBrandPageHeader";
-import ObjectDetailBackHeader from "../components/pageHeaders/ObjectDetailBackHeader";
 import ProfileRouteHeader from "../components/pageHeaders/ProfileRouteHeader";
 import { usesCustomHeader } from "./routeSkeleton";
 
@@ -42,14 +41,14 @@ export function resolveRouteHeader({
     matchPath(
       { path: "/brands/:brandId/objects/:objectId", end: true },
       pathname,
+    ) ||
+    matchPath(
+      { path: "/groups/:groupId/objects/:objectId", end: true },
+      pathname,
     )
   ) {
-    return (
-      <ObjectDetailBackHeader
-        title={state.brandObject?.name}
-        onBack={() => navigate(-1)}
-      />
-    );
+    // Detail pages set their own header once mounted.
+    return null;
   }
 
   if (matchPath({ path: "/groups/:groupId", end: true }, pathname)) {
@@ -57,20 +56,6 @@ export function resolveRouteHeader({
       <GroupObjectsPageHeader
         group={state.group ?? null}
         returnSearch={state.returnSearch ?? ""}
-      />
-    );
-  }
-
-  if (
-    matchPath(
-      { path: "/groups/:groupId/objects/:objectId", end: true },
-      pathname,
-    )
-  ) {
-    return (
-      <ObjectDetailBackHeader
-        title={state.userObject?.name}
-        onBack={() => navigate(-1)}
       />
     );
   }

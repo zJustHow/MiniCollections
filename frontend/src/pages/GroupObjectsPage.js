@@ -29,6 +29,7 @@ import { purchasePriceFromFormValue } from "../utils/format";
 import { discardUploadedImage } from "../utils/uploadsApi";
 import { resolveImageFieldPayload } from "../utils/imageFieldOverride";
 import { scrollAppToTop } from "../utils/scroll";
+import { prefetchGroupObjectDetailPage } from "../utils/prefetchRoutes";
 
 const AddUserObjectInGroupModal = createLazyModal(
   () => import("../components/ObjectList/modals/AddUserObjectInGroupModal"),
@@ -261,15 +262,18 @@ export default function GroupObjectsPage() {
                   subtitle={group?.name}
                   nameplateVariant="object"
                   imageUrl={item.image_url}
-                  onClick={() =>
+                  onMouseEnter={prefetchGroupObjectDetailPage}
+                  onFocus={prefetchGroupObjectDetailPage}
+                  onClick={() => {
+                    prefetchGroupObjectDetailPage();
                     navigate(`/groups/${groupId}/objects/${item.id}`, {
                       state: {
                         userObject: item,
                         group,
                         returnSearch: location.search,
                       },
-                    })
-                  }
+                    });
+                  }}
                 />
               ),
             )}

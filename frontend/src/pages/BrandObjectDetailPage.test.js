@@ -148,6 +148,17 @@ describe("BrandObjectDetailPage", () => {
     expect(screen.getByTestId("detail-skeleton")).toBeInTheDocument();
   });
 
+  test("renders immediately when brand is passed separately in route state", () => {
+    renderPage({
+      brandObject: { id: 42, name: "BMW M3", image_url: null },
+      brand: { name_en: "BMW" },
+    });
+
+    expect(screen.queryByTestId("detail-skeleton")).not.toBeInTheDocument();
+    expect(screen.getByText("BMW")).toBeInTheDocument();
+    expect(screen.getByText("addToGroup")).toBeInTheDocument();
+  });
+
   test("loads model details from API when route state is incomplete", async () => {
     vi.mocked(getBrandObjectById).mockResolvedValue({
       id: 42,

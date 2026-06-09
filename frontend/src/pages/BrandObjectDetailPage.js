@@ -31,19 +31,21 @@ import {
 } from "../utils/format";
 import { discardUploadedImage } from "../utils/uploadsApi";
 import { resolveImageFieldPayload } from "../utils/imageFieldOverride";
+import { hydrateBrandObjectFromRouteState } from "../utils/objectDetailRouteState";
+import { scrollAppToTop } from "../utils/scroll";
 
 export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const { brandId, objectId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const { setHeaderSlot } = useHeader();
-  const [brandObject, setBrandObject] = useState(
-    location.state?.brandObject ?? null,
+  const [brandObject, setBrandObject] = useState(() =>
+    hydrateBrandObjectFromRouteState(location.state, locale),
   );
   const [loading, setLoading] = useState(
-    !location.state?.brandObject?.brand,
+    () => !hydrateBrandObjectFromRouteState(location.state, locale)?.brand,
   );
 
   const [groups, setGroups] = useState([]);
@@ -54,23 +56,33 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
 
   const [brandObjectModalOpen, setBrandObjectModalOpen] = useState(false);
 
-  const fetchBrandObject = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await getBrandObjectById(objectId);
-      setBrandObject(data);
-    } catch (err) {
-      message.error(err?.message || t("failedToLoadModels"));
-    } finally {
-      setLoading(false);
-    }
-  }, [objectId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const fetchBrandObject = useCallback(
+    async ({ background = false } = {}) => {
+      if (!background) setLoading(true);
+      try {
+        const data = await getBrandObjectById(objectId);
+        if (data) setBrandObject(data);
+      } catch (err) {
+        if (!background) {
+          message.error(err?.message || t("failedToLoadModels"));
+        }
+      } finally {
+        if (!background) setLoading(false);
+      }
+    },
+    [objectId, message, t],
+  );
 
   useEffect(() => {
-    if (!brandObject?.brand) {
-      fetchBrandObject();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    const hydrated = hydrateBrandObjectFromRouteState(location.state, locale);
+    setBrandObject(hydrated);
+    setLoading(!hydrated?.brand);
+    fetchBrandObject({ background: Boolean(hydrated?.brand) });
+  }, [objectId, location.key]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useLayoutEffect(() => {
+    scrollAppToTop();
+  }, [objectId]);
 
   useEffect(() => {
     if (isAdmin || !objectId) return;

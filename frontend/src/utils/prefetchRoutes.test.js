@@ -4,6 +4,8 @@ import {
   prefetchForgotPasswordPage,
   prefetchLoginPage,
   prefetchAuthPages,
+  prefetchBrandObjectDetailPage,
+  prefetchGroupObjectDetailPage,
 } from "./prefetchRoutes";
 
 describe("prefetchProfilePage", () => {
@@ -46,5 +48,23 @@ describe("prefetchAuthPages", () => {
   test("prefetches register and forgot password pages", async () => {
     prefetchAuthPages();
     await Promise.all([prefetchRegisterPage(), prefetchForgotPasswordPage()]);
+  });
+});
+
+describe("prefetchBrandObjectDetailPage", () => {
+  test("returns the same in-flight import promise", async () => {
+    const first = prefetchBrandObjectDetailPage();
+    const second = prefetchBrandObjectDetailPage();
+    expect(first).toBe(second);
+    await first;
+  });
+});
+
+describe("prefetchGroupObjectDetailPage", () => {
+  test("returns the same in-flight import promise", async () => {
+    const first = prefetchGroupObjectDetailPage();
+    const second = prefetchGroupObjectDetailPage();
+    expect(first).toBe(second);
+    await first;
   });
 });

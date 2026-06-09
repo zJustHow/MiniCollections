@@ -2,11 +2,11 @@ import { lazy, Suspense } from "react";
 import SplashLoader from "./SplashLoader";
 import AuthPageSkeleton from "./AuthPageSkeleton";
 import ProfilePageSkeleton from "./ProfilePageSkeleton";
+import ObjectDetailPageSkeleton from "./ObjectDetailPageSkeleton";
 const FeedbackPageSkeleton = lazy(() => import("./FeedbackPageSkeleton"));
 const AdminLayoutSkeleton = lazy(() => import("./AdminLayoutSkeleton"));
 const AdminTableSkeleton = lazy(() => import("./AdminTableSkeleton"));
 const NeuCardGridSkeleton = lazy(() => import("./NeuCardGridSkeleton"));
-const ObjectDetailPageSkeleton = lazy(() => import("./ObjectDetailPageSkeleton"));
 
 function LazySkeleton({ children }) {
   return <Suspense fallback={<SplashLoader />}>{children}</Suspense>;
@@ -72,19 +72,11 @@ export default function PageLoader({ variant = "splash" }) {
   }
 
   if (variant === "brandObjectDetail") {
-    return (
-      <LazySkeleton>
-        <ObjectDetailPageSkeleton />
-      </LazySkeleton>
-    );
+    return <ObjectDetailPageSkeleton />;
   }
 
   if (variant === "groupObjectDetail") {
-    return (
-      <LazySkeleton>
-        <ObjectDetailPageSkeleton showRelatedModel />
-      </LazySkeleton>
-    );
+    return <ObjectDetailPageSkeleton showRelatedModel />;
   }
 
   return <SplashLoader />;
