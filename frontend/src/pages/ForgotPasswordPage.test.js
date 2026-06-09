@@ -47,7 +47,6 @@ describe("ForgotPasswordPage", () => {
 
     expect(screen.getByTestId("site-logo")).toBeInTheDocument();
     expect(screen.getByText("forgotPassword")).toBeInTheDocument();
-    expect(screen.getByText("forgotPasswordHint")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "resetPassword" })).toBeInTheDocument();
   });
 

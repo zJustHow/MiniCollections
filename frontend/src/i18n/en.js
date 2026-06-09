@@ -31,7 +31,6 @@ export default {
   sendCode: "Send Code",
   codeSent: "Code sent",
   forgotPassword: "Forgot password?",
-  forgotPasswordHint: "Enter your email or phone to receive a verification code, then set a new password.",
   resetPassword: "Reset Password",
   passwordResetSuccess: "Password reset successfully. Please sign in.",
   backToSignIn: "Back to sign in",

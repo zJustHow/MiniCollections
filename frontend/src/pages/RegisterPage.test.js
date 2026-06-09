@@ -1,6 +1,8 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import RegisterPage from "./RegisterPage";
+
+const mockSetLocale = vi.fn();
 
 vi.mock("antd", async () => {
   const actual = await vi.importActual("antd");
@@ -15,7 +17,7 @@ vi.mock("antd", async () => {
 vi.mock("../LocaleContext", () => ({
   useLocale: () => ({
     t: (key) => key,
-    setLocale: vi.fn(),
+    setLocale: mockSetLocale,
     locale: "en-US",
   }),
 }));
@@ -43,6 +45,10 @@ function renderRegisterPage() {
 }
 
 describe("RegisterPage", () => {
+  beforeEach(() => {
+    mockSetLocale.mockClear();
+  });
+
   test("renders register title and email toggle", () => {
     renderRegisterPage();
 
@@ -53,5 +59,13 @@ describe("RegisterPage", () => {
       "href",
       "/login",
     );
+  });
+
+  test("clicking Chinese language button calls setLocale with zh-CN", () => {
+    renderRegisterPage();
+
+    fireEvent.click(screen.getByRole("button", { name: "中文" }));
+
+    expect(mockSetLocale).toHaveBeenCalledWith("zh-CN");
   });
 });

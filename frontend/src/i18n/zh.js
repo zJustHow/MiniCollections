@@ -31,7 +31,6 @@ export default {
   sendCode: "发送验证码",
   codeSent: "验证码已发送",
   forgotPassword: "忘记密码？",
-  forgotPasswordHint: "输入注册邮箱或手机号获取验证码，然后设置新密码。",
   resetPassword: "重置密码",
   passwordResetSuccess: "密码已重置，请登录。",
   backToSignIn: "返回登录",

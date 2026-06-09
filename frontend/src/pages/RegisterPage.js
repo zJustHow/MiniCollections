@@ -12,7 +12,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { signup, sendCode, COUNTRIES } from "../utils";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
-import { detectBrowserLocale } from "../i18n";
 import { PHONE_AUTH_ENABLED } from "../components/auth/authFeatures";
 import { neuRem } from "../theme/fontScale";
 import { prefetchLoginPage } from "../utils/prefetchRoutes";
@@ -27,7 +26,6 @@ export default function RegisterPage() {
   const countdownTimer = useRef(null);
   const [error, setError] = useState(null);
   const [registerType, setRegisterType] = useState("email");
-  const [selectedLocale, setSelectedLocale] = useState(detectBrowserLocale);
   const [form] = Form.useForm();
   const { t, setLocale, locale } = useLocale();
   const navigate = useNavigate();
@@ -76,7 +74,6 @@ export default function RegisterPage() {
   };
 
   const handleLocaleChange = (value) => {
-    setSelectedLocale(value);
     form.setFieldsValue({ preferred_locale: value });
     setLocale(value);
   };
@@ -84,7 +81,7 @@ export default function RegisterPage() {
   const onFinish = async (values) => {
     setLoading(true);
     setError(null);
-    const preferredLocale = selectedLocale || values.preferred_locale;
+    const preferredLocale = values.preferred_locale || locale;
     try {
       const payload = {
         password: values.password,
@@ -182,7 +179,7 @@ export default function RegisterPage() {
             form={form}
             name="register"
             initialValues={{
-              preferred_locale: detectBrowserLocale(),
+              preferred_locale: locale,
               countryCode: "+86",
             }}
             onFinish={onFinish}
@@ -337,14 +334,14 @@ export default function RegisterPage() {
                 }}
               >
                 <NeuPressableButton
-                  active={selectedLocale === "en-US"}
+                  active={locale === "en-US"}
                   style={{ flex: 1, padding: "7px 0", fontSize: neuRem(13) }}
                   onClick={() => handleLocaleChange("en-US")}
                 >
                   English
                 </NeuPressableButton>
                 <NeuPressableButton
-                  active={selectedLocale === "zh-CN"}
+                  active={locale === "zh-CN"}
                   style={{ flex: 1, padding: "7px 0", fontSize: neuRem(13) }}
                   onClick={() => handleLocaleChange("zh-CN")}
                 >

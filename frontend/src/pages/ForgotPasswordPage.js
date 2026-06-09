@@ -125,17 +125,6 @@ export default function ForgotPasswordPage() {
           style={{ maxWidth: 420, width: "100%", margin: 0 }}
         >
           <div className="neu-login-title">{t("forgotPassword")}</div>
-          <p
-            style={{
-              textAlign: "center",
-              color: "var(--neu-text-2)",
-              fontSize: neuRem(13),
-              marginBottom: 24,
-              lineHeight: 1.5,
-            }}
-          >
-            {t("forgotPasswordHint")}
-          </p>
 
           <div
             style={{
