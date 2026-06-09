@@ -83,6 +83,21 @@ class SubmissionControllerTest {
     }
 
     @Test
+    void getMySubmissions_passesPageAndSizeParams() throws Exception {
+        when(submissionService.listByUserPage(5L, 2, 12))
+                .thenReturn(PageResponse.of(List.of(sampleDto()), 2, 12, 1, true));
+
+        mockMvc.perform(get("/submissions/mine")
+                        .param("page", "2")
+                        .param("size", "12")
+                        .with(authenticatedUser("5")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(2));
+
+        verify(submissionService).listByUserPage(5L, 2, 12);
+    }
+
+    @Test
     void deleteMySubmission_returnsNoContent() throws Exception {
         mockMvc.perform(delete("/submissions/9")
                         .with(authenticatedUser("5")))

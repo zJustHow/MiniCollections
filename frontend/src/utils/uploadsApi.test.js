@@ -68,4 +68,24 @@ describe("uploadsApi", () => {
     expect(options.method).toBe("POST");
     expect(options.body.get("file")).toBe(file);
   });
+
+  test("uploadBrandLogo throws on failure", async () => {
+    global.fetch.mockResolvedValue({
+      ok: false,
+      text: async () => '{"code":"uploadFailed"}',
+    });
+
+    const file = new File(["x"], "logo.png", { type: "image/png" });
+    await expect(uploadBrandLogo(5, file)).rejects.toThrow();
+  });
+
+  test("discardUploadedImage throws on failure", async () => {
+    global.fetch.mockResolvedValue({
+      ok: false,
+      status: 400,
+      text: async () => '{"code":"error.request_failed"}',
+    });
+
+    await expect(discardUploadedImage("https://cdn.example.com/a.png")).rejects.toThrow();
+  });
 });

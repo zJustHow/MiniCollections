@@ -106,4 +106,14 @@ class VerificationServiceTest {
         assertThrows(TooManyRequestsException.class,
                 () -> verificationService.sendResetCode("alice@example.com", "EMAIL", true));
     }
+
+    @Test
+    void verifyResetCode_acceptsMatchingCodeAndDeletesKey() {
+        when(redis.opsForValue()).thenReturn(valueOps);
+        when(valueOps.get("otp:reset:alice@example.com")).thenReturn("654321");
+
+        verificationService.verifyResetCode("alice@example.com", "654321");
+
+        verify(redis).delete("otp:reset:alice@example.com");
+    }
 }

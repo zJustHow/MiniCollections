@@ -65,6 +65,15 @@ describe("apiClient", () => {
     await expect(handleDeleteResponse({ status: 204 })).resolves.toBeUndefined();
   });
 
+  test("handleDeleteResponse throws localized error on failure", async () => {
+    const response = {
+      ok: false,
+      status: 403,
+      text: async () => JSON.stringify({ code: "error.request_failed", args: null }),
+    };
+    await expect(handleDeleteResponse(response)).rejects.toThrow(/request failed/i);
+  });
+
   test("buildPageParams encodes keyword and filter ids", () => {
     const params = buildPageParams({
       page: 2,

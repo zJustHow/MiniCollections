@@ -114,4 +114,28 @@ describe("usePagedList", () => {
     await waitFor(() => expect(result.current.page).toBe(1));
     expect(fetchPage).toHaveBeenLastCalledWith({ page: 1, size: 48 });
   });
+
+  test("loadPage refreshes current page data", async () => {
+    const fetchPage = vi.fn(async ({ page }) => ({
+      content: [{ id: page }],
+      page,
+      total_elements: 96,
+      total_pages: 2,
+      total_exact: true,
+    }));
+
+    const { result } = renderHook(
+      () => usePagedList(fetchPage, { resetKey: "list", enabled: true }),
+      { wrapper: createWrapper("/") },
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.loadPage(0);
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(fetchPage).toHaveBeenCalledTimes(2);
+  });
 });

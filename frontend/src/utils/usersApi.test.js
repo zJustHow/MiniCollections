@@ -1,4 +1,4 @@
-import { getMe, updateLocale, updatePassword, updateProfile } from "./usersApi";
+import { getMe, updateIdentifier, updateLocale, updatePassword, updateProfile, uploadAvatar } from "./usersApi";
 import { TOKEN_KEY } from "./apiClient";
 
 describe("usersApi", () => {
@@ -45,5 +45,33 @@ describe("usersApi", () => {
         body: JSON.stringify({ preferred_locale: "zh-CN" }),
       }),
     );
+  });
+
+  test("updateIdentifier patches identifier payload", async () => {
+    const payload = { type: "email", identifier: "new@example.com", code: "123456" };
+    await updateIdentifier(payload);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/users/me/identifier",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      }),
+    );
+  });
+
+  test("uploadAvatar posts multipart form data", async () => {
+    const file = new File(["avatar"], "avatar.png", { type: "image/png" });
+    await uploadAvatar(file);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/uploads/users/me/avatar",
+      expect.objectContaining({
+        method: "POST",
+        body: expect.any(FormData),
+      }),
+    );
+    const formData = global.fetch.mock.calls[0][1].body;
+    expect(formData.get("file")).toBe(file);
   });
 });

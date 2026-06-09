@@ -60,4 +60,73 @@ describe("DetailDrawer", () => {
 
     expect(container).toBeEmptyDOMElement();
   });
+
+  test("renders missing model approve action for pending submission", () => {
+    render(
+      <DetailDrawer
+        submission={{
+          id: 8,
+          status: "PENDING",
+          submission_type: "MISSING_MODEL",
+          submitter_name: "Bob",
+          brand_name: "BMW",
+          name_en: "M2",
+        }}
+        onClose={vi.fn()}
+        onApprove={vi.fn()}
+        onResolve={vi.fn()}
+        onReject={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("BMW")).toBeInTheDocument();
+    expect(screen.getByText("M2")).toBeInTheDocument();
+    expect(screen.getByLabelText("approveSubmission")).toBeInTheDocument();
+  });
+
+  test("hides actions for reviewed submission", () => {
+    render(
+      <DetailDrawer
+        submission={{
+          id: 9,
+          status: "APPROVED",
+          submission_type: "BUG_REPORT",
+          submitter_name: "Alice",
+          name_en: "Fixed issue",
+          notes: "Done",
+        }}
+        onClose={vi.fn()}
+        onApprove={vi.fn()}
+        onResolve={vi.fn()}
+        onReject={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByLabelText("resolveSubmission")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("approveSubmission")).not.toBeInTheDocument();
+  });
+
+  test("renders data correction details with brand name", () => {
+    render(
+      <DetailDrawer
+        submission={{
+          id: 10,
+          status: "PENDING",
+          submission_type: "DATA_CORRECTION",
+          submitter_name: "Carol",
+          brand_name: "Mini GT",
+          name_en: "Wrong scale label",
+          notes: "Scale should be 1:64",
+        }}
+        onClose={vi.fn()}
+        onApprove={vi.fn()}
+        onResolve={vi.fn()}
+        onReject={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("Mini GT")).toBeInTheDocument();
+    expect(screen.getByText("Wrong scale label")).toBeInTheDocument();
+    expect(screen.getByLabelText("resolveSubmission")).toBeInTheDocument();
+  });
 });

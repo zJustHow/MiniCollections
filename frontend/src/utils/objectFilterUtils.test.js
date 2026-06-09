@@ -48,4 +48,16 @@ describe("objectFilterUtils", () => {
     expect(props.selectedCategoryIds).toEqual([1]);
     expect(props.onToggleCategory).toBe(onToggleCategory);
   });
+
+  test("resolveFilterColumnState hides filters when search inactive", () => {
+    const state = resolveFilterColumnState({
+      searchActive: false,
+      searchKeyword: "bmw",
+      searchFacets: { categories: [{ id: 1 }], brands: [], scales: [], series: [] },
+      facetsLoading: false,
+    });
+
+    expect(state.showObjectFilters).toBe(false);
+    expect(state.showFilterColumn).toBe(false);
+  });
 });

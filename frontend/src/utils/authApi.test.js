@@ -1,6 +1,7 @@
 import {
   bindWechatAccount,
   exchangeWechatCode,
+  getWechatAuthUrl,
   login,
   logout,
   resetPassword,
@@ -88,5 +89,17 @@ describe("authApi", () => {
     await bindWechatAccount({ code: "abc", state: "xyz" });
     expect(global.fetch.mock.calls[0][0]).toBe("/auth/wechat/bind");
     expect(global.fetch.mock.calls[0][1].headers.Authorization).toBe("Bearer token-1");
+  });
+
+  test("getWechatAuthUrl requests platform-specific url", async () => {
+    global.fetch = vi.fn(async () => ({
+      ok: true,
+      json: async () => ({ url: "https://open.weixin.qq.com/connect/qrconnect" }),
+    }));
+
+    const result = await getWechatAuthUrl("mobile");
+
+    expect(global.fetch.mock.calls[0][0]).toBe("/auth/wechat/url?platform=mobile");
+    expect(result.url).toContain("weixin.qq.com");
   });
 });

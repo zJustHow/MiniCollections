@@ -3,8 +3,11 @@ package com.zjusthow.minicollections.service;
 import com.zjusthow.minicollections.entity.ObjectSubmissionEntity;
 import com.zjusthow.minicollections.entity.SeriesEntity;
 import com.zjusthow.minicollections.entity.UserEntity;
+import com.zjusthow.minicollections.exception.CategoryNotFoundException;
 import com.zjusthow.minicollections.exception.LimitExceededException;
 import com.zjusthow.minicollections.exception.NoPermissionException;
+import com.zjusthow.minicollections.exception.ScaleNotFoundException;
+import com.zjusthow.minicollections.exception.SeriesNotFoundException;
 import com.zjusthow.minicollections.exception.SubmissionAlreadyReviewedException;
 import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.model.ApprovalBody;
@@ -28,10 +31,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -174,6 +179,14 @@ class SubmissionServiceTest {
     }
 
     @Test
+    void deleteByUser_throwsWhenNotFound() {
+        when(submissionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class, () -> submissionService.deleteByUser(3L, 99L));
+        verify(submissionRepository, never()).deleteById(99L);
+    }
+
+    @Test
     void validateSeriesForBrand_rejectsMismatchedBrand() {
         when(seriesRepository.findById(10L)).thenReturn(Optional.of(new SeriesEntity(10L, 1L, "S", null)));
 
@@ -193,6 +206,38 @@ class SubmissionServiceTest {
 
         assertEquals(2L, response.totalElements());
         verify(submissionRepository).countByStatusFilter(null);
+    }
+
+    @Test
+    void listByStatusPage_filtersByExplicitStatus() {
+        ObjectSubmissionEntity entity = pendingSubmission(3L, 7L, "BUG_REPORT");
+        when(submissionRepository.countByStatusFilter(eq("REJECTED"))).thenReturn(1L);
+        when(submissionRepository.findPageByStatus(eq("REJECTED"), eq(24), eq(0)))
+                .thenReturn(List.of(entity));
+        when(userRepository.findAllById(any())).thenReturn(List.of(
+                new UserEntity(7L, "Alice", "hash", true, null, null)));
+
+        PageResponse<ObjectSubmissionDto> response =
+                submissionService.listByStatusPage("REJECTED", 0, 24);
+
+        assertEquals(1, response.content().size());
+        assertEquals("BUG_REPORT", response.content().get(0).submissionType());
+        assertEquals("Alice", response.content().get(0).submitterName());
+        verify(submissionRepository).findPageByStatus("REJECTED", 24, 0);
+    }
+
+    @Test
+    void listByStatusPage_returnsEmptyPageWhenNoMatches() {
+        when(submissionRepository.countByStatusFilter(eq("APPROVED"))).thenReturn(0L);
+        when(submissionRepository.findPageByStatus(eq("APPROVED"), eq(24), eq(0)))
+                .thenReturn(List.of());
+
+        PageResponse<ObjectSubmissionDto> response =
+                submissionService.listByStatusPage("APPROVED", 0, 24);
+
+        assertTrue(response.content().isEmpty());
+        assertEquals(0L, response.totalElements());
+        verify(userRepository, never()).findAllById(any());
     }
 
     @Test
@@ -246,6 +291,19 @@ class SubmissionServiceTest {
     }
 
     @Test
+    void listByUserPage_returnsEmptyPageWhenUserHasNoSubmissions() {
+        when(submissionRepository.countBySubmittedByUserId(7L)).thenReturn(0L);
+        when(submissionRepository.findPageBySubmittedByUserId(7L, 24, 0))
+                .thenReturn(List.of());
+
+        PageResponse<ObjectSubmissionDto> response = submissionService.listByUserPage(7L, 0, 24);
+
+        assertTrue(response.content().isEmpty());
+        assertEquals(0L, response.totalElements());
+        verify(userRepository, never()).findAllById(any());
+    }
+
+    @Test
     void reject_rejectsAlreadyReviewedSubmission() {
         ObjectSubmissionEntity reviewed = new ObjectSubmissionEntity(
                 5L, 2L, "FEEDBACK", "Name", null, null, null, null, null,
@@ -255,6 +313,179 @@ class SubmissionServiceTest {
 
         assertThrows(SubmissionAlreadyReviewedException.class,
                 () -> submissionService.reject(5L, 99L, "again"));
+    }
+
+    @Test
+    void submit_rejectsInvalidCategoryId() {
+        when(categoryRepository.existsById(99L)).thenReturn(false);
+
+        SubmissionBody body = new SubmissionBody(
+                "FEEDBACK", "Name", null, null, null, null, null,
+                null, null, null, 99L, null, null);
+
+        assertThrows(CategoryNotFoundException.class, () -> submissionService.submit(7L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void submit_rejectsSeriesWithoutBrand() {
+        SubmissionBody body = new SubmissionBody(
+                "MISSING_MODEL", "Name", null, null, null, null, null,
+                null, null, 10L, null, null, null);
+
+        assertThrows(ValidationException.class, () -> submissionService.submit(7L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void submit_throwsWhenSeriesNotFound() {
+        when(seriesRepository.findById(10L)).thenReturn(Optional.empty());
+
+        SubmissionBody body = new SubmissionBody(
+                "MISSING_MODEL", "Name", null, null, null, null, null,
+                2L, null, 10L, null, null, null);
+
+        assertThrows(SeriesNotFoundException.class, () -> submissionService.submit(7L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void submit_rejectsSeriesBrandMismatch() {
+        when(seriesRepository.findById(10L)).thenReturn(Optional.of(new SeriesEntity(10L, 1L, "S", null)));
+
+        SubmissionBody body = new SubmissionBody(
+                "MISSING_MODEL", "Name", null, null, null, null, null,
+                2L, null, 10L, null, null, null);
+
+        assertThrows(ValidationException.class, () -> submissionService.submit(7L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void submit_rejectsInvalidScaleId() {
+        when(scaleRepository.existsById(5L)).thenReturn(false);
+
+        SubmissionBody body = new SubmissionBody(
+                "FEEDBACK", "Name", null, null, null, null, null,
+                null, null, null, null, 5L, null);
+
+        assertThrows(ScaleNotFoundException.class, () -> submissionService.submit(7L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void approve_bugReportSkipsBrandObjectCreation() {
+        ObjectSubmissionEntity pending = pendingSubmission(1L, 2L, "BUG_REPORT");
+        when(submissionRepository.findById(1L)).thenReturn(Optional.of(pending));
+        when(submissionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(userRepository.findAllById(any())).thenReturn(List.of(
+                new UserEntity(2L, "Bob", "hash", true, null, null)));
+
+        ApprovalBody body = new ApprovalBody(
+                null, null, null, null, null, null, null,
+                null, null, null, null, "fixed");
+
+        ObjectSubmissionDto dto = submissionService.approve(1L, 99L, body);
+
+        assertEquals("APPROVED", dto.status());
+        assertEquals("fixed", dto.adminNote());
+        verifyNoInteractions(brandService);
+    }
+
+    @Test
+    void listByStatusPage_clampsOversizedPageSize() {
+        when(submissionRepository.countByStatusFilter(eq("PENDING"))).thenReturn(0L);
+        when(submissionRepository.findPageByStatus(eq("PENDING"), eq(100), eq(0)))
+                .thenReturn(List.of());
+
+        PageResponse<ObjectSubmissionDto> response =
+                submissionService.listByStatusPage("PENDING", 0, 500);
+
+        assertEquals(100, response.size());
+        verify(submissionRepository).findPageByStatus("PENDING", 100, 0);
+    }
+
+    @Test
+    void approve_rejectsInvalidCategoryId() {
+        when(categoryRepository.existsById(99L)).thenReturn(false);
+
+        ApprovalBody body = new ApprovalBody(
+                null, null, null, null, null, null, null,
+                null, null, 99L, null, null);
+
+        assertThrows(CategoryNotFoundException.class,
+                () -> submissionService.approve(1L, 99L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void approve_rejectsInvalidScaleId() {
+        when(scaleRepository.existsById(5L)).thenReturn(false);
+
+        ApprovalBody body = new ApprovalBody(
+                null, null, null, null, null, null, null,
+                null, null, null, 5L, null);
+
+        assertThrows(ScaleNotFoundException.class,
+                () -> submissionService.approve(1L, 99L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void approve_rejectsSeriesBrandMismatch() {
+        when(seriesRepository.findById(10L)).thenReturn(Optional.of(new SeriesEntity(10L, 1L, "S", null)));
+
+        ApprovalBody body = new ApprovalBody(
+                null, null, null, null, null, null, null,
+                2L, 10L, null, null, null);
+
+        assertThrows(ValidationException.class, () -> submissionService.approve(1L, 99L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void approve_rejectsSeriesWithoutBrand() {
+        ApprovalBody body = new ApprovalBody(
+                null, null, null, null, null, null, null,
+                null, 10L, null, null, null);
+
+        assertThrows(ValidationException.class, () -> submissionService.approve(1L, 99L, body));
+        verify(submissionRepository, never()).save(any());
+        verifyNoInteractions(seriesRepository);
+    }
+
+    @Test
+    void approve_throwsWhenSeriesNotFound() {
+        when(seriesRepository.findById(10L)).thenReturn(Optional.empty());
+
+        ApprovalBody body = new ApprovalBody(
+                null, null, null, null, null, null, null,
+                2L, 10L, null, null, null);
+
+        assertThrows(SeriesNotFoundException.class,
+                () -> submissionService.approve(1L, 99L, body));
+        verify(submissionRepository, never()).save(any());
+    }
+
+    @Test
+    void approve_throwsWhenNotFound() {
+        when(submissionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        ApprovalBody body = new ApprovalBody(
+                null, null, null, null, null, null, null,
+                null, null, null, null, null);
+
+        assertThrows(NoSuchElementException.class,
+                () -> submissionService.approve(99L, 1L, body));
+    }
+
+    @Test
+    void reject_throwsWhenNotFound() {
+        when(submissionRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(NoSuchElementException.class,
+                () -> submissionService.reject(99L, 1L, "duplicate"));
+        verify(submissionRepository, never()).save(any());
     }
 
     private static ObjectSubmissionEntity pendingSubmission(long id, long userId, String type) {

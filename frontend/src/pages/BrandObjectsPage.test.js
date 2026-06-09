@@ -8,7 +8,7 @@ const pageMocks = vi.hoisted(() => ({
   draftQuery: "",
   displayObjects: [{ id: 1, name: "M3", image_url: null }],
   facetsLoading: false,
-  showFilterColumn: false,
+  searchFacets: null,
 }));
 
 vi.mock("antd", async () => {
@@ -86,7 +86,10 @@ vi.mock("../hooks/useDualModePagedList", () => ({
 }));
 
 vi.mock("../hooks/useSearchObjectFacets", () => ({
-  default: () => ({ searchFacets: { categories: [] }, facetsLoading: pageMocks.facetsLoading }),
+  default: () => ({
+    searchFacets: pageMocks.searchFacets,
+    facetsLoading: pageMocks.facetsLoading,
+  }),
 }));
 
 vi.mock("../components/pageHeaders/BrandObjectsPageHeader", () => ({
@@ -94,9 +97,10 @@ vi.mock("../components/pageHeaders/BrandObjectsPageHeader", () => ({
 }));
 
 vi.mock("../components/listPage/ObjectListPageShell", () => ({
-  default: ({ children, searchPlaceholder }) => (
+  default: ({ children, searchPlaceholder, showFilterColumn, filter }) => (
     <div data-testid="object-list-shell">
       <span>{searchPlaceholder}</span>
+      {showFilterColumn ? filter : null}
       {children}
     </div>
   ),
@@ -155,7 +159,7 @@ describe("BrandObjectsPage", () => {
     pageMocks.draftQuery = "";
     pageMocks.displayObjects = [{ id: 1, name: "M3", image_url: null }];
     pageMocks.facetsLoading = false;
-    pageMocks.showFilterColumn = false;
+    pageMocks.searchFacets = null;
     vi.stubGlobal("sessionStorage", {
       getItem: vi.fn(() => "1"),
       setItem: vi.fn(),
@@ -187,5 +191,36 @@ describe("BrandObjectsPage", () => {
 
     expect(screen.getByTestId("search-section")).toBeInTheDocument();
     expect(screen.getByText("M3 Competition")).toBeInTheDocument();
+  });
+
+  test("shows filter panel when search facets are available", () => {
+    pageMocks.searchActive = true;
+    pageMocks.searchKeyword = "m3";
+    pageMocks.draftQuery = "m3";
+    pageMocks.searchFacets = {
+      total: 2,
+      categories: [{ id: 1, name: "Cars", count: 2 }],
+      brands: [],
+      scales: [],
+      series: [],
+    };
+    pageMocks.displayObjects = [{ id: 2, name: "M3", image_url: null }];
+
+    renderPage();
+
+    expect(screen.getByTestId("filter-panel")).toBeInTheDocument();
+  });
+
+  test("shows empty search results when query has no matches", () => {
+    pageMocks.searchActive = true;
+    pageMocks.searchKeyword = "missing";
+    pageMocks.draftQuery = "missing";
+    pageMocks.displayObjects = [];
+    pageMocks.searchFacets = null;
+    pageMocks.facetsLoading = false;
+
+    renderPage();
+
+    expect(screen.getByTestId("no-results")).toBeInTheDocument();
   });
 });

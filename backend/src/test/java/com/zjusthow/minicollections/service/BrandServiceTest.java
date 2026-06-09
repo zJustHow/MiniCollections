@@ -4,6 +4,7 @@ import com.zjusthow.minicollections.entity.BrandEntity;
 import com.zjusthow.minicollections.entity.BrandObjectEntity;
 import com.zjusthow.minicollections.entity.SeriesEntity;
 import com.zjusthow.minicollections.exception.BrandNotFoundException;
+import com.zjusthow.minicollections.exception.BrandObjectNotFoundException;
 import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.BrandBody;
@@ -99,6 +100,14 @@ class BrandServiceTest {
     }
 
     @Test
+    void getBrandObjectByIdCached_missingObjectThrows() {
+        when(brandObjectRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(BrandObjectNotFoundException.class,
+                () -> brandService.getBrandObjectByIdCached(99L, false));
+    }
+
+    @Test
     void getBrandById_enrichesViewCount() {
         BrandEntity entity = new BrandEntity(5L, "Kyosho", "京商", "K", null, 10L);
         when(brandRepository.findById(5L)).thenReturn(Optional.of(entity));
@@ -125,6 +134,22 @@ class BrandServiceTest {
     }
 
     @Test
+    void getBrandObjectsPage_mapsBrandObjects() {
+        BrandObjectEntity entity = new BrandObjectEntity(
+                42L, "BMW M3", null, null, null, null, null, null,
+                9L, null, null, null, 0L);
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+        when(brandObjectRepository.countByBrandId(9L)).thenReturn(1L);
+        when(brandObjectRepository.findPageByBrandId(9L, 48, 0)).thenReturn(List.of(entity));
+
+        PageResponse<BrandObjectDto> response =
+                brandService.getBrandObjectsPage(9L, "en-US", 0, 48);
+
+        assertEquals(1, response.content().size());
+        assertEquals("BMW M3", response.content().get(0).name());
+    }
+
+    @Test
     void createBrand_persistsEntity() {
         BrandBody body = new BrandBody("Kyosho", "京商", "K", null);
         when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
@@ -137,6 +162,36 @@ class BrandServiceTest {
 
         assertEquals(3L, dto.id());
         assertEquals("Kyosho", dto.name());
+    }
+
+    @Test
+    void updateBrand_persistsChanges() {
+        BrandEntity existing = new BrandEntity(3L, "Old", null, "OLD", "old.png", 5L);
+        BrandBody body = new BrandBody("New", "新", "NEW", "new.png");
+        when(brandRepository.findById(3L)).thenReturn(Optional.of(existing));
+        when(brandRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+
+        BrandDto updated = brandService.updateBrand(3L, body, "en-US");
+
+        assertEquals("New", updated.name());
+        verify(brandRepository).save(new BrandEntity(3L, "New", "新", "NEW", "new.png", 5L));
+    }
+
+    @Test
+    void deleteBrand_removesBrandAndObjects() {
+        BrandEntity brand = new BrandEntity(3L, "BMW", null, "BMW", "logo.png", 0L);
+        BrandObjectEntity object = new BrandObjectEntity(
+                42L, "M3", null, "img.png", null, null, null, null,
+                3L, null, null, null, 0L);
+        when(brandRepository.findById(3L)).thenReturn(Optional.of(brand));
+        when(brandObjectRepository.findByBrandId(3L)).thenReturn(Optional.of(List.of(object)));
+
+        brandService.deleteBrand(3L);
+
+        verify(userObjectRepository).clearBrandObjectReference(42L);
+        verify(brandObjectRepository).deleteById(42L);
+        verify(brandRepository).deleteById(3L);
     }
 
     @Test
@@ -207,6 +262,34 @@ class BrandServiceTest {
         assertEquals("BMW", result.brands().get(0).name());
         assertEquals(3L, result.totalObjects());
         verify(brandElasticsearchQueryService).searchSlice("bmw", 0, 48);
+    }
+
+    @Test
+    void searchCombinedPage_fallsBackToSqlWhenElasticsearchFails() {
+        ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
+        BrandEntity brand = new BrandEntity(1L, "BMW", null, "BMW", null, 0L);
+        when(brandElasticsearchQueryService.searchSlice("bmw", 0, 48))
+                .thenThrow(new RuntimeException("ES unavailable"));
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+        when(brandRepository.countSearch("bmw")).thenReturn(1L);
+        when(brandRepository.searchPage("bmw", 1, 0)).thenReturn(List.of(brand));
+        when(brandObjectRepository.countSearch(
+                eq("bmw"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(0L);
+
+        BrandCombinedSearchDto result = brandService.searchCombinedPage(
+                "bmw", null, null, null, null, "en-US", 0, 48);
+
+        assertEquals(1, result.brands().size());
+        verify(brandRepository).countSearch("bmw");
     }
 
     @Test
@@ -308,6 +391,82 @@ class BrandServiceTest {
     }
 
     @Test
+    void searchBrandObjectsPage_usesElasticsearchWhenEnabled() {
+        ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
+        BrandEntity brand = new BrandEntity(9L, "BMW", null, "BMW", null, 0L);
+        BrandObjectEntity entity = new BrandObjectEntity(
+                42L, "BMW M3", null, null, null, null, null, null,
+                9L, null, null, null, 0L);
+        when(brandObjectElasticsearchQueryService.searchPage(eq("m3"), any(), eq(0), eq(24)))
+                .thenReturn(new EsSearchPageResult(List.of(42L), 1L, true));
+        when(brandObjectRepository.findAllById(List.of(42L))).thenReturn(List.of(entity));
+        when(brandRepository.findAllById(any())).thenReturn(List.of(brand));
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+
+        PageResponse<BrandObjectDto> response =
+                brandService.searchBrandObjectsPage("m3", "en-US", 0, 24);
+
+        assertEquals(1, response.content().size());
+        assertEquals("BMW M3", response.content().get(0).nameEn());
+        verify(brandObjectElasticsearchQueryService).searchPage(eq("m3"), any(), eq(0), eq(24));
+        verify(brandObjectRepository, never()).searchPage(
+                any(), anyBoolean(), anyList(), anyBoolean(), anyList(),
+                anyBoolean(), anyList(), anyBoolean(), anyList(), eq(24), eq(0));
+    }
+
+    @Test
+    void searchBrandObjectsPage_fallsBackToSqlWhenElasticsearchFails() {
+        ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
+        BrandEntity brand = new BrandEntity(9L, "BMW", null, "BMW", null, 0L);
+        BrandObjectEntity entity = new BrandObjectEntity(
+                42L, "BMW M3", null, null, null, null, null, null,
+                9L, null, null, null, 0L);
+        when(brandObjectElasticsearchQueryService.searchPage(eq("m3"), any(), eq(0), eq(24)))
+                .thenThrow(new RuntimeException("ES unavailable"));
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+        when(brandObjectRepository.countSearch(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(1L);
+        when(brandObjectRepository.searchPage(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                eq(24),
+                eq(0)))
+                .thenReturn(List.of(entity));
+        when(brandRepository.findAllById(any())).thenReturn(List.of(brand));
+
+        PageResponse<BrandObjectDto> response =
+                brandService.searchBrandObjectsPage("m3", "en-US", 0, 24);
+
+        assertEquals(1, response.content().size());
+        verify(brandObjectRepository).countSearch(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any());
+    }
+
+    @Test
     void searchBrandObjectsFacets_usesSqlWhenElasticsearchDisabled() {
         when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
         when(brandObjectRepository.countSearch(
@@ -372,6 +531,19 @@ class BrandServiceTest {
         assertEquals(5L, result.total());
         assertTrue(result.categories().isEmpty());
         verifyNoInteractions(brandObjectElasticsearchQueryService);
+    }
+
+    @Test
+    void searchBrandObjectsFacets_blankKeywordReturnsEmpty() {
+        BrandObjectSearchFacetsDto result = brandService.searchBrandObjectsFacets(
+                "  ", null, null, null, null, "en-US");
+
+        assertEquals(0L, result.total());
+        assertTrue(result.categories().isEmpty());
+        verifyNoInteractions(brandObjectElasticsearchQueryService);
+        verify(brandObjectRepository, never()).countSearch(
+                any(), anyBoolean(), anyList(), anyBoolean(), anyList(),
+                anyBoolean(), anyList(), anyBoolean(), anyList());
     }
 
     @Test
@@ -467,5 +639,221 @@ class BrandServiceTest {
                 anyList(),
                 anyBoolean(),
                 anyList());
+    }
+
+    @Test
+    void searchBrandObjectsByBrandIdPage_usesElasticsearchWhenEnabled() {
+        ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
+        BrandEntity brand = new BrandEntity(9L, "BMW", null, "BMW", null, 0L);
+        BrandObjectEntity entity = new BrandObjectEntity(
+                42L, "BMW M3", null, null, null, null, null, null,
+                9L, null, null, null, 0L);
+        when(brandObjectElasticsearchQueryService.searchPage(eq("m3"), any(), eq(0), eq(24)))
+                .thenReturn(new EsSearchPageResult(List.of(42L), 1L, true));
+        when(brandObjectRepository.findAllById(List.of(42L))).thenReturn(List.of(entity));
+        when(brandRepository.findAllById(any())).thenReturn(List.of(brand));
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+
+        PageResponse<BrandObjectDto> response = brandService.searchBrandObjectsByBrandIdPage(
+                "m3", 9L, null, null, null, "en-US", 0, 24);
+
+        assertEquals(1, response.content().size());
+        assertEquals("BMW M3", response.content().get(0).nameEn());
+        verify(brandObjectElasticsearchQueryService).searchPage(eq("m3"), any(), eq(0), eq(24));
+        verify(brandObjectRepository, never()).searchPageWithinBrand(
+                any(), anyBoolean(), eq(9L), anyBoolean(), any(), anyBoolean(), any(),
+                anyBoolean(), any(), eq(24), eq(0));
+    }
+
+    @Test
+    void searchBrandObjectsByBrandIdPage_fallsBackToSqlWhenElasticsearchFails() {
+        ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
+        BrandEntity brand = new BrandEntity(9L, "BMW", null, "BMW", null, 0L);
+        BrandObjectEntity entity = new BrandObjectEntity(
+                42L, "BMW M3", null, null, null, null, null, null,
+                9L, null, null, null, 0L);
+        when(brandObjectElasticsearchQueryService.searchPage(eq("m3"), any(), eq(0), eq(24)))
+                .thenThrow(new RuntimeException("ES unavailable"));
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+        when(brandObjectRepository.countSearchWithinBrand(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(1L);
+        when(brandObjectRepository.searchPageWithinBrand(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                eq(24),
+                eq(0)))
+                .thenReturn(List.of(entity));
+        when(brandRepository.findAllById(any())).thenReturn(List.of(brand));
+
+        PageResponse<BrandObjectDto> response = brandService.searchBrandObjectsByBrandIdPage(
+                "m3", 9L, null, null, null, "en-US", 0, 24);
+
+        assertEquals(1, response.content().size());
+        verify(brandObjectRepository).countSearchWithinBrand(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any());
+    }
+
+    @Test
+    void searchBrandObjectsByBrandIdFacets_usesElasticsearchWhenEnabled() {
+        ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+        when(brandObjectElasticsearchQueryService.searchFacets(eq("m3"), any()))
+                .thenReturn(new EsSearchFacetsResult(2L, List.of(), List.of(), List.of(), List.of()));
+
+        BrandObjectSearchFacetsDto result = brandService.searchBrandObjectsByBrandIdFacets(
+                "m3", 9L, null, null, null, "en-US");
+
+        assertEquals(2L, result.total());
+        verify(brandObjectElasticsearchQueryService).searchFacets(eq("m3"), any());
+        verify(brandObjectRepository, never()).countSearchWithinBrand(
+                any(), anyBoolean(), eq(9L), anyBoolean(), any(), anyBoolean(), any(),
+                anyBoolean(), any());
+    }
+
+    @Test
+    void searchBrandObjectsByBrandIdFacets_usesSqlWhenElasticsearchDisabled() {
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+        when(brandObjectRepository.countSearchWithinBrand(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(4L);
+        when(brandObjectRepository.countByCategoryWithinBrandSearch(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(List.of());
+        when(brandObjectRepository.countByScaleWithinBrandSearch(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(List.of());
+        when(brandObjectRepository.countBySeriesWithinBrandSearch(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(List.of());
+
+        BrandObjectSearchFacetsDto result = brandService.searchBrandObjectsByBrandIdFacets(
+                "m3", 9L, null, null, null, "en-US");
+
+        assertEquals(4L, result.total());
+        assertTrue(result.brands().isEmpty());
+        verifyNoInteractions(brandObjectElasticsearchQueryService);
+    }
+
+    @Test
+    void searchBrandObjectsByBrandIdFacets_fallsBackToSqlWhenElasticsearchFails() {
+        ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+        when(brandObjectElasticsearchQueryService.searchFacets(eq("m3"), any()))
+                .thenThrow(new RuntimeException("ES unavailable"));
+        when(brandObjectRepository.countSearchWithinBrand(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(3L);
+        when(brandObjectRepository.countByCategoryWithinBrandSearch(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(List.of());
+        when(brandObjectRepository.countByScaleWithinBrandSearch(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(List.of());
+        when(brandObjectRepository.countBySeriesWithinBrandSearch(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any()))
+                .thenReturn(List.of());
+
+        BrandObjectSearchFacetsDto result = brandService.searchBrandObjectsByBrandIdFacets(
+                "m3", 9L, null, null, null, "en-US");
+
+        assertEquals(3L, result.total());
+        verify(brandObjectRepository).countSearchWithinBrand(
+                eq("m3"),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                eq(9L),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any(),
+                org.mockito.ArgumentMatchers.anyBoolean(),
+                any());
     }
 }

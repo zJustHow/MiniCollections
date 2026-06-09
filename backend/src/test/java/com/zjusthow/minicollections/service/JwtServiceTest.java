@@ -34,4 +34,12 @@ class JwtServiceTest {
         String token = jwtService.generate("42") + "x";
         assertFalse(jwtService.isValid(token));
     }
+
+    @Test
+    void isValid_rejectsExpiredToken() throws InterruptedException {
+        ReflectionTestUtils.setField(jwtService, "expirationMs", 1L);
+        String token = jwtService.generate("42");
+        Thread.sleep(20);
+        assertFalse(jwtService.isValid(token));
+    }
 }

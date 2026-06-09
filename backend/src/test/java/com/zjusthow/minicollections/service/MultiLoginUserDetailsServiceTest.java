@@ -66,4 +66,18 @@ class MultiLoginUserDetailsServiceTest {
         assertEquals("8", details.getUsername());
         assertEquals("", details.getPassword());
     }
+
+    @Test
+    void loadUserByUsername_includesAdminAuthority() {
+        when(identifierRepo.findByIdentifier("admin@example.com"))
+                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 3L, "email", "admin@example.com")));
+        when(userRepo.findById(3L)).thenReturn(Optional.of(
+                new UserEntity(3L, "Admin", "hash", true, "en-US", null)));
+        when(jdbc.queryForList("SELECT authority FROM authorities WHERE user_id = ?", String.class, 3L))
+                .thenReturn(List.of("ROLE_USER", "ROLE_ADMIN"));
+
+        UserDetails details = userDetailsService.loadUserByUsername("admin@example.com");
+
+        assertTrue(details.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")));
+    }
 }

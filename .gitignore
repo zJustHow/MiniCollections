@@ -24,6 +24,11 @@ scripts/
 .env
 .env.*
 !.env.example
+deploy/aws/app-secrets.json
+
+# Python virtual environments
+.venv/
+.venv-*/
 
 # Spark import resume checkpoint (local only)
 .spark-import-checkpoint.json

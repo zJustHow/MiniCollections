@@ -1,13 +1,29 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import BrandObjectDetailPage from "./BrandObjectDetailPage";
+import { getBrandObjectById, recordModelView } from "../utils/brandsApi";
+
+const messageMock = vi.hoisted(() => ({
+  success: vi.fn(),
+  error: vi.fn(),
+}));
+
+const headerMocks = vi.hoisted(() => ({
+  slot: null,
+  setHeaderSlot: vi.fn((node) => {
+    headerMocks.slot = node;
+  }),
+}));
+
+const navigateMock = vi.hoisted(() => vi.fn());
 
 vi.mock("antd", async () => {
   const actual = await vi.importActual("antd");
   return {
     ...actual,
     App: Object.assign(actual.App, {
-      useApp: () => ({ message: { success: vi.fn(), error: vi.fn() } }),
+      useApp: () => ({ message: messageMock }),
     }),
     Grid: {
       useBreakpoint: () => ({ md: true }),
@@ -16,11 +32,35 @@ vi.mock("antd", async () => {
 });
 
 vi.mock("../LocaleContext", () => ({
-  useLocale: () => ({ t: (key) => key, locale: "en-US" }),
+  useLocale: () => ({ t: (key, args) => (key === "viewsCount" ? `${args.count} views` : key), locale: "en-US" }),
 }));
 
 vi.mock("../HeaderContext", () => ({
-  useHeader: () => ({ setHeaderSlot: vi.fn() }),
+  useHeader: () => ({ setHeaderSlot: headerMocks.setHeaderSlot }),
+}));
+
+vi.mock("react-router-dom", async () => {
+  const actual = await vi.importActual("react-router-dom");
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+  };
+});
+
+vi.mock("../components/HeaderActionButton", () => ({
+  default: ({ onClick, "aria-label": ariaLabel }) => (
+    <button type="button" aria-label={ariaLabel} onClick={onClick}>
+      {ariaLabel ?? "action"}
+    </button>
+  ),
+}));
+
+vi.mock("../components/ConfirmDeleteButton", () => ({
+  default: ({ onConfirm }) => (
+    <button type="button" onClick={onConfirm}>
+      deleteBrandObject
+    </button>
+  ),
 }));
 
 vi.mock("../utils/lazyModal", () => ({
@@ -45,6 +85,12 @@ vi.mock("../utils/groupsApi", () => ({
   createUserObject: vi.fn(),
 }));
 
+vi.mock("../utils/adminApi", () => ({
+  adminDeleteBrandObject: vi.fn(),
+}));
+
+import { adminDeleteBrandObject } from "../utils/adminApi";
+
 const sampleBrandObject = {
   id: 42,
   name: "BMW M3",
@@ -53,7 +99,7 @@ const sampleBrandObject = {
   view_count: 120,
 };
 
-function renderPage(state = { brandObject: sampleBrandObject }) {
+function renderPage(state = { brandObject: sampleBrandObject }, props = { authed: true }) {
   return render(
     <MemoryRouter
       initialEntries={[
@@ -63,7 +109,7 @@ function renderPage(state = { brandObject: sampleBrandObject }) {
       <Routes>
         <Route
           path="/brands/:brandId/objects/:objectId"
-          element={<BrandObjectDetailPage authed />}
+          element={<BrandObjectDetailPage {...props} />}
         />
       </Routes>
     </MemoryRouter>,
@@ -72,8 +118,17 @@ function renderPage(state = { brandObject: sampleBrandObject }) {
 
 describe("BrandObjectDetailPage", () => {
   beforeEach(() => {
+    messageMock.success.mockReset();
+    messageMock.error.mockReset();
+    headerMocks.slot = null;
+    headerMocks.setHeaderSlot.mockClear();
+    navigateMock.mockReset();
+    vi.mocked(getBrandObjectById).mockReset();
+    vi.mocked(recordModelView).mockResolvedValue(undefined);
+    vi.mocked(adminDeleteBrandObject).mockReset();
+    vi.mocked(adminDeleteBrandObject).mockResolvedValue(undefined);
     vi.stubGlobal("sessionStorage", {
-      getItem: vi.fn(() => "1"),
+      getItem: vi.fn(() => null),
       setItem: vi.fn(),
     });
   });
@@ -90,5 +145,81 @@ describe("BrandObjectDetailPage", () => {
     renderPage({ brandObject: { id: 42, name: "BMW M3" } });
 
     expect(screen.getByTestId("detail-skeleton")).toBeInTheDocument();
+  });
+
+  test("loads model details from API when route state is incomplete", async () => {
+    vi.mocked(getBrandObjectById).mockResolvedValue({
+      id: 42,
+      name: "BMW M3",
+      brand: "BMW",
+      series: "M Series",
+      view_count: 88,
+    });
+
+    renderPage({ brandObject: { id: 42, name: "BMW M3" } });
+
+    await waitFor(() => {
+      expect(getBrandObjectById).toHaveBeenCalledWith("42");
+      expect(screen.getByText("M Series")).toBeInTheDocument();
+      expect(screen.getByText("88 views")).toBeInTheDocument();
+    });
+  });
+
+  test("shows error when model fetch fails", async () => {
+    vi.mocked(getBrandObjectById).mockRejectedValue(new Error("not found"));
+
+    renderPage({ brandObject: { id: 42, name: "BMW M3" } });
+
+    await waitFor(() => {
+      expect(messageMock.error).toHaveBeenCalledWith("not found");
+    });
+  });
+
+  test("records model view once per session", async () => {
+    renderPage();
+
+    await waitFor(() => {
+      expect(recordModelView).toHaveBeenCalledWith("42");
+    });
+    expect(sessionStorage.setItem).toHaveBeenCalledWith("viewed:model:42", "1");
+  });
+
+  test("admin deletes brand object from header action", async () => {
+    const headerHost = document.createElement("div");
+    document.body.appendChild(headerHost);
+
+    renderPage({ brandObject: sampleBrandObject }, { isAdmin: true, authed: true });
+
+    await waitFor(() => expect(headerMocks.slot).toBeTruthy());
+    render(headerMocks.slot, { container: headerHost });
+
+    await userEvent.click(screen.getByText("deleteBrandObject"));
+
+    await waitFor(() => {
+      expect(adminDeleteBrandObject).toHaveBeenCalledWith(42);
+      expect(messageMock.success).toHaveBeenCalledWith("brandObjectDeleted");
+      expect(navigateMock).toHaveBeenCalledWith("/brands/9");
+    });
+
+    headerHost.remove();
+  });
+
+  test("shows error when admin delete fails", async () => {
+    vi.mocked(adminDeleteBrandObject).mockRejectedValue(new Error("forbidden"));
+    const headerHost = document.createElement("div");
+    document.body.appendChild(headerHost);
+
+    renderPage({ brandObject: sampleBrandObject }, { isAdmin: true, authed: true });
+
+    await waitFor(() => expect(headerMocks.slot).toBeTruthy());
+    render(headerMocks.slot, { container: headerHost });
+
+    await userEvent.click(screen.getByText("deleteBrandObject"));
+
+    await waitFor(() => {
+      expect(messageMock.error).toHaveBeenCalledWith("forbidden");
+    });
+
+    headerHost.remove();
   });
 });

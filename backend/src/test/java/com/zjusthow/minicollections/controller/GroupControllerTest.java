@@ -159,11 +159,52 @@ class GroupControllerTest {
     }
 
     @Test
+    void updateUserObject_returnsUpdated() throws Exception {
+        UserObjectBody body = new UserObjectBody(4L, "Renamed", "new.png", null, null, null);
+        UserObjectDto updated = new UserObjectDto(9L, 5L, 2L, 4L, "Renamed", "new.png", null, null, null);
+        when(groupService.updateUserObject(5L, 9L, 4L, "Renamed", "new.png", null, null, null))
+                .thenReturn(updated);
+
+        mockMvc.perform(put("/groups/2/objects/9")
+                        .with(authenticatedUser("5"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Renamed"));
+
+        verify(groupService).updateUserObject(5L, 9L, 4L, "Renamed", "new.png", null, null, null);
+    }
+
+    @Test
     void deleteUserObject_returnsNoContent() throws Exception {
         mockMvc.perform(delete("/groups/2/objects/9").with(authenticatedUser("5")))
                 .andExpect(status().isNoContent());
 
         verify(groupService).deleteUserObjectById(5L, 9L);
+    }
+
+    @Test
+    void searchUserObjects_returnsPagedResults() throws Exception {
+        UserObjectDto object = new UserObjectDto(9L, 5L, 2L, 3L, "My Model", null, null, null, null);
+        when(groupService.searchUserObjectsByGroupIdPage(eq(5L), eq(2L), eq("bmw"), eq(0), eq(48)))
+                .thenReturn(PageResponse.of(List.of(object), 0, 48, 1, true));
+
+        mockMvc.perform(get("/groups/2/objects/search")
+                        .param("keyword", "bmw")
+                        .with(authenticatedUser("5")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].name").value("My Model"));
+    }
+
+    @Test
+    void getUserObjectById_returnsObject() throws Exception {
+        UserObjectDto object = new UserObjectDto(9L, 5L, 2L, 3L, "My Model", "img.png", null, null, null);
+        when(groupService.getUserObjectById(5L, 2L, 9L)).thenReturn(object);
+
+        mockMvc.perform(get("/groups/2/objects/9").with(authenticatedUser("5")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("My Model"))
+                .andExpect(jsonPath("$.imageUrl").value("img.png"));
     }
 
     private static RequestPostProcessor authenticatedUser(String userId) {

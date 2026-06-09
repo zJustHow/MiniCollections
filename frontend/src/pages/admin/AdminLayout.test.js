@@ -1,20 +1,29 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import AdminLayout from "./AdminLayout";
+
+const messageMock = vi.hoisted(() => ({
+  success: vi.fn(),
+  error: vi.fn(),
+}));
+
+const localeMocks = vi.hoisted(() => ({
+  t: (key) => key,
+}));
 
 vi.mock("antd", async () => {
   const actual = await vi.importActual("antd");
   return {
     ...actual,
     App: Object.assign(actual.App, {
-      useApp: () => ({ message: { success: vi.fn(), error: vi.fn() } }),
+      useApp: () => ({ message: messageMock }),
     }),
   };
 });
 
 vi.mock("../../LocaleContext", () => ({
-  useLocale: () => ({ t: (key) => key }),
+  useLocale: () => ({ t: localeMocks.t }),
 }));
 
 vi.mock("../../utils/submissionsApi", () => ({
@@ -32,7 +41,14 @@ vi.mock("../../components/AdminTableSkeleton", () => ({
 import { getAdminSubmissionCounts } from "../../utils/submissionsApi";
 
 describe("AdminLayout", () => {
+  afterEach(() => {
+    cleanup();
+  });
+
   beforeEach(() => {
+    messageMock.success.mockReset();
+    messageMock.error.mockReset();
+    vi.mocked(getAdminSubmissionCounts).mockReset();
     vi.mocked(getAdminSubmissionCounts).mockResolvedValue({
       pending: 2,
       approved: 5,
@@ -79,6 +95,60 @@ describe("AdminLayout", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("brands-outlet")).toBeInTheDocument();
+    });
+  });
+
+  test("shows all submission status counts in sidebar", async () => {
+    render(
+      <MemoryRouter initialEntries={["/admin"]}>
+        <Routes>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<div data-testid="admin-outlet" />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("5")).toBeInTheDocument();
+      expect(screen.getByText("1")).toBeInTheDocument();
+      expect(screen.getByText("8")).toBeInTheDocument();
+    });
+  });
+
+  test("shows sidebar skeleton before counts load", () => {
+    vi.mocked(getAdminSubmissionCounts).mockImplementation(
+      () => new Promise(() => {}),
+    );
+
+    render(
+      <MemoryRouter initialEntries={["/admin"]}>
+        <Routes>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<div data-testid="admin-outlet" />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByTestId("sidebar-skeleton")).toBeInTheDocument();
+  });
+
+  test("shows error when submission counts fail to load", async () => {
+    vi.mocked(getAdminSubmissionCounts).mockRejectedValue(new Error("network"));
+
+    render(
+      <MemoryRouter initialEntries={["/admin"]}>
+        <Routes>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<div data-testid="admin-outlet" />} />
+          </Route>
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => {
+      expect(messageMock.error).toHaveBeenCalledWith("network");
     });
   });
 });

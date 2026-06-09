@@ -48,6 +48,42 @@ class UserServiceTest {
     @InjectMocks UserService userService;
 
     @Test
+    void getUserById_returnsExistingUser() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+
+        assertEquals(user, userService.getUserById(5L));
+    }
+
+    @Test
+    void getUserById_throwsWhenMissing() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(99L));
+    }
+
+    @Test
+    void isAdmin_returnsTrueWhenAuthorityExists() {
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(true);
+
+        assertTrue(userService.isAdmin(5L));
+    }
+
+    @Test
+    void hasAnyAdmin_returnsFalseWhenNoAdminsExist() {
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class)))
+                .thenReturn(false);
+
+        assertFalse(userService.hasAnyAdmin());
+    }
+
+    @Test
     void signUp_requiresEmailOrPhone() {
         assertThrows(ValidationException.class,
                 () -> userService.signUp(null, "  ", "pw", "Alice", "en-US"));
@@ -81,6 +117,37 @@ class UserServiceTest {
         assertEquals("email", identCaptor.getValue().type());
         assertEquals("alice@example.com", identCaptor.getValue().identifier());
         verify(jdbc).update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", 9L, "ROLE_USER");
+    }
+
+    @Test
+    void signUp_withPhoneCreatesUserAndDefaultGroup() {
+        when(identifierRepository.existsByTypeAndIdentifier("phone", "+8613800138000"))
+                .thenReturn(false);
+        when(passwordEncoder.encode("secret")).thenReturn("hash");
+        when(userRepository.save(any())).thenAnswer(invocation -> {
+            UserEntity saved = invocation.getArgument(0);
+            return new UserEntity(11L, saved.displayName(), saved.password(), saved.enabled(),
+                    saved.preferredLocale(), saved.avatarUrl());
+        });
+
+        Long userId = userService.signUp(null, " +8613800138000 ", "secret", "Bob", "zh-CN");
+
+        assertEquals(11L, userId);
+        ArgumentCaptor<UserIdentifierEntity> identCaptor = ArgumentCaptor.forClass(UserIdentifierEntity.class);
+        verify(identifierRepository).save(identCaptor.capture());
+        assertEquals("phone", identCaptor.getValue().type());
+        assertEquals("+8613800138000", identCaptor.getValue().identifier());
+        verify(groupRepository).save(any());
+        verify(jdbc).update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", 11L, "ROLE_USER");
+    }
+
+    @Test
+    void signUp_rejectsDuplicatePhone() {
+        when(identifierRepository.existsByTypeAndIdentifier("phone", "+8613800138000"))
+                .thenReturn(true);
+
+        assertThrows(IdentifierExistsException.class,
+                () -> userService.signUp(null, "+8613800138000", "pw", "Bob", "en-US"));
     }
 
     @Test
@@ -149,6 +216,21 @@ class UserServiceTest {
         verify(jdbc).update(
                 "DELETE FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
                 2L);
+    }
+
+    @Test
+    void revokeAdminRole_noopsWhenUserIsNotAdmin() {
+        when(userRepository.findById(3L)).thenReturn(Optional.of(
+                new UserEntity(3L, "Bob", "hash", true, "en-US", null)));
+        when(jdbc.queryForObject(
+                "SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
+                Boolean.class, 3L)).thenReturn(false);
+
+        userService.revokeAdminRole(3L);
+
+        verify(jdbc, never()).update(
+                eq("DELETE FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(3L));
     }
 
     @Test
@@ -225,12 +307,66 @@ class UserServiceTest {
     }
 
     @Test
+    void updatePassword_updatesWhenCurrentPasswordMatches() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("old-pass", "hash")).thenReturn(true);
+        when(passwordEncoder.encode("new-pass")).thenReturn("encoded");
+        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+
+        UserProfileDto profile = userService.updatePassword(5L, "old-pass", "new-pass");
+
+        verify(userRepository).updatePasswordById(5L, "encoded");
+        assertEquals("Alice", profile.displayName());
+    }
+
+    @Test
     void findOrCreateWechatUser_returnsExistingUnionidUser() {
         when(identifierRepository.findByTypeAndIdentifier("wechat_unionid", "union-1"))
                 .thenReturn(Optional.of(new UserIdentifierEntity(1L, 7L, "wechat_unionid", "union-1")));
 
         assertEquals(7L, userService.findOrCreateWechatUser("openid", "union-1", "Nick", null));
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void findOrCreateWechatUser_returnsExistingOpenidUser() {
+        when(identifierRepository.findByTypeAndIdentifier("wechat_unionid", "union-1"))
+                .thenReturn(Optional.empty());
+        when(identifierRepository.findByTypeAndIdentifier("wechat_openid", "openid-1"))
+                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 8L, "wechat_openid", "openid-1")));
+
+        assertEquals(8L, userService.findOrCreateWechatUser("openid-1", "union-1", "Nick", null));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void findOrCreateWechatUser_createsNewUserWhenMissing() {
+        when(identifierRepository.findByTypeAndIdentifier("wechat_unionid", "union-1"))
+                .thenReturn(Optional.empty());
+        when(identifierRepository.findByTypeAndIdentifier("wechat_openid", "openid-1"))
+                .thenReturn(Optional.empty());
+        when(userRepository.save(any(UserEntity.class))).thenAnswer(invocation -> {
+            UserEntity entity = invocation.getArgument(0);
+            return new UserEntity(9L, entity.displayName(), null, entity.enabled(), entity.preferredLocale(), entity.avatarUrl());
+        });
+
+        Long userId = userService.findOrCreateWechatUser("openid-1", "union-1", "Nick", "avatar.png");
+
+        assertEquals(9L, userId);
+        verify(identifierRepository, times(2)).save(any(UserIdentifierEntity.class));
+        verify(jdbc).update(
+                eq("INSERT INTO authorities (user_id, authority) VALUES (?, ?)"),
+                eq(9L),
+                eq("ROLE_USER"));
+        verify(groupRepository).save(any());
     }
 
     @Test
@@ -285,6 +421,13 @@ class UserServiceTest {
                 eq("INSERT INTO authorities (user_id, authority) VALUES (?, ?) ON CONFLICT DO NOTHING"),
                 eq(3L),
                 eq("ROLE_ADMIN"));
+    }
+
+    @Test
+    void grantAdminRole_throwsWhenUserMissing() {
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.grantAdminRole(99L));
     }
 
     @Test
@@ -348,6 +491,32 @@ class UserServiceTest {
 
         verify(identifierRepository).save(new UserIdentifierEntity(1L, 5L, "email", "new@example.com"));
         assertEquals("new@example.com", profile.email());
+    }
+
+    @Test
+    void updateIdentifier_insertsWhenNoExistingIdentifier() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
+        when(identifierRepository.existsByTypeAndIdentifier("phone", "13800138000"))
+                .thenReturn(false);
+        when(identifierRepository.findByUserIdAndType(5L, "phone"))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(new UserIdentifierEntity(2L, 5L, "phone", "13800138000")));
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+
+        UserProfileDto profile = userService.updateIdentifier(5L, "phone", "13800138000");
+
+        ArgumentCaptor<UserIdentifierEntity> captor = ArgumentCaptor.forClass(UserIdentifierEntity.class);
+        verify(identifierRepository).save(captor.capture());
+        assertEquals(null, captor.getValue().id());
+        assertEquals("13800138000", captor.getValue().identifier());
+        assertEquals("13800138000", profile.phone());
     }
 
     @Test

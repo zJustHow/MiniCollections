@@ -93,4 +93,36 @@ class GlobalExceptionHandlerTest {
 
         assertEquals("error.too_many_requests", response.code());
     }
+
+    @Test
+    void handleSeriesNotFoundException_returnsNotFoundCode() {
+        ApiErrorResponse response = handler.handleSeriesNotFoundException(new SeriesNotFoundException());
+
+        assertEquals("error.series.not_found", response.code());
+    }
+
+    @Test
+    void handleIdentifierExistsException_includesTypeArg() {
+        ApiErrorResponse response = handler.handleIdentifierExistsException(
+                new IdentifierExistsException("error.identifier_in_use", "email"));
+
+        assertEquals("error.identifier_in_use", response.code());
+        assertArrayEquals(new Object[]{"email"}, response.args());
+    }
+
+    @Test
+    void handleSubmissionAlreadyReviewedException_returnsConflictCode() {
+        ApiErrorResponse response = handler.handleSubmissionAlreadyReviewedException(
+                new SubmissionAlreadyReviewedException());
+
+        assertEquals("error.submission_reviewed", response.code());
+    }
+
+    @Test
+    void handleNoSuchElementException_returnsNotFoundCode() {
+        ApiErrorResponse response = handler.handleNoSuchElementException(
+                new java.util.NoSuchElementException("missing"));
+
+        assertEquals("error.not_found", response.code());
+    }
 }

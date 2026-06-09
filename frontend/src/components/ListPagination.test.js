@@ -45,4 +45,14 @@ describe("ListPagination", () => {
 
     expect(screen.getByLabelText("previousPage")).toBeDisabled();
   });
+
+  test("disables all pagination controls while loading", () => {
+    render(
+      <ListPagination page={1} totalPages={4} loading onPageChange={vi.fn()} />,
+    );
+
+    expect(screen.getByLabelText("previousPage")).toBeDisabled();
+    expect(screen.getByLabelText("nextPage")).toBeDisabled();
+    expect(screen.getByRole("button", { name: "2" })).toBeDisabled();
+  });
 });
