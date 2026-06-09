@@ -27,6 +27,7 @@
         { "name": "DATABASE_USERNAME", "value": "postgres" },
         { "name": "REDIS_HOST", "value": "${REDIS_HOST}" },
         { "name": "REDIS_PORT", "value": "6379" },
+        { "name": "REDIS_SSL_ENABLED", "value": "${REDIS_SSL_ENABLED}" },
         { "name": "ELASTICSEARCH_URIS", "value": "${ELASTICSEARCH_URIS}" },
         { "name": "ELASTICSEARCH_ENABLED", "value": "true" },
         { "name": "ELASTICSEARCH_REINDEX_ON_STARTUP", "value": "false" },

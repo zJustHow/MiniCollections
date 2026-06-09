@@ -101,6 +101,7 @@ jobs:
           APP_SECRETS_ARN: ${{ vars.APP_SECRETS_ARN }}
           DATABASE_URL: ${{ vars.DATABASE_URL }}
           REDIS_HOST: ${{ vars.REDIS_HOST }}
+          REDIS_SSL_ENABLED: ${{ vars.REDIS_SSL_ENABLED || 'true' }}
           ELASTICSEARCH_URIS: ${{ vars.ELASTICSEARCH_URIS }}
           S3_BUCKET: ${{ vars.S3_BUCKET }}
           S3_PUBLIC_BASE_URL: ${{ vars.S3_PUBLIC_BASE_URL }}

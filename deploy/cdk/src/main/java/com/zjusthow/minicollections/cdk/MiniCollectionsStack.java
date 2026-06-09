@@ -427,6 +427,7 @@ public class MiniCollectionsStack extends Stack {
         environment.put("DATABASE_USERNAME", "postgres");
         environment.put("REDIS_HOST", redisHost);
         environment.put("REDIS_PORT", "6379");
+        environment.put("REDIS_SSL_ENABLED", contextString("redisSslEnabled", "true"));
         environment.put("ELASTICSEARCH_URIS", elasticsearchUris);
         environment.put("ELASTICSEARCH_ENABLED", "true");
         environment.put("ELASTICSEARCH_REINDEX_ON_STARTUP", "false");
