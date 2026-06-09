@@ -162,9 +162,9 @@ public class BrandObjectElasticsearchQueryService {
 
     private Object buildSearchQuery(String q, BrandObjectSearchFilter filter) {
         if (!filter.hasUserFilters() && filter.scopeBrandId() == null) {
-            return searchQuerySupport.multiMatchWithCompactFallback(q, BRAND_OBJECT_SEARCH_FIELDS);
+            return searchQuerySupport.brandObjectTextQuery(q, BRAND_OBJECT_SEARCH_FIELDS);
         }
-        return searchQuerySupport.boolMustWithFilters(q, mustFields(filter), filter);
+        return searchQuerySupport.boolMustWithBrandObjectFilters(q, mustFields(filter), filter);
     }
 
     private List<String> mustFields(BrandObjectSearchFilter filter) {

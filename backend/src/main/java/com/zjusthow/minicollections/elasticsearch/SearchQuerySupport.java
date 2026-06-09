@@ -119,6 +119,23 @@ public class SearchQuerySupport {
         return ElasticsearchSearchQueries.multiMatchWithCompactFallback(keyword, fields);
     }
 
+    Object brandObjectTextQuery(String keyword, List<String> fields) {
+        if (openSearchBackend) {
+            return brandObjectTextQueryOpenSearch(keyword, fields);
+        }
+        return brandObjectTextQueryElasticsearch(keyword, fields);
+    }
+
+    Object boolMustWithBrandObjectFilters(
+            String keyword,
+            List<String> mustFields,
+            BrandObjectSearchFilter filter) {
+        if (openSearchBackend) {
+            return boolMustWithBrandObjectFiltersOpenSearch(keyword, mustFields, filter);
+        }
+        return boolMustWithBrandObjectFiltersElasticsearch(keyword, mustFields, filter);
+    }
+
     Object boolMustWithFilters(
             String keyword,
             List<String> mustFields,
@@ -138,6 +155,40 @@ public class SearchQuerySupport {
             return parseOpenSearchTermBuckets(container, aggName);
         }
         return parseElasticsearchTermBuckets(container, aggName);
+    }
+
+    private Query boolMustWithBrandObjectFiltersElasticsearch(
+            String keyword,
+            List<String> mustFields,
+            BrandObjectSearchFilter filter) {
+        return Query.of(sq -> sq.bool(b -> {
+            if (filter.scopeBrandId() != null) {
+                b.must(brandObjectTextQueryElasticsearch(keyword, mustFields));
+                b.filter(f -> f.term(t -> t.field("brand_id").value(filter.scopeBrandId())));
+            } else {
+                b.must(brandObjectTextQueryElasticsearch(keyword, mustFields));
+                if (filter.filterBrands()) {
+                    b.filter(f -> f.terms(t -> t
+                            .field("brand_id")
+                            .terms(tv -> tv.value(toFieldValues(filter.brandIds())))));
+                }
+            }
+            appendElasticsearchFilters(b, filter);
+            return b;
+        }));
+    }
+
+    private Query brandObjectTextQueryElasticsearch(String keyword, List<String> fields) {
+        String compact = SearchKeywordNormalizer.compact(keyword);
+        Query textQuery = ElasticsearchSearchQueries.multiMatchWithCompactFallback(keyword, fields);
+        if (compact.isBlank()) {
+            return textQuery;
+        }
+        Query compactBrand = Query.of(q -> q.term(t -> t.field("brand_name_compact").value(compact)));
+        return Query.of(q -> q.bool(b -> b
+                .should(textQuery)
+                .should(compactBrand)
+                .minimumShouldMatch("1")));
     }
 
     private Query boolMustWithFiltersElasticsearch(
@@ -179,6 +230,41 @@ public class SearchQuerySupport {
                     .field("series_id")
                     .terms(tv -> tv.value(toFieldValues(filter.seriesIds())))));
         }
+    }
+
+    private QueryBuilder boolMustWithBrandObjectFiltersOpenSearch(
+            String keyword,
+            List<String> mustFields,
+            BrandObjectSearchFilter filter) {
+        BoolQueryBuilder bool = QueryBuilders.boolQuery();
+        bool.must(brandObjectTextQueryOpenSearch(keyword, mustFields));
+        if (filter.scopeBrandId() != null) {
+            bool.filter(QueryBuilders.termQuery("brand_id", filter.scopeBrandId()));
+        } else if (filter.filterBrands()) {
+            bool.filter(QueryBuilders.termsQuery("brand_id", filter.brandIds()));
+        }
+        if (filter.filterCategories()) {
+            bool.filter(QueryBuilders.termsQuery("category_id", filter.categoryIds()));
+        }
+        if (filter.filterScales()) {
+            bool.filter(QueryBuilders.termsQuery("scale_id", filter.scaleIds()));
+        }
+        if (filter.filterSeries()) {
+            bool.filter(QueryBuilders.termsQuery("series_id", filter.seriesIds()));
+        }
+        return bool;
+    }
+
+    private QueryBuilder brandObjectTextQueryOpenSearch(String keyword, List<String> fields) {
+        String compact = SearchKeywordNormalizer.compact(keyword);
+        QueryBuilder textQuery = multiMatchOpenSearch(keyword, fields);
+        if (compact.isBlank()) {
+            return textQuery;
+        }
+        return QueryBuilders.boolQuery()
+                .should(textQuery)
+                .should(QueryBuilders.termQuery("brand_name_compact", compact))
+                .minimumShouldMatch(1);
     }
 
     private QueryBuilder boolMustWithFiltersOpenSearch(

@@ -26,8 +26,21 @@ class BrandObjectDocumentTest {
         assertEquals("BMW M3", document.nameEn());
         assertEquals("宝马M3", document.nameZh());
         assertEquals("B", document.brandAbbreviation());
+        assertEquals("bmw", document.brandNameCompact());
         assertEquals("1:64", document.scale());
         assertEquals(7L, document.viewCount());
+    }
+
+    @Test
+    void from_compactBrandNameRemovesSpacesAndHyphens() {
+        BrandObjectEntity entity = new BrandObjectEntity(
+                2L, "Model", null, null, null, null, null, null,
+                3L, null, null, null, 0L);
+
+        BrandObjectDocument document = BrandObjectDocument.from(
+                entity, "AutoArt", "AA", null, null, null, null, null, "1:18");
+
+        assertEquals("autoart", document.brandNameCompact());
     }
 
     @Test

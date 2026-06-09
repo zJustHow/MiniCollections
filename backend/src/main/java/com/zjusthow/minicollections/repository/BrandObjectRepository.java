@@ -46,14 +46,20 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             @Param("offset") int offset);
 
     @Query("""
-            SELECT * FROM brand_objects
-            WHERE (:filterBrands = FALSE OR brand_id IN (:brandIds))
-              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
-              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
-              AND (:filterSeries = FALSE OR series_id IN (:seriesIds))
-              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
-            ORDER BY id ASC
+            SELECT bo.* FROM brand_objects bo
+            JOIN brands b ON b.id = bo.brand_id
+            WHERE (:filterBrands = FALSE OR bo.brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR bo.category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR bo.scale_id IN (:scaleIds))
+              AND (:filterSeries = FALSE OR bo.series_id IN (:seriesIds))
+              AND (LOWER(bo.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(bo.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(b.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(REPLACE(REPLACE(COALESCE(b.name_en, ''), ' ', ''), '-', ''))
+                    LIKE '%' || LOWER(REPLACE(REPLACE(:keyword, ' ', ''), '-', '')) || '%'
+               OR LOWER(COALESCE(b.abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(b.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            ORDER BY bo.id ASC
             LIMIT :limit OFFSET :offset
             """)
     List<BrandObjectEntity> searchPage(
@@ -70,13 +76,19 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             @Param("offset") int offset);
 
     @Query("""
-            SELECT COUNT(*) FROM brand_objects
-            WHERE (:filterBrands = FALSE OR brand_id IN (:brandIds))
-              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
-              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
-              AND (:filterSeries = FALSE OR series_id IN (:seriesIds))
-              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            SELECT COUNT(*) FROM brand_objects bo
+            JOIN brands b ON b.id = bo.brand_id
+            WHERE (:filterBrands = FALSE OR bo.brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR bo.category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR bo.scale_id IN (:scaleIds))
+              AND (:filterSeries = FALSE OR bo.series_id IN (:seriesIds))
+              AND (LOWER(bo.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(bo.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(b.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(REPLACE(REPLACE(COALESCE(b.name_en, ''), ' ', ''), '-', ''))
+                    LIKE '%' || LOWER(REPLACE(REPLACE(:keyword, ' ', ''), '-', '')) || '%'
+               OR LOWER(COALESCE(b.abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(b.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
             """)
     long countSearch(
             @Param("keyword") String keyword,
@@ -90,17 +102,23 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             @Param("seriesIds") List<Long> seriesIds);
 
     @Query("""
-            SELECT category_id AS category_id, COUNT(*) AS cnt
-            FROM brand_objects
-            WHERE category_id IS NOT NULL
-              AND (:filterBrands = FALSE OR brand_id IN (:brandIds))
-              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
-              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
-              AND (:filterSeries = FALSE OR series_id IN (:seriesIds))
-              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
-            GROUP BY category_id
-            ORDER BY cnt DESC, category_id ASC
+            SELECT bo.category_id AS category_id, COUNT(*) AS cnt
+            FROM brand_objects bo
+            JOIN brands b ON b.id = bo.brand_id
+            WHERE bo.category_id IS NOT NULL
+              AND (:filterBrands = FALSE OR bo.brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR bo.category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR bo.scale_id IN (:scaleIds))
+              AND (:filterSeries = FALSE OR bo.series_id IN (:seriesIds))
+              AND (LOWER(bo.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(bo.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(b.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(REPLACE(REPLACE(COALESCE(b.name_en, ''), ' ', ''), '-', ''))
+                    LIKE '%' || LOWER(REPLACE(REPLACE(:keyword, ' ', ''), '-', '')) || '%'
+               OR LOWER(COALESCE(b.abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(b.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY bo.category_id
+            ORDER BY cnt DESC, bo.category_id ASC
             """)
     List<CategoryFacetRow> countByCategorySearch(
             @Param("keyword") String keyword,
@@ -114,16 +132,22 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             @Param("seriesIds") List<Long> seriesIds);
 
     @Query("""
-            SELECT brand_id AS id, COUNT(*) AS cnt
-            FROM brand_objects
-            WHERE (:filterBrands = FALSE OR brand_id IN (:brandIds))
-              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
-              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
-              AND (:filterSeries = FALSE OR series_id IN (:seriesIds))
-              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
-            GROUP BY brand_id
-            ORDER BY cnt DESC, brand_id ASC
+            SELECT bo.brand_id AS id, COUNT(*) AS cnt
+            FROM brand_objects bo
+            JOIN brands b ON b.id = bo.brand_id
+            WHERE (:filterBrands = FALSE OR bo.brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR bo.category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR bo.scale_id IN (:scaleIds))
+              AND (:filterSeries = FALSE OR bo.series_id IN (:seriesIds))
+              AND (LOWER(bo.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(bo.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(b.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(REPLACE(REPLACE(COALESCE(b.name_en, ''), ' ', ''), '-', ''))
+                    LIKE '%' || LOWER(REPLACE(REPLACE(:keyword, ' ', ''), '-', '')) || '%'
+               OR LOWER(COALESCE(b.abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(b.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY bo.brand_id
+            ORDER BY cnt DESC, bo.brand_id ASC
             """)
     List<FacetCountRow> countByBrandSearch(
             @Param("keyword") String keyword,
@@ -137,17 +161,23 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             @Param("seriesIds") List<Long> seriesIds);
 
     @Query("""
-            SELECT scale_id AS id, COUNT(*) AS cnt
-            FROM brand_objects
-            WHERE scale_id IS NOT NULL
-              AND (:filterBrands = FALSE OR brand_id IN (:brandIds))
-              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
-              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
-              AND (:filterSeries = FALSE OR series_id IN (:seriesIds))
-              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
-            GROUP BY scale_id
-            ORDER BY cnt DESC, scale_id ASC
+            SELECT bo.scale_id AS id, COUNT(*) AS cnt
+            FROM brand_objects bo
+            JOIN brands b ON b.id = bo.brand_id
+            WHERE bo.scale_id IS NOT NULL
+              AND (:filterBrands = FALSE OR bo.brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR bo.category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR bo.scale_id IN (:scaleIds))
+              AND (:filterSeries = FALSE OR bo.series_id IN (:seriesIds))
+              AND (LOWER(bo.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(bo.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(b.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(REPLACE(REPLACE(COALESCE(b.name_en, ''), ' ', ''), '-', ''))
+                    LIKE '%' || LOWER(REPLACE(REPLACE(:keyword, ' ', ''), '-', '')) || '%'
+               OR LOWER(COALESCE(b.abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(b.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY bo.scale_id
+            ORDER BY cnt DESC, bo.scale_id ASC
             """)
     List<FacetCountRow> countByScaleSearch(
             @Param("keyword") String keyword,
@@ -161,17 +191,23 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             @Param("seriesIds") List<Long> seriesIds);
 
     @Query("""
-            SELECT series_id AS id, COUNT(*) AS cnt
-            FROM brand_objects
-            WHERE series_id IS NOT NULL
-              AND (:filterBrands = FALSE OR brand_id IN (:brandIds))
-              AND (:filterCategories = FALSE OR category_id IN (:categoryIds))
-              AND (:filterScales = FALSE OR scale_id IN (:scaleIds))
-              AND (:filterSeries = FALSE OR series_id IN (:seriesIds))
-              AND (LOWER(name_en) LIKE '%' || LOWER(:keyword) || '%'
-               OR LOWER(COALESCE(name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
-            GROUP BY series_id
-            ORDER BY cnt DESC, series_id ASC
+            SELECT bo.series_id AS id, COUNT(*) AS cnt
+            FROM brand_objects bo
+            JOIN brands b ON b.id = bo.brand_id
+            WHERE bo.series_id IS NOT NULL
+              AND (:filterBrands = FALSE OR bo.brand_id IN (:brandIds))
+              AND (:filterCategories = FALSE OR bo.category_id IN (:categoryIds))
+              AND (:filterScales = FALSE OR bo.scale_id IN (:scaleIds))
+              AND (:filterSeries = FALSE OR bo.series_id IN (:seriesIds))
+              AND (LOWER(bo.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(bo.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(b.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(REPLACE(REPLACE(COALESCE(b.name_en, ''), ' ', ''), '-', ''))
+                    LIKE '%' || LOWER(REPLACE(REPLACE(:keyword, ' ', ''), '-', '')) || '%'
+               OR LOWER(COALESCE(b.abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(COALESCE(b.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%')
+            GROUP BY bo.series_id
+            ORDER BY cnt DESC, bo.series_id ASC
             """)
     List<FacetCountRow> countBySeriesSearch(
             @Param("keyword") String keyword,
@@ -316,6 +352,8 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
             WHERE LOWER(bo.name_en) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(bo.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(b.name_en) LIKE '%' || LOWER(:keyword) || '%'
+               OR LOWER(REPLACE(REPLACE(COALESCE(b.name_en, ''), ' ', ''), '-', ''))
+                    LIKE '%' || LOWER(REPLACE(REPLACE(:keyword, ' ', ''), '-', '')) || '%'
                OR LOWER(COALESCE(b.abbreviation, '')) LIKE '%' || LOWER(:keyword) || '%'
                OR LOWER(COALESCE(b.name_zh, '')) LIKE '%' || LOWER(:keyword) || '%'
             """)

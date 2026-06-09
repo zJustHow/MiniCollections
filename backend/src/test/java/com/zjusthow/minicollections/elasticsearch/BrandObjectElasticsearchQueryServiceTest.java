@@ -77,7 +77,7 @@ class BrandObjectElasticsearchQueryServiceTest {
     void searchPage_mapsElasticsearchHitsToIds() {
         BrandObjectDocument document = new BrandObjectDocument(
                 42L, "BMW M3", null, null, null, null, null,
-                1L, "BMW", "B", null,
+                1L, "BMW", "bmw", "B", null,
                 null, null, null,
                 null, null, null,
                 null, null, 0L);

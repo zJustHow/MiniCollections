@@ -26,6 +26,8 @@ public record BrandObjectDocument(
         @Field(name = "brand_name_en", type = FieldType.Text,
                analyzer = "english_text_index", searchAnalyzer = "english_text_search")
         String brandNameEn,
+        @Field(name = "brand_name_compact", type = FieldType.Keyword, normalizer = "lowercase_normalizer")
+        String brandNameCompact,
         @Field(name = "brand_abbreviation", type = FieldType.Keyword, normalizer = "lowercase_normalizer")
         String brandAbbreviation,
         @Field(name = "brand_name_zh", type = FieldType.Text) String brandNameZh,
@@ -57,7 +59,7 @@ public record BrandObjectDocument(
                 e.id(),
                 e.nameEn(), e.nameZh(), e.imageUrl(),
                 e.releasePriceCny(), e.releasePriceUsd(), e.releaseDate(),
-                e.brandId(), brandNameEn, indexAbbreviation(brandAbbreviation), brandNameZh,
+                e.brandId(), brandNameEn, indexBrandNameCompact(brandNameEn), indexAbbreviation(brandAbbreviation), brandNameZh,
                 e.seriesId(), seriesEn, seriesZh,
                 e.categoryId(), categoryEn, categoryZh,
                 e.scaleId(), scaleCode,
@@ -70,5 +72,13 @@ public record BrandObjectDocument(
             return null;
         }
         return abbreviation.trim();
+    }
+
+    private static String indexBrandNameCompact(String brandNameEn) {
+        if (brandNameEn == null || brandNameEn.isBlank()) {
+            return null;
+        }
+        String compact = SearchKeywordNormalizer.compact(brandNameEn);
+        return compact.isEmpty() ? null : compact;
     }
 }
