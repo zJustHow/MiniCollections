@@ -91,7 +91,8 @@ public class MiniCollectionsStack extends Stack {
                         "JWT_SECRET", SecretValue.unsafePlainText("REPLACE_WITH_openssl_rand_base64_32"),
                         "DATABASE_PASSWORD", SecretValue.unsafePlainText("CHANGE_ME"),
                         "S3_ACCESS_KEY", SecretValue.unsafePlainText("OPTIONAL_IF_USING_TASK_ROLE"),
-                        "S3_SECRET_KEY", SecretValue.unsafePlainText("OPTIONAL_IF_USING_TASK_ROLE")
+                        "S3_SECRET_KEY", SecretValue.unsafePlainText("OPTIONAL_IF_USING_TASK_ROLE"),
+                        "ADMIN_PASSWORD", SecretValue.unsafePlainText("SET_FOR_FIRST_ADMIN_BOOTSTRAP_ONLY")
                 ))
                 .build();
 
@@ -147,7 +148,8 @@ public class MiniCollectionsStack extends Stack {
                         "JWT_SECRET", Secret.fromSecretsManager(appSecret, "JWT_SECRET"),
                         "DATABASE_PASSWORD", Secret.fromSecretsManager(appSecret, "DATABASE_PASSWORD"),
                         "S3_ACCESS_KEY", Secret.fromSecretsManager(appSecret, "S3_ACCESS_KEY"),
-                        "S3_SECRET_KEY", Secret.fromSecretsManager(appSecret, "S3_SECRET_KEY")
+                        "S3_SECRET_KEY", Secret.fromSecretsManager(appSecret, "S3_SECRET_KEY"),
+                        "ADMIN_PASSWORD", Secret.fromSecretsManager(appSecret, "ADMIN_PASSWORD")
                 ))
                 .logging(LogDriver.awsLogs(software.amazon.awscdk.services.ecs.AwsLogDriverProps.builder()
                         .logGroup(logGroup)
@@ -436,6 +438,9 @@ public class MiniCollectionsStack extends Stack {
         environment.put("S3_REGION", Stack.of(this).getRegion());
         environment.put("S3_BUCKET", s3BucketName);
         environment.put("S3_PUBLIC_BASE_URL", s3PublicBaseUrl);
+        environment.put("ADMIN_EMAIL", contextString("adminEmail", ""));
+        environment.put("ADMIN_NAME", contextString("adminName", "Admin"));
+        environment.put("ADMIN_LOCALE", contextString("adminLocale", "en-US"));
         return environment;
     }
 

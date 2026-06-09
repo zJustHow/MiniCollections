@@ -106,6 +106,9 @@ jobs:
           S3_BUCKET: ${{ vars.S3_BUCKET }}
           S3_PUBLIC_BASE_URL: ${{ vars.S3_PUBLIC_BASE_URL }}
           INIT_DB: ${{ vars.INIT_DB || 'never' }}
+          ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL || '' }}
+          ADMIN_NAME: ${{ vars.ADMIN_NAME || 'Admin' }}
+          ADMIN_LOCALE: ${{ vars.ADMIN_LOCALE || 'en-US' }}
         run: |
           test -n "${AWS_ACCOUNT_ID}" || (echo "Missing repository variable AWS_ACCOUNT_ID" && exit 1)
           test -n "${ECS_EXECUTION_ROLE_ARN}" || (echo "Missing repository variable ECS_EXECUTION_ROLE_ARN" && exit 1)
