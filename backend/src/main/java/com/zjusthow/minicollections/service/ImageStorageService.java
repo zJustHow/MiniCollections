@@ -56,7 +56,11 @@ public class ImageStorageService {
         String policy = """
                 {"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":["*"]},"Action":["s3:GetObject"],"Resource":["arn:aws:s3:::%s/*"]}]}
                 """.formatted(bucket).strip();
-        s3Client.putBucketPolicy(PutBucketPolicyRequest.builder().bucket(bucket).policy(policy).build());
+        try {
+            s3Client.putBucketPolicy(PutBucketPolicyRequest.builder().bucket(bucket).policy(policy).build());
+        } catch (S3Exception e) {
+            log.warn("Skipped S3 bucket policy update for {}: {}", bucket, e.getMessage());
+        }
     }
 
     public String uploadUserImage(long userId, MultipartFile file) throws IOException {

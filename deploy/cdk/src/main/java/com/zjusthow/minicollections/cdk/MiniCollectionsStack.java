@@ -434,7 +434,7 @@ public class MiniCollectionsStack extends Stack {
         environment.put("ELASTICSEARCH_ENABLED", "true");
         environment.put("ELASTICSEARCH_REINDEX_ON_STARTUP", "false");
         environment.put("S3_ENABLED", "true");
-        environment.put("S3_ENDPOINT", "https://s3.amazonaws.com");
+        environment.put("S3_ENDPOINT", "https://s3." + Stack.of(this).getRegion() + ".amazonaws.com");
         environment.put("S3_REGION", Stack.of(this).getRegion());
         environment.put("S3_BUCKET", s3BucketName);
         environment.put("S3_PUBLIC_BASE_URL", s3PublicBaseUrl);
