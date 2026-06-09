@@ -1,10 +1,20 @@
 import { Layout } from "antd";
+import { useNavigation } from "react-router-dom";
 import LoginForm from "../components/auth/LoginForm";
 import SiteLogo from "../components/SiteLogo";
+import PageLoader from "../components/PageLoader";
+import { getAuthNavigationLoaderVariant } from "../utils/authNavigation";
 
 const { Header, Content } = Layout;
 
 export default function LoginPage({ onSuccess }) {
+  const navigation = useNavigation();
+  const loaderVariant = getAuthNavigationLoaderVariant(navigation);
+
+  if (loaderVariant) {
+    return <PageLoader variant={loaderVariant} />;
+  }
+
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Header

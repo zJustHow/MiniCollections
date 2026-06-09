@@ -1,9 +1,7 @@
 import { lazy, Suspense } from "react";
 import SplashLoader from "./SplashLoader";
-
+import AuthPageSkeleton from "./AuthPageSkeleton";
 import ProfilePageSkeleton from "./ProfilePageSkeleton";
-
-const AuthPageSkeleton = lazy(() => import("./AuthPageSkeleton"));
 const FeedbackPageSkeleton = lazy(() => import("./FeedbackPageSkeleton"));
 const AdminLayoutSkeleton = lazy(() => import("./AdminLayoutSkeleton"));
 const AdminTableSkeleton = lazy(() => import("./AdminTableSkeleton"));
@@ -16,27 +14,15 @@ function LazySkeleton({ children }) {
 
 export default function PageLoader({ variant = "splash" }) {
   if (variant === "register") {
-    return (
-      <LazySkeleton>
-        <AuthPageSkeleton variant="register" />
-      </LazySkeleton>
-    );
+    return <AuthPageSkeleton variant="register" />;
   }
 
   if (variant === "forgotPassword") {
-    return (
-      <LazySkeleton>
-        <AuthPageSkeleton variant="forgotPassword" />
-      </LazySkeleton>
-    );
+    return <AuthPageSkeleton variant="forgotPassword" />;
   }
 
   if (variant === "wechatCallback") {
-    return (
-      <LazySkeleton>
-        <AuthPageSkeleton variant="wechatCallback" />
-      </LazySkeleton>
-    );
+    return <AuthPageSkeleton variant="wechatCallback" />;
   }
 
   if (variant === "feedback") {

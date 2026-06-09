@@ -2,17 +2,22 @@ import NeuPressableButton from "../NeuPressableButton";
 import NeuButton from "../NeuButton";
 import { Form } from "antd";
 import { NeuInput, NeuSelect } from "../NeuFormControl";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LockOutlined from "@ant-design/icons/es/icons/LockOutlined.js";
 import MailOutlined from "@ant-design/icons/es/icons/MailOutlined.js";
 import PhoneOutlined from "@ant-design/icons/es/icons/PhoneOutlined.js";
 import WechatOutlined from "@ant-design/icons/es/icons/WechatOutlined.js";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { login, getWechatAuthUrl, COUNTRIES } from "../../utils";
 import { useLocale } from "../../LocaleContext";
 import { radius } from "../../theme/radius";
 import { PHONE_AUTH_ENABLED, WECHAT_AUTH_ENABLED } from "./authFeatures";
 import { neuRem } from "../../theme/fontScale";
+import {
+  prefetchAuthPages,
+  prefetchForgotPasswordPage,
+  prefetchRegisterPage,
+} from "../../utils/prefetchRoutes";
 
 const isWechatBrowser = () => /MicroMessenger/i.test(navigator.userAgent);
 const isMobileBrowser = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -26,7 +31,10 @@ function LoginForm({ onSuccess }) {
   const inMobileNonWeChat = !inWeChat && isMobileBrowser();
   const [form] = Form.useForm();
   const { t, locale } = useLocale();
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    prefetchAuthPages();
+  }, []);
 
   const handleTypeChange = (value) => {
     setLoginType(value);
@@ -247,17 +255,18 @@ function LoginForm({ onSuccess }) {
         </Form.Item>
 
         <div style={{ textAlign: "right", marginTop: -12, marginBottom: 16 }}>
-          <span
-            onClick={() => navigate("/forgot-password")}
+          <Link
+            to="/forgot-password"
+            onMouseEnter={prefetchForgotPasswordPage}
+            onFocus={prefetchForgotPasswordPage}
             style={{
-              cursor: "pointer",
               color: "var(--neu-accent)",
               fontSize: neuRem(13),
               textDecoration: "underline",
             }}
           >
             {t("forgotPassword")}
-          </span>
+          </Link>
         </div>
 
         {error && (
@@ -358,16 +367,17 @@ function LoginForm({ onSuccess }) {
           fontSize: neuRem(13),
         }}
       >
-        <span
-          onClick={() => navigate("/register")}
+        <Link
+          to="/register"
+          onMouseEnter={prefetchRegisterPage}
+          onFocus={prefetchRegisterPage}
           style={{
-            cursor: "pointer",
             color: "var(--neu-accent)",
             textDecoration: "underline",
           }}
         >
           {t("signUp")}
-        </span>
+        </Link>
       </div>
     </div>
   );

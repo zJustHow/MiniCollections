@@ -1,8 +1,6 @@
 import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import ForgotPasswordPage from "./ForgotPasswordPage";
-
-const navigateMock = vi.hoisted(() => vi.fn());
 
 vi.mock("antd", async () => {
   const actual = await vi.importActual("antd");
@@ -21,13 +19,9 @@ vi.mock("../LocaleContext", () => ({
   }),
 }));
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => navigateMock,
-  };
-});
+vi.mock("../utils/prefetchRoutes", () => ({
+  prefetchLoginPage: vi.fn(),
+}));
 
 vi.mock("../components/SiteLogo", () => ({
   default: () => <div data-testid="site-logo">Logo</div>,
@@ -39,13 +33,17 @@ vi.mock("../utils", () => ({
   COUNTRIES: [{ code: "+86", en: "China", zh: "中国" }],
 }));
 
-describe("ForgotPasswordPage", () => {
-  beforeEach(() => {
-    navigateMock.mockReset();
-  });
+function renderForgotPasswordPage() {
+  const router = createMemoryRouter(
+    [{ path: "/forgot-password", element: <ForgotPasswordPage /> }],
+    { initialEntries: ["/forgot-password"] },
+  );
+  return render(<RouterProvider router={router} />);
+}
 
+describe("ForgotPasswordPage", () => {
   test("renders forgot password form", () => {
-    render(<ForgotPasswordPage />);
+    renderForgotPasswordPage();
 
     expect(screen.getByTestId("site-logo")).toBeInTheDocument();
     expect(screen.getByText("forgotPassword")).toBeInTheDocument();
@@ -53,11 +51,12 @@ describe("ForgotPasswordPage", () => {
     expect(screen.getByRole("button", { name: "resetPassword" })).toBeInTheDocument();
   });
 
-  test("navigates back to login from footer link", async () => {
-    render(<ForgotPasswordPage />);
+  test("links back to login from footer link", () => {
+    renderForgotPasswordPage();
 
-    await userEvent.click(screen.getByText("backToSignIn"));
-
-    expect(navigateMock).toHaveBeenCalledWith("/login");
+    expect(screen.getByRole("link", { name: "backToSignIn" })).toHaveAttribute(
+      "href",
+      "/login",
+    );
   });
 });

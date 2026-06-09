@@ -17,6 +17,7 @@ import org.opensearch.search.aggregations.bucket.terms.Terms;
 import org.opensearch.search.sort.SortBuilders;
 import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.AggregationsContainer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Component;
@@ -33,6 +34,7 @@ public class SearchQuerySupport {
 
     private final boolean openSearchBackend;
 
+    @Autowired
     public SearchQuerySupport(ElasticsearchOperations elasticsearchOperations) {
         this(isOpenSearchBackend(elasticsearchOperations));
     }

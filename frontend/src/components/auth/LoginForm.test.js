@@ -1,18 +1,17 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import LoginForm from "./LoginForm";
 
 vi.mock("../../LocaleContext", () => ({
   useLocale: () => ({ t: (key) => key, locale: "en-US" }),
 }));
 
-vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual("react-router-dom");
-  return {
-    ...actual,
-    useNavigate: () => vi.fn(),
-  };
-});
+vi.mock("../../utils/prefetchRoutes", () => ({
+  prefetchAuthPages: vi.fn(),
+  prefetchForgotPasswordPage: vi.fn(),
+  prefetchRegisterPage: vi.fn(),
+}));
 
 vi.mock("../../utils", () => ({
   login: vi.fn(),
@@ -22,21 +21,37 @@ vi.mock("../../utils", () => ({
 
 import { login } from "../../utils";
 
+function renderLoginForm(props = {}) {
+  return render(
+    <MemoryRouter>
+      <LoginForm onSuccess={vi.fn()} {...props} />
+    </MemoryRouter>,
+  );
+}
+
 describe("LoginForm", () => {
   beforeEach(() => {
     vi.mocked(login).mockResolvedValue({});
   });
 
   test("renders email login by default", () => {
-    render(<LoginForm onSuccess={vi.fn()} />);
+    renderLoginForm();
 
     expect(screen.getByPlaceholderText("email")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "signIn" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "forgotPassword" })).toHaveAttribute(
+      "href",
+      "/forgot-password",
+    );
+    expect(screen.getByRole("link", { name: "signUp" })).toHaveAttribute(
+      "href",
+      "/register",
+    );
   });
 
   test("submits email credentials", async () => {
     const onSuccess = vi.fn();
-    render(<LoginForm onSuccess={onSuccess} />);
+    renderLoginForm({ onSuccess });
 
     await userEvent.type(screen.getByPlaceholderText("email"), "alice@example.com");
     await userEvent.type(screen.getByPlaceholderText("password"), "secret");
