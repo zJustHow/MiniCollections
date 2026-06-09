@@ -8,6 +8,7 @@ import {
 } from "../../NeuFormControl";
 import { useLocale } from "../../../LocaleContext";
 import ImageUploadField from "../../ImageUploadField";
+import { resolveImageFieldDisplay } from "../../../utils/imageFieldOverride";
 
 export default function AddToGroupModal({ visible,
   onOk,
@@ -38,7 +39,13 @@ export default function AddToGroupModal({ visible,
           <NeuInput />
         </Form.Item>
         <Form.Item label={t("image")}>
-          <ImageUploadField value={customImageData || selectedBrandObject?.image_url} onChange={onImageChange} />
+          <ImageUploadField
+            value={resolveImageFieldDisplay(
+              customImageData,
+              selectedBrandObject?.image_url ?? selectedBrandObject?.imageUrl,
+            )}
+            onChange={onImageChange}
+          />
         </Form.Item>
         <Form.Item label={t("purchasePrice")} name="purchasePrice">
           <NeuInputNumber min={0} step={0.01} stringMode controls={false} />

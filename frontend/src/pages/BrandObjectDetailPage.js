@@ -30,6 +30,7 @@ import {
   formatViewCount,
 } from "../utils/format";
 import { discardUploadedImage } from "../utils/uploadsApi";
+import { resolveImageFieldPayload } from "../utils/imageFieldOverride";
 
 const { useBreakpoint } = Grid;
 
@@ -53,7 +54,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const [addToGroupVisible, setAddToGroupVisible] = useState(false);
   const [addToGroupLoading, setAddToGroupLoading] = useState(false);
   const [addToGroupForm] = Form.useForm();
-  const [customImageData, setCustomImageData] = useState(null);
+  const [customImageData, setCustomImageData] = useState(undefined);
 
   const [brandObjectModalOpen, setBrandObjectModalOpen] = useState(false);
 
@@ -122,7 +123,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   }, [brandObject, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openAddToGroup = async () => {
-    setCustomImageData(null);
+    setCustomImageData(undefined);
     addToGroupForm.setFieldsValue({
       name: brandObject.name,
       purchasePrice: undefined,
@@ -160,7 +161,11 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       const payload = {
         brand_object_id: brandObject.id,
         name: values.name,
-        image_url: customImageData || brandObject.image_url,
+        image_url: resolveImageFieldPayload(
+          customImageData,
+          brandObject.image_url,
+          brandObject.imageUrl,
+        ),
         purchase_date: values.purchaseDate
           ? values.purchaseDate.format("YYYY-MM-DD")
           : null,
@@ -263,7 +268,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
         onCancel={() => {
           if (customImageData)
             discardUploadedImage(customImageData).catch(() => {});
-          setCustomImageData(null);
+          setCustomImageData(undefined);
           setAddToGroupVisible(false);
         }}
         confirmLoading={addToGroupLoading}

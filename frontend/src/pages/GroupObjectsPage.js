@@ -27,6 +27,7 @@ import {
 } from "../utils/groupsApi";
 import { purchasePriceFromFormValue } from "../utils/format";
 import { discardUploadedImage } from "../utils/uploadsApi";
+import { resolveImageFieldPayload } from "../utils/imageFieldOverride";
 import { scrollAppToTop } from "../utils/scroll";
 
 const AddUserObjectInGroupModal = createLazyModal(
@@ -83,12 +84,12 @@ export default function GroupObjectsPage() {
   const [editGroupVisible, setEditGroupVisible] = useState(false);
   const [editGroupLoading, setEditGroupLoading] = useState(false);
   const [editGroupForm] = Form.useForm();
-  const [editGroupImageData, setEditGroupImageData] = useState(null);
+  const [editGroupImageData, setEditGroupImageData] = useState(undefined);
 
   const [addVisible, setAddVisible] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
   const [addForm] = Form.useForm();
-  const [addImageData, setAddImageData] = useState(null);
+  const [addImageData, setAddImageData] = useState(undefined);
   const {
     results: addSearchResults,
     loading: addSearchLoading,
@@ -124,7 +125,7 @@ export default function GroupObjectsPage() {
   const openEditGroup = () => {
     if (!group) return;
     editGroupForm.setFieldsValue({ name: group.name });
-    setEditGroupImageData(null);
+    setEditGroupImageData(undefined);
     setEditGroupVisible(true);
   };
 
@@ -149,7 +150,11 @@ export default function GroupObjectsPage() {
     try {
       const values = await editGroupForm.validateFields();
       setEditGroupLoading(true);
-      const image_url = editGroupImageData ?? group.image_url;
+      const image_url = resolveImageFieldPayload(
+        editGroupImageData,
+        group.image_url,
+        group.imageUrl,
+      );
       try {
         const data = await updateGroup(group.id, {
           name: values.name,
@@ -176,8 +181,11 @@ export default function GroupObjectsPage() {
     if (!group) return;
     try {
       const values = await addForm.validateFields();
-      const image_url =
-        addImageData ?? selectedBrandObjectForAdd?.image_url ?? null;
+      const image_url = resolveImageFieldPayload(
+        addImageData,
+        selectedBrandObjectForAdd?.image_url,
+        selectedBrandObjectForAdd?.imageUrl,
+      );
       const payload = {
         brand_object_id: values.brandObjectId ?? null,
         name: values.name,
@@ -206,7 +214,7 @@ export default function GroupObjectsPage() {
 
   const openAddUserObject = () => {
     addForm.resetFields();
-    setAddImageData(null);
+    setAddImageData(undefined);
     setAddSearchResults([]);
     setSelectedBrandObjectForAdd(null);
     setAddVisible(true);
@@ -276,7 +284,7 @@ export default function GroupObjectsPage() {
         onCancel={() => {
           if (editGroupImageData)
             discardUploadedImage(editGroupImageData).catch(() => {});
-          setEditGroupImageData(null);
+          setEditGroupImageData(undefined);
           setEditGroupVisible(false);
         }}
         confirmLoading={editGroupLoading}
@@ -291,7 +299,7 @@ export default function GroupObjectsPage() {
         onOk={handleAddUserObject}
         onCancel={() => {
           if (addImageData) discardUploadedImage(addImageData).catch(() => {});
-          setAddImageData(null);
+          setAddImageData(undefined);
           setAddVisible(false);
         }}
         confirmLoading={addLoading}

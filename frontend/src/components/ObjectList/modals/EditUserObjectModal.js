@@ -9,6 +9,7 @@ import {
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";
 import ImageUploadField from "../../ImageUploadField";
+import { resolveImageFieldDisplay } from "../../../utils/imageFieldOverride";
 
 export default function EditUserObjectModal({ visible,
   onOk,
@@ -70,7 +71,13 @@ export default function EditUserObjectModal({ visible,
           <NeuInput.TextArea rows={3} />
         </Form.Item>
         <Form.Item label={t("image")}>
-          <ImageUploadField value={imageData || selectedUserObject?.image_url} onChange={onImageChange} />
+          <ImageUploadField
+            value={resolveImageFieldDisplay(
+              imageData,
+              selectedUserObject?.image_url ?? selectedUserObject?.imageUrl,
+            )}
+            onChange={onImageChange}
+          />
         </Form.Item>
       </Form>
     </NeuFormDrawer>

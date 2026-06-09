@@ -32,6 +32,7 @@ import {
   displayPurchasePriceFromObject,
 } from "../utils/format";
 import { discardUploadedImage } from "../utils/uploadsApi";
+import { resolveImageFieldPayload } from "../utils/imageFieldOverride";
 
 const { useBreakpoint } = Grid;
 
@@ -63,7 +64,7 @@ export default function GroupObjectDetailPage() {
   const [editVisible, setEditVisible] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [editForm] = Form.useForm();
-  const [editImageData, setEditImageData] = useState(null);
+  const [editImageData, setEditImageData] = useState(undefined);
   const {
     results: editSearchResults,
     loading: editSearchLoading,
@@ -73,17 +74,20 @@ export default function GroupObjectDetailPage() {
     onError: (err) => message.error(err?.message || t("searchFailed")),
   });
 
-  const fetchUserObject = useCallback(async () => {
-    setLoading(true);
-    try {
-      const found = await getUserObjectById(groupId, objectId);
-      setUserObject(found);
-    } catch (err) {
-      message.error(err?.message || t("failedToLoadGroupModels"));
-    } finally {
-      setLoading(false);
-    }
-  }, [groupId, objectId, message, t]);
+  const fetchUserObject = useCallback(
+    async ({ background = false } = {}) => {
+      if (!background) setLoading(true);
+      try {
+        const found = await getUserObjectById(groupId, objectId);
+        setUserObject(found);
+      } catch (err) {
+        message.error(err?.message || t("failedToLoadGroupModels"));
+      } finally {
+        if (!background) setLoading(false);
+      }
+    },
+    [groupId, objectId, message, t],
+  );
 
   useEffect(() => {
     if (!group) {
@@ -91,7 +95,7 @@ export default function GroupObjectDetailPage() {
         .then(setGroup)
         .catch((err) => message.error(err?.message || t("failedToLoadGroups")));
     }
-    if (!userObject) fetchUserObject();
+    fetchUserObject({ background: Boolean(location.state?.userObject) });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -139,7 +143,7 @@ export default function GroupObjectDetailPage() {
       purchaseDate: pd ? dayjs(pd) : null,
       otherNotes: userObject.otherNotes ?? userObject.other_notes ?? "",
     });
-    setEditImageData(null);
+    setEditImageData(undefined);
     setEditSearchResults(brandObjectDetail ? [brandObjectDetail] : []);
     setEditVisible(true);
   };
@@ -156,8 +160,13 @@ export default function GroupObjectDetailPage() {
             (o) => Number(o.id) === Number(values.brandObjectId),
           )) ||
         null;
-      const image_url =
-        editImageData ?? userObject.image_url ?? selectedBo?.image_url;
+      const image_url = resolveImageFieldPayload(
+        editImageData,
+        userObject.image_url,
+        userObject.imageUrl,
+        selectedBo?.image_url,
+        selectedBo?.imageUrl,
+      );
       const payload = {
         brand_object_id:
           values.brandObjectId != null && values.brandObjectId !== ""
@@ -327,7 +336,7 @@ export default function GroupObjectDetailPage() {
         onCancel={() => {
           if (editImageData)
             discardUploadedImage(editImageData).catch(() => {});
-          setEditImageData(null);
+          setEditImageData(undefined);
           setEditVisible(false);
         }}
         confirmLoading={editLoading}

@@ -3,6 +3,7 @@ import NeuFormDrawer from "../../NeuFormDrawer";
 import { NeuInput } from "../../NeuFormControl";
 import { useLocale } from "../../../LocaleContext";
 import ImageUploadField from "../../ImageUploadField";
+import { resolveImageFieldDisplay } from "../../../utils/imageFieldOverride";
 
 export default function EditGroupModal({ visible,
   onOk,
@@ -32,7 +33,13 @@ export default function EditGroupModal({ visible,
           <NeuInput />
         </Form.Item>
         <Form.Item label={t("image")}>
-          <ImageUploadField value={imageData || selectedGroup?.image_url} onChange={onImageChange} />
+          <ImageUploadField
+            value={resolveImageFieldDisplay(
+              imageData,
+              selectedGroup?.image_url ?? selectedGroup?.imageUrl,
+            )}
+            onChange={onImageChange}
+          />
         </Form.Item>
       </Form>
     </NeuFormDrawer>

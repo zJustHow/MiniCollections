@@ -140,6 +140,7 @@ describe("GroupObjectDetailPage", () => {
     vi.mocked(getUserObjectById).mockReset();
     vi.mocked(getBrandObjectById).mockReset();
     vi.mocked(deleteUserObject).mockReset();
+    vi.mocked(getUserObjectById).mockResolvedValue(sampleUserObject);
     vi.mocked(getBrandObjectById).mockResolvedValue({ id: 42, name: "BMW M3", brand_id: 9 });
     vi.mocked(deleteUserObject).mockResolvedValue(undefined);
   });
@@ -173,6 +174,30 @@ describe("GroupObjectDetailPage", () => {
     await waitFor(() => {
       expect(getUserObjectById).toHaveBeenCalledWith("5", "10");
       expect(screen.getByText("Fresh from API")).toBeInTheDocument();
+    });
+  });
+
+  test("refreshes stale route state so related model appears after edit", async () => {
+    vi.mocked(getUserObjectById).mockResolvedValue({
+      id: 10,
+      name: "My M3",
+      other_notes: "Mint condition",
+      brand_object_id: 42,
+    });
+
+    renderPage({
+      userObject: {
+        id: 10,
+        name: "My M3",
+        other_notes: "Mint condition",
+        brand_object_id: null,
+      },
+      group: { id: 5, name: "Garage" },
+    });
+
+    await waitFor(() => {
+      expect(getUserObjectById).toHaveBeenCalledWith("5", "10");
+      expect(screen.getByTestId("related-model")).toHaveTextContent("BMW M3");
     });
   });
 
