@@ -20,8 +20,13 @@ export default function ProfilePageSkeleton() {
     <div className="profile-page-content neu-profile-page-skeleton" aria-busy="true">
       <div className="profile-page-inner">
         <div className="profile-hero neu-profile-skeleton-hero">
-          <span className="neu-profile-skeleton-avatar" aria-hidden="true">
-            <span className="neu-card-skeleton-line neu-profile-skeleton-avatar-fill" />
+          <span
+            className="neu-card neu-card--avatar neu-profile-skeleton-avatar"
+            aria-hidden="true"
+          >
+            <span className="neu-profile-skeleton-avatar-body">
+              <span className="neu-card-skeleton-line neu-profile-skeleton-avatar-fill" />
+            </span>
           </span>
           <span className="neu-card-skeleton-line neu-profile-skeleton-name" />
           <span className="neu-card-skeleton-line neu-profile-skeleton-email" />

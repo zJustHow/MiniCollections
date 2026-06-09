@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { App, Form, Grid } from "antd";
+import { App, Form } from "antd";
 import NeuButton from "../components/NeuButton";
 import HeaderActionButton from "../components/HeaderActionButton";
 import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
@@ -32,8 +32,6 @@ import {
 import { discardUploadedImage } from "../utils/uploadsApi";
 import { resolveImageFieldPayload } from "../utils/imageFieldOverride";
 
-const { useBreakpoint } = Grid;
-
 export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const { brandId, objectId } = useParams();
   const location = useLocation();
@@ -41,8 +39,6 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   const { message } = App.useApp();
   const { t } = useLocale();
   const { setHeaderSlot } = useHeader();
-  const screens = useBreakpoint();
-
   const [brandObject, setBrandObject] = useState(
     location.state?.brandObject ?? null,
   );
@@ -193,20 +189,8 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          gap: 32,
-          alignItems: "flex-start",
-          flexWrap: screens.md ? "nowrap" : "wrap",
-        }}
-      >
-        <div
-          style={{
-            flex: screens.md ? "0 0 45%" : "1 1 100%",
-            maxWidth: screens.md ? "45%" : "100%",
-          }}
-        >
+      <div className="neu-object-detail-layout">
+        <div className="neu-object-detail-image-col">
           <DetailImage
             imageUrl={brandObject?.image_url}
             alt={brandObject?.name}
@@ -222,7 +206,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
           />
         </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="neu-object-detail-info-col">
           <DetailPanel>
             <DetailRow label={t("brand")} value={brandObject?.brand} />
             <DetailRow label={t("series")} value={brandObject?.series} />

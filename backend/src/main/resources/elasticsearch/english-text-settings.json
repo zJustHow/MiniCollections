@@ -28,6 +28,9 @@
         "type": "word_delimiter_graph",
         "catenate_all": true,
         "preserve_original": true
+      },
+      "flatten_graph": {
+        "type": "flatten_graph"
       }
     },
     "analyzer": {
@@ -35,7 +38,7 @@
         "type": "custom",
         "char_filter": ["remove_hyphens"],
         "tokenizer": "keyword",
-        "filter": ["word_delimiter_catenate", "lowercase"]
+        "filter": ["word_delimiter_catenate", "flatten_graph", "lowercase"]
       },
       "english_text_search": {
         "type": "custom",

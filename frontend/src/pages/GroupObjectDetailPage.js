@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { App, Form, Grid } from "antd";
+import { App, Form } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
 import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
 import ArrowLeftOutlined from "@ant-design/icons/es/icons/ArrowLeftOutlined.js";
@@ -34,8 +34,6 @@ import {
 import { discardUploadedImage } from "../utils/uploadsApi";
 import { resolveImageFieldPayload } from "../utils/imageFieldOverride";
 
-const { useBreakpoint } = Grid;
-
 export default function GroupObjectDetailPage() {
   const { groupId, objectId } = useParams();
   const location = useLocation();
@@ -43,8 +41,6 @@ export default function GroupObjectDetailPage() {
   const { message } = App.useApp();
   const { t } = useLocale();
   const { setHeaderSlot } = useHeader();
-  const screens = useBreakpoint();
-
   const [userObject, setUserObject] = useState(
     location.state?.userObject ?? null,
   );
@@ -272,20 +268,8 @@ export default function GroupObjectDetailPage() {
 
   return (
     <div>
-      <div
-        style={{
-          display: "flex",
-          gap: 32,
-          alignItems: "flex-start",
-          flexWrap: screens.md ? "nowrap" : "wrap",
-        }}
-      >
-        <div
-          style={{
-            flex: screens.md ? "0 0 45%" : "1 1 100%",
-            maxWidth: screens.md ? "45%" : "100%",
-          }}
-        >
+      <div className="neu-object-detail-layout">
+        <div className="neu-object-detail-image-col">
           <DetailImage
             imageUrl={imageUrl}
             alt={userObject?.name ?? ""}
@@ -297,7 +281,7 @@ export default function GroupObjectDetailPage() {
           />
         </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="neu-object-detail-info-col">
           <DetailPanel>
             <DetailRow label={t("purchasePrice")} value={purchasePrice} />
             <DetailRow label={t("purchaseDate")} value={purchaseDate} />

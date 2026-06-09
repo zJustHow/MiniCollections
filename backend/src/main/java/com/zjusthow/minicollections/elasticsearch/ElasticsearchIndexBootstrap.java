@@ -4,6 +4,7 @@ import com.zjusthow.minicollections.entity.BrandEntity;
 import com.zjusthow.minicollections.repository.BrandRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -22,6 +23,7 @@ public class ElasticsearchIndexBootstrap {
 
     private final BrandRepository brandRepository;
     private final BrandSearchRepository brandSearchRepository;
+    private final SearchIndexMetaRepository searchIndexMetaRepository;
     private final BrandObjectIndexService brandObjectIndexService;
     private final ElasticsearchOperations elasticsearchOperations;
     private final Environment environment;
@@ -35,11 +37,13 @@ public class ElasticsearchIndexBootstrap {
     public ElasticsearchIndexBootstrap(
             BrandRepository brandRepository,
             BrandSearchRepository brandSearchRepository,
+            @Autowired(required = false) SearchIndexMetaRepository searchIndexMetaRepository,
             BrandObjectIndexService brandObjectIndexService,
             ElasticsearchOperations elasticsearchOperations,
             Environment environment) {
         this.brandRepository = brandRepository;
         this.brandSearchRepository = brandSearchRepository;
+        this.searchIndexMetaRepository = searchIndexMetaRepository;
         this.brandObjectIndexService = brandObjectIndexService;
         this.elasticsearchOperations = elasticsearchOperations;
         this.environment = environment;
@@ -104,7 +108,22 @@ public class ElasticsearchIndexBootstrap {
                     dbCount);
             return true;
         }
+        if (isBrandIndexVersionStale()) {
+            log.info(
+                    "Elasticsearch brands index version mismatch (expected {})",
+                    BrandIndexVersion.CURRENT);
+            return true;
+        }
         return false;
+    }
+
+    private boolean isBrandIndexVersionStale() {
+        if (searchIndexMetaRepository == null) {
+            return true;
+        }
+        return searchIndexMetaRepository.findById(BrandIndexVersion.META_ID)
+                .map(meta -> meta.version() != BrandIndexVersion.CURRENT)
+                .orElse(true);
     }
 
     private void rebuildBrandIndex(IndexOperations indexOps, long expectedCount) {
@@ -116,6 +135,15 @@ public class ElasticsearchIndexBootstrap {
         List<BrandEntity> all = (List<BrandEntity>) brandRepository.findAll();
         List<BrandDocument> docs = all.stream().map(BrandDocument::from).toList();
         brandSearchRepository.saveAll(docs);
-        log.info("Elasticsearch brands index built ({} documents, db count {})", docs.size(), expectedCount);
+        if (searchIndexMetaRepository != null) {
+            searchIndexMetaRepository.save(new SearchIndexMetaDocument(
+                    BrandIndexVersion.META_ID,
+                    BrandIndexVersion.CURRENT));
+        }
+        log.info(
+                "Elasticsearch brands index built ({} documents, db count {}, version {})",
+                docs.size(),
+                expectedCount,
+                BrandIndexVersion.CURRENT);
     }
 }

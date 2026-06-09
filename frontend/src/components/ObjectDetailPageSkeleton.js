@@ -5,8 +5,8 @@ export default function ObjectDetailPageSkeleton({
 }) {
   return (
     <div className="neu-object-detail-skeleton" aria-busy="true">
-      <div className="neu-object-detail-skeleton-layout">
-        <div className="neu-object-detail-skeleton-image-col">
+      <div className="neu-object-detail-layout">
+        <div className="neu-object-detail-image-col">
           <div className="neu-panel">
             <div className="neu-image-groove-well neu-detail-image-well">
               <div className="neu-card-image-slot">
@@ -17,7 +17,7 @@ export default function ObjectDetailPageSkeleton({
             </div>
           </div>
         </div>
-        <div className="neu-object-detail-skeleton-info-col">
+        <div className="neu-object-detail-info-col">
           <div className="neu-panel neu-object-detail-skeleton-panel">
             <span className="neu-card-skeleton-line neu-object-detail-skeleton-row" />
             <span className="neu-card-skeleton-line neu-object-detail-skeleton-row" />

@@ -77,10 +77,11 @@ class BrandObjectElasticsearchQueryServiceTest {
     void searchPage_mapsElasticsearchHitsToIds() {
         BrandObjectDocument document = new BrandObjectDocument(
                 42L, "BMW M3", null, null, null, null, null,
-                1L, "BMW", "bmw", "B", null,
+                1L, "BMW", "B", null,
                 null, null, null,
                 null, null, null,
-                null, null, 0L);
+                null, null,
+                0L);
         SearchHit<BrandObjectDocument> hit = org.mockito.Mockito.mock(SearchHit.class);
         when(hit.getContent()).thenReturn(document);
         List<SearchHit<BrandObjectDocument>> hitsList = List.of(hit);
