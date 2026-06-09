@@ -8,23 +8,19 @@ import LockOutlined from "@ant-design/icons/es/icons/LockOutlined.js";
 import MailOutlined from "@ant-design/icons/es/icons/MailOutlined.js";
 import PhoneOutlined from "@ant-design/icons/es/icons/PhoneOutlined.js";
 import UserOutlined from "@ant-design/icons/es/icons/UserOutlined.js";
-import { Link, useNavigate, useNavigation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { signup, sendCode, COUNTRIES } from "../utils";
 import { useLocale } from "../LocaleContext";
 import { radius } from "../theme/radius";
 import { detectBrowserLocale } from "../i18n";
 import { PHONE_AUTH_ENABLED } from "../components/auth/authFeatures";
 import { neuRem } from "../theme/fontScale";
-import PageLoader from "../components/PageLoader";
-import { getAuthNavigationLoaderVariant } from "../utils/authNavigation";
 import { prefetchLoginPage } from "../utils/prefetchRoutes";
 
 const { Header, Content } = Layout;
 
 export default function RegisterPage() {
   const { message } = App.useApp();
-  const navigation = useNavigation();
-  const loaderVariant = getAuthNavigationLoaderVariant(navigation);
   const [loading, setLoading] = useState(false);
   const [sendingCode, setSendingCode] = useState(false);
   const [codeCountdown, setCodeCountdown] = useState(0);
@@ -115,10 +111,6 @@ export default function RegisterPage() {
   useEffect(() => {
     prefetchLoginPage();
   }, []);
-
-  if (loaderVariant) {
-    return <PageLoader variant={loaderVariant} />;
-  }
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
