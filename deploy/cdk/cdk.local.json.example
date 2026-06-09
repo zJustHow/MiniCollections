@@ -10,6 +10,9 @@
     "certificateArn": "",
     "adminEmail": "admin@example.com",
     "adminName": "Admin",
-    "adminLocale": "en-US"
+    "adminLocale": "en-US",
+    "mailHost": "smtp.gmail.com",
+    "mailPort": "587",
+    "mailUsername": "you@gmail.com"
   }
 }

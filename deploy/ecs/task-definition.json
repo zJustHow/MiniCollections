@@ -38,7 +38,10 @@
         { "name": "S3_PUBLIC_BASE_URL", "value": "${S3_PUBLIC_BASE_URL}" },
         { "name": "ADMIN_EMAIL", "value": "${ADMIN_EMAIL}" },
         { "name": "ADMIN_NAME", "value": "${ADMIN_NAME}" },
-        { "name": "ADMIN_LOCALE", "value": "${ADMIN_LOCALE}" }
+        { "name": "ADMIN_LOCALE", "value": "${ADMIN_LOCALE}" },
+        { "name": "MAIL_HOST", "value": "${MAIL_HOST}" },
+        { "name": "MAIL_PORT", "value": "${MAIL_PORT}" },
+        { "name": "MAIL_USERNAME", "value": "${MAIL_USERNAME}" }
       ],
       "secrets": [
         {
@@ -60,6 +63,18 @@
         {
           "name": "ADMIN_PASSWORD",
           "valueFrom": "${APP_SECRETS_ARN}:ADMIN_PASSWORD::"
+        },
+        {
+          "name": "MAIL_PASSWORD",
+          "valueFrom": "${APP_SECRETS_ARN}:MAIL_PASSWORD::"
+        },
+        {
+          "name": "ELASTICSEARCH_USERNAME",
+          "valueFrom": "${APP_SECRETS_ARN}:ELASTICSEARCH_USERNAME::"
+        },
+        {
+          "name": "ELASTICSEARCH_PASSWORD",
+          "valueFrom": "${APP_SECRETS_ARN}:ELASTICSEARCH_PASSWORD::"
         }
       ],
       "logConfiguration": {

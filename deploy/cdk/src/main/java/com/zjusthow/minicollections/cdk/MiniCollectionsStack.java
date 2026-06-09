@@ -92,7 +92,10 @@ public class MiniCollectionsStack extends Stack {
                         "DATABASE_PASSWORD", SecretValue.unsafePlainText("CHANGE_ME"),
                         "S3_ACCESS_KEY", SecretValue.unsafePlainText("OPTIONAL_IF_USING_TASK_ROLE"),
                         "S3_SECRET_KEY", SecretValue.unsafePlainText("OPTIONAL_IF_USING_TASK_ROLE"),
-                        "ADMIN_PASSWORD", SecretValue.unsafePlainText("SET_FOR_FIRST_ADMIN_BOOTSTRAP_ONLY")
+                        "ADMIN_PASSWORD", SecretValue.unsafePlainText("SET_FOR_FIRST_ADMIN_BOOTSTRAP_ONLY"),
+                        "MAIL_PASSWORD", SecretValue.unsafePlainText("SET_FOR_SMTP"),
+                        "ELASTICSEARCH_USERNAME", SecretValue.unsafePlainText("admin"),
+                        "ELASTICSEARCH_PASSWORD", SecretValue.unsafePlainText("SET_OPENSEARCH_MASTER_PASSWORD")
                 ))
                 .build();
 
@@ -149,7 +152,10 @@ public class MiniCollectionsStack extends Stack {
                         "DATABASE_PASSWORD", Secret.fromSecretsManager(appSecret, "DATABASE_PASSWORD"),
                         "S3_ACCESS_KEY", Secret.fromSecretsManager(appSecret, "S3_ACCESS_KEY"),
                         "S3_SECRET_KEY", Secret.fromSecretsManager(appSecret, "S3_SECRET_KEY"),
-                        "ADMIN_PASSWORD", Secret.fromSecretsManager(appSecret, "ADMIN_PASSWORD")
+                        "ADMIN_PASSWORD", Secret.fromSecretsManager(appSecret, "ADMIN_PASSWORD"),
+                        "MAIL_PASSWORD", Secret.fromSecretsManager(appSecret, "MAIL_PASSWORD"),
+                        "ELASTICSEARCH_USERNAME", Secret.fromSecretsManager(appSecret, "ELASTICSEARCH_USERNAME"),
+                        "ELASTICSEARCH_PASSWORD", Secret.fromSecretsManager(appSecret, "ELASTICSEARCH_PASSWORD")
                 ))
                 .logging(LogDriver.awsLogs(software.amazon.awscdk.services.ecs.AwsLogDriverProps.builder()
                         .logGroup(logGroup)
@@ -441,6 +447,9 @@ public class MiniCollectionsStack extends Stack {
         environment.put("ADMIN_EMAIL", contextString("adminEmail", ""));
         environment.put("ADMIN_NAME", contextString("adminName", "Admin"));
         environment.put("ADMIN_LOCALE", contextString("adminLocale", "en-US"));
+        environment.put("MAIL_HOST", contextString("mailHost", "smtp.gmail.com"));
+        environment.put("MAIL_PORT", contextString("mailPort", "587"));
+        environment.put("MAIL_USERNAME", contextString("mailUsername", ""));
         return environment;
     }
 

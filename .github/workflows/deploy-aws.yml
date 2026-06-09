@@ -109,6 +109,9 @@ jobs:
           ADMIN_EMAIL: ${{ vars.ADMIN_EMAIL || '' }}
           ADMIN_NAME: ${{ vars.ADMIN_NAME || 'Admin' }}
           ADMIN_LOCALE: ${{ vars.ADMIN_LOCALE || 'en-US' }}
+          MAIL_HOST: ${{ vars.MAIL_HOST || 'smtp.gmail.com' }}
+          MAIL_PORT: ${{ vars.MAIL_PORT || '587' }}
+          MAIL_USERNAME: ${{ vars.MAIL_USERNAME || '' }}
         run: |
           test -n "${AWS_ACCOUNT_ID}" || (echo "Missing repository variable AWS_ACCOUNT_ID" && exit 1)
           test -n "${ECS_EXECUTION_ROLE_ARN}" || (echo "Missing repository variable ECS_EXECUTION_ROLE_ARN" && exit 1)

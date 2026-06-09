@@ -5,6 +5,8 @@ server:
 spring:
   elasticsearch:
     uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
   servlet:
     multipart:
       max-file-size: 10MB
