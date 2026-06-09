@@ -572,6 +572,19 @@ class UserServiceTest {
     }
 
     @Test
+    void resetPassword_withPhoneVerifiesCodeAndUpdatesPassword() {
+        when(identifierRepository.findByTypeAndIdentifier("phone", "+8613800138000"))
+                .thenReturn(Optional.of(new UserIdentifierEntity(2L, 6L, "phone", "+8613800138000")));
+        when(passwordEncoder.encode("newpass")).thenReturn("encoded");
+
+        Long userId = userService.resetPassword(null, "+8613800138000", "123456", "newpass");
+
+        assertEquals(6L, userId);
+        verify(verificationService).verifyResetCode("+8613800138000", "123456");
+        verify(userRepository).updatePasswordById(6L, "encoded");
+    }
+
+    @Test
     void resetPassword_requiresEmailOrPhone() {
         assertThrows(ValidationException.class,
                 () -> userService.resetPassword(null, null, "123456", "newpass"));

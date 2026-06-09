@@ -1,6 +1,7 @@
 import { App, Empty, Typography } from "antd";
 import NeuTag from "../components/NeuTag";
-import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
+import PlusOutlined from "@ant-design/icons/es/icons/PlusOutlined.js";
+import ReloadOutlined from "@ant-design/icons/es/icons/ReloadOutlined.js";
 import { useCallback, useEffect, useState } from "react";
 import NeuButton from "../components/NeuButton";
 import NeuCard from "../components/NeuCard";

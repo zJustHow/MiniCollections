@@ -21,7 +21,8 @@ public class CacheConfig {
                 return cacheSpecFor(name).build();
             }
         };
-        manager.setCacheNames(List.of("users", "userDetails", "brands", "brandObjects", "groups"));
+        manager.setCacheNames(List.of(
+                "users", "userDetails", "brands", "brandObjects", "groups", "categories", "scales"));
         return manager;
     }
 
@@ -39,6 +40,9 @@ public class CacheConfig {
             case "brands", "brandObjects" -> Caffeine.newBuilder()
                     .expireAfterWrite(Duration.ofMinutes(10))
                     .maximumSize(2000);
+            case "categories", "scales" -> Caffeine.newBuilder()
+                    .expireAfterWrite(Duration.ofMinutes(30))
+                    .maximumSize(4);
             default -> Caffeine.newBuilder()
                     .expireAfterWrite(Duration.ofMinutes(1))
                     .maximumSize(500);

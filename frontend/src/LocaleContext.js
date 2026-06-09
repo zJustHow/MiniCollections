@@ -14,7 +14,7 @@ import {
   translateError,
   translations,
 } from "./i18n";
-import { neuFormControlTheme } from "./components/NeuFormControl";
+import { neuFormControlTheme } from "./components/NeuFormControl/theme";
 import { RADIUS_PX } from "./theme/radius";
 import { buildAntdFontTokens, useNeuFontScale } from "./theme/fontScale";
 import { setCurrentLocale } from "./utils/apiClient";

@@ -1,5 +1,5 @@
 import { createElement, forwardRef } from "react";
-import { LoadingOutlined } from "@ant-design/icons";
+import LoadingOutlined from "@ant-design/icons/es/icons/LoadingOutlined.js";
 
 export function neuBtnProps({ className = "", ...props } = {}) {
   return {

@@ -1,8 +1,14 @@
-import { ArrowLeftOutlined, PlusOutlined } from "@ant-design/icons";
+import ArrowLeftOutlined from "@ant-design/icons/es/icons/ArrowLeftOutlined.js";
+import PlusOutlined from "@ant-design/icons/es/icons/PlusOutlined.js";
 import HeaderActionButton from "../HeaderActionButton";
 import { useLocale } from "../../LocaleContext";
 
-export default function AdminBrandPageHeader({ brandName, onBack, onAdd }) {
+export default function AdminBrandPageHeader({
+  brandName,
+  onBack,
+  onAdd,
+  addAriaLabel,
+}) {
   const { t } = useLocale();
 
   return (
@@ -14,7 +20,7 @@ export default function AdminBrandPageHeader({ brandName, onBack, onAdd }) {
         <HeaderActionButton
           icon={<PlusOutlined />}
           onClick={onAdd}
-          aria-label={t("addBrand")}
+          aria-label={addAriaLabel ?? t("addBrand")}
         />
       </div>
       <span className="header-slot-title">{brandName}</span>

@@ -1,12 +1,18 @@
 import {
   adminCreateBrand,
   adminCreateBrandObject,
+  adminCreateCategory,
+  adminCreateScale,
   adminCreateSeries,
   adminDeleteBrand,
   adminDeleteBrandObject,
+  adminDeleteCategory,
+  adminDeleteScale,
   adminDeleteSeries,
   adminUpdateBrand,
   adminUpdateBrandObject,
+  adminUpdateCategory,
+  adminUpdateScale,
   adminUpdateSeries,
 } from "./adminApi";
 import { TOKEN_KEY } from "./apiClient";
@@ -109,6 +115,70 @@ describe("adminApi", () => {
 
     expect(global.fetch).toHaveBeenCalledWith(
       "/admin/series/6",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  test("adminCreateCategory posts to admin categories endpoint", async () => {
+    const payload = { slug: "custom-car", name_en: "Custom Car", sort_order: 23 };
+    await adminCreateCategory(payload);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/admin/categories",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    );
+  });
+
+  test("adminUpdateCategory sends PUT", async () => {
+    await adminUpdateCategory(3, { slug: "cars", name_en: "Cars", sort_order: 1 });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/admin/categories/3",
+      expect.objectContaining({ method: "PUT" }),
+    );
+  });
+
+  test("adminDeleteCategory sends DELETE", async () => {
+    global.fetch = vi.fn(async () => ({ ok: true, status: 204 }));
+    await adminDeleteCategory(3);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/admin/categories/3",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  test("adminCreateScale posts to admin scales endpoint", async () => {
+    const payload = { code: "1:72", denominator: 72 };
+    await adminCreateScale(payload);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/admin/scales",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+    );
+  });
+
+  test("adminUpdateScale sends PUT", async () => {
+    await adminUpdateScale(72, { code: "1:72", denominator: 72 });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/admin/scales/72",
+      expect.objectContaining({ method: "PUT" }),
+    );
+  });
+
+  test("adminDeleteScale sends DELETE", async () => {
+    global.fetch = vi.fn(async () => ({ ok: true, status: 204 }));
+    await adminDeleteScale(72);
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/admin/scales/72",
       expect.objectContaining({ method: "DELETE" }),
     );
   });

@@ -125,4 +125,64 @@ class GlobalExceptionHandlerTest {
 
         assertEquals("error.not_found", response.code());
     }
+
+    @Test
+    void handleCategoryNotFoundException_returnsNotFoundCode() {
+        ApiErrorResponse response = handler.handleCategoryNotFoundException(new CategoryNotFoundException());
+
+        assertEquals("error.category.not_found", response.code());
+    }
+
+    @Test
+    void handleBrandObjectNotFoundException_returnsNotFoundCode() {
+        ApiErrorResponse response = handler.handleBrandObjectNotFoundException(new BrandObjectNotFoundException());
+
+        assertEquals("error.brand_object.not_found", response.code());
+    }
+
+    @Test
+    void handleInvalidCodeException_returnsCodeFromException() {
+        ApiErrorResponse response = handler.handleInvalidCodeException(
+                new InvalidCodeException("error.invalid_code"));
+
+        assertEquals("error.invalid_code", response.code());
+    }
+
+    @Test
+    void handleUnsupportedImageTypeException_includesContentTypeArg() {
+        ApiErrorResponse response = handler.handleUnsupportedImageTypeException(
+                new UnsupportedImageTypeException("image/bmp"));
+
+        assertEquals("error.unsupported_image_type", response.code());
+        assertArrayEquals(new Object[]{"image/bmp"}, response.args());
+    }
+
+    @Test
+    void handleScaleNotFoundException_returnsNotFoundCode() {
+        ApiErrorResponse response = handler.handleScaleNotFoundException(new ScaleNotFoundException());
+
+        assertEquals("error.scale.not_found", response.code());
+    }
+
+    @Test
+    void handleUserNotFoundException_returnsNotFoundCode() {
+        ApiErrorResponse response = handler.handleUserNotFoundException(new UserNotFoundException());
+
+        assertEquals("error.user.not_found", response.code());
+    }
+
+    @Test
+    void handleGroupNotFoundException_returnsNotFoundCode() {
+        ApiErrorResponse response = handler.handleGroupNotFoundException(new GroupNotFoundException());
+
+        assertEquals("error.group.not_found", response.code());
+    }
+
+    @Test
+    void handleIllegalArgumentException_returnsBadRequestCode() {
+        ApiErrorResponse response = handler.handleIllegalArgumentException(
+                new IllegalArgumentException("bad input"));
+
+        assertEquals("error.bad_request", response.code());
+    }
 }

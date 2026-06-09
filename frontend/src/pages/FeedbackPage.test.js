@@ -74,10 +74,11 @@ vi.mock("../components/NeuCard", () => ({
 }));
 
 vi.mock("../components/NeuFormDrawer", () => ({
-  default: ({ open, title, onClose, onDelete }) =>
+  default: ({ open, title, onClose, onDelete, children }) =>
     open ? (
       <div data-testid="feedback-drawer">
         <div>{title}</div>
+        <div data-testid="feedback-drawer-body">{children}</div>
         <button type="button" onClick={onClose}>
           close
         </button>
@@ -229,5 +230,35 @@ describe("FeedbackPage", () => {
     expect(screen.getByText("feedbackTypeDataCorrection")).toBeInTheDocument();
     expect(screen.getByText("statusApproved")).toBeInTheDocument();
     expect(screen.getByText("statusResolved")).toBeInTheDocument();
+  });
+
+  test("shows admin reply and rejection reason in detail drawer", async () => {
+    pagedListMocks.items = [
+      {
+        id: 4,
+        submission_type: "DATA_CORRECTION",
+        status: "REJECTED",
+        notes: "Fix scale",
+        admin_note: "We updated it",
+        reject_reason: "Duplicate entry",
+        submitted_at: "2024-06-04T10:00:00Z",
+      },
+    ];
+
+    render(<FeedbackPage />);
+
+    await userEvent.click(screen.getAllByText("Fix scale")[0]);
+
+    expect(screen.getByTestId("feedback-drawer")).toBeInTheDocument();
+    expect(screen.getByText("We updated it")).toBeInTheDocument();
+    expect(screen.getByText("Duplicate entry")).toBeInTheDocument();
+  });
+
+  test("opens submit modal when new feedback is clicked", async () => {
+    render(<FeedbackPage />);
+
+    await userEvent.click(screen.getByRole("button", { name: /newFeedback/i }));
+
+    expect(screen.getByRole("button", { name: /newFeedback/i })).toBeInTheDocument();
   });
 });

@@ -8,7 +8,8 @@ public record CategoryDto(
         String slug,
         String name,
         String nameEn,
-        String nameZh
+        String nameZh,
+        int sortOrder
 ) {
 
     public static CategoryDto from(CategoryEntity entity, boolean preferZh) {
@@ -18,7 +19,8 @@ public record CategoryDto(
                 entity.slug(),
                 name,
                 entity.nameEn(),
-                entity.nameZh()
+                entity.nameZh(),
+                entity.sortOrder()
         );
     }
 }

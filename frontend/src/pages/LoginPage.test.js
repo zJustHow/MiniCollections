@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import LoginPage from "./LoginPage";
 
 vi.mock("../components/SiteLogo", () => ({
@@ -19,5 +20,14 @@ describe("LoginPage", () => {
 
     expect(screen.getByTestId("site-logo")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "login-form" })).toBeInTheDocument();
+  });
+
+  test("calls onSuccess when login form succeeds", async () => {
+    const onSuccess = vi.fn();
+    render(<LoginPage onSuccess={onSuccess} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "login-form" }));
+
+    expect(onSuccess).toHaveBeenCalled();
   });
 });

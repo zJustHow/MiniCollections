@@ -8,6 +8,8 @@ const CUSTOM_HEADER_PATTERNS = [
   "/groups/:groupId/objects/:objectId",
   "/admin/brands",
   "/admin/brands/:brandId",
+  "/admin/categories",
+  "/admin/scales",
 ];
 
 const STANDALONE_AUTH_PATHS = new Set([
@@ -36,7 +38,9 @@ export function resolveHeaderSkeletonEndActions(
   }
   if (
     matchPath({ path: "/admin/brands", end: true }, pathname) ||
-    matchPath({ path: "/admin/brands/:brandId", end: true }, pathname)
+    matchPath({ path: "/admin/brands/:brandId", end: true }, pathname) ||
+    matchPath({ path: "/admin/categories", end: true }, pathname) ||
+    matchPath({ path: "/admin/scales", end: true }, pathname)
   ) {
     return 1;
   }
@@ -75,6 +79,12 @@ export function resolveRouteSkeletonVariant(pathname) {
     return "admin";
   }
   if (matchPath({ path: "/admin/brands", end: true }, pathname)) {
+    return "admin";
+  }
+  if (matchPath({ path: "/admin/categories", end: true }, pathname)) {
+    return "admin";
+  }
+  if (matchPath({ path: "/admin/scales", end: true }, pathname)) {
     return "admin";
   }
   if (matchPath({ path: "/admin", end: true }, pathname)) {

@@ -107,9 +107,6 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
-          if (id.includes("antd") || id.includes("@ant-design")) {
-            return "vendor-antd";
-          }
           if (id.includes("react-router")) {
             return "vendor-router";
           }

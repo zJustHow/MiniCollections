@@ -4,12 +4,10 @@ import NeuButton from "../components/NeuButton";
 import { App, Form, Layout } from "antd";
 import { NeuInput, NeuSelect } from "../components/NeuFormControl";
 import { useRef, useState } from "react";
-import {
-  LockOutlined,
-  MailOutlined,
-  PhoneOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import LockOutlined from "@ant-design/icons/es/icons/LockOutlined.js";
+import MailOutlined from "@ant-design/icons/es/icons/MailOutlined.js";
+import PhoneOutlined from "@ant-design/icons/es/icons/PhoneOutlined.js";
+import UserOutlined from "@ant-design/icons/es/icons/UserOutlined.js";
 import { useNavigate } from "react-router-dom";
 import { signup, sendCode, COUNTRIES } from "../utils";
 import { useLocale } from "../LocaleContext";

@@ -85,6 +85,12 @@ export {
   adminCreateSeries,
   adminUpdateSeries,
   adminDeleteSeries,
+  adminCreateCategory,
+  adminUpdateCategory,
+  adminDeleteCategory,
+  adminCreateScale,
+  adminUpdateScale,
+  adminDeleteScale,
 } from "./utils/adminApi";
 export {
   formatViewCount,

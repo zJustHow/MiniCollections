@@ -1,9 +1,6 @@
 import { memo } from "react";
-import { PlusOutlined } from "@ant-design/icons";
-import { Card } from "antd";
+import PlusOutlined from "@ant-design/icons/es/icons/PlusOutlined.js";
 import GroovedImage from "./GroovedImage";
-
-const DEFAULT_BODY_STYLE = { padding: 0 };
 
 const IMAGE_SLOT = {
   tile: {
@@ -39,6 +36,7 @@ export function buildNeuCardClassName({
 } = {}) {
   return [
     "neu-card",
+    variant === "tile" && "neu-card--tile",
     variant === "row" && "neu-card--row",
     variant === "upload" && "neu-card--upload",
     className,
@@ -167,7 +165,6 @@ function NeuCard({
   variant = "tile",
   hoverable = true,
   className = "",
-  styles,
   name,
   subtitle,
   nameplateVariant = "catalog",
@@ -187,7 +184,10 @@ function NeuCard({
   ...props
 }) {
   const resolvedImageUrl = imageUrl ?? image_url;
-  const cardClassName = buildNeuCardClassName({ variant, className });
+  const cardClassName = buildNeuCardClassName({
+    variant,
+    className: [className, !hoverable && "neu-card--static"].filter(Boolean).join(" "),
+  });
   const imageSlotProps = buildImageSlotProps({
     variant,
     name,
@@ -236,19 +236,15 @@ function NeuCard({
   }
 
   const tileCover = cover ?? <NeuCardImageSlot {...imageSlotProps} />;
+  const TileTag = onClick ? "button" : "div";
+  const tileProps = onClick
+    ? { type: "button", onClick, disabled }
+    : {};
 
   return (
-    <Card
-      hoverable={hoverable}
-      className={cardClassName}
-      styles={{
-        ...styles,
-        body: { ...DEFAULT_BODY_STYLE, ...styles?.body },
-      }}
-      cover={tileCover}
-      onClick={onClick}
-      {...props}
-    />
+    <TileTag className={cardClassName} {...tileProps} {...props}>
+      {tileCover}
+    </TileTag>
   );
 }
 

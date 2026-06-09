@@ -1,4 +1,4 @@
-import { LoadingOutlined } from "@ant-design/icons";
+import LoadingOutlined from "@ant-design/icons/es/icons/LoadingOutlined.js";
 import { forwardRef } from "react";
 import NeuPressableButton from "./NeuPressableButton";
 

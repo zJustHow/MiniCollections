@@ -18,7 +18,9 @@ import {
   useLocation,
   Outlet,
 } from "react-router-dom";
-import { UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons";
+import UserOutlined from "@ant-design/icons/es/icons/UserOutlined.js";
+import MenuOutlined from "@ant-design/icons/es/icons/MenuOutlined.js";
+import CloseOutlined from "@ant-design/icons/es/icons/CloseOutlined.js";
 import SiteLogo from "./components/SiteLogo";
 import { getMe } from "./utils/usersApi";
 import { logout } from "./utils/authApi";
@@ -55,6 +57,12 @@ const AdminBrandObjectsPage = lazyWithRetry(
 );
 const AdminBrandsPage = lazyWithRetry(
   () => import("./pages/admin/AdminBrandsPage"),
+);
+const AdminCategoriesPage = lazyWithRetry(
+  () => import("./pages/admin/AdminCategoriesPage"),
+);
+const AdminScalesPage = lazyWithRetry(
+  () => import("./pages/admin/AdminScalesPage"),
 );
 const FeedbackPage = lazyWithRetry(() => import("./pages/FeedbackPage"));
 const WechatCallbackPage = lazyWithRetry(
@@ -577,6 +585,8 @@ export default function App() {
           <Route index element={<AdminPage />} />
           <Route path="brands" element={<AdminBrandsPage />} />
           <Route path="brands/:brandId" element={<AdminBrandObjectsPage />} />
+          <Route path="categories" element={<AdminCategoriesPage />} />
+          <Route path="scales" element={<AdminScalesPage />} />
         </Route>
       </Route>
     </Routes>

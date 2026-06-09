@@ -1,4 +1,4 @@
-import { NeuInput } from "../NeuFormControl";
+import { NeuInput } from "../NeuFormControl/NeuInput";
 
 const { Search } = NeuInput;
 

@@ -227,6 +227,36 @@ class BrandServiceTest {
     }
 
     @Test
+    void updateBrandObject_persistsChanges() {
+        BrandObjectEntity existing = new BrandObjectEntity(
+                7L, "Old EN", "旧", "old.png", null, null, null, null,
+                1L, null, null, null, 10L);
+        BrandObjectBody body = new BrandObjectBody(
+                "New EN", "新", "new.png", null, null, null, null, null, null, null);
+        when(brandObjectRepository.findById(7L)).thenReturn(Optional.of(existing));
+        when(brandObjectRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(displayLocaleResolver.prefersZh("en-US")).thenReturn(false);
+
+        BrandObjectDto updated = brandService.updateBrandObject(7L, body, "en-US");
+
+        assertEquals("New EN", updated.name());
+        verify(brandObjectIndexService).index(any());
+    }
+
+    @Test
+    void deleteBrandObject_removesObjectAndClearsReferences() {
+        BrandObjectEntity existing = new BrandObjectEntity(
+                7L, "M3", null, "img.png", null, null, null, null,
+                1L, null, null, null, 0L);
+        when(brandObjectRepository.findById(7L)).thenReturn(Optional.of(existing));
+
+        brandService.deleteBrandObject(7L);
+
+        verify(userObjectRepository).clearBrandObjectReference(7L);
+        verify(brandObjectRepository).deleteById(7L);
+    }
+
+    @Test
     void searchBrandsPage_usesElasticsearchWhenEnabled() {
         ReflectionTestUtils.setField(brandService, "elasticsearchEnabled", true);
         BrandEntity entity = new BrandEntity(5L, "BMW", null, "BMW", null, 0L);

@@ -1,8 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import {
-  ArrowLeftOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import ArrowLeftOutlined from "@ant-design/icons/es/icons/ArrowLeftOutlined.js";
+import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
 import HeaderActionButton from "../HeaderActionButton";
 import ConfirmDeleteButton from "../ConfirmDeleteButton";
 

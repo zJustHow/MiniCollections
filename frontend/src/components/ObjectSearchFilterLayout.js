@@ -1,7 +1,7 @@
 import { useState } from "react";
 import NeuButton from "./NeuButton";
 import { Badge, Drawer, Grid } from "antd";
-import { FilterOutlined } from "@ant-design/icons";
+import FilterOutlined from "@ant-design/icons/es/icons/FilterOutlined.js";
 import ObjectSearchFilterPanel from "./ObjectSearchFilterPanel";
 import DrawerHeaderTitle from "./DrawerHeaderTitle";
 import { NeuDrawerBody } from "./drawerStyles";

@@ -3,10 +3,8 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { App, Form, Grid } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
 import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
-import {
-  ArrowLeftOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import ArrowLeftOutlined from "@ant-design/icons/es/icons/ArrowLeftOutlined.js";
+import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
 import dayjs from "dayjs";
 import DetailImage from "../components/DetailImage";
 import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";

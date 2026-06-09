@@ -9,30 +9,37 @@
   --neu-card-transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-.ant-card.neu-card {
+button.neu-card.neu-card--tile,
+div.neu-card.neu-card--tile {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
   border-radius: 0;
+  background: var(--neu-bg);
   box-shadow: var(--neu-card-shadow);
   transition: var(--neu-card-transition);
+  text-align: left;
 }
 
-.ant-card.neu-card.ant-card-hoverable:hover {
+button.neu-card.neu-card--tile {
+  cursor: pointer;
+}
+
+.neu-card.neu-card--tile .neu-card-cover {
+  padding-bottom: 12px;
+}
+
+button.neu-card.neu-card--tile:hover:not(:disabled):not(.neu-card--static),
+div.neu-card.neu-card--tile:hover:not(.neu-card--static) {
   transform: scale(var(--neu-card-hover-scale));
   box-shadow: var(--neu-card-shadow-hover);
 }
 
-.ant-card.neu-card.ant-card-hoverable:active {
+button.neu-card.neu-card--tile:active:not(:disabled):not(.neu-card--static),
+div.neu-card.neu-card--tile:active:not(.neu-card--static) {
   transform: scale(var(--neu-card-active-scale));
   box-shadow: var(--neu-card-shadow-active);
-}
-
-.ant-card.neu-card .ant-card-cover {
-  padding-bottom: 12px;
-}
-
-.ant-card.neu-card .ant-card-body {
-  border-top: none;
-  padding: 0;
-  min-height: 0;
 }
 
 button.neu-card.neu-card--row,

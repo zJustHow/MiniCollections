@@ -304,6 +304,17 @@ class SubmissionServiceTest {
     }
 
     @Test
+    void listByUserPage_clampsOversizedPageSize() {
+        when(submissionRepository.countBySubmittedByUserId(7L)).thenReturn(0L);
+        when(submissionRepository.findPageBySubmittedByUserId(7L, 100, 0))
+                .thenReturn(List.of());
+
+        submissionService.listByUserPage(7L, 0, 500);
+
+        verify(submissionRepository).findPageBySubmittedByUserId(7L, 100, 0);
+    }
+
+    @Test
     void reject_rejectsAlreadyReviewedSubmission() {
         ObjectSubmissionEntity reviewed = new ObjectSubmissionEntity(
                 5L, 2L, "FEEDBACK", "Name", null, null, null, null, null,

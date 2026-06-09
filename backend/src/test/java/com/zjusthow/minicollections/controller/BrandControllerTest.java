@@ -156,6 +156,31 @@ class BrandControllerTest {
                 .andExpect(jsonPath("$.id").value(42));
     }
 
+    @Test
+    void searchBrandObjectsByBrandId_returnsScopedResults() throws Exception {
+        BrandObjectDto object = sampleObjectDto();
+        when(brandService.searchBrandObjectsByBrandIdPage(
+                eq("m3"), eq(9L), isNull(), isNull(), isNull(), eq("en-US"), eq(0), eq(48)))
+                .thenReturn(PageResponse.of(List.of(object), 0, 48, 1, true));
+
+        mockMvc.perform(get("/brands/9/objects/search").param("keyword", "m3"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].nameEn").value("Model A"));
+    }
+
+    @Test
+    void searchBrandObjectsFacetsByBrandId_returnsFacetBuckets() throws Exception {
+        BrandObjectSearchFacetsDto facets =
+                new BrandObjectSearchFacetsDto(2L, List.of(), List.of(), List.of(), List.of());
+        when(brandService.searchBrandObjectsByBrandIdFacets(
+                eq("bmw"), eq(9L), isNull(), isNull(), isNull(), eq("en-US")))
+                .thenReturn(facets);
+
+        mockMvc.perform(get("/brands/9/objects/search/facets").param("keyword", "bmw"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(2));
+    }
+
     private static BrandObjectDto sampleObjectDto() {
         return new BrandObjectDto(
                 42L, "Model A", "Model A", null, null, null,

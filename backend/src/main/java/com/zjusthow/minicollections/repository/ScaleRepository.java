@@ -10,4 +10,8 @@ import java.util.List;
 public interface ScaleRepository extends ListCrudRepository<ScaleEntity, Long> {
 
     List<ScaleEntity> findAllByOrderByDenominatorAscIdAsc();
+
+    boolean existsByCode(String code);
+
+    boolean existsByCodeAndIdNot(String code, Long id);
 }

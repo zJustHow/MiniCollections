@@ -45,7 +45,7 @@ class CategoryControllerTest {
 
     @Test
     void listCategories_returnsLocalizedList() throws Exception {
-        CategoryDto category = new CategoryDto(1L, "cars", "Cars", "Cars", "汽车");
+        CategoryDto category = new CategoryDto(1L, "cars", "Cars", "Cars", "汽车", 1);
         when(categoryService.listAll("en-US")).thenReturn(List.of(category));
 
         mockMvc.perform(get("/categories"))

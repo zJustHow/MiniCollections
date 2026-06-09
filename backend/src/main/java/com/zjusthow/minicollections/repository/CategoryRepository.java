@@ -10,4 +10,8 @@ import java.util.List;
 public interface CategoryRepository extends ListCrudRepository<CategoryEntity, Long> {
 
     List<CategoryEntity> findAllByOrderBySortOrderAscIdAsc();
+
+    boolean existsBySlug(String slug);
+
+    boolean existsBySlugAndIdNot(String slug, Long id);
 }

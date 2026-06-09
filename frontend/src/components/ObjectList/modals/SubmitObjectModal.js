@@ -7,7 +7,9 @@ import {
   NeuInputNumber,
   NeuSelect,
 } from "../../NeuFormControl";
-import { BugOutlined, EditOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import BugOutlined from "@ant-design/icons/es/icons/BugOutlined.js";
+import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
+import PlusCircleOutlined from "@ant-design/icons/es/icons/PlusCircleOutlined.js";
 import { useLocale } from "../../../LocaleContext";
 import { radius } from "../../../theme/radius";
 import { submitFeedback, getCategories, getScales, getSeriesByBrandId } from "../../../utils";

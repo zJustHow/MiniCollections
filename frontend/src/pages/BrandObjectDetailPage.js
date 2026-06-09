@@ -4,11 +4,9 @@ import { App, Form, Grid } from "antd";
 import NeuButton from "../components/NeuButton";
 import HeaderActionButton from "../components/HeaderActionButton";
 import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
-import {
-  ArrowLeftOutlined,
-  EditOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
+import ArrowLeftOutlined from "@ant-design/icons/es/icons/ArrowLeftOutlined.js";
+import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
+import PlusOutlined from "@ant-design/icons/es/icons/PlusOutlined.js";
 import DetailImage from "../components/DetailImage";
 import ObjectDetailPageSkeleton from "../components/ObjectDetailPageSkeleton";
 import { DetailPanel, DetailRow, PanelText } from "../components/DetailPanel";

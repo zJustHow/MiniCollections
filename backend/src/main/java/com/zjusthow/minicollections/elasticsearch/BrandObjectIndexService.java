@@ -151,6 +151,29 @@ public class BrandObjectIndexService {
         indexAll(brandObjectRepository.findBySeriesId(seriesId));
     }
 
+    public void reindexForCategory(long categoryId) {
+        if (!isEnabled()) {
+            return;
+        }
+        indexAll(brandObjectRepository.findByCategoryId(categoryId));
+    }
+
+    public void reindexForScale(long scaleId) {
+        if (!isEnabled()) {
+            return;
+        }
+        indexAll(brandObjectRepository.findByScaleId(scaleId));
+    }
+
+    public void reindexByIds(Iterable<Long> ids) {
+        if (!isEnabled()) {
+            return;
+        }
+        List<BrandObjectEntity> entities = new ArrayList<>();
+        brandObjectRepository.findAllById(ids).forEach(entities::add);
+        indexAll(entities);
+    }
+
     private void indexAll(List<BrandObjectEntity> entities) {
         if (!isEnabled() || entities.isEmpty()) {
             return;

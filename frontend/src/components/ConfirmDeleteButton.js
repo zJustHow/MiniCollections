@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DeleteOutlined, LoadingOutlined } from "@ant-design/icons";
+import DeleteOutlined from "@ant-design/icons/es/icons/DeleteOutlined.js";
+import LoadingOutlined from "@ant-design/icons/es/icons/LoadingOutlined.js";
 import HeaderActionButton from "./HeaderActionButton";
 import NeuPressableButton from "./NeuPressableButton";
 import { useLocale } from "../LocaleContext";

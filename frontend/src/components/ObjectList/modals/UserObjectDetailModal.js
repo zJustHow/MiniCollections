@@ -2,7 +2,7 @@ import NeuButton from "../../NeuButton";
 import ConfirmDeleteButton from "../../ConfirmDeleteButton";
 import RelatedModelCard from "../../RelatedModelCard";
 import RelatedModelCardSkeleton from "../../RelatedModelCardSkeleton";
-import { EditOutlined } from "@ant-design/icons";
+import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
 import NeuFormDrawer from "../../NeuFormDrawer";
 import { Z_INDEX } from "../constants";
 import { useLocale } from "../../../LocaleContext";

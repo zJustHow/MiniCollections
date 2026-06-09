@@ -124,6 +124,7 @@ describe("BrandObjectDetailPage", () => {
     headerMocks.setHeaderSlot.mockClear();
     navigateMock.mockReset();
     vi.mocked(getBrandObjectById).mockReset();
+    vi.mocked(recordModelView).mockReset();
     vi.mocked(recordModelView).mockResolvedValue(undefined);
     vi.mocked(adminDeleteBrandObject).mockReset();
     vi.mocked(adminDeleteBrandObject).mockResolvedValue(undefined);
@@ -221,5 +222,13 @@ describe("BrandObjectDetailPage", () => {
     });
 
     headerHost.remove();
+  });
+
+  test("does not record model view in admin mode", async () => {
+    renderPage({ brandObject: sampleBrandObject }, { isAdmin: true, authed: true });
+
+    await waitFor(() => {
+      expect(recordModelView).not.toHaveBeenCalled();
+    });
   });
 });

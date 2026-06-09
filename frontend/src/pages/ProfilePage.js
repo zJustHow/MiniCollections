@@ -11,14 +11,12 @@ import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
 import NeuButton from "../components/NeuButton";
 import PageLoader from "../components/PageLoader";
 import { NeuInput, NeuSelect } from "../components/NeuFormControl";
-import {
-  ArrowLeftOutlined,
-  LoadingOutlined,
-  LockOutlined,
-  LogoutOutlined,
-  MailOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+import ArrowLeftOutlined from "@ant-design/icons/es/icons/ArrowLeftOutlined.js";
+import LoadingOutlined from "@ant-design/icons/es/icons/LoadingOutlined.js";
+import LockOutlined from "@ant-design/icons/es/icons/LockOutlined.js";
+import LogoutOutlined from "@ant-design/icons/es/icons/LogoutOutlined.js";
+import MailOutlined from "@ant-design/icons/es/icons/MailOutlined.js";
+import UserOutlined from "@ant-design/icons/es/icons/UserOutlined.js";
 import { useLayoutEffect, useState } from "react";
 import useCountdown from "../hooks/useCountdown";
 import { useNavigate } from "react-router-dom";

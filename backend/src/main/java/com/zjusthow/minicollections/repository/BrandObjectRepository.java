@@ -17,6 +17,10 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
 
     List<BrandObjectEntity> findBySeriesId(Long seriesId);
 
+    List<BrandObjectEntity> findByCategoryId(Long categoryId);
+
+    List<BrandObjectEntity> findByScaleId(Long scaleId);
+
     @Query("""
             SELECT * FROM brand_objects
             ORDER BY id ASC

@@ -224,4 +224,15 @@ describe("GroupObjectDetailPage", () => {
 
     headerHost.remove();
   });
+
+  test("shows error when group fetch fails", async () => {
+    vi.mocked(getGroupById).mockRejectedValue(new Error("group denied"));
+
+    renderPage({ userObject: sampleUserObject, group: null });
+
+    await waitFor(() => {
+      expect(getGroupById).toHaveBeenCalledWith("5");
+      expect(messageMock.error).toHaveBeenCalledWith("group denied");
+    });
+  });
 });

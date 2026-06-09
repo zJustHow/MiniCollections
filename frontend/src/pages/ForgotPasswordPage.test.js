@@ -1,5 +1,8 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import ForgotPasswordPage from "./ForgotPasswordPage";
+
+const navigateMock = vi.hoisted(() => vi.fn());
 
 vi.mock("antd", async () => {
   const actual = await vi.importActual("antd");
@@ -22,7 +25,7 @@ vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
   return {
     ...actual,
-    useNavigate: () => vi.fn(),
+    useNavigate: () => navigateMock,
   };
 });
 
@@ -37,6 +40,10 @@ vi.mock("../utils", () => ({
 }));
 
 describe("ForgotPasswordPage", () => {
+  beforeEach(() => {
+    navigateMock.mockReset();
+  });
+
   test("renders forgot password form", () => {
     render(<ForgotPasswordPage />);
 
@@ -44,5 +51,13 @@ describe("ForgotPasswordPage", () => {
     expect(screen.getByText("forgotPassword")).toBeInTheDocument();
     expect(screen.getByText("forgotPasswordHint")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "resetPassword" })).toBeInTheDocument();
+  });
+
+  test("navigates back to login from footer link", async () => {
+    render(<ForgotPasswordPage />);
+
+    await userEvent.click(screen.getByText("backToSignIn"));
+
+    expect(navigateMock).toHaveBeenCalledWith("/login");
   });
 });

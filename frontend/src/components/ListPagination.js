@@ -1,4 +1,5 @@
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import LeftOutlined from "@ant-design/icons/es/icons/LeftOutlined.js";
+import RightOutlined from "@ant-design/icons/es/icons/RightOutlined.js";
 import { Grid } from "antd";
 import NeuButton from "./NeuButton";
 import { useLocale } from "../LocaleContext";

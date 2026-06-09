@@ -1,4 +1,5 @@
-import { CloseOutlined, CheckOutlined } from "@ant-design/icons";
+import CloseOutlined from "@ant-design/icons/es/icons/CloseOutlined.js";
+import CheckOutlined from "@ant-design/icons/es/icons/CheckOutlined.js";
 import HeaderActionButton from "./HeaderActionButton";
 import ConfirmDeleteButton from "./ConfirmDeleteButton";
 

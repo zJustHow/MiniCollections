@@ -35,8 +35,8 @@ class ScaleControllerTest {
     @Test
     void listScales_returnsAllScales() throws Exception {
         when(scaleService.listAll()).thenReturn(List.of(
-                new ScaleDto(1L, "1:64"),
-                new ScaleDto(2L, "1:43")));
+                new ScaleDto(1L, "1:64", 64),
+                new ScaleDto(2L, "1:43", 43)));
 
         mockMvc.perform(get("/scales"))
                 .andExpect(status().isOk())

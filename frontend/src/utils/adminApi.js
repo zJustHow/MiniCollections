@@ -77,3 +77,55 @@ export const adminDeleteSeries = async (id) => {
   });
   return handleDeleteResponse(response);
 };
+
+export const adminCreateCategory = async (payload) => {
+  const response = await fetch("/admin/categories", {
+    method: "POST",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+};
+
+export const adminUpdateCategory = async (id, payload) => {
+  const response = await fetch(`/admin/categories/${id}`, {
+    method: "PUT",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+};
+
+export const adminDeleteCategory = async (id) => {
+  const response = await fetch(`/admin/categories/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  return handleDeleteResponse(response);
+};
+
+export const adminCreateScale = async (payload) => {
+  const response = await fetch("/admin/scales", {
+    method: "POST",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+};
+
+export const adminUpdateScale = async (id, payload) => {
+  const response = await fetch(`/admin/scales/${id}`, {
+    method: "PUT",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+};
+
+export const adminDeleteScale = async (id) => {
+  const response = await fetch(`/admin/scales/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  return handleDeleteResponse(response);
+};

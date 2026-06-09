@@ -251,6 +251,16 @@ class GroupServiceTest {
     }
 
     @Test
+    void createUserObject_rejectsOtherUsersGroup() {
+        when(groupRepository.findById(5L)).thenReturn(Optional.of(
+                new GroupEntity(5L, 99L, "Private", null)));
+
+        assertThrows(NoPermissionException.class, () -> groupService.createUserObject(
+                1L, 5L, 100L, "Item", null, null, null, null));
+        verify(userObjectRepository, never()).save(any());
+    }
+
+    @Test
     void createUserObject_persistsForGroupOwner() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
                 new GroupEntity(5L, 1L, "Mine", null)));

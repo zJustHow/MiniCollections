@@ -2,13 +2,13 @@ import NeuPressableButton from "../../components/NeuPressableButton";
 import AdminSidebarSkeleton from "../../components/AdminSidebarSkeleton";
 import AdminTableSkeleton from "../../components/AdminTableSkeleton";
 import { App } from "antd";
-import {
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  CloseCircleOutlined,
-  TagsOutlined,
-  UnorderedListOutlined,
-} from "@ant-design/icons";
+import CheckCircleOutlined from "@ant-design/icons/es/icons/CheckCircleOutlined.js";
+import ClockCircleOutlined from "@ant-design/icons/es/icons/ClockCircleOutlined.js";
+import CloseCircleOutlined from "@ant-design/icons/es/icons/CloseCircleOutlined.js";
+import AppstoreOutlined from "@ant-design/icons/es/icons/AppstoreOutlined.js";
+import ColumnHeightOutlined from "@ant-design/icons/es/icons/ColumnHeightOutlined.js";
+import TagsOutlined from "@ant-design/icons/es/icons/TagsOutlined.js";
+import UnorderedListOutlined from "@ant-design/icons/es/icons/UnorderedListOutlined.js";
 import { Suspense, useCallback, useEffect, useState, useTransition } from "react";
 import {
   Outlet,
@@ -24,6 +24,8 @@ function adminTableSkeletonColumns(pathname) {
   if (!pathname) return 7;
   if (/^\/admin\/brands\/[^/]+/.test(pathname)) return 8;
   if (pathname.startsWith("/admin/brands")) return 3;
+  if (pathname.startsWith("/admin/categories")) return 6;
+  if (pathname.startsWith("/admin/scales")) return 4;
   return 7;
 }
 
@@ -41,8 +43,11 @@ export default function AdminLayout() {
   const displayPath = isNavPending ? pendingPath : location.pathname;
   const skeletonColumns = adminTableSkeletonColumns(displayPath);
   const brandsNavActive = displayPath.startsWith("/admin/brands");
-  const submissionsNavActive = !brandsNavActive;
-  const showSidebar = !brandsNavActive;
+  const categoriesNavActive = displayPath.startsWith("/admin/categories");
+  const scalesNavActive = displayPath.startsWith("/admin/scales");
+  const catalogNavActive = categoriesNavActive || scalesNavActive;
+  const submissionsNavActive = !brandsNavActive && !catalogNavActive;
+  const showSidebar = !brandsNavActive && !catalogNavActive;
 
   const navigateAdmin = useCallback(
     (to, options) => {
@@ -214,6 +219,58 @@ export default function AdminLayout() {
             >
               <TagsOutlined />
               {t("brands")}
+            </NeuPressableButton>
+
+            <div
+              style={{
+                height: 1,
+                background: "rgba(184,182,176,0.25)",
+                margin: "4px 8px",
+              }}
+            />
+
+            <div
+              style={{
+                fontSize: neuRem(11),
+                color: "var(--neu-text-2)",
+                padding: "0 10px",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+              }}
+            >
+              {t("adminCatalog")}
+            </div>
+            <NeuPressableButton
+              active={categoriesNavActive}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: neuRem(13),
+              }}
+              onClick={() => navigateAdmin("/admin/categories")}
+            >
+              <AppstoreOutlined />
+              {t("categories")}
+            </NeuPressableButton>
+            <NeuPressableButton
+              active={scalesNavActive}
+              style={{
+                width: "100%",
+                padding: "10px 14px",
+                textAlign: "left",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                fontSize: neuRem(13),
+              }}
+              onClick={() => navigateAdmin("/admin/scales")}
+            >
+              <ColumnHeightOutlined />
+              {t("scales")}
             </NeuPressableButton>
           </div>
         ) : (

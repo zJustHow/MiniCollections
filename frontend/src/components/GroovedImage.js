@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { PictureOutlined } from "@ant-design/icons";
+import PictureOutlined from "@ant-design/icons/es/icons/PictureOutlined.js";
 import {
   useAdaptiveImageFrame,
   IMAGE_ACTION_RESERVE_PX,

@@ -1,4 +1,4 @@
-import { EditOutlined } from "@ant-design/icons";
+import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
 import NeuPressableButton from "../NeuPressableButton";
 import { useLocale } from "../../LocaleContext";
 

@@ -41,4 +41,19 @@ describe("useCountdown", () => {
 
     expect(result.current.countdown).toBe(0);
   });
+
+  test("reaches zero when countdown completes", () => {
+    const { result } = renderHook(() => useCountdown());
+
+    act(() => {
+      result.current.start(1);
+    });
+    expect(result.current.countdown).toBe(1);
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(result.current.countdown).toBe(0);
+  });
 });

@@ -7,7 +7,8 @@ import {
   NeuInputNumber,
   NeuSelect,
 } from "../../components/NeuFormControl";
-import { AppstoreOutlined, PlusCircleOutlined } from "@ant-design/icons";
+import AppstoreOutlined from "@ant-design/icons/es/icons/AppstoreOutlined.js";
+import PlusCircleOutlined from "@ant-design/icons/es/icons/PlusCircleOutlined.js";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   adminCreateBrandObject,

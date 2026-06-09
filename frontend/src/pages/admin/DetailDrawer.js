@@ -1,4 +1,4 @@
-import { CheckOutlined } from "@ant-design/icons";
+import CheckOutlined from "@ant-design/icons/es/icons/CheckOutlined.js";
 import NeuTag from "../../components/NeuTag";
 import DetailImage from "../../components/DetailImage";
 import { useLocale } from "../../LocaleContext";
