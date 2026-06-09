@@ -89,6 +89,7 @@ button.neu-card.neu-card--row:active:not(:disabled) {
 }
 
 button.neu-card.neu-card--avatar,
+a.neu-card.neu-card--avatar,
 .neu-card.neu-card--avatar {
   display: inline-flex;
   padding: 0;

@@ -34,7 +34,16 @@ export function LocaleProvider({ children }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLocaleReady(locale === "en-US");
+    setCurrentLocale(locale);
+
+    if (locale === "en-US" || translations[locale]) {
+      setLocaleReady(true);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setLocaleReady(false);
     ensureLocaleLoaded(locale).then(() => {
       if (!cancelled) setLocaleReady(true);
     });

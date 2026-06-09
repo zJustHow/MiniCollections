@@ -19,7 +19,11 @@ export function authHeaders(extra = {}) {
   return headers;
 }
 
-function parseApiError(errorText, fallbackCode = "error.request_failed") {
+function parseApiError(
+  errorText,
+  fallbackCode = "error.request_failed",
+  status,
+) {
   let code;
   let args;
   try {
@@ -31,9 +35,20 @@ function parseApiError(errorText, fallbackCode = "error.request_failed") {
   } catch {
     // plain-text or non-JSON error body
   }
-  const message = code
-    ? translateError(code, args, _locale)
-    : (errorText || translateError(fallbackCode, null, _locale));
+
+  let message;
+  if (code) {
+    message = translateError(code, args, _locale);
+  } else if (errorText?.trim()) {
+    message = errorText.trim();
+  } else if (status === 401 || status === 403) {
+    message = translateError("error.no_permission", null, _locale);
+  } else if (status != null && status >= 500) {
+    message = translateError("error.internal_server_error", null, _locale);
+  } else {
+    message = translateError(fallbackCode, null, _locale);
+  }
+
   const err = new Error(message);
   err.code = code;
   err.args = args;
@@ -43,7 +58,7 @@ function parseApiError(errorText, fallbackCode = "error.request_failed") {
 export async function handleResponse(response) {
   if (!response.ok) {
     const errorText = await response.text();
-    throw parseApiError(errorText);
+    throw parseApiError(errorText, "error.request_failed", response.status);
   }
   try {
     return await response.json();
@@ -56,7 +71,7 @@ export async function handleDeleteResponse(response) {
   if (response.status === 204) return;
   if (!response.ok) {
     const errorText = await response.text();
-    throw parseApiError(errorText);
+    throw parseApiError(errorText, "error.request_failed", response.status);
   }
 }
 

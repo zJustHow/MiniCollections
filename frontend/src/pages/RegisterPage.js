@@ -44,7 +44,7 @@ export default function RegisterPage() {
     try {
       if (registerType === "email") {
         await form.validateFields(["email"]);
-        target = form.getFieldValue("email");
+        target = form.getFieldValue("email")?.trim();
       } else {
         await form.validateFields(["phoneNumber"]);
         const countryCode = form.getFieldValue("countryCode") || "+86";
@@ -77,27 +77,29 @@ export default function RegisterPage() {
   const handleLocaleChange = (value) => {
     setSelectedLocale(value);
     form.setFieldsValue({ preferred_locale: value });
+    setLocale(value);
   };
 
   const onFinish = async (values) => {
     setLoading(true);
     setError(null);
+    const preferredLocale = selectedLocale || values.preferred_locale;
     try {
       const payload = {
         password: values.password,
         name: values.name,
-        preferred_locale: values.preferred_locale,
+        preferred_locale: preferredLocale,
         code: values.code,
       };
       if (registerType === "email") {
-        payload.email = values.email;
+        payload.email = values.email?.trim();
       } else {
         payload.phone = values.countryCode + values.phoneNumber;
       }
       await signup(payload);
-      if (values.preferred_locale) setLocale(values.preferred_locale);
       message.success(t("registerSuccess"));
       navigate("/login");
+      if (preferredLocale) setLocale(preferredLocale);
     } catch (err) {
       setError(err?.message);
     } finally {

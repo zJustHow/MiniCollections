@@ -35,7 +35,8 @@ public class VerificationService {
     }
 
     public void sendCode(String target, String type) {
-        String key = PREFIX + target;
+        String normalizedTarget = normalizeTarget(target, type);
+        String key = PREFIX + normalizedTarget;
         Long ttl = redis.getExpire(key, TimeUnit.SECONDS);
         if (ttl != null && ttl > otpTtlSeconds - resendCooldownSeconds) {
             throw new TooManyRequestsException("error.resend_wait");
@@ -45,20 +46,21 @@ public class VerificationService {
         redis.opsForValue().set(key, code, otpTtlSeconds, TimeUnit.SECONDS);
 
         if ("EMAIL".equals(type)) {
-            emailService.sendCode(target, code);
+            emailService.sendCode(normalizedTarget, code);
         } else if ("PHONE".equals(type)) {
-            smsSender.send(target, code);
+            smsSender.send(normalizedTarget, code);
         } else {
             throw new ValidationException("error.invalid_verification_type", type);
         }
     }
 
     public void verify(String target, String code) {
-        verifyCode(PREFIX + target, code);
+        verifyCode(PREFIX + normalizeTarget(target), code);
     }
 
     public void sendResetCode(String target, String type, boolean deliver) {
-        String cooldownKey = RESET_COOLDOWN_PREFIX + target;
+        String normalizedTarget = normalizeTarget(target, type);
+        String cooldownKey = RESET_COOLDOWN_PREFIX + normalizedTarget;
         if (Boolean.TRUE.equals(redis.hasKey(cooldownKey))) {
             throw new TooManyRequestsException("error.resend_wait");
         }
@@ -68,21 +70,21 @@ public class VerificationService {
             return;
         }
 
-        String key = RESET_PREFIX + target;
+        String key = RESET_PREFIX + normalizedTarget;
         String code = String.format("%06d", ThreadLocalRandom.current().nextInt(1_000_000));
         redis.opsForValue().set(key, code, otpTtlSeconds, TimeUnit.SECONDS);
 
         if ("EMAIL".equals(type)) {
-            emailService.sendCode(target, code);
+            emailService.sendCode(normalizedTarget, code);
         } else if ("PHONE".equals(type)) {
-            smsSender.send(target, code);
+            smsSender.send(normalizedTarget, code);
         } else {
             throw new ValidationException("error.invalid_verification_type", type);
         }
     }
 
     public void verifyResetCode(String target, String code) {
-        verifyCode(RESET_PREFIX + target, code);
+        verifyCode(RESET_PREFIX + normalizeTarget(target), code);
     }
 
     private void verifyCode(String key, String code) {
@@ -90,5 +92,24 @@ public class VerificationService {
         if (stored == null) throw new InvalidCodeException("error.code_expired");
         if (!stored.equals(code)) throw new InvalidCodeException("error.code_invalid");
         redis.delete(key);
+    }
+
+    private static String normalizeTarget(String target, String type) {
+        if (target == null || target.isBlank()) {
+            return target;
+        }
+        String trimmed = target.strip();
+        if ("EMAIL".equals(type)) {
+            return trimmed.toLowerCase();
+        }
+        return trimmed;
+    }
+
+    private static String normalizeTarget(String target) {
+        if (target == null || target.isBlank()) {
+            return target;
+        }
+        String trimmed = target.strip();
+        return trimmed.contains("@") ? trimmed.toLowerCase() : trimmed;
     }
 }

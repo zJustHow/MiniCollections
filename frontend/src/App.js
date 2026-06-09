@@ -2,18 +2,19 @@ import NeuPressableButton from "./components/NeuPressableButton";
 import PageLoader from "./components/PageLoader";
 import RouteSkeleton from "./components/RouteSkeleton";
 import HeaderSlotSkeleton from "./components/HeaderSlotSkeleton";
-import { Layout, Avatar, Tooltip } from "antd";
+import { Layout, Avatar } from "antd";
 import {
   resolveHeaderSkeletonEndActions,
   usesCustomHeader,
   usesMainLayout,
 } from "./utils/routeSkeleton";
-import { Suspense, useState, useEffect, useRef } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { lazyWithRetry } from "./utils/lazyWithRetry";
 import {
   Routes,
   Route,
   Navigate,
+  Link,
   useNavigate,
   useLocation,
   Outlet,
@@ -27,6 +28,8 @@ import { logout } from "./utils/authApi";
 import { scrollAppToTop } from "./utils/scroll";
 import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
+import useRouteHeaderSync from "./hooks/useRouteHeaderSync";
+import { prefetchProfilePage } from "./utils/prefetchRoutes";
 
 const ObjectList = lazyWithRetry(() => import("./components/ObjectList"));
 const GuestBrandsView = lazyWithRetry(
@@ -76,13 +79,21 @@ function LazyPageFallback() {
   return <RouteSkeleton pathname={location.pathname} />;
 }
 
-function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
+function MainLayoutInner({
+  authed,
+  profile,
+  isAdmin,
+  authLoading = false,
+  onLogout,
+}) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLocale();
   const { headerSlot } = useHeader();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  useRouteHeaderSync({ isAdmin, onLogout });
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -118,20 +129,23 @@ function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
 
   const goToLogin = () => navigate("/login");
 
-  const goToProfile = () => {
+  const handleProfileNavigate = () => {
     setMenuOpen(false);
     scrollAppToTop();
-    navigate(authed ? "/profile" : "/login");
   };
 
-  const renderProfileBtn = (onClick) =>
-    authed ? (
-      <button
-        type="button"
-        className="neu-card neu-card--avatar"
-        aria-label={profile?.display_name || t("profile")}
-        onClick={onClick}
-      >
+  const renderProfileBtn = (to) => (
+    <Link
+      to={to}
+      prefetch="intent"
+      className="neu-card neu-card--avatar"
+      aria-label={authed ? profile?.display_name || t("profile") : t("signIn")}
+      title={authed ? profile?.display_name || t("profile") : t("signIn")}
+      onClick={handleProfileNavigate}
+      onMouseEnter={authed ? prefetchProfilePage : undefined}
+      onFocus={authed ? prefetchProfilePage : undefined}
+    >
+      {authed ? (
         <Avatar
           src={profile?.avatar_url}
           icon={!profile?.avatar_url && <UserOutlined />}
@@ -142,14 +156,7 @@ function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
               : "var(--neu-accent)",
           }}
         />
-      </button>
-    ) : (
-      <button
-        type="button"
-        className="neu-card neu-card--avatar"
-        aria-label={t("signIn")}
-        onClick={onClick}
-      >
+      ) : (
         <Avatar
           icon={<UserOutlined />}
           size={36}
@@ -158,8 +165,9 @@ function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
             color: "var(--neu-text-2)",
           }}
         />
-      </button>
-    );
+      )}
+    </Link>
+  );
 
   const handleTabChange = (tab) => {
     if (!authed && (tab === "groups" || tab === "feedback")) {
@@ -238,16 +246,9 @@ function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
             }}
           >
             {authed ? (
-              <Tooltip
-                title={profile?.display_name || t("profile")}
-                placement="bottomRight"
-              >
-                {renderProfileBtn(goToProfile)}
-              </Tooltip>
+              renderProfileBtn("/profile")
             ) : (
-              <Tooltip title={t("signIn")} placement="bottomRight">
-                {renderProfileBtn(goToLogin)}
-              </Tooltip>
+              renderProfileBtn("/login")
             )}
           </div>
         )}
@@ -300,7 +301,7 @@ function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
             <>
               <div className="mobile-menu-divider" />
               <div className="mobile-menu-profile">
-                {renderProfileBtn(goToProfile)}
+                {renderProfileBtn(authed ? "/profile" : "/login")}
               </div>
             </>
           )}
@@ -328,7 +329,7 @@ function MainLayoutInner({ authed, profile, isAdmin, authLoading = false }) {
   );
 }
 
-function MainLayout({ authed, profile, isAdmin, authLoading = false }) {
+function MainLayout({ authed, profile, isAdmin, authLoading = false, onLogout }) {
   return (
     <HeaderProvider>
       <MainLayoutInner
@@ -336,6 +337,7 @@ function MainLayout({ authed, profile, isAdmin, authLoading = false }) {
         profile={profile}
         isAdmin={isAdmin}
         authLoading={authLoading}
+        onLogout={onLogout}
       />
     </HeaderProvider>
   );
@@ -362,6 +364,7 @@ export default function App() {
         setProfile(me);
         if (me.preferred_locale) setLocale(me.preferred_locale);
         setAuthed(true);
+        prefetchProfilePage();
       })
       .catch(() => {
         localStorage.removeItem("auth_token");
@@ -369,17 +372,23 @@ export default function App() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (authed) {
+      prefetchProfilePage();
+    }
+  }, [authed]);
+
   const handleProfileChange = (updated) => {
     setProfile(updated);
     if (updated.preferred_locale) setLocale(updated.preferred_locale);
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     setAuthed(false);
     setProfile(null);
     navigate("/");
-  };
+  }, [navigate]);
 
   const handleLoginSuccess = async () => {
     try {
@@ -387,6 +396,7 @@ export default function App() {
       setProfile(me);
       if (me.preferred_locale) setLocale(me.preferred_locale);
       setAuthed(true);
+      prefetchProfilePage();
       navigate("/");
     } catch {
       localStorage.removeItem("auth_token");
@@ -406,6 +416,7 @@ export default function App() {
           profile={null}
           isAdmin={false}
           authLoading
+          onLogout={handleLogout}
         />
       );
     }
@@ -468,7 +479,12 @@ export default function App() {
       />
       <Route
         element={
-          <MainLayout authed={authed} profile={profile} isAdmin={isAdmin} />
+          <MainLayout
+            authed={authed}
+            profile={profile}
+            isAdmin={isAdmin}
+            onLogout={handleLogout}
+          />
         }
       >
         <Route

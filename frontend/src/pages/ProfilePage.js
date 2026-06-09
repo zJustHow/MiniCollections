@@ -31,6 +31,7 @@ import {
   updateProfile,
   uploadAvatar,
 } from "../utils";
+import { ensureLocaleLoaded, translate } from "../i18n";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import { scrollAppToTop } from "../utils/scroll";
@@ -167,8 +168,10 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
     setLocaleLoading(true);
     try {
       const updated = await updateLocale(values.preferredLocale);
+      const newLocale = updated.preferred_locale || values.preferredLocale;
       onProfileChange(updated);
-      message.success(t("languageUpdated"));
+      await ensureLocaleLoaded(newLocale);
+      message.success(translate("languageUpdated", newLocale));
     } catch (err) {
       message.error(err?.message || t("updateFailed"));
     } finally {

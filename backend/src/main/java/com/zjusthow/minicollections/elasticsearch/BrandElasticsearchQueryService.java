@@ -1,12 +1,7 @@
 package com.zjusthow.minicollections.elasticsearch;
 
-import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -21,9 +16,13 @@ public class BrandElasticsearchQueryService {
     private static final Logger log = LoggerFactory.getLogger(BrandElasticsearchQueryService.class);
 
     private final ElasticsearchOperations elasticsearchOperations;
+    private final SearchQuerySupport searchQuerySupport;
 
-    public BrandElasticsearchQueryService(ElasticsearchOperations elasticsearchOperations) {
+    public BrandElasticsearchQueryService(
+            ElasticsearchOperations elasticsearchOperations,
+            SearchQuerySupport searchQuerySupport) {
         this.elasticsearchOperations = elasticsearchOperations;
+        this.searchQuerySupport = searchQuerySupport;
     }
 
     private static final int MAX_RESULT_WINDOW = 10_000;
@@ -57,36 +56,25 @@ public class BrandElasticsearchQueryService {
         if (safeSize <= 0) {
             return countOnly(q);
         }
-        var nativeQuery = NativeQuery.builder()
-                .withQuery(buildSearchQuery(q))
-                .withSort(s -> s.score(sc -> sc.order(SortOrder.Desc)))
-                .withSort(s -> s.field(f -> f.field("id").order(SortOrder.Asc)))
-                .withPageable(new OffsetPageRequest(safeOffset, safeSize))
-                .withTrackTotalHitsUpTo(MAX_RESULT_WINDOW)
-                .build();
-        return executePage(nativeQuery);
+        var query = searchQuerySupport.pageQuery(buildSearchQuery(q), safeOffset, safeSize, MAX_RESULT_WINDOW);
+        return executePage(query);
     }
 
-    private Query buildSearchQuery(String q) {
-        return Query.of(sq -> sq.multiMatch(m -> m
-                .query(q)
-                .fields("name_en^2", "name_zh^2", "abbreviation^3")
-                .type(TextQueryType.BestFields)
-                .operator(Operator.Or)));
+    private static final List<String> BRAND_SEARCH_FIELDS = List.of(
+            "name_en^2", "name_zh^2", "abbreviation^3");
+
+    private Object buildSearchQuery(String q) {
+        return searchQuerySupport.multiMatchWithCompactFallback(q, BRAND_SEARCH_FIELDS);
     }
 
     private EsSearchPageResult countOnly(String q) {
-        var nativeQuery = NativeQuery.builder()
-                .withQuery(buildSearchQuery(q))
-                .withMaxResults(0)
-                .withTrackTotalHitsUpTo(MAX_RESULT_WINDOW)
-                .build();
-        return executePage(nativeQuery);
+        var query = searchQuerySupport.countQuery(buildSearchQuery(q), MAX_RESULT_WINDOW);
+        return executePage(query);
     }
 
-    private EsSearchPageResult executePage(NativeQuery nativeQuery) {
+    private EsSearchPageResult executePage(org.springframework.data.elasticsearch.core.query.Query query) {
         try {
-            SearchHits<BrandDocument> hits = elasticsearchOperations.search(nativeQuery, BrandDocument.class);
+            SearchHits<BrandDocument> hits = elasticsearchOperations.search(query, BrandDocument.class);
             List<Long> ids = new ArrayList<>();
             for (SearchHit<BrandDocument> hit : hits) {
                 if (hit.getContent() != null && hit.getContent().id() != null) {

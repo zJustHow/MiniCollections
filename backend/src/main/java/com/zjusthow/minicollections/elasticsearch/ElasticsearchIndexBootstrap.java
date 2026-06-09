@@ -97,6 +97,13 @@ public class ElasticsearchIndexBootstrap {
             log.info("Elasticsearch brands index empty but database has {} rows, indexing", dbCount);
             return true;
         }
+        if (dbCount > 0 && indexedCount < dbCount) {
+            log.info(
+                    "Elasticsearch brands index incomplete ({} indexed, {} in db), reindexing",
+                    indexedCount,
+                    dbCount);
+            return true;
+        }
         return false;
     }
 

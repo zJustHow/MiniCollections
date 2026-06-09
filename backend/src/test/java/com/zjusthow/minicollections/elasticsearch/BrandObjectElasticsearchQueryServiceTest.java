@@ -1,13 +1,13 @@
 package com.zjusthow.minicollections.elasticsearch;
 
 import com.zjusthow.minicollections.model.BrandObjectSearchFilter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
@@ -26,7 +26,14 @@ class BrandObjectElasticsearchQueryServiceTest {
 
     @Mock ElasticsearchOperations elasticsearchOperations;
 
-    @InjectMocks BrandObjectElasticsearchQueryService queryService;
+    private BrandObjectElasticsearchQueryService queryService;
+
+    @BeforeEach
+    void setUp() {
+        queryService = new BrandObjectElasticsearchQueryService(
+                elasticsearchOperations,
+                new SearchQuerySupport(false));
+    }
 
     private static final BrandObjectSearchFilter NO_FILTER =
             BrandObjectSearchFilter.global(null, null, null, null);
@@ -83,7 +90,7 @@ class BrandObjectElasticsearchQueryServiceTest {
         when(hits.iterator()).thenReturn(hitsList.iterator());
         when(hits.getTotalHits()).thenReturn(1L);
         when(hits.getTotalHitsRelation()).thenReturn(TotalHitsRelation.EQUAL_TO);
-        when(elasticsearchOperations.search(any(NativeQuery.class), eq(BrandObjectDocument.class)))
+        when(elasticsearchOperations.search(any(Query.class), eq(BrandObjectDocument.class)))
                 .thenReturn(hits);
 
         EsSearchPageResult result = queryService.searchPage("bmw", NO_FILTER, 0, 24);

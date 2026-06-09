@@ -44,6 +44,11 @@ describe("apiClient", () => {
     expect(err.code).toBeUndefined();
   });
 
+  test("parseApiError maps empty 401 body to no-permission message", () => {
+    const err = parseApiError("", "error.request_failed", 401);
+    expect(err.message).toMatch(/permission|权限/i);
+  });
+
   test("handleResponse returns JSON on success", async () => {
     const response = {
       ok: true,

@@ -1,12 +1,12 @@
 package com.zjusthow.minicollections.elasticsearch;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.TotalHitsRelation;
@@ -25,7 +25,14 @@ class BrandElasticsearchQueryServiceTest {
 
     @Mock ElasticsearchOperations elasticsearchOperations;
 
-    @InjectMocks BrandElasticsearchQueryService queryService;
+    private BrandElasticsearchQueryService queryService;
+
+    @BeforeEach
+    void setUp() {
+        queryService = new BrandElasticsearchQueryService(
+                elasticsearchOperations,
+                new SearchQuerySupport(false));
+    }
 
     @Test
     void searchPage_blankKeywordSkipsElasticsearch() {
@@ -64,7 +71,7 @@ class BrandElasticsearchQueryServiceTest {
         when(hits.iterator()).thenReturn(hitsList.iterator());
         when(hits.getTotalHits()).thenReturn(1L);
         when(hits.getTotalHitsRelation()).thenReturn(TotalHitsRelation.EQUAL_TO);
-        when(elasticsearchOperations.search(any(NativeQuery.class), eq(BrandDocument.class))).thenReturn(hits);
+        when(elasticsearchOperations.search(any(Query.class), eq(BrandDocument.class))).thenReturn(hits);
 
         EsSearchPageResult result = queryService.searchPage("kyosho", 0, 24);
 

@@ -34,6 +34,7 @@ public class BrandObjectIndexService {
     private static final Logger log = LoggerFactory.getLogger(BrandObjectIndexService.class);
     private static final int SAMPLE_SLICES = 5;
     private static final int SAMPLE_PER_SLICE = 10;
+    private static final int INDEX_BATCH_SIZE = 500;
 
     private final BrandRepository brandRepository;
     private final BrandObjectRepository brandObjectRepository;
@@ -187,7 +188,14 @@ public class BrandObjectIndexService {
                         entity.categoryId() != null ? maps.categoryById.get(entity.categoryId()) : null,
                         entity.scaleId() != null ? maps.scaleById.get(entity.scaleId()) : null))
                 .toList();
-        brandObjectSearchRepository.saveAll(docs);
+        saveInBatches(docs);
+    }
+
+    private void saveInBatches(List<BrandObjectDocument> docs) {
+        for (int offset = 0; offset < docs.size(); offset += INDEX_BATCH_SIZE) {
+            int end = Math.min(offset + INDEX_BATCH_SIZE, docs.size());
+            brandObjectSearchRepository.saveAll(docs.subList(offset, end));
+        }
     }
 
     private RelationMaps buildRelationMaps(List<BrandObjectEntity> entities) {
@@ -240,6 +248,13 @@ public class BrandObjectIndexService {
         }
         if (indexedCount == 0 && dbCount > 0) {
             log.info("Elasticsearch brand-objects index empty but database has {} rows, indexing", dbCount);
+            return true;
+        }
+        if (dbCount > 0 && indexedCount < dbCount) {
+            log.info(
+                    "Elasticsearch brand-objects index incomplete ({} indexed, {} in db), reindexing",
+                    indexedCount,
+                    dbCount);
             return true;
         }
         return false;
@@ -326,7 +341,7 @@ public class BrandObjectIndexService {
                         e.categoryId() != null ? categoryById.get(e.categoryId()) : null,
                         e.scaleId() != null ? scaleById.get(e.scaleId()) : null))
                 .toList();
-        brandObjectSearchRepository.saveAll(docs);
+        saveInBatches(docs);
         searchIndexMetaRepository.save(new SearchIndexMetaDocument(
                 BrandObjectIndexVersion.META_ID,
                 BrandObjectIndexVersion.CURRENT));

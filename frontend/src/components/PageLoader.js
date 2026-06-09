@@ -1,9 +1,10 @@
 import { lazy, Suspense } from "react";
 import SplashLoader from "./SplashLoader";
 
+import ProfilePageSkeleton from "./ProfilePageSkeleton";
+
 const AuthPageSkeleton = lazy(() => import("./AuthPageSkeleton"));
 const FeedbackPageSkeleton = lazy(() => import("./FeedbackPageSkeleton"));
-const ProfilePageSkeleton = lazy(() => import("./ProfilePageSkeleton"));
 const AdminLayoutSkeleton = lazy(() => import("./AdminLayoutSkeleton"));
 const AdminTableSkeleton = lazy(() => import("./AdminTableSkeleton"));
 const NeuCardGridSkeleton = lazy(() => import("./NeuCardGridSkeleton"));
@@ -47,11 +48,7 @@ export default function PageLoader({ variant = "splash" }) {
   }
 
   if (variant === "profile") {
-    return (
-      <LazySkeleton>
-        <ProfilePageSkeleton />
-      </LazySkeleton>
-    );
+    return <ProfilePageSkeleton />;
   }
 
   if (variant === "admin") {

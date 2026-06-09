@@ -43,6 +43,7 @@ yarn-error.log*
 
 # Backend (Java/Spring)
 /backend/HELP.md
+backend/org/
 
 ### STS ###
 .apt_generated

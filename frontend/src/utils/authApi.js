@@ -47,7 +47,7 @@ export const bindWechatAccount = async ({ code, state }) => {
 export const sendCode = async (target, type) => {
   const response = await fetch("/send-code", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ target, type }),
   });
   return handleResponse(response);
@@ -74,7 +74,7 @@ export const resetPassword = async (data) => {
 export const signup = async (data) => {
   const response = await fetch("/signup", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(data),
   });
   return handleResponse(response);

@@ -17,6 +17,13 @@ export function translateError(code, args, locale = "en-US") {
   return str;
 }
 
+export function translate(key, locale = "en-US", params) {
+  const dict = translations[locale] ?? translations["en-US"];
+  const str = dict[key] ?? translations["en-US"][key] ?? key;
+  if (!params) return str;
+  return str.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? ""));
+}
+
 export function detectBrowserLocale() {
   const lang = navigator.language || "en-US";
   return lang.startsWith("zh") ? "zh-CN" : "en-US";

@@ -232,7 +232,7 @@ describe("ProfilePage", () => {
 
     await waitFor(() => {
       expect(updateLocale).toHaveBeenCalledWith("zh-CN");
-      expect(messageMock.success).toHaveBeenCalledWith("languageUpdated");
+      expect(messageMock.success).toHaveBeenCalledWith("语言已更新");
       expect(onProfileChange).toHaveBeenCalled();
     });
   });

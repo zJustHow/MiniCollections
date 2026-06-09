@@ -89,6 +89,16 @@ class VerificationServiceTest {
     }
 
     @Test
+    void verify_matchesEmailCaseInsensitively() {
+        when(redis.opsForValue()).thenReturn(valueOps);
+        when(valueOps.get("otp:alice@example.com")).thenReturn("123456");
+
+        verificationService.verify("Alice@Example.com", "123456");
+
+        verify(redis).delete("otp:alice@example.com");
+    }
+
+    @Test
     void sendResetCode_skipsDeliveryWhenUserHasNoPassword() {
         when(redis.hasKey("otp:reset:cooldown:alice@example.com")).thenReturn(false);
         when(redis.opsForValue()).thenReturn(valueOps);

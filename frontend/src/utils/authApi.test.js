@@ -50,15 +50,26 @@ describe("authApi", () => {
     await signup(payload);
     expect(global.fetch).toHaveBeenCalledWith(
       "/signup",
-      expect.objectContaining({ method: "POST", body: JSON.stringify(payload) }),
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+          "Accept-Language": "en-US",
+        }),
+        body: JSON.stringify(payload),
+      }),
     );
   });
 
-  test("sendCode posts target and type", async () => {
+  test("sendCode posts target and type with locale header", async () => {
     await sendCode("alice@example.com", "EMAIL");
     expect(global.fetch).toHaveBeenCalledWith(
       "/send-code",
       expect.objectContaining({
+        headers: expect.objectContaining({
+          "Content-Type": "application/json",
+          "Accept-Language": "en-US",
+        }),
         body: JSON.stringify({ target: "alice@example.com", type: "EMAIL" }),
       }),
     );

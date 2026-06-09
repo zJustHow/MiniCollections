@@ -16,13 +16,15 @@ export default function AdminBrandPageHeader({
       <div className="header-slot-actions">
         <HeaderActionButton icon={<ArrowLeftOutlined />} onClick={onBack} />
       </div>
-      <div className="header-slot-actions header-slot-actions-end">
-        <HeaderActionButton
-          icon={<PlusOutlined />}
-          onClick={onAdd}
-          aria-label={addAriaLabel ?? t("addBrand")}
-        />
-      </div>
+      {onAdd ? (
+        <div className="header-slot-actions header-slot-actions-end">
+          <HeaderActionButton
+            icon={<PlusOutlined />}
+            onClick={onAdd}
+            aria-label={addAriaLabel ?? t("addBrand")}
+          />
+        </div>
+      ) : null}
       <span className="header-slot-title">{brandName}</span>
     </div>
   );

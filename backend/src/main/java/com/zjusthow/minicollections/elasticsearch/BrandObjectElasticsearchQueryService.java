@@ -1,26 +1,14 @@
 package com.zjusthow.minicollections.elasticsearch;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
-import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.aggregations.Aggregation;
-import co.elastic.clients.elasticsearch._types.aggregations.LongTermsAggregate;
-import co.elastic.clients.elasticsearch._types.aggregations.LongTermsBucket;
-import co.elastic.clients.elasticsearch._types.query_dsl.Operator;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import com.zjusthow.minicollections.model.BrandObjectSearchFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregation;
-import org.springframework.data.elasticsearch.client.elc.ElasticsearchAggregations;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -34,9 +22,13 @@ public class BrandObjectElasticsearchQueryService {
     private static final int MAX_SERIES_BUCKETS = 64;
 
     private final ElasticsearchOperations elasticsearchOperations;
+    private final SearchQuerySupport searchQuerySupport;
 
-    public BrandObjectElasticsearchQueryService(ElasticsearchOperations elasticsearchOperations) {
+    public BrandObjectElasticsearchQueryService(
+            ElasticsearchOperations elasticsearchOperations,
+            SearchQuerySupport searchQuerySupport) {
         this.elasticsearchOperations = elasticsearchOperations;
+        this.searchQuerySupport = searchQuerySupport;
     }
 
     private static final int MAX_RESULT_WINDOW = 10_000;
@@ -111,13 +103,9 @@ public class BrandObjectElasticsearchQueryService {
     }
 
     private long countTotal(String q, BrandObjectSearchFilter filter) {
-        var nativeQuery = NativeQuery.builder()
-                .withQuery(buildSearchQuery(q, filter))
-                .withMaxResults(0)
-                .withTrackTotalHitsUpTo(MAX_RESULT_WINDOW)
-                .build();
+        var query = searchQuerySupport.countQuery(buildSearchQuery(q, filter), MAX_RESULT_WINDOW);
         SearchHits<BrandObjectDocument> hits =
-                elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
+                elasticsearchOperations.search(query, BrandObjectDocument.class);
         return hits.getTotalHits() >= 0 ? hits.getTotalHits() : 0L;
     }
 
@@ -126,18 +114,11 @@ public class BrandObjectElasticsearchQueryService {
             BrandObjectSearchFilter crossFilter,
             String field,
             int maxBuckets) {
-        var nativeQuery = NativeQuery.builder()
-                .withQuery(buildSearchQuery(q, crossFilter))
-                .withMaxResults(0)
-                .withAggregation(FACET_AGG, termsAgg(field, maxBuckets))
-                .build();
+        var query = searchQuerySupport.facetQuery(
+                buildSearchQuery(q, crossFilter), FACET_AGG, field, maxBuckets, MAX_RESULT_WINDOW);
         SearchHits<BrandObjectDocument> hits =
-                elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
-        return parseTermBuckets(hits, FACET_AGG);
-    }
-
-    private Aggregation termsAgg(String field, int size) {
-        return Aggregation.of(a -> a.terms(t -> t.field(field).size(size)));
+                elasticsearchOperations.search(query, BrandObjectDocument.class);
+        return searchQuerySupport.parseTermBuckets(hits, FACET_AGG);
     }
 
     private EsSearchPageResult searchAtOffset(
@@ -154,23 +135,14 @@ public class BrandObjectElasticsearchQueryService {
         if (safeSize <= 0) {
             return countOnly(q, filter);
         }
-        var nativeQuery = NativeQuery.builder()
-                .withQuery(buildSearchQuery(q, filter))
-                .withSort(s -> s.score(sc -> sc.order(SortOrder.Desc)))
-                .withSort(s -> s.field(f -> f.field("id").order(SortOrder.Asc)))
-                .withPageable(new OffsetPageRequest(safeOffset, safeSize))
-                .withTrackTotalHitsUpTo(MAX_RESULT_WINDOW)
-                .build();
-        return executePage(nativeQuery);
+        var query = searchQuerySupport.pageQuery(
+                buildSearchQuery(q, filter), safeOffset, safeSize, MAX_RESULT_WINDOW);
+        return executePage(query);
     }
 
     private EsSearchPageResult countOnly(String q, BrandObjectSearchFilter filter) {
-        var nativeQuery = NativeQuery.builder()
-                .withQuery(buildSearchQuery(q, filter))
-                .withMaxResults(0)
-                .withTrackTotalHitsUpTo(MAX_RESULT_WINDOW)
-                .build();
-        return executePage(nativeQuery);
+        var query = searchQuerySupport.countQuery(buildSearchQuery(q, filter), MAX_RESULT_WINDOW);
+        return executePage(query);
     }
 
     private static final List<String> BRAND_OBJECT_SEARCH_FIELDS = List.of(
@@ -185,90 +157,24 @@ public class BrandObjectElasticsearchQueryService {
             "category_zh",
             "scale");
 
-    private Query buildSearchQuery(String q, BrandObjectSearchFilter filter) {
+    private static final List<String> BRAND_OBJECT_SCOPED_SEARCH_FIELDS = List.of(
+            "name_en^2", "name_zh^2", "series_en", "series_zh", "category_en", "category_zh", "scale");
+
+    private Object buildSearchQuery(String q, BrandObjectSearchFilter filter) {
         if (!filter.hasUserFilters() && filter.scopeBrandId() == null) {
-            return Query.of(sq -> sq.multiMatch(m -> m
-                    .query(q)
-                    .fields(BRAND_OBJECT_SEARCH_FIELDS)
-                    .type(TextQueryType.BestFields)
-                    .operator(Operator.Or)));
+            return searchQuerySupport.multiMatchWithCompactFallback(q, BRAND_OBJECT_SEARCH_FIELDS);
         }
-        return Query.of(sq -> sq.bool(b -> {
-            if (filter.scopeBrandId() != null) {
-                b.must(m -> m.multiMatch(mm -> mm
-                        .query(q)
-                        .fields("name_en^2", "name_zh^2", "series_en", "series_zh",
-                                "category_en", "category_zh", "scale")
-                        .type(TextQueryType.BestFields)
-                        .operator(Operator.Or)));
-                b.filter(f -> f.term(t -> t.field("brand_id").value(filter.scopeBrandId())));
-            } else {
-                b.must(m -> m.multiMatch(mm -> mm
-                        .query(q)
-                        .fields(BRAND_OBJECT_SEARCH_FIELDS)
-                        .type(TextQueryType.BestFields)
-                        .operator(Operator.Or)));
-                if (filter.filterBrands()) {
-                    b.filter(f -> f.terms(t -> t
-                            .field("brand_id")
-                            .terms(tv -> tv.value(toFieldValues(filter.brandIds())))));
-                }
-            }
-            if (filter.filterCategories()) {
-                b.filter(f -> f.terms(t -> t
-                        .field("category_id")
-                        .terms(tv -> tv.value(toFieldValues(filter.categoryIds())))));
-            }
-            if (filter.filterScales()) {
-                b.filter(f -> f.terms(t -> t
-                        .field("scale_id")
-                        .terms(tv -> tv.value(toFieldValues(filter.scaleIds())))));
-            }
-            if (filter.filterSeries()) {
-                b.filter(f -> f.terms(t -> t
-                        .field("series_id")
-                        .terms(tv -> tv.value(toFieldValues(filter.seriesIds())))));
-            }
-            return b;
-        }));
+        return searchQuerySupport.boolMustWithFilters(q, mustFields(filter), filter);
     }
 
-    private List<FieldValue> toFieldValues(List<Long> ids) {
-        return ids.stream().map(FieldValue::of).toList();
+    private List<String> mustFields(BrandObjectSearchFilter filter) {
+        return filter.scopeBrandId() != null ? BRAND_OBJECT_SCOPED_SEARCH_FIELDS : BRAND_OBJECT_SEARCH_FIELDS;
     }
 
-    private List<EsFacetBucket> parseTermBuckets(SearchHits<BrandObjectDocument> hits, String aggName) {
-        if (hits.getAggregations() == null) {
-            return List.of();
-        }
-        if (!(hits.getAggregations() instanceof ElasticsearchAggregations esAggs)) {
-            return List.of();
-        }
-        ElasticsearchAggregation aggregation = esAggs.get(aggName);
-        if (aggregation == null) {
-            return List.of();
-        }
-        var aggregate = aggregation.aggregation().getAggregate();
-        if (!aggregate.isLterms()) {
-            return List.of();
-        }
-        LongTermsAggregate terms = aggregate.lterms();
-        List<EsFacetBucket> buckets = new ArrayList<>();
-        for (LongTermsBucket bucket : terms.buckets().array()) {
-            if (bucket.key() != 0L) {
-                buckets.add(new EsFacetBucket(bucket.key(), bucket.docCount()));
-            }
-        }
-        buckets.sort(Comparator
-                .comparingLong(EsFacetBucket::count).reversed()
-                .thenComparingLong(EsFacetBucket::id));
-        return buckets;
-    }
-
-    private EsSearchPageResult executePage(NativeQuery nativeQuery) {
+    private EsSearchPageResult executePage(org.springframework.data.elasticsearch.core.query.Query query) {
         try {
             SearchHits<BrandObjectDocument> hits =
-                    elasticsearchOperations.search(nativeQuery, BrandObjectDocument.class);
+                    elasticsearchOperations.search(query, BrandObjectDocument.class);
             List<Long> ids = new ArrayList<>();
             for (SearchHit<BrandObjectDocument> hit : hits) {
                 if (hit.getContent() != null && hit.getContent().id() != null) {
