@@ -201,10 +201,37 @@ logging:
     org.springframework.jdbc.core: DEBUG
 ---
 
+---
+
+# Non-prod: keep Elasticsearch 8 client for local Docker; disable OpenSearch auto-config.
+spring:
+  config:
+    activate:
+      on-profile: "!prod"
+  autoconfigure:
+    exclude:
+      - org.opensearch.spring.boot.autoconfigure.OpenSearchClientAutoConfiguration
+      - org.opensearch.spring.boot.autoconfigure.OpenSearchRestClientAutoConfiguration
+      - org.opensearch.spring.boot.autoconfigure.OpenSearchRestHighLevelClientAutoConfiguration
+      - org.opensearch.spring.boot.autoconfigure.ReactiveOpenSearchClientAutoConfiguration
+      - org.opensearch.spring.boot.autoconfigure.data.OpenSearchDataAutoConfiguration
+      - org.opensearch.spring.boot.autoconfigure.data.ReactiveOpenSearchRepositoriesAutoConfiguration
+
+---
+
 spring:
   config:
     activate:
       on-profile: prod
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+  opensearch:
+    uris: ${ELASTICSEARCH_URIS}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
   sql:
     init:
       mode: never
