@@ -265,7 +265,8 @@ public class MiniCollectionsStack extends Stack {
                 .vpcSubnets(SubnetSelection.builder()
                         .subnetType(serviceSubnetType)
                         .build())
-                .healthCheckGracePeriod(Duration.seconds(120))
+                // Allow time for Flyway migrations (index builds) before ALB health checks count.
+                .healthCheckGracePeriod(Duration.seconds(600))
                 .minHealthyPercent(0)
                 .maxHealthyPercent(200)
                 .circuitBreaker(DeploymentCircuitBreaker.builder()
