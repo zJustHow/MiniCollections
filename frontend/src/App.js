@@ -8,7 +8,14 @@ import {
   usesCustomHeader,
   usesMainLayout,
 } from "./utils/routeSkeleton";
-import { Suspense, useState, useEffect, useRef, useCallback } from "react";
+import {
+  Suspense,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useLayoutEffect,
+} from "react";
 import { lazyWithRetry } from "./utils/lazyWithRetry";
 import {
   Routes,
@@ -28,7 +35,6 @@ import { logout } from "./utils/authApi";
 import { scrollAppToTop } from "./utils/scroll";
 import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
-import useRouteHeaderSync from "./hooks/useRouteHeaderSync";
 import { prefetchProfilePage } from "./utils/prefetchRoutes";
 
 const ObjectList = lazyWithRetry(() => import("./components/ObjectList"));
@@ -89,11 +95,13 @@ function MainLayoutInner({
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLocale();
-  const { headerSlot } = useHeader();
+  const { headerSlot, setHeaderSlot } = useHeader();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
 
-  useRouteHeaderSync({ isAdmin, onLogout });
+  useLayoutEffect(() => {
+    setHeaderSlot(null);
+  }, [location.pathname, location.key, setHeaderSlot]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -322,7 +330,9 @@ function MainLayoutInner({
         {authLoading ? (
           <RouteSkeleton pathname={location.pathname} />
         ) : (
-          <Outlet />
+          <Suspense fallback={<RouteSkeleton pathname={location.pathname} />}>
+            <Outlet />
+          </Suspense>
         )}
       </Content>
     </Layout>

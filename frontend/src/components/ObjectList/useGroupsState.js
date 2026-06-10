@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import GroupObjectsPageHeader from "../pageHeaders/GroupObjectsPageHeader";
-import { useHeader } from "../../HeaderContext";
 import { useSearchParams } from "react-router-dom";
 import { mutateSearchParams } from "../../utils/searchParams";
 import usePagedList from "../../hooks/usePagedList";
@@ -20,7 +18,6 @@ export default function useGroupsState() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const location = useLocation();
-  const { setHeaderSlot } = useHeader();
   const [searchParams, setSearchParams] = useSearchParams();
   const searchValue = searchParams.get("q") || "";
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -75,9 +72,6 @@ export default function useGroupsState() {
 
   const handleGroupClick = (group) => {
     const returnSearch = location.search;
-    setHeaderSlot(
-      <GroupObjectsPageHeader group={group} returnSearch={returnSearch} />,
-    );
     const nextSearch = new URLSearchParams(location.search);
     nextSearch.delete("q");
     nextSearch.delete("page");

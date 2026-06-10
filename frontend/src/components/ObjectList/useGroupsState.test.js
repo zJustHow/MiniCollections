@@ -155,7 +155,6 @@ describe("useGroupsState", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "open" }));
 
-    expect(mockSetHeaderSlot).toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith(
       expect.objectContaining({ pathname: "/groups/7" }),
       expect.any(Object),

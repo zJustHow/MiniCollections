@@ -29,28 +29,38 @@ describe("resolveRouteHeader", () => {
     expect(header.props.title).toBe("profileTitle");
   });
 
-  it("uses navigation state for brand routes", () => {
-    const brand = { id: 3, name: "Acme" };
-    const header = resolveRouteHeader({
-      location: {
-        pathname: "/brands/3",
-        state: { brand, returnSearch: "?page=2" },
-      },
-      navigate,
-      t,
-      isAdmin: false,
-      onLogout,
-    });
-    expect(header.props.brand).toEqual(brand);
-    expect(header.props.returnSearch).toBe("?page=2");
-  });
+  it("returns null for entity list/detail routes so pages own their header", () => {
+    expect(
+      resolveRouteHeader({
+        location: {
+          pathname: "/brands/3",
+          state: { brand: { id: 3, name: "Acme" }, returnSearch: "?page=2" },
+        },
+        navigate,
+        t,
+        isAdmin: false,
+        onLogout,
+      }),
+    ).toBeNull();
 
-  it("returns null for object detail routes so pages own their header", () => {
     expect(
       resolveRouteHeader({
         location: {
           pathname: "/brands/3/objects/9",
           state: { brandObject: { name: "Model X" } },
+        },
+        navigate,
+        t,
+        isAdmin: false,
+        onLogout,
+      }),
+    ).toBeNull();
+
+    expect(
+      resolveRouteHeader({
+        location: {
+          pathname: "/groups/2",
+          state: { group: { id: 2, name: "My group" } },
         },
         navigate,
         t,

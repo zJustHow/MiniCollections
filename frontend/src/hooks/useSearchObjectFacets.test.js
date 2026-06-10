@@ -32,7 +32,10 @@ describe("useSearchObjectFacets", () => {
     });
 
     rerender({ enabled: false });
-    await waitFor(() => expect(result.current.searchFacets).toBeNull());
+    await waitFor(() => {
+      expect(result.current.searchFacets).toBeNull();
+      expect(result.current.facetsLoading).toBe(false);
+    });
   });
 
   test("falls back to empty facets on error", async () => {

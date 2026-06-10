@@ -125,7 +125,7 @@ describe("useBrandsState", () => {
     expect(mockSetSearchQueryClearingFilters).toHaveBeenCalledWith("bmw");
   });
 
-  test("handleBrandClick navigates and sets header slot", async () => {
+  test("handleBrandClick navigates with return search state", async () => {
     mockSearchValue = "bmw";
     const { result } = renderHook(() => useBrandsState(), { wrapper });
 
@@ -133,7 +133,6 @@ describe("useBrandsState", () => {
       result.current.handleBrandClick({ id: 9, name_en: "Mini GT" });
     });
 
-    expect(mockSetHeaderSlot).toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith(
       expect.objectContaining({ pathname: "/brands/9" }),
       expect.objectContaining({ state: expect.objectContaining({ returnSearch: "?q=bmw" }) }),

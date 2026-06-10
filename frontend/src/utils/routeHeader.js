@@ -1,6 +1,4 @@
 import { matchPath } from "react-router-dom";
-import BrandObjectsPageHeader from "../components/pageHeaders/BrandObjectsPageHeader";
-import GroupObjectsPageHeader from "../components/pageHeaders/GroupObjectsPageHeader";
 import AdminBrandPageHeader from "../components/pageHeaders/AdminBrandPageHeader";
 import ProfileRouteHeader from "../components/pageHeaders/ProfileRouteHeader";
 import { usesCustomHeader } from "./routeSkeleton";
@@ -27,37 +25,20 @@ export function resolveRouteHeader({
     );
   }
 
-  if (matchPath({ path: "/brands/:brandId", end: true }, pathname)) {
-    return (
-      <BrandObjectsPageHeader
-        brand={state.brand ?? null}
-        returnSearch={state.returnSearch ?? ""}
-        isAdmin={isAdmin}
-      />
-    );
-  }
-
   if (
+    matchPath({ path: "/brands/:brandId", end: true }, pathname) ||
     matchPath(
       { path: "/brands/:brandId/objects/:objectId", end: true },
       pathname,
     ) ||
+    matchPath({ path: "/groups/:groupId", end: true }, pathname) ||
     matchPath(
       { path: "/groups/:groupId/objects/:objectId", end: true },
       pathname,
     )
   ) {
-    // Detail pages set their own header once mounted.
+    // Entity list/detail pages set their own header once mounted.
     return null;
-  }
-
-  if (matchPath({ path: "/groups/:groupId", end: true }, pathname)) {
-    return (
-      <GroupObjectsPageHeader
-        group={state.group ?? null}
-        returnSearch={state.returnSearch ?? ""}
-      />
-    );
   }
 
   if (matchPath({ path: "/admin/brands", end: true }, pathname)) {

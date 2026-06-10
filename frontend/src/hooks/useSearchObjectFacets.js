@@ -8,6 +8,7 @@ export default function useSearchObjectFacets({ enabled, fetchFacets, deps = [] 
   useEffect(() => {
     if (!enabled) {
       setSearchFacets(null);
+      setFacetsLoading(false);
       return undefined;
     }
 
@@ -32,6 +33,7 @@ export default function useSearchObjectFacets({ enabled, fetchFacets, deps = [] 
 
     return () => {
       cancelled = true;
+      setFacetsLoading(false);
     };
   }, [enabled, ...deps]); // eslint-disable-line react-hooks/exhaustive-deps
 

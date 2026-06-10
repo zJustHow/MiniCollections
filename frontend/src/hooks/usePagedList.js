@@ -101,6 +101,14 @@ export default function usePagedList(fetchPage, options = {}) {
           return;
         }
         applyPage(response);
+      } catch {
+        applyPage({
+          content: [],
+          page: targetPage,
+          total_elements: 0,
+          total_pages: 0,
+          total_exact: true,
+        });
       } finally {
         setLoading(false);
       }

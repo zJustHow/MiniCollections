@@ -221,7 +221,14 @@ export default function GroupObjectDetailPage() {
     onEditModelSearch(keyword);
   };
 
+  const showSkeleton = loading && !userObject;
+
   useLayoutEffect(() => {
+    if (showSkeleton) {
+      setHeaderSlot(null);
+      return () => setHeaderSlot(null);
+    }
+
     setHeaderSlot(
       <div className="header-slot-bar">
         <div className="header-slot-actions">
@@ -249,7 +256,7 @@ export default function GroupObjectDetailPage() {
       </div>,
     );
     return () => setHeaderSlot(null);
-  }, [userObject]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [showSkeleton, userObject]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const purchasePrice = userObject
     ? (userObject.purchasePrice ?? userObject.purchase_price)
@@ -262,7 +269,7 @@ export default function GroupObjectDetailPage() {
     : null;
   const imageUrl = userObject?.imageUrl ?? userObject?.image_url ?? null;
 
-  if (loading && !userObject) {
+  if (showSkeleton) {
     return <ObjectDetailPageSkeleton showRelatedModel />;
   }
 

@@ -103,7 +103,14 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
     }
   };
 
+  const showSkeleton = loading && !brandObject?.brand;
+
   useLayoutEffect(() => {
+    if (showSkeleton) {
+      setHeaderSlot(null);
+      return () => setHeaderSlot(null);
+    }
+
     setHeaderSlot(
       <div className="header-slot-bar">
         <div className="header-slot-actions">
@@ -128,7 +135,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       </div>,
     );
     return () => setHeaderSlot(null);
-  }, [brandObject, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [showSkeleton, brandObject, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openAddToGroup = async () => {
     setCustomImageData(undefined);
@@ -195,7 +202,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
     }
   };
 
-  if (loading && !brandObject?.brand) {
+  if (showSkeleton) {
     return <ObjectDetailPageSkeleton />;
   }
 

@@ -135,6 +135,11 @@ export default function GroupObjectsPage() {
   }, [groupId]);
 
   useLayoutEffect(() => {
+    if (!group) {
+      setHeaderSlot(null);
+      return () => setHeaderSlot(null);
+    }
+
     setHeaderSlot(
       <GroupObjectsPageHeader
         group={group}

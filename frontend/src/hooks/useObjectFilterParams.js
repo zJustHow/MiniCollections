@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { toggleInList } from "../utils/filterParams";
 import { mutateSearchParams } from "../utils/searchParams";
 
@@ -18,7 +18,12 @@ function parseIds(searchParams, key) {
 }
 
 export default function useObjectFilterParams({ includeBrands = true } = {}) {
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigateOptions = useMemo(
+    () => ({ replace: true, state: location.state }),
+    [location.state],
+  );
 
   const selectedCategoryIds = useMemo(
     () => parseIds(searchParams, CATEGORY_KEY),
@@ -45,10 +50,10 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
           next.delete(key);
           ids.forEach((id) => next.append(key, String(id)));
         },
-        { replace: true },
+        navigateOptions,
       );
     },
-    [setSearchParams],
+    [setSearchParams, navigateOptions],
   );
 
   const clearObjectFilters = useCallback(() => {
@@ -60,9 +65,9 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
         next.delete(SCALE_KEY);
         next.delete(SERIES_KEY);
       },
-      { replace: true },
+      navigateOptions,
     );
-  }, [setSearchParams]);
+  }, [setSearchParams, navigateOptions]);
 
   const clearSearchAndFilters = useCallback(() => {
     mutateSearchParams(
@@ -75,9 +80,9 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
         next.delete(SERIES_KEY);
         PAGE_KEYS.forEach((key) => next.delete(key));
       },
-      { replace: true },
+      navigateOptions,
     );
-  }, [setSearchParams]);
+  }, [setSearchParams, navigateOptions]);
 
   const setSearchQueryClearingFilters = useCallback((query) => {
     const trimmed = (query ?? "").trim();
@@ -95,9 +100,9 @@ export default function useObjectFilterParams({ includeBrands = true } = {}) {
           next.delete(SEARCH_KEY);
         }
       },
-      { replace: true },
+      navigateOptions,
     );
-  }, [setSearchParams]);
+  }, [setSearchParams, navigateOptions]);
 
   const onToggleCategory = useCallback(
     (id) => {
