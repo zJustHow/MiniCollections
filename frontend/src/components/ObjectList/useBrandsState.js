@@ -12,6 +12,7 @@ import {
   searchBrandObjectsFacets,
 } from "../../utils/brandsApi";
 import { filterKeyFromIds } from "../../utils/filterParams";
+import { prefetchBrandObjectsPage } from "../../utils/prefetchRoutes";
 
 export default function useBrandsState({ isAdmin = false } = {}) {
   const navigate = useNavigate();
@@ -103,6 +104,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
   });
 
   const handleBrandClick = (brand) => {
+    prefetchBrandObjectsPage();
     const returnSearch = location.search;
     const nextSearch = new URLSearchParams(location.search);
     nextSearch.delete("q");

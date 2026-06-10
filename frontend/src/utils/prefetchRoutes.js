@@ -4,6 +4,8 @@ let forgotPasswordPagePrefetch;
 let loginPagePrefetch;
 let brandObjectDetailPagePrefetch;
 let groupObjectDetailPagePrefetch;
+let brandObjectsPagePrefetch;
+let groupObjectsPagePrefetch;
 
 export function prefetchProfilePage() {
   if (!profilePagePrefetch) {
@@ -50,4 +52,18 @@ export function prefetchGroupObjectDetailPage() {
     groupObjectDetailPagePrefetch = import("../pages/GroupObjectDetailPage");
   }
   return groupObjectDetailPagePrefetch;
+}
+
+export function prefetchBrandObjectsPage() {
+  if (!brandObjectsPagePrefetch) {
+    brandObjectsPagePrefetch = import("../pages/BrandObjectsPage");
+  }
+  return brandObjectsPagePrefetch;
+}
+
+export function prefetchGroupObjectsPage() {
+  if (!groupObjectsPagePrefetch) {
+    groupObjectsPagePrefetch = import("../pages/GroupObjectsPage");
+  }
+  return groupObjectsPagePrefetch;
 }

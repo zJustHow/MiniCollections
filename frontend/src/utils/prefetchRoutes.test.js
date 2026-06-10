@@ -6,6 +6,8 @@ import {
   prefetchAuthPages,
   prefetchBrandObjectDetailPage,
   prefetchGroupObjectDetailPage,
+  prefetchBrandObjectsPage,
+  prefetchGroupObjectsPage,
 } from "./prefetchRoutes";
 
 describe("prefetchProfilePage", () => {
@@ -64,6 +66,24 @@ describe("prefetchGroupObjectDetailPage", () => {
   test("returns the same in-flight import promise", async () => {
     const first = prefetchGroupObjectDetailPage();
     const second = prefetchGroupObjectDetailPage();
+    expect(first).toBe(second);
+    await first;
+  });
+});
+
+describe("prefetchBrandObjectsPage", () => {
+  test("returns the same in-flight import promise", async () => {
+    const first = prefetchBrandObjectsPage();
+    const second = prefetchBrandObjectsPage();
+    expect(first).toBe(second);
+    await first;
+  });
+});
+
+describe("prefetchGroupObjectsPage", () => {
+  test("returns the same in-flight import promise", async () => {
+    const first = prefetchGroupObjectsPage();
+    const second = prefetchGroupObjectsPage();
     expect(first).toBe(second);
     await first;
   });

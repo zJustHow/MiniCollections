@@ -3,6 +3,8 @@ import ArrowLeftOutlined from "@ant-design/icons/es/icons/ArrowLeftOutlined.js";
 import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
 import HeaderActionButton from "../HeaderActionButton";
 import ConfirmDeleteButton from "../ConfirmDeleteButton";
+import { useLocale } from "../../LocaleContext";
+import { pickLocalizedField } from "../../utils/displayLocale";
 
 export default function BrandObjectsPageHeader({
   brand,
@@ -12,6 +14,15 @@ export default function BrandObjectsPageHeader({
   onDeleteBrand,
 }) {
   const navigate = useNavigate();
+  const { locale } = useLocale();
+  const brandTitle =
+    pickLocalizedField(
+      brand,
+      { enKey: "name_en", zhKey: "name_zh", singleKey: "name" },
+      locale,
+    ) ??
+    brand?.name ??
+    null;
 
   return (
     <div className="header-slot-bar">
@@ -32,7 +43,7 @@ export default function BrandObjectsPageHeader({
           <ConfirmDeleteButton variant="header" onConfirm={onDeleteBrand} />
         </div>
       )}
-      <span className="header-slot-title">{brand?.name ?? "…"}</span>
+      <span className="header-slot-title">{brandTitle ?? "…"}</span>
     </div>
   );
 }

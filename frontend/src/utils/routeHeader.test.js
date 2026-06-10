@@ -29,38 +29,41 @@ describe("resolveRouteHeader", () => {
     expect(header.props.title).toBe("profileTitle");
   });
 
-  it("returns null for entity list/detail routes so pages own their header", () => {
-    expect(
-      resolveRouteHeader({
-        location: {
-          pathname: "/brands/3",
-          state: { brand: { id: 3, name: "Acme" }, returnSearch: "?page=2" },
-        },
-        navigate,
-        t,
-        isAdmin: false,
-        onLogout,
-      }),
-    ).toBeNull();
+  it("uses navigation state for brand and group list routes", () => {
+    const brand = { id: 3, name: "Acme" };
+    const brandHeader = resolveRouteHeader({
+      location: {
+        pathname: "/brands/3",
+        state: { brand, returnSearch: "?page=2" },
+      },
+      navigate,
+      t,
+      isAdmin: false,
+      onLogout,
+    });
+    expect(brandHeader.props.brand).toEqual(brand);
+    expect(brandHeader.props.returnSearch).toBe("?page=2");
 
+    const groupHeader = resolveRouteHeader({
+      location: {
+        pathname: "/groups/2",
+        state: { group: { id: 2, name: "My group" }, returnSearch: "?q=test" },
+      },
+      navigate,
+      t,
+      isAdmin: false,
+      onLogout,
+    });
+    expect(groupHeader.props.group).toEqual({ id: 2, name: "My group" });
+    expect(groupHeader.props.returnSearch).toBe("?q=test");
+  });
+
+  it("returns null for object detail routes so pages own their header", () => {
     expect(
       resolveRouteHeader({
         location: {
           pathname: "/brands/3/objects/9",
           state: { brandObject: { name: "Model X" } },
-        },
-        navigate,
-        t,
-        isAdmin: false,
-        onLogout,
-      }),
-    ).toBeNull();
-
-    expect(
-      resolveRouteHeader({
-        location: {
-          pathname: "/groups/2",
-          state: { group: { id: 2, name: "My group" } },
         },
         navigate,
         t,

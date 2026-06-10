@@ -12,6 +12,7 @@ import {
   createGroup,
 } from "../../utils/groupsApi";
 import { useLocale } from "../../LocaleContext";
+import { prefetchGroupObjectsPage } from "../../utils/prefetchRoutes";
 
 export default function useGroupsState() {
   const { message } = App.useApp();
@@ -71,6 +72,7 @@ export default function useGroupsState() {
   }, [location.pathname, searchValue]);
 
   const handleGroupClick = (group) => {
+    prefetchGroupObjectsPage();
     const returnSearch = location.search;
     const nextSearch = new URLSearchParams(location.search);
     nextSearch.delete("q");

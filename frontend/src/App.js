@@ -8,6 +8,7 @@ import {
   usesCustomHeader,
   usesMainLayout,
 } from "./utils/routeSkeleton";
+import { resolveRouteHeader } from "./utils/routeHeader";
 import {
   Suspense,
   useState,
@@ -122,7 +123,18 @@ function MainLayoutInner({
     location.pathname,
     { isAdmin },
   );
-  const showDefaultHeaderNav = !customHeaderRoute && !headerSlot;
+  const interimHeader =
+    !headerSlot && customHeaderRoute
+      ? resolveRouteHeader({
+          location,
+          navigate,
+          t,
+          isAdmin,
+          onLogout,
+        })
+      : null;
+  const showDefaultHeaderNav =
+    !customHeaderRoute && !headerSlot && !interimHeader;
 
   const hideProfileButton = customHeaderRoute;
 
@@ -204,6 +216,8 @@ function MainLayoutInner({
         {/* Center slot: custom page header, skeleton, or default nav tabs */}
         {headerSlot ? (
           <div className="header-slot-wrap">{headerSlot}</div>
+        ) : interimHeader ? (
+          <div className="header-slot-wrap">{interimHeader}</div>
         ) : customHeaderRoute ? (
           <div className="header-slot-wrap">
             <HeaderSlotSkeleton endActions={headerSkeletonEndActions} />
