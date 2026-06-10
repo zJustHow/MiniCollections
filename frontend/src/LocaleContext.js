@@ -19,8 +19,32 @@ import { RADIUS_PX } from "./theme/radius";
 import { buildAntdFontTokens, useNeuFontScale } from "./theme/fontScale";
 import { setCurrentLocale } from "./utils/apiClient";
 import SplashLoader from "./components/SplashLoader";
+import NoDataPlaceholder from "./components/NoDataPlaceholder";
 
 const LocaleContext = createContext(null);
+
+function AppConfigShell({ children, antdLocale, antdTheme }) {
+  const mergedLocale = useMemo(
+    () => ({
+      ...antdLocale,
+      Table: {
+        ...(antdLocale.Table ?? {}),
+        emptyText: <NoDataPlaceholder />,
+      },
+    }),
+    [antdLocale],
+  );
+
+  return (
+    <ConfigProvider
+      locale={mergedLocale}
+      wave={{ disabled: true }}
+      theme={antdTheme}
+    >
+      <App>{children}</App>
+    </ConfigProvider>
+  );
+}
 
 export function LocaleProvider({ children }) {
   const fontScale = useNeuFontScale();
@@ -128,13 +152,9 @@ export function LocaleProvider({ children }) {
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale, t }}>
-      <ConfigProvider
-        locale={antdLocale}
-        wave={{ disabled: true }}
-        theme={antdTheme}
-      >
-        <App>{children}</App>
-      </ConfigProvider>
+      <AppConfigShell antdLocale={antdLocale} antdTheme={antdTheme}>
+        {children}
+      </AppConfigShell>
     </LocaleContext.Provider>
   );
 }

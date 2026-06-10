@@ -14,6 +14,10 @@ vi.mock("./ActivePagePagination", () => ({
   default: () => <div data-testid="pagination" />,
 }));
 
+vi.mock("../NoDataPlaceholder", () => ({
+  default: () => <div data-testid="no-data-placeholder" />,
+}));
+
 describe("TabListPageBody", () => {
   test("renders browse items when not loading", () => {
     render(
@@ -63,5 +67,37 @@ describe("TabListPageBody", () => {
 
     expect(screen.getByTestId("search-content")).toBeInTheDocument();
     expect(screen.getByTestId("no-results")).toBeInTheDocument();
+  });
+
+  test("shows browse empty placeholder for empty list", () => {
+    render(
+      <TabListPageBody
+        searchActive={false}
+        spinning={false}
+        browseItems={[]}
+        renderBrowseItem={() => null}
+        browsePaginationPage={{ page: 0 }}
+        searchPaginationPage={{ page: 0 }}
+      />,
+    );
+
+    expect(screen.getByTestId("no-data-placeholder")).toBeInTheDocument();
+    expect(screen.queryByTestId("browse-loading")).not.toBeInTheDocument();
+  });
+
+  test("still renders browse section when only add card is present", () => {
+    render(
+      <TabListPageBody
+        searchActive={false}
+        spinning={false}
+        browseItems={[{ id: "__add__" }]}
+        renderBrowseItem={(item) => <div key={item.id}>add-card</div>}
+        browsePaginationPage={{ page: 0 }}
+        searchPaginationPage={{ page: 0 }}
+      />,
+    );
+
+    expect(screen.getByText("add-card")).toBeInTheDocument();
+    expect(screen.queryByTestId("no-data-placeholder")).not.toBeInTheDocument();
   });
 });

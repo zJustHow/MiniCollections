@@ -1,7 +1,24 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { App, Form } from "antd";
+import { Form } from "antd";
 import useModalForm from "./useModalForm";
+
+const mockMessageError = vi.fn();
+
+vi.mock("antd", async () => {
+  const actual = await vi.importActual("antd");
+  return {
+    ...actual,
+    App: Object.assign(actual.App, {
+      useApp: () => ({
+        message: {
+          success: vi.fn(),
+          error: mockMessageError,
+        },
+      }),
+    }),
+  };
+});
 
 function ModalFormProbe({ onSubmit, onSuccess, onClose }) {
   const { form, loading, handleOk } = useModalForm({
@@ -25,14 +42,14 @@ function ModalFormProbe({ onSubmit, onSuccess, onClose }) {
 }
 
 function renderProbe(props) {
-  return render(
-    <App>
-      <ModalFormProbe {...props} />
-    </App>,
-  );
+  return render(<ModalFormProbe {...props} />);
 }
 
 describe("useModalForm", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   test("validates before submit", async () => {
     const onSubmit = vi.fn();
     renderProbe({ onSubmit, onSuccess: vi.fn(), onClose: vi.fn() });
@@ -55,6 +72,20 @@ describe("useModalForm", () => {
       expect(onSubmit).toHaveBeenCalledWith({ name: "Alice" });
       expect(onSuccess).toHaveBeenCalled();
       expect(onClose).toHaveBeenCalled();
+    });
+  });
+
+  test("shows fallback error message when submit fails without details", async () => {
+    const onSubmit = vi.fn(async () => {
+      throw {};
+    });
+    renderProbe({ onSubmit, onSuccess: vi.fn(), onClose: vi.fn() });
+
+    await userEvent.type(screen.getByLabelText("name"), "Alice");
+    await userEvent.click(screen.getByRole("button", { name: "submit" }));
+
+    await waitFor(() => {
+      expect(mockMessageError).toHaveBeenCalledWith("failed");
     });
   });
 });

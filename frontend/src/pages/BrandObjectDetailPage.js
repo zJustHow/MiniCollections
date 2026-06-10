@@ -203,7 +203,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
   };
 
   if (showSkeleton) {
-    return <ObjectDetailPageSkeleton />;
+    return <ObjectDetailPageSkeleton showFollowOn />;
   }
 
   return (

@@ -91,6 +91,9 @@ export default {
   deleteAccountFailed: "Failed to delete account",
 
   // Brands / Groups
+  noData: "No data",
+  retry: "Retry",
+  failedToLoadMore: "Failed to load more",
   searchBrandsAndObjects: "Search brands & models",
   noSearchResults: "No results found",
   searchResultsSummary: 'Found {count} results for "{query}"',
@@ -141,8 +144,6 @@ export default {
   categoryEn: "Category (EN)",
   categoryZh: "Category (ZH)",
   series: "Series",
-  seriesEn: "Series (EN)",
-  seriesZh: "Series (ZH)",
   selectSeries: "Select series",
   addSeries: "Add Series",
   editSeries: "Edit Series",

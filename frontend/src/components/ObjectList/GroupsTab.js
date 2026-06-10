@@ -138,6 +138,11 @@ export default function GroupsTab({
           hasMore={groupsBrowse?.hasMore}
           loadingMore={groupsBrowse?.loadingMore}
           onLoadMore={groupsBrowse?.loadMore}
+          loadError={groupsBrowse?.loadError}
+          loadMoreError={groupsBrowse?.loadMoreError}
+          errorMessage={t("failedToLoadGroups")}
+          onRetry={groupsBrowse?.retry}
+          onRetryLoadMore={groupsBrowse?.retryLoadMore}
           skeletonVariant="catalog"
         />
       )}

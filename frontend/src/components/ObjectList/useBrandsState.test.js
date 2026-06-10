@@ -152,4 +152,27 @@ describe("useBrandsState", () => {
     expect(mockCombinedLoadPage).toHaveBeenCalledWith(0);
     expect(mockBrandsListLoadPage).not.toHaveBeenCalled();
   });
+
+  test("refreshBrands reloads browse list when search is inactive", () => {
+    const { result } = renderHook(() => useBrandsState(), { wrapper });
+
+    act(() => {
+      result.current.refreshBrands();
+    });
+
+    expect(mockBrandsListLoadPage).toHaveBeenCalledWith(0);
+    expect(mockCombinedLoadPage).not.toHaveBeenCalled();
+  });
+
+  test("clears filters when q param changes", async () => {
+    mockSearchValue = "bmw";
+    const { rerender } = renderHook(() => useBrandsState(), { wrapper });
+
+    await waitFor(() => expect(mockClearObjectFilters).not.toHaveBeenCalled());
+
+    mockSearchValue = "mini gt";
+    rerender();
+
+    await waitFor(() => expect(mockClearObjectFilters).toHaveBeenCalled());
+  });
 });

@@ -584,7 +584,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             <ConfirmDeleteButton
               variant="neu"
               className="profile-btn-full profile-delete-account-btn"
-              icon={<span className="confirm-delete-label">{t("deleteAccount")}</span>}
+              icon={t("deleteAccount")}
               onConfirm={handleDeleteAccount}
               confirmLabel={t("confirmDeleteAccount")}
               deleteLabel={t("deleteAccount")}

@@ -18,6 +18,7 @@ import {
   getSeriesByBrandId,
 } from "../../utils";
 import { useLocale } from "../../LocaleContext";
+import { pickSeriesName } from "../../utils/displayLocale";
 import { radius } from "../../theme/radius";
 import ImageUploadField from "../../components/ImageUploadField";
 import { neuRem } from "../../theme/fontScale";
@@ -35,7 +36,7 @@ export default function AdminBrandAddDrawer({
   onSeriesSuccess,
 }) {
   const { message } = App.useApp();
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [addType, setAddType] = useState("SERIES");
@@ -254,7 +255,7 @@ export default function AdminBrandAddDrawer({
                 placeholder={t("selectSeries")}
                 options={seriesOptions.map((s) => ({
                   value: s.id,
-                  label: s.name_en || s.name,
+                  label: pickSeriesName(s, locale),
                 }))}
               />
             </Form.Item>

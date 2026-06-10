@@ -333,6 +333,11 @@ export default function GroupObjectsPage() {
             hasMore={browseList.hasMore}
             loadingMore={browseList.loadingMore}
             onLoadMore={browseList.loadMore}
+            loadError={browseList.loadError}
+            loadMoreError={browseList.loadMoreError}
+            errorMessage={t("failedToLoadGroupModels")}
+            onRetry={browseList.retry}
+            onRetryLoadMore={browseList.retryLoadMore}
             skeletonVariant="object"
           />
         )}

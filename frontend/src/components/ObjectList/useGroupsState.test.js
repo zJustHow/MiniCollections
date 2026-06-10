@@ -61,24 +61,28 @@ vi.mock("../../LocaleContext", () => ({
   }),
 }));
 
-vi.mock("antd", () => ({
-  App: {
-    useApp: () => ({
-      message: {
-        success: mockMessageSuccess,
-        error: mockMessageError,
-      },
-    }),
-  },
-  Form: {
-    useForm: () => [
-      {
-        validateFields: mockValidateFields,
-        resetFields: vi.fn(),
-      },
-    ],
-  },
-}));
+vi.mock("antd", async () => {
+  const actual = await vi.importActual("antd");
+  return {
+    ...actual,
+    App: {
+      useApp: () => ({
+        message: {
+          success: mockMessageSuccess,
+          error: mockMessageError,
+        },
+      }),
+    },
+    Form: {
+      useForm: () => [
+        {
+          validateFields: mockValidateFields,
+          resetFields: vi.fn(),
+        },
+      ],
+    },
+  };
+});
 
 vi.mock("../../hooks/useCombinedBrandSearch", () => ({
   default: () => mockCombinedSearch,
@@ -209,6 +213,24 @@ describe("useGroupsState", () => {
       expect(mockMessageError).toHaveBeenCalledWith("create failed");
     });
     expect(mockRefreshAll).not.toHaveBeenCalled();
+  });
+
+  test("handleCreateGroup uses fallback error message", async () => {
+    mockCreateGroup.mockRejectedValue({});
+
+    render(
+      <MemoryRouter initialEntries={["/groups"]}>
+        <Routes>
+          <Route path="*" element={<GroupsProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "create" }));
+
+    await waitFor(() => {
+      expect(mockMessageError).toHaveBeenCalledWith("failedToCreateGroup");
+    });
   });
 
   test("handleGroupReorder shows error when drag fails", async () => {

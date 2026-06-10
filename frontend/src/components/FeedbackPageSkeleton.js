@@ -1,4 +1,6 @@
+import PlusOutlined from "@ant-design/icons/es/icons/PlusOutlined.js";
 import FeedbackCardSkeleton from "./FeedbackCardSkeleton";
+import { useLocale } from "../LocaleContext";
 
 export const DEFAULT_FEEDBACK_SKELETON_COUNT = 5;
 
@@ -18,6 +20,8 @@ export default function FeedbackPageSkeleton({
   showToolbar = true,
   count = DEFAULT_FEEDBACK_SKELETON_COUNT,
 }) {
+  const { t } = useLocale();
+
   return (
     <div
       className="neu-feedback-page-skeleton"
@@ -30,7 +34,10 @@ export default function FeedbackPageSkeleton({
             <span className="neu-card-skeleton-line neu-feedback-page-skeleton-btn-fill" />
           </span>
           <span className="neu-feedback-page-skeleton-btn neu-feedback-page-skeleton-btn--wide neu-feedback-page-skeleton-btn--primary">
-            <span className="neu-card-skeleton-line neu-feedback-page-skeleton-btn-fill" />
+            <span className="neu-feedback-page-skeleton-btn-measure" aria-hidden="true">
+              <PlusOutlined />
+              {t("newFeedback")}
+            </span>
           </span>
         </div>
       ) : null}

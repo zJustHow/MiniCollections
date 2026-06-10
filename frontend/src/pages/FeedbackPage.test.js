@@ -142,7 +142,7 @@ describe("FeedbackPage", () => {
     render(<FeedbackPage />);
 
     await waitFor(() => {
-      expect(screen.getByText("myFeedbackEmpty")).toBeInTheDocument();
+      expect(screen.getByText("noData")).toBeInTheDocument();
     });
   });
 

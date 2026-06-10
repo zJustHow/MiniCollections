@@ -104,16 +104,20 @@ public class UserService {
 
     public UserProfileDto getProfile(Long userId) {
         UserEntity u = getUserById(userId);
-        String email = identifierRepository.findByUserIdAndType(userId, "email")
-                .map(UserIdentifierEntity::identifier)
-                .orElse(null);
-        String phone = identifierRepository.findByUserIdAndType(userId, "phone")
-                .map(UserIdentifierEntity::identifier)
-                .orElse(null);
+        String email = null;
+        String phone = null;
+        boolean wechatBound = false;
+        for (UserIdentifierEntity identifier : identifierRepository.findByUserId(userId)) {
+            switch (identifier.type()) {
+                case "email" -> email = identifier.identifier();
+                case "phone" -> phone = identifier.identifier();
+                case "wechat_openid" -> wechatBound = true;
+                default -> { }
+            }
+        }
         boolean isAdmin = Boolean.TRUE.equals(jdbc.queryForObject(
                 "SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
                 Boolean.class, userId));
-        boolean wechatBound = identifierRepository.findByUserIdAndType(userId, "wechat_openid").isPresent();
         boolean passwordSet = u.password() != null && !u.password().isBlank();
         return new UserProfileDto(
                 u.id(), email, phone, u.displayName(), u.preferredLocale(), u.avatarUrl(),

@@ -20,7 +20,8 @@ import {
   buildFilterLayoutProps,
   resolveFilterColumnState,
 } from "../utils/objectFilterUtils";
-import { withAddCardSlot } from "../utils/listPageUtils";
+import { shouldShowNoData, withAddCardSlot } from "../utils/listPageUtils";
+import NoDataPlaceholder from "../components/NoDataPlaceholder";
 import { createLazyModal } from "../utils/lazyModal";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
@@ -253,6 +254,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   const spinning = searchActive
     ? objectsSearch.loading || facetsLoading
     : activePage.loading;
+  const showBrowseEmpty = !searchActive && shouldShowNoData(listData, { loading: spinning });
 
   return (
     <div>
@@ -296,6 +298,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
               )}
               <ActivePagePagination activePage={activePage} />
             </>
+          ) : showBrowseEmpty ? (
+            <NoDataPlaceholder />
           ) : (
             <>
               <ObjectBrowseSection loading={spinning}>

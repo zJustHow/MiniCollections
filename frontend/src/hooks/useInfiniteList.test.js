@@ -85,7 +85,7 @@ describe("useInfiniteList", () => {
     expect(fetchPage).toHaveBeenCalledWith({ page: 1, size: 2 });
   });
 
-  test("initial load failure clears items", async () => {
+  test("initial load failure exposes loadError", async () => {
     const fetchPage = vi.fn(async () => {
       throw new Error("network");
     });
@@ -97,9 +97,35 @@ describe("useInfiniteList", () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.items).toEqual([]);
     expect(result.current.totalElements).toBe(0);
+    expect(result.current.loadError).toBe(true);
   });
 
-  test("loadMore failure keeps existing items", async () => {
+  test("retry reloads after initial failure", async () => {
+    const fetchPage = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("network"))
+      .mockResolvedValueOnce({
+        content: [{ id: 1 }],
+        total_elements: 1,
+      });
+
+    const { result } = renderHook(() =>
+      useInfiniteList(fetchPage, { resetKey: "list", enabled: true }),
+    );
+
+    await waitFor(() => expect(result.current.loadError).toBe(true));
+
+    await act(async () => {
+      await result.current.retry();
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.loadError).toBe(false);
+    expect(result.current.items).toEqual([{ id: 1 }]);
+    expect(fetchPage).toHaveBeenCalledTimes(2);
+  });
+
+  test("loadMore failure keeps existing items and exposes loadMoreError", async () => {
     const fetchPage = vi.fn(async ({ page }) => {
       if (page === 0) {
         return { content: [{ id: 1 }], total_elements: 2 };
@@ -120,6 +146,7 @@ describe("useInfiniteList", () => {
 
     await waitFor(() => expect(result.current.loadingMore).toBe(false));
     expect(result.current.items).toEqual([{ id: 1 }]);
+    expect(result.current.loadMoreError).toBe(true);
   });
 
   test("reorderLocalItems keeps state when order is unchanged", async () => {

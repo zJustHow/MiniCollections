@@ -116,6 +116,7 @@
 .profile-danger-warning {
   margin: 0 0 16px;
   color: var(--neu-text-2);
+  font-size: var(--neu-fs-13);
   line-height: 1.5;
 }
 
@@ -134,14 +135,17 @@
   max-width: none;
 }
 
-.profile-delete-account-btn .confirm-delete-label,
+.profile-delete-account-btn.confirm-delete-btn--neu.neu-pressable-btn {
+  font-size: var(--neu-fs-14);
+}
+
 .profile-delete-account-btn.confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn
   .confirm-delete-label {
   writing-mode: horizontal-tb;
   text-orientation: mixed;
   letter-spacing: normal;
   text-transform: none;
-  font-size: var(--neu-fs-14);
+  font-size: inherit;
   overflow: visible;
 }
 

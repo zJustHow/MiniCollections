@@ -154,8 +154,8 @@ class AdminControllerTest {
     private static ObjectSubmissionDto sampleDto(String status) {
         return new ObjectSubmissionDto(
                 1L, 2L, "Alice", "FEEDBACK", "Name", null, null,
-                null, null, null, null, null, null, null, null,
-                null, null, null, null, null, "notes", status,
+                null, null, null, null, null, null, null,
+                null, null, null, null, null, null, "notes", status,
                 OffsetDateTime.now(), null, null);
     }
 }

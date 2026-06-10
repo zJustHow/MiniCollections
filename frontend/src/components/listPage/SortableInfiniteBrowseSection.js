@@ -11,8 +11,12 @@ import {
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
+import ListLoadError from "../ListLoadError";
+import NoDataPlaceholder from "../NoDataPlaceholder";
 import ObjectBrowseSection from "./ObjectBrowseSection";
 import InfiniteScrollSentinel from "./InfiniteScrollSentinel";
+import { shouldShowNoData } from "../../utils/listPageUtils";
+import { useLocale } from "../../LocaleContext";
 
 export default function SortableInfiniteBrowseSection({
   loading,
@@ -25,9 +29,15 @@ export default function SortableInfiniteBrowseSection({
   hasMore,
   loadingMore,
   onLoadMore,
+  loadError = false,
+  loadMoreError = false,
+  errorMessage,
+  onRetry,
+  onRetryLoadMore,
   skeletonVariant = "catalog",
   gridClassName,
 }) {
+  const { t } = useLocale();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
@@ -38,12 +48,24 @@ export default function SortableInfiniteBrowseSection({
   );
 
   const spinning = loading || orderLoading;
+  const showEmpty = shouldShowNoData(items, { loading: spinning });
+  const resolvedErrorMessage = errorMessage ?? t("failedToLoadModels");
 
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over) return;
     onDragEnd?.(active.id, over.id);
   };
+
+  if (!spinning && loadError) {
+    return (
+      <ListLoadError message={resolvedErrorMessage} onRetry={onRetry} />
+    );
+  }
+
+  if (showEmpty) {
+    return <NoDataPlaceholder />;
+  }
 
   return (
     <>
@@ -72,8 +94,15 @@ export default function SortableInfiniteBrowseSection({
               …
             </div>
           ) : null}
+          {loadMoreError ? (
+            <ListLoadError
+              className="neu-infinite-scroll-error"
+              message={t("failedToLoadMore")}
+              onRetry={onRetryLoadMore}
+            />
+          ) : null}
           <InfiniteScrollSentinel
-            enabled={hasMore}
+            enabled={hasMore && !loadMoreError}
             loading={loadingMore}
             onLoadMore={onLoadMore}
           />

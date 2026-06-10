@@ -48,14 +48,14 @@ public class SeriesService {
             throw new BrandNotFoundException();
         }
         SeriesEntity saved = seriesRepository.save(new SeriesEntity(
-                null, brandId, body.nameEn(), body.nameZh()));
+                null, brandId, body.nameEn(), trimToNull(body.nameZh())));
         return SeriesDto.from(saved, displayLocaleResolver.prefersZh(effectiveLocale));
     }
 
     public SeriesDto update(long id, SeriesBody body, String effectiveLocale) {
         SeriesEntity existing = seriesRepository.findById(id).orElseThrow(SeriesNotFoundException::new);
         SeriesEntity saved = seriesRepository.save(new SeriesEntity(
-                id, existing.brandId(), body.nameEn(), body.nameZh()));
+                id, existing.brandId(), body.nameEn(), trimToNull(body.nameZh())));
         if (brandObjectIndexService != null) {
             brandObjectIndexService.reindexForSeries(id);
         }
@@ -67,5 +67,13 @@ public class SeriesService {
             throw new SeriesNotFoundException();
         }
         seriesRepository.deleteById(id);
+    }
+
+    private static String trimToNull(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

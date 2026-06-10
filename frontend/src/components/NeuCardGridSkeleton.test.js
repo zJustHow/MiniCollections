@@ -6,7 +6,7 @@ vi.mock("./NeuCardSkeleton", () => ({
 }));
 
 vi.mock("../utils/apiClient", () => ({
-  PAGE_SIZE: 2,
+  SKELETON_CARD_COUNT: 2,
 }));
 
 describe("NeuCardGridSkeleton", () => {
@@ -34,9 +34,7 @@ describe("NeuCardGridSkeleton", () => {
     expect(
       container.querySelector(".neu-list-page-search-field-skeleton"),
     ).toBeInTheDocument();
-    expect(
-      container.querySelector(".neu-list-page-summary"),
-    ).toBeInTheDocument();
+    expect(container.querySelector(".neu-list-page-summary")).not.toBeInTheDocument();
     expect(container.querySelectorAll("[data-testid='card-skeleton']")).toHaveLength(
       2,
     );

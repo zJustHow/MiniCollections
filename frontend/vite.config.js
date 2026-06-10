@@ -107,6 +107,19 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
+          if (id.includes("@dnd-kit")) {
+            return "vendor-dnd-kit";
+          }
+          if (id.includes("@ant-design/plots")) {
+            return "vendor-plots";
+          }
+          if (
+            id.includes("/antd/") ||
+            id.includes("@ant-design/cssinjs") ||
+            id.includes("@ant-design/icons")
+          ) {
+            return "vendor-antd";
+          }
           if (id.includes("react-router")) {
             return "vendor-router";
           }

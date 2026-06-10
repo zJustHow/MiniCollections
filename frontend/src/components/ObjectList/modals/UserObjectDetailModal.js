@@ -5,6 +5,7 @@ import RelatedModelCardSkeleton from "../../RelatedModelCardSkeleton";
 import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
 import NeuFormDrawer from "../../NeuFormDrawer";
 import { Z_INDEX } from "../constants";
+import NoDataPlaceholder from "../../NoDataPlaceholder";
 import { useLocale } from "../../../LocaleContext";
 
 export default function UserObjectDetailModal({
@@ -81,7 +82,9 @@ export default function UserObjectDetailModal({
             />
           </div>
         ) : (
-          <p style={{ marginTop: 8 }}>{t("noRelatedBrandObjectFound")}</p>
+          <div style={{ marginTop: 8 }}>
+            <NoDataPlaceholder />
+          </div>
         )}
       </div>
     </NeuFormDrawer>

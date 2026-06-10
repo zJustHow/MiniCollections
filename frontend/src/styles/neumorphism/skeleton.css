@@ -114,6 +114,9 @@
 .neu-splash-loader-brand .header-logo {
   font-size: var(--neu-fs-22);
   letter-spacing: 2px;
+  /* Avoid waiting on Google Fonts during first paint */
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .neu-splash-loader-progress {
@@ -229,15 +232,31 @@
 .neu-feedback-page-skeleton-btn {
   display: block;
   flex-shrink: 0;
-  width: 40px;
-  height: 40px;
+  width: var(--neu-control-height);
+  height: var(--neu-control-height);
   background: var(--neu-bg);
   box-shadow: var(--raised-sm);
   overflow: hidden;
 }
 
 .neu-feedback-page-skeleton-btn--wide {
-  width: 132px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: var(--neu-control-height);
+  padding-inline: 15px;
+  gap: 8px;
+}
+
+.neu-feedback-page-skeleton-btn-measure {
+  visibility: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--neu-fs-14);
+  line-height: 1.5714285714285714;
+  white-space: nowrap;
 }
 
 .neu-feedback-page-skeleton-btn--primary {
@@ -260,6 +279,16 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.neu-panel:has(> .neu-table-skeleton) {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
 }
 
@@ -268,6 +297,9 @@
   display: grid;
   gap: 0;
   align-items: center;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   padding: 12px 8px;
 }
 

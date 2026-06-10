@@ -36,6 +36,9 @@ export default function ProfilePageSkeleton() {
         <ProfileSectionSkeleton fieldCount={3} />
         <ProfileSectionSkeleton fieldCount={2} />
         <ProfileSectionSkeleton fieldCount={1} />
+        <ProfileSectionSkeleton fieldCount={1} />
+        <ProfileSectionSkeleton fieldCount={1} />
+        <ProfileSectionSkeleton fieldCount={1} />
       </div>
     </div>
   );

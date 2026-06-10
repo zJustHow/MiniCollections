@@ -2,6 +2,10 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import SortableInfiniteBrowseSection from "./SortableInfiniteBrowseSection";
 
+vi.mock("../../LocaleContext", () => ({
+  useLocale: () => ({ t: (key) => key }),
+}));
+
 vi.mock("@dnd-kit/core", () => ({
   DndContext: ({ children, onDragEnd }) => (
     <div data-testid="dnd-context">
@@ -40,6 +44,23 @@ vi.mock("./InfiniteScrollSentinel", () => ({
         load more
       </button>
     ) : null,
+}));
+
+vi.mock("../NoDataPlaceholder", () => ({
+  default: () => <div data-testid="no-data-placeholder" />,
+}));
+
+vi.mock("../ListLoadError", () => ({
+  default: ({ message, onRetry }) => (
+    <div data-testid="load-error">
+      <span>{message}</span>
+      {onRetry ? (
+        <button type="button" data-testid="retry" onClick={onRetry}>
+          retry
+        </button>
+      ) : null}
+    </div>
+  ),
 }));
 
 describe("SortableInfiniteBrowseSection", () => {
@@ -82,6 +103,26 @@ describe("SortableInfiniteBrowseSection", () => {
     expect(screen.queryByText("Model A")).not.toBeInTheDocument();
   });
 
+  test("shows unified empty state when there are no items", () => {
+    render(
+      <SortableInfiniteBrowseSection
+        loading={false}
+        orderLoading={false}
+        items={[]}
+        renderItem={() => null}
+        sortableIds={[]}
+        sortEnabled={false}
+        onDragEnd={vi.fn()}
+        hasMore={false}
+        loadingMore={false}
+        onLoadMore={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId("no-data-placeholder")).toBeInTheDocument();
+    expect(screen.queryByTestId("browse-grid")).not.toBeInTheDocument();
+  });
+
   test("forwards drag end ids to callback", async () => {
     const onDragEnd = vi.fn();
 
@@ -105,5 +146,102 @@ describe("SortableInfiniteBrowseSection", () => {
 
     await userEvent.click(screen.getByTestId("simulate-drag"));
     expect(onDragEnd).toHaveBeenCalledWith(1, 2);
+  });
+
+  test("calls onLoadMore from infinite scroll sentinel", async () => {
+    const onLoadMore = vi.fn();
+
+    render(
+      <SortableInfiniteBrowseSection
+        loading={false}
+        orderLoading={false}
+        items={[{ id: 1, name: "Model A" }]}
+        renderItem={(item) => <div key={item.id}>{item.name}</div>}
+        sortableIds={[1]}
+        sortEnabled
+        onDragEnd={vi.fn()}
+        hasMore
+        loadingMore={false}
+        onLoadMore={onLoadMore}
+      />,
+    );
+
+    await userEvent.click(screen.getByTestId("load-more"));
+    expect(onLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  test("shows load error with retry instead of empty state", async () => {
+    const onRetry = vi.fn();
+
+    render(
+      <SortableInfiniteBrowseSection
+        loading={false}
+        orderLoading={false}
+        items={[]}
+        renderItem={() => null}
+        sortableIds={[]}
+        sortEnabled={false}
+        onDragEnd={vi.fn()}
+        hasMore={false}
+        loadingMore={false}
+        onLoadMore={vi.fn()}
+        loadError
+        errorMessage="failedToLoadGroups"
+        onRetry={onRetry}
+      />,
+    );
+
+    expect(screen.getByTestId("load-error")).toBeInTheDocument();
+    expect(screen.getByText("failedToLoadGroups")).toBeInTheDocument();
+    expect(screen.queryByTestId("no-data-placeholder")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId("retry"));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  test("shows load-more error with retry", async () => {
+    const onRetryLoadMore = vi.fn();
+
+    render(
+      <SortableInfiniteBrowseSection
+        loading={false}
+        orderLoading={false}
+        items={[{ id: 1, name: "Model A" }]}
+        renderItem={(item) => <div key={item.id}>{item.name}</div>}
+        sortableIds={[1]}
+        sortEnabled
+        onDragEnd={vi.fn()}
+        hasMore
+        loadingMore={false}
+        onLoadMore={vi.fn()}
+        loadMoreError
+        onRetryLoadMore={onRetryLoadMore}
+      />,
+    );
+
+    expect(screen.getByTestId("load-error")).toBeInTheDocument();
+    expect(screen.queryByTestId("load-more")).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByTestId("retry"));
+    expect(onRetryLoadMore).toHaveBeenCalledTimes(1);
+  });
+
+  test("shows loading-more indicator", () => {
+    render(
+      <SortableInfiniteBrowseSection
+        loading={false}
+        orderLoading={false}
+        items={[{ id: 1, name: "Model A" }]}
+        renderItem={(item) => <div key={item.id}>{item.name}</div>}
+        sortableIds={[1]}
+        sortEnabled
+        onDragEnd={vi.fn()}
+        hasMore
+        loadingMore
+        onLoadMore={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText("…")).toBeInTheDocument();
   });
 });

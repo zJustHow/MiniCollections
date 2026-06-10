@@ -7,7 +7,7 @@ package com.zjusthow.minicollections.elasticsearch;
 public final class BrandObjectIndexVersion {
 
     /** Increment when seed taxonomy or {@link BrandObjectDocument} denormalized fields change. */
-    public static final int CURRENT = 5;
+    public static final int CURRENT = 7;
 
     public static final String META_ID = "brand-objects";
 

@@ -76,6 +76,7 @@ export async function handleDeleteResponse(response) {
 }
 
 export const PAGE_SIZE = 48;
+export const SKELETON_CARD_COUNT = 16;
 export const FEEDBACK_PAGE_SIZE = 24;
 
 export async function fetchAllPages(fetchPage) {

@@ -3,6 +3,7 @@ package com.zjusthow.minicollections.service;
 import com.zjusthow.minicollections.elasticsearch.ViewCountElasticsearchSyncService;
 import com.zjusthow.minicollections.exception.BrandNotFoundException;
 import com.zjusthow.minicollections.exception.BrandObjectNotFoundException;
+import com.zjusthow.minicollections.exception.RateLimitExceededException;
 import com.zjusthow.minicollections.repository.BrandObjectRepository;
 import com.zjusthow.minicollections.repository.BrandRepository;
 import com.zjusthow.minicollections.repository.PageViewDailyStatsRepository;
@@ -49,6 +50,7 @@ class ViewCountServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(viewCountService, "dedupMinutes", 30);
+        ReflectionTestUtils.setField(viewCountService, "rateLimitPerVisitorPerMinute", 60);
     }
 
     @Test
@@ -80,6 +82,7 @@ class ViewCountServiceTest {
     void recordBrandView_incrementsPendingForAnonymousSession() {
         when(brandRepository.existsById(3L)).thenReturn(true);
         when(redis.opsForValue()).thenReturn(valueOps);
+        when(valueOps.increment(ViewCountKeys.rateLimitKey("anon:session-1"))).thenReturn(1L);
         when(valueOps.setIfAbsent(
                 eq(ViewCountKeys.dedupKey("brand", 3, "anon:session-1")),
                 eq("1"),
@@ -97,9 +100,26 @@ class ViewCountServiceTest {
     }
 
     @Test
+    void recordBrandView_throwsWhenRateLimitExceeded() {
+        when(brandRepository.existsById(3L)).thenReturn(true);
+        when(redis.opsForValue()).thenReturn(valueOps);
+        when(valueOps.increment(ViewCountKeys.rateLimitKey("anon:session-1"))).thenReturn(61L);
+
+        assertThrows(RateLimitExceededException.class,
+                () -> viewCountService.recordBrandView(3L, null, "session-1"));
+
+        verify(valueOps, never()).setIfAbsent(
+                eq(ViewCountKeys.dedupKey("brand", 3, "anon:session-1")),
+                anyString(),
+                anyLong(),
+                eq(TimeUnit.MINUTES));
+    }
+
+    @Test
     void recordBrandView_skipsWhenDedupRejected() {
         when(brandRepository.existsById(3L)).thenReturn(true);
         when(redis.opsForValue()).thenReturn(valueOps);
+        when(valueOps.increment(ViewCountKeys.rateLimitKey("user:alice"))).thenReturn(1L);
         when(valueOps.setIfAbsent(
                 eq(ViewCountKeys.dedupKey("brand", 3, "user:alice")),
                 eq("1"),
@@ -109,7 +129,8 @@ class ViewCountServiceTest {
 
         viewCountService.recordBrandView(3L, "alice", null);
 
-        verify(valueOps, never()).increment(anyString());
+        verify(valueOps).increment(ViewCountKeys.rateLimitKey("user:alice"));
+        verify(valueOps, never()).increment(ViewCountKeys.pendingKey("brand", 3));
         verifyNoInteractions(pageViewEventRepository);
     }
 

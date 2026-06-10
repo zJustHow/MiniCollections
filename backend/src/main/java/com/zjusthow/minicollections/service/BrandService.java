@@ -1113,14 +1113,18 @@ public class BrandService {
     public void deleteBrand(long id) {
         BrandEntity brand = brandRepository.findById(id)
                 .orElseThrow(BrandNotFoundException::new);
-        brandObjectRepository.findByBrandId(id)
-                .orElse(Collections.emptyList())
-                .forEach(this::removeBrandObject);
+        List<String> objectImageUrls = collectBrandObjectImageUrls(id);
+        userObjectRepository.clearBrandObjectReferencesByBrandId(id);
+        brandObjectRepository.deleteAllByBrandId(id);
+        if (esEnabled()) {
+            brandObjectIndexService.deleteAllByBrandId(id);
+        }
         brandRepository.deleteById(id);
         if (brandEsEnabled()) {
             brandSearchRepository.deleteById(id);
         }
         deleteStoredImage(brand.imageUrl());
+        objectImageUrls.forEach(this::deleteStoredImage);
     }
 
     public BrandObjectDto createBrandObject(long brandId, BrandObjectBody req, String effectiveLocale) {
@@ -1181,6 +1185,19 @@ public class BrandService {
             brandObjectIndexService.delete(existing.id());
         }
         deleteStoredImage(imageUrl);
+    }
+
+    private List<String> collectBrandObjectImageUrls(long brandId) {
+        List<String> urls = new ArrayList<>();
+        int offset = 0;
+        final int pageSize = 500;
+        List<String> page;
+        do {
+            page = brandObjectRepository.findImageUrlsPageByBrandId(brandId, pageSize, offset);
+            urls.addAll(page);
+            offset += pageSize;
+        } while (page.size() == pageSize);
+        return urls;
     }
 
     private void deleteStoredImage(String imageUrl) {

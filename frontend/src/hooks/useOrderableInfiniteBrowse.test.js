@@ -180,6 +180,30 @@ describe("useOrderableInfiniteBrowse", () => {
     expect(result.current.displayItems).toEqual(infiniteState.items);
   });
 
+  test("skips reorder when fetched order is unchanged", async () => {
+    const fetchOrder = vi.fn(async () => ({ ids: [1, 2] }));
+
+    const { result } = renderHook(() =>
+      useOrderableInfiniteBrowse({
+        entityKey: "groups",
+        enabled: true,
+        fetchPage: vi.fn(),
+        fetchOrder,
+        reorder: vi.fn(),
+        pageSize: 48,
+      }),
+    );
+
+    await waitFor(() => expect(result.current.orderLoading).toBe(false));
+    infiniteState.reorderLocalItems.mockClear();
+
+    await act(async () => {
+      await result.current.loadOrder();
+    });
+
+    expect(infiniteState.reorderLocalItems).not.toHaveBeenCalled();
+  });
+
   test("disables sorting when browse is disabled", async () => {
     const fetchOrder = vi.fn(async () => ({ ids: [2, 1] }));
 

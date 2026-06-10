@@ -18,6 +18,8 @@ export default function useInfiniteList(fetchPage, options = {}) {
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(() => enabled);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState(false);
   const [prevResetKey, setPrevResetKey] = useState(resetKey);
   const loadingRef = useRef(false);
   const nextUiPageRef = useRef(0);
@@ -30,6 +32,8 @@ export default function useInfiniteList(fetchPage, options = {}) {
       setItems([]);
       setTotalElements(0);
       setLoading(true);
+      setLoadError(false);
+      setLoadMoreError(false);
       nextUiPageRef.current = 0;
     }
   }
@@ -45,6 +49,7 @@ export default function useInfiniteList(fetchPage, options = {}) {
     if (!enabled) return;
     loadingRef.current = true;
     setLoading(true);
+    setLoadError(false);
     try {
       const response = await fetchBrowseChunk(
         fetchPageRef.current,
@@ -64,6 +69,7 @@ export default function useInfiniteList(fetchPage, options = {}) {
         false,
       );
       nextUiPageRef.current = 0;
+      setLoadError(true);
     } finally {
       setLoading(false);
       loadingRef.current = false;
@@ -76,6 +82,7 @@ export default function useInfiniteList(fetchPage, options = {}) {
 
     loadingRef.current = true;
     setLoadingMore(true);
+    setLoadMoreError(false);
     try {
       const uiPage = nextUiPageRef.current;
       const response = await fetchBrowseChunk(
@@ -93,7 +100,7 @@ export default function useInfiniteList(fetchPage, options = {}) {
         );
       }
     } catch {
-      // keep current items on append failure
+      setLoadMoreError(true);
     } finally {
       setLoadingMore(false);
       loadingRef.current = false;
@@ -108,6 +115,15 @@ export default function useInfiniteList(fetchPage, options = {}) {
     reservedFirstPageSlots,
     totalElements,
   ]);
+
+  const retry = useCallback(async () => {
+    nextUiPageRef.current = 0;
+    await loadInitial();
+  }, [loadInitial]);
+
+  const retryLoadMore = useCallback(async () => {
+    await loadMore();
+  }, [loadMore]);
 
   const refresh = useCallback(async () => {
     nextUiPageRef.current = 0;
@@ -133,6 +149,8 @@ export default function useInfiniteList(fetchPage, options = {}) {
       setTotalElements((current) => (current === 0 ? current : 0));
       setLoading((current) => (current === false ? current : false));
       setLoadingMore((current) => (current === false ? current : false));
+      setLoadError((current) => (current === false ? current : false));
+      setLoadMoreError((current) => (current === false ? current : false));
       nextUiPageRef.current = 0;
       return;
     }
@@ -147,8 +165,12 @@ export default function useInfiniteList(fetchPage, options = {}) {
     totalElements,
     loading,
     loadingMore,
+    loadError,
+    loadMoreError,
     hasMore,
     loadMore,
+    retry,
+    retryLoadMore,
     refresh,
     reorderLocalItems,
   };

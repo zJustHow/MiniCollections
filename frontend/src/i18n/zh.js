@@ -91,6 +91,9 @@ export default {
   deleteAccountFailed: "注销账号失败",
 
   // Brands / Groups
+  noData: "暂无数据",
+  retry: "重试",
+  failedToLoadMore: "加载更多失败",
   searchBrandsAndObjects: "搜索品牌和模型",
   noSearchResults: "未找到结果",
   searchResultsSummary: "找到 {count} 条与「{query}」相关的结果",
@@ -139,8 +142,6 @@ export default {
   categoryEn: "类别（英文）",
   categoryZh: "类别（中文）",
   series: "系列",
-  seriesEn: "系列（英文）",
-  seriesZh: "系列（中文）",
   selectSeries: "选择系列",
   addSeries: "添加系列",
   editSeries: "编辑系列",

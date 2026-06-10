@@ -1,6 +1,8 @@
 import NoSearchResults from "./NoSearchResults";
+import NoDataPlaceholder from "../NoDataPlaceholder";
 import ObjectBrowseSection from "./ObjectBrowseSection";
 import ActivePagePagination from "./ActivePagePagination";
+import { shouldShowNoData } from "../../utils/listPageUtils";
 
 export default function TabListPageBody({
   searchActive,
@@ -28,14 +30,20 @@ export default function TabListPageBody({
     );
   }
 
+  const showBrowseEmpty = shouldShowNoData(browseItems, { loading: spinning });
+
   return (
     <>
-      <ObjectBrowseSection
-        loading={spinning}
-        skeletonVariant={browseSkeletonVariant}
-      >
-        {browseItems.map(renderBrowseItem)}
-      </ObjectBrowseSection>
+      {showBrowseEmpty ? (
+        <NoDataPlaceholder />
+      ) : (
+        <ObjectBrowseSection
+          loading={spinning}
+          skeletonVariant={browseSkeletonVariant}
+        >
+          {browseItems.map(renderBrowseItem)}
+        </ObjectBrowseSection>
+      )}
       <ActivePagePagination
         activePage={browsePaginationPage}
         includeTotals={browsePaginationIncludeTotals}

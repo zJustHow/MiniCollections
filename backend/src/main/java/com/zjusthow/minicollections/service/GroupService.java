@@ -13,6 +13,7 @@ import com.zjusthow.minicollections.model.PageResponse;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.model.UserObjectSearchDto;
 import com.zjusthow.minicollections.repository.GroupRepository;
+import com.zjusthow.minicollections.repository.SortOrderBatchRepository;
 import com.zjusthow.minicollections.repository.UserObjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,6 +54,7 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final UserObjectRepository userObjectRepository;
+    private final SortOrderBatchRepository sortOrderBatchRepository;
     private final JdbcClient jdbcClient;
     private final ImageStorageService imageStorageService;
 
@@ -65,10 +67,12 @@ public class GroupService {
     public GroupService(
             GroupRepository groupRepository,
             UserObjectRepository userObjectRepository,
+            SortOrderBatchRepository sortOrderBatchRepository,
             JdbcClient jdbcClient,
             @Autowired(required = false) ImageStorageService imageStorageService) {
         this.groupRepository = groupRepository;
         this.userObjectRepository = userObjectRepository;
+        this.sortOrderBatchRepository = sortOrderBatchRepository;
         this.jdbcClient = jdbcClient;
         this.imageStorageService = imageStorageService;
     }
@@ -92,9 +96,7 @@ public class GroupService {
     @Transactional
     public void reorderGroups(Long userId, List<Long> orderedIds) {
         validateReorderIds(groupRepository.findOrderedIdsByUserId(userId), orderedIds);
-        for (int i = 0; i < orderedIds.size(); i++) {
-            groupRepository.updateSortOrder(orderedIds.get(i), userId, i);
-        }
+        sortOrderBatchRepository.updateGroupSortOrders(userId, orderedIds);
     }
 
     public OrderIdsDto getUserObjectOrder(Long userId, Long groupId) {
@@ -106,9 +108,7 @@ public class GroupService {
     public void reorderUserObjects(Long userId, Long groupId, List<Long> orderedIds) {
         verifyGroupAccess(userId, groupId);
         validateReorderIds(userObjectRepository.findOrderedIdsByGroupId(groupId), orderedIds);
-        for (int i = 0; i < orderedIds.size(); i++) {
-            userObjectRepository.updateSortOrder(orderedIds.get(i), groupId, i);
-        }
+        sortOrderBatchRepository.updateUserObjectSortOrders(groupId, orderedIds);
     }
 
     private void validateReorderIds(List<Long> existingIds, List<Long> orderedIds) {

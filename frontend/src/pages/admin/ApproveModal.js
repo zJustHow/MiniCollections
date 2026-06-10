@@ -11,10 +11,11 @@ import { useCallback, useEffect, useState } from "react";
 import dayjs from "dayjs";
 import { approveSubmission, getCategories, getScales, getSeriesByBrandId } from "../../utils";
 import { useLocale } from "../../LocaleContext";
+import { pickSeriesName } from "../../utils/displayLocale";
 import useModalForm from "../../hooks/useModalForm";
 
 export default function ApproveModal({ open, submission, onClose, onSuccess }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [categoryOptions, setCategoryOptions] = useState([]);
   const [scaleOptions, setScaleOptions] = useState([]);
   const [seriesOptions, setSeriesOptions] = useState([]);
@@ -146,7 +147,7 @@ export default function ApproveModal({ open, submission, onClose, onSuccess }) {
             placeholder={t("selectSeries")}
             options={seriesOptions.map((s) => ({
               value: s.id,
-              label: s.name_en || s.name,
+              label: pickSeriesName(s, locale),
             }))}
           />
         </Form.Item>

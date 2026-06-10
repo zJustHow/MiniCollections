@@ -12,6 +12,7 @@ import com.zjusthow.minicollections.model.GroupDto;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.entity.UserObjectEntity;
 import com.zjusthow.minicollections.repository.GroupRepository;
+import com.zjusthow.minicollections.repository.SortOrderBatchRepository;
 import com.zjusthow.minicollections.repository.UserObjectRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,6 +46,7 @@ class GroupServiceTest {
 
     @Mock GroupRepository groupRepository;
     @Mock UserObjectRepository userObjectRepository;
+    @Mock SortOrderBatchRepository sortOrderBatchRepository;
     @Mock JdbcClient jdbcClient;
     @Mock ImageStorageService imageStorageService;
 
@@ -384,9 +387,7 @@ class GroupServiceTest {
 
         groupService.reorderGroups(1L, List.of(3L, 1L, 2L));
 
-        verify(groupRepository).updateSortOrder(3L, 1L, 0);
-        verify(groupRepository).updateSortOrder(1L, 1L, 1);
-        verify(groupRepository).updateSortOrder(2L, 1L, 2);
+        verify(sortOrderBatchRepository).updateGroupSortOrders(1L, List.of(3L, 1L, 2L));
     }
 
     @Test
@@ -403,7 +404,16 @@ class GroupServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> groupService.reorderGroups(1L, List.of()));
-        verify(groupRepository, never()).updateSortOrder(any(), any(), anyInt());
+        verifyNoInteractions(sortOrderBatchRepository);
+    }
+
+    @Test
+    void reorderGroups_rejectsDuplicateOrderedIds() {
+        when(groupRepository.findOrderedIdsByUserId(1L)).thenReturn(List.of(1L, 2L));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> groupService.reorderGroups(1L, List.of(1L, 1L)));
+        verifyNoInteractions(sortOrderBatchRepository);
     }
 
     @Test
@@ -433,8 +443,7 @@ class GroupServiceTest {
 
         groupService.reorderUserObjects(1L, 5L, List.of(8L, 10L));
 
-        verify(userObjectRepository).updateSortOrder(8L, 5L, 0);
-        verify(userObjectRepository).updateSortOrder(10L, 5L, 1);
+        verify(sortOrderBatchRepository).updateUserObjectSortOrders(5L, List.of(8L, 10L));
     }
 
     @Test
@@ -445,7 +454,7 @@ class GroupServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> groupService.reorderUserObjects(1L, 5L, List.of(10L)));
-        verify(userObjectRepository, never()).updateSortOrder(any(), any(), anyInt());
+        verifyNoInteractions(sortOrderBatchRepository);
     }
 
     @Test
@@ -456,7 +465,18 @@ class GroupServiceTest {
 
         assertThrows(IllegalArgumentException.class,
                 () -> groupService.reorderUserObjects(1L, 5L, List.of()));
-        verify(userObjectRepository, never()).updateSortOrder(any(), any(), anyInt());
+        verifyNoInteractions(sortOrderBatchRepository);
+    }
+
+    @Test
+    void reorderUserObjects_rejectsDuplicateOrderedIds() {
+        when(groupRepository.findById(5L)).thenReturn(Optional.of(
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
+        when(userObjectRepository.findOrderedIdsByGroupId(5L)).thenReturn(List.of(10L, 8L));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> groupService.reorderUserObjects(1L, 5L, List.of(10L, 10L)));
+        verifyNoInteractions(sortOrderBatchRepository);
     }
 
     @Test

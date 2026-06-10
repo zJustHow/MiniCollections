@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.data.elasticsearch.core.query.Criteria;
+import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
+import org.springframework.data.elasticsearch.core.query.DeleteQuery;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -136,6 +139,15 @@ public class BrandObjectIndexService {
             return;
         }
         brandObjectSearchRepository.deleteById(id);
+    }
+
+    public void deleteAllByBrandId(long brandId) {
+        if (!isEnabled()) {
+            return;
+        }
+        CriteriaQuery query = new CriteriaQuery(new Criteria("brandId").is(brandId));
+        DeleteQuery deleteQuery = DeleteQuery.builder(query).build();
+        elasticsearchOperations.delete(deleteQuery, BrandObjectDocument.class);
     }
 
     public void reindexForBrand(long brandId) {
@@ -332,22 +344,33 @@ public class BrandObjectIndexService {
         Map<Long, ScaleEntity> scaleById = ((List<ScaleEntity>) scaleRepository.findAll())
                 .stream().collect(Collectors.toMap(ScaleEntity::id, s -> s));
 
-        List<BrandObjectEntity> all = (List<BrandObjectEntity>) brandObjectRepository.findAll();
-        List<BrandObjectDocument> docs = all.stream()
-                .map(e -> toDocument(
-                        e,
-                        brandById.get(e.brandId()),
-                        e.seriesId() != null ? seriesById.get(e.seriesId()) : null,
-                        e.categoryId() != null ? categoryById.get(e.categoryId()) : null,
-                        e.scaleId() != null ? scaleById.get(e.scaleId()) : null))
-                .toList();
-        saveInBatches(docs);
+        long indexed = 0L;
+        int offset = 0;
+        List<BrandObjectEntity> page;
+        do {
+            page = brandObjectRepository.findPageOrderedById(INDEX_BATCH_SIZE, offset);
+            if (page.isEmpty()) {
+                break;
+            }
+            List<BrandObjectDocument> docs = page.stream()
+                    .map(e -> toDocument(
+                            e,
+                            brandById.get(e.brandId()),
+                            e.seriesId() != null ? seriesById.get(e.seriesId()) : null,
+                            e.categoryId() != null ? categoryById.get(e.categoryId()) : null,
+                            e.scaleId() != null ? scaleById.get(e.scaleId()) : null))
+                    .toList();
+            saveInBatches(docs);
+            indexed += docs.size();
+            offset += INDEX_BATCH_SIZE;
+        } while (page.size() == INDEX_BATCH_SIZE);
+
         searchIndexMetaRepository.save(new SearchIndexMetaDocument(
                 BrandObjectIndexVersion.META_ID,
                 BrandObjectIndexVersion.CURRENT));
         log.info(
                 "Elasticsearch brand-objects index built ({} documents, db count {}, version {})",
-                docs.size(),
+                indexed,
                 expectedCount,
                 BrandObjectIndexVersion.CURRENT);
     }

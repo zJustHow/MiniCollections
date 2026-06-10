@@ -1,4 +1,5 @@
-import { App, Empty, Typography } from "antd";
+import { App, Typography } from "antd";
+import NoDataPlaceholder from "../components/NoDataPlaceholder";
 import NeuTag from "../components/NeuTag";
 import PlusOutlined from "@ant-design/icons/es/icons/PlusOutlined.js";
 import ReloadOutlined from "@ant-design/icons/es/icons/ReloadOutlined.js";
@@ -233,7 +234,7 @@ export default function FeedbackPage() {
       {showInitialSkeleton ? (
         <FeedbackListSkeleton />
       ) : submissions.length === 0 ? (
-        <Empty description={t("myFeedbackEmpty")} style={{ padding: 48 }} />
+        <NoDataPlaceholder />
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           {submissions.map((item) => (

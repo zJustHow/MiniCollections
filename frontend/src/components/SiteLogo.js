@@ -1,15 +1,9 @@
-export default function SiteLogo({ priority = false }) {
+import SiteLogoIcon from "./SiteLogoIcon";
+
+export default function SiteLogo() {
   return (
     <span className="header-logo-wrap">
-      <img
-        src="/icon.svg"
-        alt=""
-        className="header-logo-icon"
-        width={28}
-        height={28}
-        decoding={priority ? "sync" : "async"}
-        fetchpriority={priority ? "high" : "auto"}
-      />
+      <SiteLogoIcon className="header-logo-icon" />
       <span className="header-logo">
         Mini <span className="header-logo-accent">Collections</span>
       </span>

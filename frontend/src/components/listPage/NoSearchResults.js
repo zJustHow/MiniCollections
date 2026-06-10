@@ -1,7 +1,5 @@
-import { useLocale } from "../../LocaleContext";
-import { NO_RESULTS_STYLE } from "../../utils/listPageUtils";
+import NoDataPlaceholder from "../NoDataPlaceholder";
 
-export default function NoSearchResults({ message }) {
-  const { t } = useLocale();
-  return <div style={NO_RESULTS_STYLE}>{message ?? t("noSearchResults")}</div>;
+export default function NoSearchResults() {
+  return <NoDataPlaceholder />;
 }

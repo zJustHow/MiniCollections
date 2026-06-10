@@ -179,6 +179,14 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
+    void handleRateLimitExceededException_returnsRateLimitCode() {
+        ApiErrorResponse response = handler.handleRateLimitExceededException(
+                new RateLimitExceededException());
+
+        assertEquals("error.rate_limit_exceeded", response.code());
+    }
+
+    @Test
     void handleIllegalArgumentException_returnsBadRequestCode() {
         ApiErrorResponse response = handler.handleIllegalArgumentException(
                 new IllegalArgumentException("bad input"));

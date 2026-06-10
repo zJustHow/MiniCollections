@@ -54,7 +54,7 @@ export default function PageLoader({ variant = "splash" }) {
   }
 
   if (variant === "brandObjectDetail") {
-    return <ObjectDetailPageSkeleton />;
+    return <ObjectDetailPageSkeleton showFollowOn />;
   }
 
   if (variant === "groupObjectDetail") {

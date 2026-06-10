@@ -1,19 +1,19 @@
-import { useLayoutEffect } from "react";
+import { Suspense, useLayoutEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useHeader } from "../../HeaderContext";
-import useObjectListState from "./useObjectListState";
+import useBrandsState from "./useBrandsState";
 import BrandsTab from "./BrandsTab";
-import GroupsTab from "./GroupsTab";
+import NeuCardGridSkeleton from "../NeuCardGridSkeleton";
 import { createLazyModal } from "../../utils/lazyModal";
-import { discardUploadedImage } from "../../utils/uploadsApi";
+import { lazyWithRetry } from "../../utils/lazyWithRetry";
 
 const BrandModal = createLazyModal(() => import("./modals/BrandModal"));
-const CreateGroupModal = createLazyModal(() => import("./modals/CreateGroupModal"));
+const GroupsTabContainer = lazyWithRetry(() => import("./GroupsTabContainer"));
 
 export default function ObjectList({ isAdmin }) {
   const location = useLocation();
   const { headerSlot, setHeaderSlot } = useHeader();
-  const state = useObjectListState({ isAdmin });
+  const brandsState = useBrandsState({ isAdmin });
   const activeTab = location.pathname === "/groups" ? "groups" : "brands";
 
   useLayoutEffect(() => {
@@ -24,7 +24,6 @@ export default function ObjectList({ isAdmin }) {
 
   const {
     brands,
-    loadingBrands,
     handleBrandClick,
     handleBrandSearch,
     refreshBrands,
@@ -46,24 +45,7 @@ export default function ObjectList({ isAdmin }) {
     onToggleBrand,
     onToggleScale,
     onToggleSeries,
-    groups,
-    loadingGroups,
-    handleGroupClick,
-    handleGroupSearch,
-    handleGroupReorder,
-    groupSearchActive,
-    groupSearchResultGroups,
-    groupSearchResultObjects,
-    groupsBrowse,
-    groupCombinedSearchPage,
-    createGroupModalVisible,
-    setCreateGroupModalVisible,
-    createGroupLoading,
-    groupForm,
-    groupImageData,
-    setGroupImageData,
-    handleCreateGroup,
-  } = state;
+  } = brandsState;
 
   return (
     <>
@@ -93,22 +75,9 @@ export default function ObjectList({ isAdmin }) {
         />
       ) : null}
       {activeTab === "groups" ? (
-        <GroupsTab
-          groups={groups}
-          onSearch={handleGroupSearch}
-          onGroupClick={handleGroupClick}
-          onGroupReorder={handleGroupReorder}
-          onCreateGroup={() => {
-            groupForm.resetFields();
-            setCreateGroupModalVisible(true);
-          }}
-          searchValue={searchValue}
-          searchActive={groupSearchActive}
-          searchResultGroups={groupSearchResultGroups}
-          searchResultObjects={groupSearchResultObjects}
-          groupsBrowse={groupsBrowse}
-          combinedSearchPage={groupCombinedSearchPage}
-        />
+        <Suspense fallback={<NeuCardGridSkeleton reserveSearchRow />}>
+          <GroupsTabContainer />
+        </Suspense>
       ) : null}
 
       <BrandModal
@@ -116,20 +85,6 @@ export default function ObjectList({ isAdmin }) {
         brand={null}
         onClose={() => setBrandModalOpen(false)}
         onSuccess={refreshBrands}
-      />
-
-      <CreateGroupModal
-        visible={createGroupModalVisible}
-        onOk={handleCreateGroup}
-        onCancel={() => {
-          if (groupImageData) discardUploadedImage(groupImageData).catch(() => {});
-          setGroupImageData(null);
-          setCreateGroupModalVisible(false);
-        }}
-        confirmLoading={createGroupLoading}
-        form={groupForm}
-        imageData={groupImageData}
-        onImageChange={setGroupImageData}
       />
     </>
   );

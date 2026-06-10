@@ -7,6 +7,7 @@ import com.zjusthow.minicollections.entity.UserIdentifierEntity;
 import com.zjusthow.minicollections.entity.UserObjectEntity;
 import com.zjusthow.minicollections.exception.IdentifierExistsException;
 import com.zjusthow.minicollections.exception.UserNotFoundException;
+import com.zjusthow.minicollections.exception.InvalidCodeException;
 import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.model.UserProfileDto;
 import com.zjusthow.minicollections.service.WechatService;
@@ -257,8 +258,8 @@ class UserServiceTest {
         when(identifierRepository.findByUserIdAndType(5L, "wechat_unionid"))
                 .thenReturn(Optional.empty());
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of(
+                new UserIdentifierEntity(2L, 5L, "wechat_openid", "openid-1")));
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -321,9 +322,7 @@ class UserServiceTest {
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
         when(passwordEncoder.matches("old-pass", "hash")).thenReturn(true);
         when(passwordEncoder.encode("new-pass")).thenReturn("encoded");
-        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of());
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -382,10 +381,8 @@ class UserServiceTest {
     void getProfile_includesEmailAndAdminFlag() {
         UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(identifierRepository.findByUserIdAndType(5L, "email"))
-                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "alice@example.com")));
-        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of(
+                new UserIdentifierEntity(1L, 5L, "email", "alice@example.com")));
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -404,9 +401,7 @@ class UserServiceTest {
     void updateDisplayName_persistsAndReturnsProfile() {
         UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of());
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -454,10 +449,8 @@ class UserServiceTest {
         when(identifierRepository.findByTypeAndIdentifier("email", "alice@example.com"))
                 .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "alice@example.com")));
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(identifierRepository.findByUserIdAndType(5L, "email"))
-                .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "alice@example.com")));
-        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of(
+                new UserIdentifierEntity(1L, 5L, "email", "alice@example.com")));
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -488,8 +481,8 @@ class UserServiceTest {
                 .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "old@example.com")))
                 .thenReturn(Optional.of(new UserIdentifierEntity(1L, 5L, "email", "new@example.com")));
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of(
+                new UserIdentifierEntity(1L, 5L, "email", "new@example.com")));
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -511,8 +504,8 @@ class UserServiceTest {
                 .thenReturn(Optional.empty())
                 .thenReturn(Optional.of(new UserIdentifierEntity(2L, 5L, "phone", "13800138000")));
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of(
+                new UserIdentifierEntity(2L, 5L, "phone", "13800138000")));
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -532,9 +525,7 @@ class UserServiceTest {
     void updatePreferredLocale_persistsAndReturnsProfile() {
         UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of());
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -551,9 +542,7 @@ class UserServiceTest {
     void updateAvatarUrl_replacesStoredImageAndReturnsProfile() {
         UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", "old.png");
         when(userRepository.findById(5L)).thenReturn(Optional.of(user));
-        when(identifierRepository.findByUserIdAndType(5L, "email")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "phone")).thenReturn(Optional.empty());
-        when(identifierRepository.findByUserIdAndType(5L, "wechat_openid")).thenReturn(Optional.empty());
+        when(identifierRepository.findByUserId(5L)).thenReturn(List.of());
         when(jdbc.queryForObject(
                 eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
                 eq(Boolean.class),
@@ -597,6 +586,17 @@ class UserServiceTest {
     void resetPassword_requiresEmailOrPhone() {
         assertThrows(ValidationException.class,
                 () -> userService.resetPassword(null, null, "123456", "newpass"));
+    }
+
+    @Test
+    void resetPassword_rejectsInvalidCode() {
+        org.mockito.Mockito.doThrow(new InvalidCodeException("error.code_invalid"))
+                .when(verificationService)
+                .verifyResetCode("alice@example.com", "000000");
+
+        assertThrows(InvalidCodeException.class,
+                () -> userService.resetPassword("alice@example.com", null, "000000", "newpass"));
+        verify(userRepository, never()).updatePasswordById(any(), anyString());
     }
 
     @Test

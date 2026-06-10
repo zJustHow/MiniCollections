@@ -4,6 +4,7 @@ import com.zjusthow.minicollections.entity.UserIdentifierEntity;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -11,5 +12,6 @@ public interface UserIdentifierRepository extends ListCrudRepository<UserIdentif
     Optional<UserIdentifierEntity> findByIdentifier(String identifier);
     Optional<UserIdentifierEntity> findByTypeAndIdentifier(String type, String identifier);
     Optional<UserIdentifierEntity> findByUserIdAndType(Long userId, String type);
+    List<UserIdentifierEntity> findByUserId(Long userId);
     boolean existsByTypeAndIdentifier(String type, String identifier);
 }

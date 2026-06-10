@@ -48,6 +48,18 @@ class UserControllerTest {
     }
 
     @Test
+    void sendCode_delegatesPhoneTargetToVerificationService() throws Exception {
+        SendCodeRequest body = new SendCodeRequest("+8613800138000", "phone");
+
+        mockMvc.perform(post("/send-code")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isNoContent());
+
+        verify(verificationService).sendCode("+8613800138000", "phone");
+    }
+
+    @Test
     void signUp_verifiesCodeThenCreatesUser() throws Exception {
         RegisterBody body = new RegisterBody(
                 "alice@example.com", null, "secret12", "Alice", "en-US", "123456");

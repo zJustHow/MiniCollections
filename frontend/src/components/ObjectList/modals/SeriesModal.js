@@ -32,7 +32,7 @@ export default function SeriesModal({ open, series, brandId, onClose, onSuccess 
     if (open) {
       form.setFieldsValue(series ? {
         nameEn: series.name_en,
-        nameZh: series.name_zh,
+        nameZh: series.name_zh ?? "",
       } : {
         nameEn: "", nameZh: "",
       });

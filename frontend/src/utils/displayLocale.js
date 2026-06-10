@@ -23,3 +23,23 @@ export function pickBrandName(record, locale) {
     locale,
   );
 }
+
+export function pickSeriesName(record, locale) {
+  return pickLocalizedField(
+    record,
+    {
+      enKey: "name_en",
+      zhKey: "name_zh",
+      singleKey: "name",
+    },
+    locale,
+  );
+}
+
+export function pickSubmissionSeriesName(record, locale) {
+  return pickLocalizedField(
+    record,
+    { enKey: "series_en", zhKey: "series_zh" },
+    locale,
+  );
+}

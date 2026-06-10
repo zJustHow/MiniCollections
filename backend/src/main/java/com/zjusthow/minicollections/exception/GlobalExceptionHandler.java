@@ -150,6 +150,13 @@ public class GlobalExceptionHandler {
         return ApiErrorResponse.of("error.internal_server_error");
     }
 
+    @ExceptionHandler(RateLimitExceededException.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ApiErrorResponse handleRateLimitExceededException(RateLimitExceededException ex) {
+        log.debug("View count rate limit exceeded");
+        return ApiErrorResponse.of("error.rate_limit_exceeded");
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiErrorResponse handleIllegalArgumentException(IllegalArgumentException ex) {

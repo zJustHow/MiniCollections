@@ -124,8 +124,8 @@ class SubmissionControllerTest {
     private static ObjectSubmissionDto sampleDto() {
         return new ObjectSubmissionDto(
                 1L, 5L, "Alice", "FEEDBACK", "Name", null, null,
-                null, null, null, null, null, null, null, null,
-                null, null, null, null, null, "notes", "PENDING",
+                null, null, null, null, null, null, null,
+                null, null, null, null, null, null, "notes", "PENDING",
                 OffsetDateTime.now(), null, null);
     }
 }

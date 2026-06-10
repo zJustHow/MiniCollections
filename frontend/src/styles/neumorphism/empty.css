@@ -1,5 +1,33 @@
 /* neumorphism/empty.css */
 /* ── EMPTY ────────────────────────────────────────────────── */
+.neu-no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.neu-no-data-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  opacity: 0.55;
+}
+
+.neu-no-data-text {
+  margin: 0;
+  color: var(--neu-text-2);
+  font-size: var(--neu-fs-14);
+}
+
+.neu-infinite-scroll-error {
+  padding-top: 16px;
+  padding-bottom: 16px;
+}
+
 .ant-empty-description {
   color: var(--neu-text-2);
 }

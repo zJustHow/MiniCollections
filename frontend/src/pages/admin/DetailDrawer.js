@@ -2,6 +2,7 @@ import CheckOutlined from "@ant-design/icons/es/icons/CheckOutlined.js";
 import NeuTag from "../../components/NeuTag";
 import DetailImage from "../../components/DetailImage";
 import { useLocale } from "../../LocaleContext";
+import { pickSubmissionSeriesName } from "../../utils/displayLocale";
 import NeuFormDrawer from "../../components/NeuFormDrawer";
 import HeaderActionButton from "../../components/HeaderActionButton";
 import ConfirmDeleteButton from "../../components/ConfirmDeleteButton";
@@ -21,7 +22,7 @@ export default function DetailDrawer({
   onResolve,
   onReject,
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const getTypeLabel = useTypeLabel(t);
   const getStatusLabel = useStatusLabel(t);
   if (!submission) return null;
@@ -42,7 +43,7 @@ export default function DetailDrawer({
           { label: t("scale"), value: submission.scale },
           { label: t("category"), value: submission.category_en },
           { label: t("releaseDate"), value: submission.release_date },
-          { label: t("series"), value: submission.series_en },
+          { label: t("series"), value: pickSubmissionSeriesName(submission, locale) },
           { label: t("priceCNY"), value: submission.release_price_cny },
           { label: t("priceUSD"), value: submission.release_price_usd },
           { label: t("additionalNotes"), value: submission.notes },

@@ -181,16 +181,14 @@ class BrandServiceTest {
     @Test
     void deleteBrand_removesBrandAndObjects() {
         BrandEntity brand = new BrandEntity(3L, "BMW", null, "BMW", "logo.png", 0L);
-        BrandObjectEntity object = new BrandObjectEntity(
-                42L, "M3", null, "img.png", null, null, null, null,
-                3L, null, null, null, 0L);
         when(brandRepository.findById(3L)).thenReturn(Optional.of(brand));
-        when(brandObjectRepository.findByBrandId(3L)).thenReturn(Optional.of(List.of(object)));
+        when(brandObjectRepository.findImageUrlsPageByBrandId(3L, 500, 0))
+                .thenReturn(List.of("img.png"));
 
         brandService.deleteBrand(3L);
 
-        verify(userObjectRepository).clearBrandObjectReference(42L);
-        verify(brandObjectRepository).deleteById(42L);
+        verify(userObjectRepository).clearBrandObjectReferencesByBrandId(3L);
+        verify(brandObjectRepository).deleteAllByBrandId(3L);
         verify(brandRepository).deleteById(3L);
     }
 

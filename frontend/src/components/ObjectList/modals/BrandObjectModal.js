@@ -16,6 +16,7 @@ import {
   getSeriesByBrandId,
 } from "../../../utils";
 import { useLocale } from "../../../LocaleContext";
+import { pickSeriesName } from "../../../utils/displayLocale";
 import ImageUploadField from "../../ImageUploadField";
 import useModalForm from "../../../hooks/useModalForm";
 
@@ -27,7 +28,7 @@ export default function BrandObjectModal({
   onSuccess,
   seriesRefreshKey = 0,
 }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [imageUrl, setImageUrl] = useState(null);
   const uploadSessionRef = useRef(null);
   const [seriesOptions, setSeriesOptions] = useState([]);
@@ -200,7 +201,7 @@ export default function BrandObjectModal({
             placeholder={t("selectSeries")}
             options={seriesOptions.map((s) => ({
               value: s.id,
-              label: s.name_en || s.name,
+              label: pickSeriesName(s, locale),
             }))}
           />
         </Form.Item>

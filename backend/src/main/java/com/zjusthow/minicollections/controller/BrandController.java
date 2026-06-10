@@ -94,8 +94,7 @@ public class BrandController {
             @PathVariable Long brandId,
             @RequestHeader(value = HttpHeaders.ACCEPT_LANGUAGE, required = false) String acceptLanguage,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(seriesService.listByBrandId(
-                brandId, effectiveLocale(acceptLanguage, user)));
+        return ResponseEntity.ok(seriesService.listByBrandId(brandId, effectiveLocale(acceptLanguage, user)));
     }
 
     @GetMapping("/{brandId}/objects")

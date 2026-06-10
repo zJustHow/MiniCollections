@@ -1,5 +1,6 @@
 import { Column, Line, Pie } from "@ant-design/plots";
-import { App, Empty } from "antd";
+import { App } from "antd";
+import NoDataPlaceholder from "../components/NoDataPlaceholder";
 import { useEffect, useMemo, useRef, useState } from "react";
 import StatsPageSkeleton from "../components/StatsPageSkeleton";
 import useElementWidth from "../hooks/useElementWidth";
@@ -9,21 +10,35 @@ import { getCollectionStats } from "../utils/statsApi";
 import "../styles/stats-page.css";
 
 const STATS_CHART_HEIGHT = 280;
+const LINE_CHART_MAX_X_LABELS = 8;
 
-const CHART_COLORS = [
+/** Matches --neu-* tokens in styles/neumorphism/tokens.css */
+const NEU_CHART_COLORS = [
   "#5592cc",
-  "#3d78b8",
-  "#7c9eb2",
-  "#a8b8c4",
-  "#c5d0d8",
-  "#5a7a8c",
+  "#10ab7c",
+  "#1e90ff",
+  "#f5b759",
+  "#00bf9a",
+  "#fa5252",
+  "#ff9c6e",
+  "#b37feb",
+  "#5cdbd3",
 ];
 
-const CHART_THEME = { color: CHART_COLORS };
+const CHART_THEME = { color: NEU_CHART_COLORS };
+
+function createLineChartXLabelFilter(maxLabels) {
+  return (_datum, index, data) => {
+    const count = data?.length ?? 0;
+    if (count <= maxLabels) return true;
+    if (index === 0 || index === count - 1) return true;
+    const step = Math.ceil(count / maxLabels);
+    return index % step === 0;
+  };
+}
 
 function StatsChartCard({
   title,
-  emptyDescription,
   data,
   className = "",
   chartWrapRef,
@@ -34,7 +49,7 @@ function StatsChartCard({
       <h3 className="stats-card-title">{title}</h3>
       {data.length === 0 ? (
         <div className="stats-empty">
-          <Empty description={emptyDescription} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+          <NoDataPlaceholder />
         </div>
       ) : (
         <div className="stats-chart-wrap" ref={chartWrapRef}>
@@ -127,7 +142,6 @@ export default function CollectionStatsPage() {
         <div className="stats-grid">
           <StatsChartCard
             title={t("categoryDistribution")}
-            emptyDescription={t("statsNoCategoryData")}
             data={pieData}
           >
             <Pie
@@ -136,6 +150,7 @@ export default function CollectionStatsPage() {
               data={pieData}
               angleField="value"
               colorField="type"
+              scale={{ color: { range: NEU_CHART_COLORS } }}
               radius={0.82}
               innerRadius={0.5}
               legend={{ position: "bottom" }}
@@ -148,7 +163,6 @@ export default function CollectionStatsPage() {
 
           <StatsChartCard
             title={t("brandCounts")}
-            emptyDescription={t("statsNoBrandData")}
             data={barData}
             chartWrapRef={columnWrapRef}
           >
@@ -163,13 +177,12 @@ export default function CollectionStatsPage() {
               axis={{
                 x: { labelAutoRotate: true, labelAutoHide: true },
               }}
-              style={{ fill: CHART_COLORS[0] }}
+              style={{ fill: NEU_CHART_COLORS[0] }}
             />
           </StatsChartCard>
 
           <StatsChartCard
             title={t("purchaseTrend")}
-            emptyDescription={t("statsNoPurchaseData")}
             data={lineData}
             className="stats-card--wide"
           >
@@ -181,6 +194,12 @@ export default function CollectionStatsPage() {
               yField="value"
               smooth
               axis={{
+                x: {
+                  labelAutoHide: true,
+                  labelFilter: createLineChartXLabelFilter(
+                    LINE_CHART_MAX_X_LABELS,
+                  ),
+                },
                 y: { title: t("statsCumulativeSpend") },
               }}
             />

@@ -6,9 +6,20 @@ const COLUMN_TEMPLATES = {
   8: "60px 1fr 120px 80px 100px 110px 100px 90px",
 };
 
+function shrinkableGridTemplate(template) {
+  return template
+    .split(" ")
+    .map((track) =>
+      track === "1fr" ? "minmax(0, 1fr)" : `minmax(0, ${track})`,
+    )
+    .join(" ");
+}
+
 export default function AdminTableSkeleton({ rows = 10, columns = 6 }) {
-  const gridTemplateColumns =
-    COLUMN_TEMPLATES[columns] ?? `repeat(${columns}, minmax(0, 1fr))`;
+  const columnTemplate = COLUMN_TEMPLATES[columns];
+  const gridTemplateColumns = columnTemplate
+    ? shrinkableGridTemplate(columnTemplate)
+    : `repeat(${columns}, minmax(0, 1fr))`;
 
   return (
     <div className="neu-panel">

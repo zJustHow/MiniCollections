@@ -61,4 +61,11 @@ public interface UserObjectRepository extends ListCrudRepository<UserObjectEntit
     @Modifying
     @Query("UPDATE user_objects SET brand_object_id = NULL WHERE brand_object_id = :brandObjectId")
     void clearBrandObjectReference(@Param("brandObjectId") Long brandObjectId);
+
+    @Modifying
+    @Query("""
+            UPDATE user_objects SET brand_object_id = NULL
+            WHERE brand_object_id IN (SELECT id FROM brand_objects WHERE brand_id = :brandId)
+            """)
+    void clearBrandObjectReferencesByBrandId(@Param("brandId") Long brandId);
 }

@@ -217,6 +217,12 @@
   margin-bottom: 8px;
 }
 
+.neu-object-detail-skeleton-follow-on-btn {
+  display: block;
+  width: 100%;
+  height: 40px;
+}
+
 @media (min-width: 768px) {
   .neu-object-detail-layout {
     flex-wrap: nowrap;

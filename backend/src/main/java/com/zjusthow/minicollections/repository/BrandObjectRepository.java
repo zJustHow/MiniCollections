@@ -15,6 +15,21 @@ public interface BrandObjectRepository extends ListCrudRepository<BrandObjectEnt
 
     Optional<List<BrandObjectEntity>> findByBrandId(Long brandId);
 
+    @Query("""
+            SELECT image_url FROM brand_objects
+            WHERE brand_id = :brandId AND image_url IS NOT NULL
+            ORDER BY id ASC
+            LIMIT :limit OFFSET :offset
+            """)
+    List<String> findImageUrlsPageByBrandId(
+            @Param("brandId") Long brandId,
+            @Param("limit") int limit,
+            @Param("offset") int offset);
+
+    @Modifying
+    @Query("DELETE FROM brand_objects WHERE brand_id = :brandId")
+    void deleteAllByBrandId(@Param("brandId") Long brandId);
+
     List<BrandObjectEntity> findBySeriesId(Long seriesId);
 
     List<BrandObjectEntity> findByCategoryId(Long categoryId);

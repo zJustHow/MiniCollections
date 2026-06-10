@@ -33,6 +33,9 @@ CREATE TABLE user_identifiers
     CONSTRAINT uq_type_identifier UNIQUE (type, identifier)
 );
 
+CREATE INDEX idx_user_identifiers_identifier ON user_identifiers (identifier);
+CREATE INDEX idx_user_identifiers_user_type ON user_identifiers (user_id, type);
+
 CREATE TABLE groups
 (
     id                  SERIAL PRIMARY KEY  NOT NULL,

@@ -7,6 +7,7 @@ final class ViewCountKeys {
     static final String PENDING_PREFIX = "views:pending:";
     static final String DEDUP_PREFIX = "views:dedup:";
     static final String DAILY_UV_PREFIX = "views:daily-uv:";
+    static final String RATE_LIMIT_PREFIX = "views:rate:";
 
     private ViewCountKeys() {
     }
@@ -25,6 +26,10 @@ final class ViewCountKeys {
 
     static String dailyUvKey(String entityType, long id, java.time.LocalDate date, String visitorKey) {
         return DAILY_UV_PREFIX + entityType + ":" + id + ":" + date + ":" + visitorKey;
+    }
+
+    static String rateLimitKey(String visitorKey) {
+        return RATE_LIMIT_PREFIX + visitorKey;
     }
 
     static Optional<String> resolveVisitorKey(String username, String sessionId) {

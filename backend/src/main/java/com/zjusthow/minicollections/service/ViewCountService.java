@@ -4,6 +4,7 @@ import com.zjusthow.minicollections.elasticsearch.ViewCountElasticsearchSyncServ
 import com.zjusthow.minicollections.entity.PageViewEventEntity;
 import com.zjusthow.minicollections.exception.BrandNotFoundException;
 import com.zjusthow.minicollections.exception.BrandObjectNotFoundException;
+import com.zjusthow.minicollections.exception.RateLimitExceededException;
 import com.zjusthow.minicollections.repository.BrandObjectRepository;
 import com.zjusthow.minicollections.repository.BrandRepository;
 import com.zjusthow.minicollections.repository.PageViewDailyStatsRepository;
@@ -39,6 +40,9 @@ public class ViewCountService {
 
     @Value("${app.view-count.dedup-minutes:30}")
     private int dedupMinutes;
+
+    @Value("${app.view-count.rate-limit-per-visitor-per-minute:60}")
+    private int rateLimitPerVisitorPerMinute;
 
     public ViewCountService(
             StringRedisTemplate redis,
@@ -103,6 +107,9 @@ public class ViewCountService {
         if (visitorKey == null) {
             return;
         }
+        if (!acquireRateLimit(visitorKey)) {
+            throw new RateLimitExceededException();
+        }
         String dedupKey = ViewCountKeys.dedupKey(kind, id, visitorKey);
         Boolean accepted = redis.opsForValue().setIfAbsent(
                 dedupKey, "1", dedupMinutes, TimeUnit.MINUTES);
@@ -127,6 +134,15 @@ public class ViewCountService {
         } catch (Exception e) {
             log.warn("Failed to upsert daily view stats for {}:{}: {}", entityType, id, e.getMessage());
         }
+    }
+
+    private boolean acquireRateLimit(String visitorKey) {
+        String key = ViewCountKeys.rateLimitKey(visitorKey);
+        Long count = redis.opsForValue().increment(key);
+        if (count != null && count == 1L) {
+            redis.expire(key, 1, TimeUnit.MINUTES);
+        }
+        return count != null && count <= rateLimitPerVisitorPerMinute;
     }
 
     private boolean countDailyUniqueVisitor(String entityType, long id, String visitorKey) {

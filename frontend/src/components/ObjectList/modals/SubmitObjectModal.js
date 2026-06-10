@@ -11,6 +11,7 @@ import BugOutlined from "@ant-design/icons/es/icons/BugOutlined.js";
 import EditOutlined from "@ant-design/icons/es/icons/EditOutlined.js";
 import PlusCircleOutlined from "@ant-design/icons/es/icons/PlusCircleOutlined.js";
 import { useLocale } from "../../../LocaleContext";
+import { pickSeriesName } from "../../../utils/displayLocale";
 import { radius } from "../../../theme/radius";
 import { submitFeedback, getCategories, getScales, getSeriesByBrandId } from "../../../utils";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -19,7 +20,7 @@ import BrandSelectField, { OTHER_BRAND } from "../../BrandSelectField";
 import { neuRem } from "../../../theme/fontScale";
 
 function MissingModelForm({ form, brandValue, onBrandChange, onLoadSeries, categoryOptions, scaleOptions, seriesOptions, imageValue, onImageChange, uploadSessionRef, seedBrand }) {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   return (
     <>
       <Form.Item label={t("brand")} name="brandId">
@@ -86,7 +87,7 @@ function MissingModelForm({ form, brandValue, onBrandChange, onLoadSeries, categ
           disabled={!brandValue || brandValue === OTHER_BRAND}
           options={seriesOptions.map((s) => ({
             value: s.id,
-            label: s.name_en || s.name,
+            label: pickSeriesName(s, locale),
           }))}
         />
       </Form.Item>

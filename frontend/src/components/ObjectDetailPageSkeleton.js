@@ -2,6 +2,7 @@ import RelatedModelCardSkeleton from "./RelatedModelCardSkeleton";
 
 export default function ObjectDetailPageSkeleton({
   showRelatedModel = false,
+  showFollowOn = false,
 }) {
   return (
     <div className="neu-object-detail-skeleton" aria-busy="true">
@@ -23,6 +24,14 @@ export default function ObjectDetailPageSkeleton({
             <span className="neu-card-skeleton-line neu-object-detail-skeleton-row" />
             <span className="neu-card-skeleton-line neu-object-detail-skeleton-notes" />
           </div>
+          {showFollowOn ? (
+            <div className="neu-detail-follow-on">
+              <span
+                className="neu-card-skeleton-line neu-object-detail-skeleton-follow-on-btn"
+                aria-hidden="true"
+              />
+            </div>
+          ) : null}
           {showRelatedModel ? (
             <div className="neu-detail-follow-on">
               <span className="neu-card-skeleton-line neu-object-detail-skeleton-label" />

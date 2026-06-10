@@ -14,7 +14,10 @@ describe("AdminTableSkeleton", () => {
     render(<AdminTableSkeleton columns={7} rows={3} />);
 
     const header = document.querySelector(".neu-table-skeleton-header");
-    expect(header).toHaveStyle({ gridTemplateColumns: "60px 120px 140px 100px 1fr 110px 160px" });
+    expect(header).toHaveStyle({
+      gridTemplateColumns:
+        "minmax(0, 60px) minmax(0, 120px) minmax(0, 140px) minmax(0, 100px) minmax(0, 1fr) minmax(0, 110px) minmax(0, 160px)",
+    });
     expect(document.querySelectorAll(".neu-table-skeleton-row")).toHaveLength(3);
     expect(document.querySelectorAll(".neu-table-skeleton-cell--header")).toHaveLength(7);
   });
@@ -32,7 +35,8 @@ describe("AdminTableSkeleton", () => {
 
     const header = document.querySelector(".neu-table-skeleton-header");
     expect(header).toHaveStyle({
-      gridTemplateColumns: "60px 1fr 1fr 1fr 100px 80px",
+      gridTemplateColumns:
+        "minmax(0, 60px) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 100px) minmax(0, 80px)",
     });
   });
 });
