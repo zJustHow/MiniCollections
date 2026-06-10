@@ -324,3 +324,60 @@
   }
 }
 
+.neu-sortable-card-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.neu-sortable-card-handle-slot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  pointer-events: auto;
+}
+
+.neu-sortable-card-wrap--dragging {
+  z-index: 2;
+  opacity: 0.88;
+}
+
+.neu-sortable-card-wrap .neu-card {
+  width: 100%;
+}
+
+.neu-card-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: rgba(252, 251, 248, 0.92);
+  color: var(--neu-text-2);
+  box-shadow:
+    2px 2px 4px rgba(163, 177, 198, 0.45),
+    -2px -2px 4px rgba(255, 255, 255, 0.85);
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+}
+
+.neu-card-drag-handle:active {
+  cursor: grabbing;
+}
+
+.neu-infinite-scroll-sentinel {
+  width: 100%;
+  height: 1px;
+}
+
+.neu-infinite-scroll-loading {
+  width: 100%;
+  padding: 12px 0 24px;
+  text-align: center;
+  color: var(--neu-text-2);
+}
+

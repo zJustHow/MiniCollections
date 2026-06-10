@@ -22,6 +22,7 @@ import useCountdown from "../hooks/useCountdown";
 import { useNavigate } from "react-router-dom";
 import {
   COUNTRIES,
+  deleteAccount,
   getWechatAuthUrl,
   parsePhone,
   sendCode,
@@ -60,6 +61,8 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   const { countdown: emailCodeCountdown, start: startEmailCodeCountdown, reset: resetEmailCodeCountdown } = useCountdown();
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [localeLoading, setLocaleLoading] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
 
   const [nameForm] = Form.useForm();
   const [pwForm] = Form.useForm();
@@ -192,6 +195,25 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
     } catch (err) {
       message.error(err?.message || t("wechatBindFailed"));
       setWechatLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (profile.password_set && !deletePassword) {
+      message.error(t("currentPasswordRequired"));
+      return;
+    }
+    setDeleteLoading(true);
+    try {
+      await deleteAccount(
+        profile.password_set ? { password: deletePassword } : {},
+      );
+      message.success(t("deleteAccountSuccess"));
+      onLogout();
+    } catch (err) {
+      message.error(err?.message || t("deleteAccountFailed"));
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -542,6 +564,32 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                 </NeuButton>
               </Form.Item>
             </Form>
+          </SectionCard>
+
+          <SectionCard>
+            <SectionLabel title={t("deleteAccount")} />
+            <p className="profile-danger-warning">{t("deleteAccountWarning")}</p>
+            {profile.password_set && (
+              <Form layout="vertical">
+                <Form.Item className="profile-form-item-submit">
+                  <NeuInput.Password
+                    prefix={<LockOutlined />}
+                    placeholder={t("deleteAccountPassword")}
+                    value={deletePassword}
+                    onChange={(event) => setDeletePassword(event.target.value)}
+                    autoComplete="current-password"
+                  />
+                </Form.Item>
+              </Form>
+            )}
+            <ConfirmDeleteButton
+              variant="neu"
+              onConfirm={handleDeleteAccount}
+              confirmLabel={t("confirmDeleteAccount")}
+              deleteLabel={t("deleteAccount")}
+              loading={deleteLoading}
+              disabled={profile.password_set && !deletePassword}
+            />
           </SectionCard>
       </div>
     </div>

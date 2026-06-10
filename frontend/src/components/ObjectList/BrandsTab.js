@@ -12,7 +12,6 @@ import {
 import { withAddCardSlot } from "../../utils/listPageUtils";
 import { useLocale } from "../../LocaleContext";
 import { pickBrandName } from "../../utils/displayLocale";
-import { prefetchBrandObjectDetailPage } from "../../utils/prefetchRoutes";
 
 export default function BrandsTab({
   brands,
@@ -65,14 +64,11 @@ export default function BrandsTab({
       subtitle={pickBrandName(obj, locale)}
       nameplateVariant="object"
       imageUrl={obj.image_url}
-      onMouseEnter={prefetchBrandObjectDetailPage}
-      onFocus={prefetchBrandObjectDetailPage}
-      onClick={() => {
-        prefetchBrandObjectDetailPage();
+      onClick={() =>
         navigate(`/brands/${obj.brand_id}/objects/${obj.id}`, {
           state: { brandObject: obj },
-        });
-      }}
+        })
+      }
     />
   );
 

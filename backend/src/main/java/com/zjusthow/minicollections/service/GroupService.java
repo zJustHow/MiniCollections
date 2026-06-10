@@ -8,6 +8,7 @@ import com.zjusthow.minicollections.exception.LimitExceededException;
 import com.zjusthow.minicollections.exception.UserObjectNotFoundException;
 import com.zjusthow.minicollections.model.GroupCombinedSearchDto;
 import com.zjusthow.minicollections.model.GroupDto;
+import com.zjusthow.minicollections.model.OrderIdsDto;
 import com.zjusthow.minicollections.model.PageResponse;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.model.UserObjectSearchDto;
@@ -25,7 +26,9 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class GroupService {
@@ -80,6 +83,46 @@ public class GroupService {
                 .map(GroupDto::new)
                 .toList();
         return PageResponse.of(content, safePage, pageSize, total, true);
+    }
+
+    public OrderIdsDto getGroupOrder(Long userId) {
+        return new OrderIdsDto(groupRepository.findOrderedIdsByUserId(userId));
+    }
+
+    @Transactional
+    public void reorderGroups(Long userId, List<Long> orderedIds) {
+        validateReorderIds(groupRepository.findOrderedIdsByUserId(userId), orderedIds);
+        for (int i = 0; i < orderedIds.size(); i++) {
+            groupRepository.updateSortOrder(orderedIds.get(i), userId, i);
+        }
+    }
+
+    public OrderIdsDto getUserObjectOrder(Long userId, Long groupId) {
+        verifyGroupAccess(userId, groupId);
+        return new OrderIdsDto(userObjectRepository.findOrderedIdsByGroupId(groupId));
+    }
+
+    @Transactional
+    public void reorderUserObjects(Long userId, Long groupId, List<Long> orderedIds) {
+        verifyGroupAccess(userId, groupId);
+        validateReorderIds(userObjectRepository.findOrderedIdsByGroupId(groupId), orderedIds);
+        for (int i = 0; i < orderedIds.size(); i++) {
+            userObjectRepository.updateSortOrder(orderedIds.get(i), groupId, i);
+        }
+    }
+
+    private void validateReorderIds(List<Long> existingIds, List<Long> orderedIds) {
+        if (orderedIds == null || orderedIds.isEmpty()) {
+            throw new IllegalArgumentException("ordered_ids must not be empty");
+        }
+        if (existingIds.size() != orderedIds.size()) {
+            throw new IllegalArgumentException("ordered_ids size mismatch");
+        }
+        Set<Long> existingSet = new HashSet<>(existingIds);
+        Set<Long> orderedSet = new HashSet<>(orderedIds);
+        if (!existingSet.equals(orderedSet)) {
+            throw new IllegalArgumentException("ordered_ids must match existing items");
+        }
     }
 
     @Cacheable(
@@ -201,7 +244,12 @@ public class GroupService {
         if (current >= maxGroupsPerUser) {
             throw new LimitExceededException("error.group.limit", maxGroupsPerUser);
         }
-        GroupEntity groupEntity = new GroupEntity(null, userId, name, imageUrl);
+        GroupEntity groupEntity = new GroupEntity(
+                null,
+                userId,
+                name,
+                imageUrl,
+                groupRepository.maxSortOrderByUserId(userId) + 1);
         GroupEntity savedGroupEntity = groupRepository.save(groupEntity);
         return new GroupDto(savedGroupEntity);
     }
@@ -222,7 +270,8 @@ public class GroupService {
                 groupId,
                 userId,
                 name,
-                imageUrl
+                imageUrl,
+                groupEntity.sortOrder()
         );
         GroupEntity savedGroupEntity = groupRepository.save(updatedGroupEntity);
         return new GroupDto(savedGroupEntity);
@@ -321,7 +370,8 @@ public class GroupService {
                 imageUrl,
                 purchaseDate,
                 purchasePrice,
-                otherNotes
+                otherNotes,
+                userObjectRepository.maxSortOrderByGroupId(groupId) + 1
         );
         UserObjectEntity savedUserObjectEntity = userObjectRepository.save(userObjectEntity);
         return new UserObjectDto(savedUserObjectEntity);
@@ -355,7 +405,8 @@ public class GroupService {
                 imageUrl,
                 purchaseDate,
                 purchasePrice,
-                otherNotes
+                otherNotes,
+                existing.sortOrder()
         );
         UserObjectEntity saved = userObjectRepository.save(updated);
         return new UserObjectDto(saved);

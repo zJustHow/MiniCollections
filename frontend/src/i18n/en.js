@@ -2,6 +2,7 @@ export default {
   // Header / Nav
   brands: "Brands",
   groups: "Groups",
+  stats: "Stats",
   feedback: "Feedback",
   profile: "Profile",
   logout: "Log Out",
@@ -81,6 +82,13 @@ export default {
   preferredLanguage: "Preferred Language",
   saveLanguage: "Save Language",
   languageUpdated: "Language updated",
+  deleteAccount: "Delete Account",
+  deleteAccountPassword: "Password to confirm deletion",
+  deleteAccountWarning:
+    "This permanently deletes your account, collections, and uploaded images. This cannot be undone.",
+  confirmDeleteAccount: "CONFIRM DELETE",
+  deleteAccountSuccess: "Account deleted",
+  deleteAccountFailed: "Failed to delete account",
 
   // Brands / Groups
   searchBrandsAndObjects: "Search brands & models",
@@ -125,6 +133,7 @@ export default {
   failedToAddModel: "Failed to add model",
   groupCreated: "Group created",
   failedToCreateGroup: "Failed to create group",
+  failedToReorder: "Failed to save order",
   searchFailed: "Search failed",
 
   // Drawer detail labels
@@ -343,6 +352,8 @@ export default {
   "error.no_permission": "No permission",
   "error.bad_credentials": "Incorrect credentials",
   "error.password_incorrect": "Current password is incorrect",
+  "error.password_required": "Password is required",
+  "error.cannot_delete_last_admin": "Cannot delete the last admin account",
   "error.email_registered": "Email already registered",
   "error.phone_registered": "Phone already registered",
   "error.identifier_in_use": "{0} already in use",
@@ -368,4 +379,16 @@ export default {
   "error.conflict": "Conflict",
   "error.internal_server_error": "Internal server error",
   "error.request_failed": "Request failed",
+
+  // Collection stats
+  collectionStats: "Collection Stats",
+  statsTotalObjects: "Total items",
+  categoryDistribution: "By category",
+  brandCounts: "By brand",
+  purchaseTrend: "Cumulative purchase spend",
+  statsCumulativeSpend: "Cumulative spend",
+  statsNoCategoryData: "No categorized items yet",
+  statsNoBrandData: "No brand-linked items yet",
+  statsNoPurchaseData: "No purchase price records yet",
+  statsLoadFailed: "Failed to load stats",
 };

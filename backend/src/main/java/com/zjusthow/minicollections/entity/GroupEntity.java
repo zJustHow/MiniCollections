@@ -8,6 +8,7 @@ public record GroupEntity(
         @Id Long id,
         Long userId,
         String name,
-        String imageUrl
+        String imageUrl,
+        int sortOrder
 ) {
 }

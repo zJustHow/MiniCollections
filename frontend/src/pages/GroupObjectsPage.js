@@ -1,16 +1,17 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import useSearchParam from "../hooks/useSearchParam";
 import useRemoteModelSelectSearch from "../hooks/useRemoteModelSelectSearch";
 import useReturnSearchRef from "../hooks/useReturnSearchRef";
 import useObjectListPageSearch from "../hooks/useObjectListPageSearch";
-import useDualModePagedList from "../hooks/useDualModePagedList";
+import useDualModeBrowseList from "../hooks/useDualModeBrowseList";
 import { App, Form } from "antd";
-import NeuCard from "../components/NeuCard";
+import SortableNeuCard from "../components/listPage/SortableNeuCard";
 import GroupObjectsPageHeader from "../components/pageHeaders/GroupObjectsPageHeader";
 import ObjectListPageShell from "../components/listPage/ObjectListPageShell";
 import NoSearchResults from "../components/listPage/NoSearchResults";
 import ObjectBrowseSection from "../components/listPage/ObjectBrowseSection";
+import SortableInfiniteBrowseSection from "../components/listPage/SortableInfiniteBrowseSection";
 import ActivePagePagination from "../components/listPage/ActivePagePagination";
 import { createLazyModal } from "../utils/lazyModal";
 import { withAddCardSlot } from "../utils/listPageUtils";
@@ -19,7 +20,9 @@ import { useHeader } from "../HeaderContext";
 import { PAGE_SIZE } from "../utils/apiClient";
 import {
   getGroupById,
+  getGroupObjectOrder,
   getUserObjectsPage,
+  reorderGroupObjects,
   searchGroupObjectsPage,
   updateGroup,
   deleteGroup,
@@ -29,7 +32,6 @@ import { purchasePriceFromFormValue } from "../utils/format";
 import { discardUploadedImage } from "../utils/uploadsApi";
 import { resolveImageFieldPayload } from "../utils/imageFieldOverride";
 import { scrollAppToTop } from "../utils/scroll";
-import { prefetchGroupObjectDetailPage } from "../utils/prefetchRoutes";
 
 const AddUserObjectInGroupModal = createLazyModal(
   () => import("../components/ObjectList/modals/AddUserObjectInGroupModal"),
@@ -63,7 +65,7 @@ export default function GroupObjectsPage() {
     clearSearch: () => setSearchParam(""),
   });
 
-  const { activePage, displayObjects, objectsList } = useDualModePagedList({
+  const { browseList, searchList, displayItems } = useDualModeBrowseList({
     entityKey: groupId,
     searchActive,
     searchKeyword,
@@ -74,13 +76,22 @@ export default function GroupObjectsPage() {
       getUserObjectsPage(groupId, { size, page }),
     fetchSearchPage: ({ size, page }) =>
       searchGroupObjectsPage(groupId, searchKeyword, { size, page }),
+    fetchOrder: () => getGroupObjectOrder(groupId),
+    reorder: (orderedIds) => reorderGroupObjects(groupId, orderedIds),
     listOptions: { reservedFirstPageSlots: 1 },
   });
 
-  const listData = withAddCardSlot(
-    displayObjects,
-    !searchActive && activePage.page === 0,
+  const handleObjectReorder = useCallback(
+    async (activeId, overId) => {
+      const ok = await browseList.handleDragEnd(activeId, overId);
+      if (ok === false) {
+        message.error(t("failedToReorder"));
+      }
+    },
+    [browseList, message, t],
   );
+
+  const listData = withAddCardSlot(displayItems, !searchActive);
 
   const [editGroupVisible, setEditGroupVisible] = useState(false);
   const [editGroupLoading, setEditGroupLoading] = useState(false);
@@ -135,11 +146,6 @@ export default function GroupObjectsPage() {
   }, [groupId]);
 
   useLayoutEffect(() => {
-    if (!group) {
-      setHeaderSlot(null);
-      return () => setHeaderSlot(null);
-    }
-
     setHeaderSlot(
       <GroupObjectsPageHeader
         group={group}
@@ -206,7 +212,7 @@ export default function GroupObjectsPage() {
       try {
         await createUserObject(group.id, payload);
         message.success(t("modelAdded"));
-        objectsList.loadPage(0);
+        await browseList.refreshAll();
         setAddVisible(false);
       } catch (err) {
         message.error(err?.message || t("failedToAddModel"));
@@ -226,19 +232,70 @@ export default function GroupObjectsPage() {
     setAddVisible(true);
   };
 
-  const spinning = activePage.loading;
+  const renderBrowseItem = (item) =>
+    item.id === "__add__" ? (
+      <SortableNeuCard
+        key="__add__"
+        id="__add__"
+        sortEnabled={false}
+        add
+        name={t("addModel")}
+        onClick={openAddUserObject}
+      />
+    ) : (
+      <SortableNeuCard
+        key={item.id}
+        id={item.id}
+        sortEnabled={browseList.sortEnabled}
+        name={item.name ?? "—"}
+        subtitle={group?.name}
+        nameplateVariant="object"
+        imageUrl={item.image_url}
+        onClick={() =>
+          navigate(`/groups/${groupId}/objects/${item.id}`, {
+            state: {
+              userObject: item,
+              group,
+              returnSearch: location.search,
+            },
+          })
+        }
+      />
+    );
+
+  const renderSearchItem = (item) => (
+    <SortableNeuCard
+      key={item.id}
+      id={item.id}
+      sortEnabled={false}
+      name={item.name ?? "—"}
+      subtitle={group?.name}
+      nameplateVariant="object"
+      imageUrl={item.image_url}
+      onClick={() =>
+        navigate(`/groups/${groupId}/objects/${item.id}`, {
+          state: {
+            userObject: item,
+            group,
+            returnSearch: location.search,
+          },
+        })
+      }
+    />
+  );
+
+  const searchSpinning = searchList.loading;
   const showNoResults =
     searchActive &&
-    displayObjects.length === 0 &&
-    !activePage.loading &&
-    !spinning;
+    displayItems.length === 0 &&
+    !searchSpinning;
 
   return (
     <div>
       <ObjectListPageShell
         searchActive={searchActive}
         searchKeyword={searchKeyword}
-        resultPage={activePage}
+        resultPage={searchList}
         searchFieldId="group-objects-search"
         searchFieldName="groupObjectsSearch"
         searchPlaceholder={t("searchModels")}
@@ -246,45 +303,34 @@ export default function GroupObjectsPage() {
         onDraftChange={handleDraftChange}
         onSearch={runSearch}
       >
-        {spinning ? (
-          <ObjectBrowseSection loading />
-        ) : showNoResults ? (
-          <NoSearchResults />
-        ) : (
-          <ObjectBrowseSection>
-            {listData.map((item) =>
-              item.id === "__add__" ? (
-                <NeuCard
-                  key="__add__"
-                  add
-                  name={t("addModel")}
-                  onClick={openAddUserObject}
-                />
-              ) : (
-                <NeuCard
-                  key={item.id}
-                  name={item.name ?? "—"}
-                  subtitle={group?.name}
-                  nameplateVariant="object"
-                  imageUrl={item.image_url}
-                  onMouseEnter={prefetchGroupObjectDetailPage}
-                  onFocus={prefetchGroupObjectDetailPage}
-                  onClick={() => {
-                    prefetchGroupObjectDetailPage();
-                    navigate(`/groups/${groupId}/objects/${item.id}`, {
-                      state: {
-                        userObject: item,
-                        group,
-                        returnSearch: location.search,
-                      },
-                    });
-                  }}
-                />
-              ),
+        {searchActive ? (
+          <>
+            {searchSpinning ? (
+              <ObjectBrowseSection loading skeletonVariant="object" />
+            ) : showNoResults ? (
+              <NoSearchResults />
+            ) : (
+              <ObjectBrowseSection skeletonVariant="object">
+                {displayItems.map(renderSearchItem)}
+              </ObjectBrowseSection>
             )}
-          </ObjectBrowseSection>
+            <ActivePagePagination activePage={searchList} includeTotals={false} />
+          </>
+        ) : (
+          <SortableInfiniteBrowseSection
+            loading={browseList.loading}
+            orderLoading={browseList.orderLoading}
+            items={listData}
+            renderItem={renderBrowseItem}
+            sortableIds={browseList.orderedIds}
+            sortEnabled={browseList.sortEnabled}
+            onDragEnd={handleObjectReorder}
+            hasMore={browseList.hasMore}
+            loadingMore={browseList.loadingMore}
+            onLoadMore={browseList.loadMore}
+            skeletonVariant="object"
+          />
         )}
-        <ActivePagePagination activePage={activePage} includeTotals={false} />
       </ObjectListPageShell>
 
       <EditGroupModal

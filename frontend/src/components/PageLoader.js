@@ -25,6 +25,10 @@ export default function PageLoader({ variant = "splash" }) {
     return <AuthPageSkeleton variant="wechatCallback" />;
   }
 
+  if (variant === "stats") {
+    return <SplashLoader />;
+  }
+
   if (variant === "feedback") {
     return (
       <LazySkeleton>

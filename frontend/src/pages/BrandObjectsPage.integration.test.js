@@ -1,20 +1,26 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import { HeaderProvider } from "../HeaderContext";
+import { HeaderProvider, useHeader } from "../HeaderContext";
 import { LocaleProvider } from "../LocaleContext";
 import BrandObjectsPage from "./BrandObjectsPage";
 
 const sampleBrand = { id: 9, name: "BMW", name_en: "BMW" };
 
-function renderBrandPage(initialEntry) {
+function HeaderSlotProbe() {
+  const { headerSlot } = useHeader();
+  return <div data-testid="header-slot">{headerSlot}</div>;
+}
+
+function renderBrandPage(initialEntry, pageProps = {}) {
   return render(
     <LocaleProvider>
       <HeaderProvider>
         <MemoryRouter initialEntries={[initialEntry]}>
+          <HeaderSlotProbe />
           <Routes>
             <Route
               path="/brands/:brandId"
-              element={<BrandObjectsPage authed={false} />}
+              element={<BrandObjectsPage authed {...pageProps} />}
             />
           </Routes>
         </MemoryRouter>
@@ -88,10 +94,13 @@ describe("BrandObjectsPage integration", () => {
   });
 
   test("search switches to results without crashing", async () => {
-    renderBrandPage({
-      pathname: "/brands/9",
-      state: { brand: sampleBrand, returnSearch: "?q=bmw" },
-    });
+    renderBrandPage(
+      {
+        pathname: "/brands/9",
+        state: { brand: sampleBrand, returnSearch: "?q=bmw" },
+      },
+      { authed: false },
+    );
 
     await waitFor(() =>
       expect(screen.getByText("Browse model")).toBeInTheDocument(),
@@ -105,5 +114,26 @@ describe("BrandObjectsPage integration", () => {
       () => expect(screen.getByText("M3")).toBeInTheDocument(),
       { timeout: 3000 },
     );
+  });
+
+  test("admin header includes edit and delete actions once brand is ready", async () => {
+    renderBrandPage(
+      {
+        pathname: "/brands/9",
+        state: { brand: sampleBrand, returnSearch: "?page=2" },
+      },
+      { isAdmin: true, authed: true },
+    );
+
+    await waitFor(() =>
+      expect(screen.getByText("Browse model")).toBeInTheDocument(),
+    );
+
+    await waitFor(() => {
+      const endActions = screen
+        .getByTestId("header-slot")
+        .querySelector(".header-slot-actions-end");
+      expect(endActions?.querySelectorAll("button")).toHaveLength(2);
+    });
   });
 });

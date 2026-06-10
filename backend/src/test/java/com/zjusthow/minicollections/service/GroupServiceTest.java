@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -57,7 +58,7 @@ class GroupServiceTest {
     @Test
     void getUserObjectsPage_rejectsOtherUsersGroup() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 99L, "Private", null)));
+                new GroupEntity(5L, 99L, "Private", null, 0)));
 
         assertThrows(NoPermissionException.class,
                 () -> groupService.getUserObjectsPage(1L, 5L, 0, 24));
@@ -77,8 +78,8 @@ class GroupServiceTest {
     void getGroupsPage_returnsPagedGroups() {
         when(groupRepository.countByUserId(1L)).thenReturn(2L);
         when(groupRepository.findPageByUserId(1L, 24, 0)).thenReturn(List.of(
-                new GroupEntity(1L, 1L, "Garage", null),
-                new GroupEntity(2L, 1L, "Wishlist", null)));
+                new GroupEntity(1L, 1L, "Garage", null, 0),
+                new GroupEntity(2L, 1L, "Wishlist", null, 0)));
 
         PageResponse<GroupDto> result = groupService.getGroupsPage(1L, 0, 24);
 
@@ -90,7 +91,7 @@ class GroupServiceTest {
     @Test
     void getGroupById_returnsOwnedGroup() {
         when(groupRepository.findById(10L)).thenReturn(Optional.of(
-                new GroupEntity(10L, 1L, "Garage", "img.png")));
+                new GroupEntity(10L, 1L, "Garage", "img.png", 0)));
 
         GroupDto group = groupService.getGroupById(1L, 10L);
 
@@ -108,10 +109,10 @@ class GroupServiceTest {
     @Test
     void getUserObjectsPage_returnsGroupObjects() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
         when(userObjectRepository.countByGroupId(5L)).thenReturn(1L);
         when(userObjectRepository.findPageByGroupId(5L, 24, 0)).thenReturn(List.of(
-                new UserObjectEntity(10L, 1L, 5L, 100L, "M3", null, null, null, null)));
+                new UserObjectEntity(10L, 1L, 5L, 100L, "M3", null, null, null, null, 0)));
 
         PageResponse<UserObjectDto> result = groupService.getUserObjectsPage(1L, 5L, 0, 24);
 
@@ -123,9 +124,9 @@ class GroupServiceTest {
     @Test
     void getUserObjectById_returnsOwnedObject() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
         when(userObjectRepository.findById(10L)).thenReturn(Optional.of(
-                new UserObjectEntity(10L, 1L, 5L, 100L, "M3", "img.png", null, null, null)));
+                new UserObjectEntity(10L, 1L, 5L, 100L, "M3", "img.png", null, null, null, 0)));
 
         UserObjectDto object = groupService.getUserObjectById(1L, 5L, 10L);
 
@@ -136,9 +137,9 @@ class GroupServiceTest {
     @Test
     void getUserObjectById_rejectsObjectFromDifferentGroup() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
         when(userObjectRepository.findById(10L)).thenReturn(Optional.of(
-                new UserObjectEntity(10L, 1L, 99L, 100L, "M3", null, null, null, null)));
+                new UserObjectEntity(10L, 1L, 99L, 100L, "M3", null, null, null, null, 0)));
 
         assertThrows(NoPermissionException.class,
                 () -> groupService.getUserObjectById(1L, 5L, 10L));
@@ -147,7 +148,7 @@ class GroupServiceTest {
     @Test
     void searchUserObjectsByGroupIdPage_blankKeywordReturnsEmpty() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
 
         PageResponse<UserObjectDto> result =
                 groupService.searchUserObjectsByGroupIdPage(1L, 5L, "  ", 0, 24);
@@ -168,7 +169,7 @@ class GroupServiceTest {
     @Test
     void deleteGroupById_rejectsOtherUsersGroup() {
         when(groupRepository.findById(10L)).thenReturn(Optional.of(
-                new GroupEntity(10L, 99L, "Private", null)));
+                new GroupEntity(10L, 99L, "Private", null, 0)));
 
         assertThrows(NoPermissionException.class, () -> groupService.deleteGroupById(1L, 10L));
         verify(groupRepository, never()).deleteById(10L);
@@ -177,7 +178,7 @@ class GroupServiceTest {
     @Test
     void searchUserObjectsByGroupIdPage_returnsMatchingObjects() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
         UserObjectDto object = new UserObjectDto(10L, 1L, 5L, 100L, "M3", null, null, null, null);
         stubJdbcSearch(1L, List.of(object));
 
@@ -192,7 +193,7 @@ class GroupServiceTest {
     @Test
     void getUserObjectById_throwsWhenNotFound() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
         when(userObjectRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(UserObjectNotFoundException.class,
@@ -202,9 +203,9 @@ class GroupServiceTest {
     @Test
     void deleteGroupById_deletesGroupAndObjectImages() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", "group.png")));
+                new GroupEntity(5L, 1L, "Mine", "group.png", 0)));
         when(userObjectRepository.findByGroupId(5L)).thenReturn(Optional.of(List.of(
-                new UserObjectEntity(10L, 1L, 5L, 100L, "M3", "obj.png", null, null, null))));
+                new UserObjectEntity(10L, 1L, 5L, 100L, "M3", "obj.png", null, null, null, 0))));
 
         groupService.deleteGroupById(1L, 5L);
 
@@ -225,7 +226,7 @@ class GroupServiceTest {
     @Test
     void getGroupById_rejectsOtherUsersGroup() {
         when(groupRepository.findById(10L)).thenReturn(Optional.of(
-                new GroupEntity(10L, 99L, "Private", null)));
+                new GroupEntity(10L, 99L, "Private", null, 0)));
 
         assertThrows(NoPermissionException.class, () -> groupService.getGroupById(1L, 10L));
     }
@@ -243,7 +244,7 @@ class GroupServiceTest {
     @Test
     void createUserObject_enforcesGroupObjectLimit() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
         when(userObjectRepository.countByGroupId(5L)).thenReturn(3L);
 
         assertThrows(LimitExceededException.class, () -> groupService.createUserObject(
@@ -253,7 +254,7 @@ class GroupServiceTest {
     @Test
     void createUserObject_rejectsOtherUsersGroup() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 99L, "Private", null)));
+                new GroupEntity(5L, 99L, "Private", null, 0)));
 
         assertThrows(NoPermissionException.class, () -> groupService.createUserObject(
                 1L, 5L, 100L, "Item", null, null, null, null));
@@ -263,8 +264,9 @@ class GroupServiceTest {
     @Test
     void createUserObject_persistsForGroupOwner() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
         when(userObjectRepository.countByGroupId(5L)).thenReturn(0L);
+        when(userObjectRepository.maxSortOrderByGroupId(5L)).thenReturn(-1);
         when(userObjectRepository.save(any())).thenAnswer(invocation -> {
             UserObjectEntity entity = invocation.getArgument(0);
             return new UserObjectEntity(
@@ -276,7 +278,8 @@ class GroupServiceTest {
                     entity.imageUrl(),
                     entity.purchaseDate(),
                     entity.purchasePrice(),
-                    entity.otherNotes());
+                    entity.otherNotes(),
+                    entity.sortOrder());
         });
 
         UserObjectDto created = groupService.createUserObject(
@@ -289,7 +292,7 @@ class GroupServiceTest {
     @Test
     void updateUserObject_persistsChangesForOwner() {
         UserObjectEntity existing = new UserObjectEntity(
-                20L, 1L, 5L, 100L, "Old", "old.png", null, null, null);
+                20L, 1L, 5L, 100L, "Old", "old.png", null, null, null, 0);
         when(userObjectRepository.findById(20L)).thenReturn(Optional.of(existing));
         when(userObjectRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -304,7 +307,7 @@ class GroupServiceTest {
     @Test
     void updateUserObject_rejectsOtherUsersObject() {
         when(userObjectRepository.findById(20L)).thenReturn(Optional.of(
-                new UserObjectEntity(20L, 99L, 5L, 100L, "Theirs", "img.png", null, null, null)));
+                new UserObjectEntity(20L, 99L, 5L, 100L, "Theirs", "img.png", null, null, null, 0)));
 
         assertThrows(NoPermissionException.class,
                 () -> groupService.updateUserObject(
@@ -324,7 +327,7 @@ class GroupServiceTest {
     @Test
     void deleteUserObjectById_removesOwnedObject() {
         when(userObjectRepository.findById(20L)).thenReturn(Optional.of(
-                new UserObjectEntity(20L, 1L, 5L, 100L, "Mine", "img.png", null, null, null)));
+                new UserObjectEntity(20L, 1L, 5L, 100L, "Mine", "img.png", null, null, null, 0)));
 
         groupService.deleteUserObjectById(1L, 20L);
 
@@ -335,7 +338,7 @@ class GroupServiceTest {
     @Test
     void deleteUserObjectById_rejectsOtherUsersObject() {
         when(userObjectRepository.findById(20L)).thenReturn(Optional.of(
-                new UserObjectEntity(20L, 99L, 5L, 100L, "Theirs", "img.png", null, null, null)));
+                new UserObjectEntity(20L, 99L, 5L, 100L, "Theirs", "img.png", null, null, null, 0)));
 
         assertThrows(NoPermissionException.class,
                 () -> groupService.deleteUserObjectById(1L, 20L));
@@ -353,9 +356,10 @@ class GroupServiceTest {
     @Test
     void createGroup_persistsWhenUnderLimit() {
         when(groupRepository.countByUserId(1L)).thenReturn(1L);
+        when(groupRepository.maxSortOrderByUserId(1L)).thenReturn(2);
         when(groupRepository.save(any(GroupEntity.class))).thenAnswer(invocation -> {
             GroupEntity entity = invocation.getArgument(0);
-            return new GroupEntity(8L, entity.userId(), entity.name(), entity.imageUrl());
+            return new GroupEntity(8L, entity.userId(), entity.name(), entity.imageUrl(), entity.sortOrder());
         });
 
         GroupDto created = groupService.createGroup(1L, "Wishlist", null);
@@ -368,9 +372,97 @@ class GroupServiceTest {
     }
 
     @Test
+    void getGroupOrder_returnsOrderedIds() {
+        when(groupRepository.findOrderedIdsByUserId(1L)).thenReturn(List.of(3L, 1L, 2L));
+
+        assertEquals(List.of(3L, 1L, 2L), groupService.getGroupOrder(1L).ids());
+    }
+
+    @Test
+    void reorderGroups_updatesSortOrder() {
+        when(groupRepository.findOrderedIdsByUserId(1L)).thenReturn(List.of(1L, 2L, 3L));
+
+        groupService.reorderGroups(1L, List.of(3L, 1L, 2L));
+
+        verify(groupRepository).updateSortOrder(3L, 1L, 0);
+        verify(groupRepository).updateSortOrder(1L, 1L, 1);
+        verify(groupRepository).updateSortOrder(2L, 1L, 2);
+    }
+
+    @Test
+    void reorderGroups_rejectsMismatchedIds() {
+        when(groupRepository.findOrderedIdsByUserId(1L)).thenReturn(List.of(1L, 2L));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> groupService.reorderGroups(1L, List.of(1L, 3L)));
+    }
+
+    @Test
+    void reorderGroups_rejectsEmptyIds() {
+        when(groupRepository.findOrderedIdsByUserId(1L)).thenReturn(List.of(1L, 2L));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> groupService.reorderGroups(1L, List.of()));
+        verify(groupRepository, never()).updateSortOrder(any(), any(), anyInt());
+    }
+
+    @Test
+    void getUserObjectOrder_returnsOrderedIdsForGroup() {
+        when(groupRepository.findById(5L)).thenReturn(Optional.of(
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
+        when(userObjectRepository.findOrderedIdsByGroupId(5L)).thenReturn(List.of(10L, 8L));
+
+        assertEquals(List.of(10L, 8L), groupService.getUserObjectOrder(1L, 5L).ids());
+    }
+
+    @Test
+    void getUserObjectOrder_rejectsOtherUsersGroup() {
+        when(groupRepository.findById(5L)).thenReturn(Optional.of(
+                new GroupEntity(5L, 99L, "Private", null, 0)));
+
+        assertThrows(NoPermissionException.class,
+                () -> groupService.getUserObjectOrder(1L, 5L));
+        verify(userObjectRepository, never()).findOrderedIdsByGroupId(any());
+    }
+
+    @Test
+    void reorderUserObjects_updatesSortOrder() {
+        when(groupRepository.findById(5L)).thenReturn(Optional.of(
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
+        when(userObjectRepository.findOrderedIdsByGroupId(5L)).thenReturn(List.of(10L, 8L));
+
+        groupService.reorderUserObjects(1L, 5L, List.of(8L, 10L));
+
+        verify(userObjectRepository).updateSortOrder(8L, 5L, 0);
+        verify(userObjectRepository).updateSortOrder(10L, 5L, 1);
+    }
+
+    @Test
+    void reorderUserObjects_rejectsMismatchedIds() {
+        when(groupRepository.findById(5L)).thenReturn(Optional.of(
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
+        when(userObjectRepository.findOrderedIdsByGroupId(5L)).thenReturn(List.of(10L, 8L));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> groupService.reorderUserObjects(1L, 5L, List.of(10L)));
+        verify(userObjectRepository, never()).updateSortOrder(any(), any(), anyInt());
+    }
+
+    @Test
+    void reorderUserObjects_rejectsEmptyIds() {
+        when(groupRepository.findById(5L)).thenReturn(Optional.of(
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
+        when(userObjectRepository.findOrderedIdsByGroupId(5L)).thenReturn(List.of(10L, 8L));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> groupService.reorderUserObjects(1L, 5L, List.of()));
+        verify(userObjectRepository, never()).updateSortOrder(any(), any(), anyInt());
+    }
+
+    @Test
     void updateGroup_rejectsOtherUsersGroup() {
         when(groupRepository.findById(10L)).thenReturn(Optional.of(
-                new GroupEntity(10L, 99L, "Private", null)));
+                new GroupEntity(10L, 99L, "Private", null, 0)));
 
         assertThrows(NoPermissionException.class,
                 () -> groupService.updateGroup(1L, 10L, "Renamed", null));
@@ -378,7 +470,7 @@ class GroupServiceTest {
 
     @Test
     void updateGroup_persistsChangesForOwner() {
-        GroupEntity existing = new GroupEntity(10L, 1L, "Garage", "old.png");
+        GroupEntity existing = new GroupEntity(10L, 1L, "Garage", "old.png", 0);
         when(groupRepository.findById(10L)).thenReturn(Optional.of(existing));
         when(groupRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -386,13 +478,13 @@ class GroupServiceTest {
 
         assertEquals("Workshop", updated.name());
         verify(imageStorageService).deleteReplacedUserImage(1L, "old.png", "new.png");
-        verify(groupRepository).save(new GroupEntity(10L, 1L, "Workshop", "new.png"));
+        verify(groupRepository).save(new GroupEntity(10L, 1L, "Workshop", "new.png", 0));
     }
 
     @Test
     void deleteGroupById_removesOwnedGroup() {
         when(groupRepository.findById(5L)).thenReturn(Optional.of(
-                new GroupEntity(5L, 1L, "Mine", null)));
+                new GroupEntity(5L, 1L, "Mine", null, 0)));
         when(userObjectRepository.findByGroupId(5L)).thenReturn(Optional.of(Collections.emptyList()));
 
         groupService.deleteGroupById(1L, 5L);
@@ -412,7 +504,7 @@ class GroupServiceTest {
         stubJdbcSearch(0L, List.of());
         when(groupRepository.countSearchByKeyword(1L, "bmw")).thenReturn(1L);
         when(groupRepository.searchPageByKeyword(1L, "bmw", 1, 0))
-                .thenReturn(List.of(new GroupEntity(2L, 1L, "BMW Group", null)));
+                .thenReturn(List.of(new GroupEntity(2L, 1L, "BMW Group", null, 0)));
 
         GroupCombinedSearchDto result = groupService.crossSearchPage(1L, "bmw", 0, 48);
 
@@ -464,8 +556,8 @@ class GroupServiceTest {
         when(groupRepository.countSearchByKeyword(1L, "bmw")).thenReturn(2L);
         when(groupRepository.searchPageByKeyword(1L, "bmw", 2, 0))
                 .thenReturn(List.of(
-                        new GroupEntity(2L, 1L, "G1", null),
-                        new GroupEntity(3L, 1L, "G2", null)));
+                        new GroupEntity(2L, 1L, "G1", null, 0),
+                        new GroupEntity(3L, 1L, "G2", null, 0)));
 
         GroupCombinedSearchDto result = groupService.crossSearchPage(1L, "bmw", 0, 2);
 

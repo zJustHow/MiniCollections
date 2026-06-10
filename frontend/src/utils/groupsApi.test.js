@@ -9,6 +9,10 @@ import {
   getUserObjectsPage,
   searchGroupObjectsPage,
   searchGroupsCombinedPage,
+  getGroupOrder,
+  reorderGroups,
+  getGroupObjectOrder,
+  reorderGroupObjects,
   updateGroup,
   updateUserObject,
 } from "./groupsApi";
@@ -29,6 +33,23 @@ describe("groupsApi", () => {
     expect(url).toContain("/groups?");
     expect(url).toContain("page=1");
     expect(url).toContain("size=24");
+  });
+
+  test("getGroupOrder fetches ordered ids", async () => {
+    await getGroupOrder();
+    expect(global.fetch.mock.calls[0][0]).toBe("/groups/order");
+  });
+
+  test("reorderGroups sends ordered ids", async () => {
+    global.fetch = vi.fn(async () => ({ ok: true, status: 204 }));
+    await reorderGroups([3, 1, 2]);
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/groups/reorder",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ ordered_ids: [3, 1, 2] }),
+      }),
+    );
   });
 
   test("searchGroupsCombinedPage includes keyword", async () => {
@@ -73,6 +94,23 @@ describe("groupsApi", () => {
     const url = global.fetch.mock.calls[0][0];
     expect(url).toContain("/groups/3/objects?");
     expect(url).toContain("size=48");
+  });
+
+  test("getGroupObjectOrder fetches ordered ids", async () => {
+    await getGroupObjectOrder(3);
+    expect(global.fetch.mock.calls[0][0]).toBe("/groups/3/objects/order");
+  });
+
+  test("reorderGroupObjects sends ordered ids", async () => {
+    global.fetch = vi.fn(async () => ({ ok: true, status: 204 }));
+    await reorderGroupObjects(3, [8, 10]);
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/groups/3/objects/reorder",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify({ ordered_ids: [8, 10] }),
+      }),
+    );
   });
 
   test("getUserObjectById fetches user object detail", async () => {

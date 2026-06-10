@@ -26,6 +26,18 @@ trap cleanup INT TERM
 log "Starting Docker services (postgres / elasticsearch / redis / minio)..."
 docker compose -f "$ROOT/docker-compose.yml" up -d
 
+log "Waiting for Postgres to be ready (localhost:5433)..."
+PG_RETRIES=0
+until nc -z 127.0.0.1 5433 2>/dev/null; do
+  PG_RETRIES=$((PG_RETRIES + 1))
+  if [ "$PG_RETRIES" -ge 30 ]; then
+    echo -e "${RED}[dev]${NC} Postgres did not become ready after 60s. Check: docker compose -f \"$ROOT/docker-compose.yml\" logs db" >&2
+    exit 1
+  fi
+  sleep 2
+done
+log "Postgres is ready."
+
 log "Waiting for Elasticsearch to be ready..."
 ES_RETRIES=0
 until curl -sf "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s" > /dev/null 2>&1; do
@@ -50,6 +62,12 @@ until nc -z 127.0.0.1 6379 2>/dev/null; do
 done
 log "Redis is ready."
 
+log "Ensuring pg_trgm extension..."
+if ! docker compose -f "$ROOT/docker-compose.yml" exec -T db \
+  psql -U postgres -d minicollections -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;" >/dev/null 2>&1; then
+  warn "Could not create pg_trgm in Docker Postgres. Check: docker compose -f \"$ROOT/docker-compose.yml\" logs db"
+fi
+
 log "Uploading seed brand logos to MinIO..."
 if ! "$ROOT/scripts/upload-brand-logos.sh"; then
   warn "Brand logo upload failed (see message above). Logos may 404 until you run scripts/upload-brand-logos.sh"
@@ -63,6 +81,12 @@ cd "$BACKEND"
 if [ -f ".env" ]; then
   set -a; source .env; set +a
 fi
+# Docker Postgres is mapped to localhost:5433 (see docker-compose.yml).
+export DATABASE_URL="${DATABASE_URL:-localhost}"
+export DATABASE_PORT="${DATABASE_PORT:-5433}"
+export DATABASE_USERNAME="${DATABASE_USERNAME:-postgres}"
+export DATABASE_PASSWORD="${DATABASE_PASSWORD:-secret}"
+log "DATABASE=${DATABASE_URL}:${DATABASE_PORT}/${DATABASE_USERNAME}"
 # Keep media URLs consistent with seed SQL and MinIO on localhost:9000 (override in backend/.env if needed).
 export S3_ENDPOINT="${S3_ENDPOINT:-http://localhost:9000}"
 export S3_BUCKET="${S3_BUCKET:-minicollections-media}"

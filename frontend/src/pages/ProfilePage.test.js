@@ -95,9 +95,10 @@ vi.mock("../utils", () => ({
   updatePassword: vi.fn(),
   updateProfile: vi.fn(),
   uploadAvatar: vi.fn(),
+  deleteAccount: vi.fn(),
 }));
 
-import { updateProfile, updateLocale, updatePassword, sendCode, updateIdentifier, uploadAvatar } from "../utils";
+import { updateProfile, updateLocale, updatePassword, sendCode, updateIdentifier, uploadAvatar, deleteAccount } from "../utils";
 
 const sampleProfile = {
   display_name: "Alice",
@@ -106,6 +107,7 @@ const sampleProfile = {
   phone: null,
   preferred_locale: "en-US",
   wechat_bound: false,
+  password_set: true,
 };
 
 describe("ProfilePage", () => {
@@ -431,6 +433,31 @@ describe("ProfilePage", () => {
 
     await waitFor(() => {
       expect(messageMock.error).toHaveBeenCalledWith("invalid code");
+    });
+  });
+
+  test("deletes account and logs out", async () => {
+    vi.mocked(deleteAccount).mockResolvedValue(undefined);
+    const onLogout = vi.fn();
+
+    render(
+      <ProfilePage
+        profile={sampleProfile}
+        onProfileChange={vi.fn()}
+        onLogout={onLogout}
+      />,
+    );
+
+    await userEvent.type(
+      screen.getByPlaceholderText("deleteAccountPassword"),
+      "secret",
+    );
+    await userEvent.click(screen.getByRole("button", { name: "deleteAccount" }));
+
+    await waitFor(() => {
+      expect(deleteAccount).toHaveBeenCalledWith({ password: "secret" });
+      expect(messageMock.success).toHaveBeenCalledWith("deleteAccountSuccess");
+      expect(onLogout).toHaveBeenCalled();
     });
   });
 });

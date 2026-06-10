@@ -1,4 +1,4 @@
-import { getMe, updateIdentifier, updateLocale, updatePassword, updateProfile, uploadAvatar } from "./usersApi";
+import { getMe, updateIdentifier, updateLocale, updatePassword, updateProfile, uploadAvatar, deleteAccount } from "./usersApi";
 import { TOKEN_KEY } from "./apiClient";
 
 describe("usersApi", () => {
@@ -73,5 +73,18 @@ describe("usersApi", () => {
     );
     const formData = global.fetch.mock.calls[0][1].body;
     expect(formData.get("file")).toBe(file);
+  });
+
+  test("deleteAccount sends DELETE with password", async () => {
+    global.fetch = vi.fn(async () => ({ ok: true, status: 204 }));
+    await deleteAccount({ password: "secret" });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      "/users/me",
+      expect.objectContaining({
+        method: "DELETE",
+        body: JSON.stringify({ password: "secret" }),
+      }),
+    );
   });
 });

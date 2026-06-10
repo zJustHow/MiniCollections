@@ -67,7 +67,7 @@ class ImageUploadControllerTest {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "avatar.png", "image/png", new byte[] {3, 4});
         UserProfileDto profile = new UserProfileDto(
-                5L, "alice@example.com", null, "Alice", "en-US", "avatar.png", false, false);
+                5L, "alice@example.com", null, "Alice", "en-US", "avatar.png", false, false, true);
         when(imageStorageService.uploadUserImage(eq(5L), org.mockito.ArgumentMatchers.any()))
                 .thenReturn("avatar.png");
         when(userService.updateAvatarUrl(5L, "avatar.png")).thenReturn(profile);

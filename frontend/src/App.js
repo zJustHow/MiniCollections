@@ -6,7 +6,6 @@ import { Layout, Avatar } from "antd";
 import {
   resolveHeaderSkeletonEndActions,
   usesCustomHeader,
-  usesMainLayout,
 } from "./utils/routeSkeleton";
 import { resolveRouteHeader } from "./utils/routeHeader";
 import {
@@ -75,6 +74,9 @@ const AdminScalesPage = lazyWithRetry(
   () => import("./pages/admin/AdminScalesPage"),
 );
 const FeedbackPage = lazyWithRetry(() => import("./pages/FeedbackPage"));
+const CollectionStatsPage = lazyWithRetry(
+  () => import("./pages/CollectionStatsPage"),
+);
 const WechatCallbackPage = lazyWithRetry(
   () => import("./pages/WechatCallbackPage"),
 );
@@ -102,7 +104,7 @@ function MainLayoutInner({
 
   useLayoutEffect(() => {
     setHeaderSlot(null);
-  }, [location.pathname, location.key, setHeaderSlot]);
+  }, [location.pathname, setHeaderSlot]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -125,13 +127,7 @@ function MainLayoutInner({
   );
   const interimHeader =
     !headerSlot && customHeaderRoute
-      ? resolveRouteHeader({
-          location,
-          navigate,
-          t,
-          isAdmin,
-          onLogout,
-        })
+      ? resolveRouteHeader({ location, isAdmin })
       : null;
   const showDefaultHeaderNav =
     !customHeaderRoute && !headerSlot && !interimHeader;
@@ -141,11 +137,13 @@ function MainLayoutInner({
   const activeTab =
     location.pathname === "/groups"
       ? "groups"
-      : location.pathname === "/feedback"
-        ? "feedback"
-        : location.pathname.startsWith("/admin")
-          ? "admin"
-          : "brands";
+      : location.pathname === "/stats"
+        ? "stats"
+        : location.pathname === "/feedback"
+          ? "feedback"
+          : location.pathname.startsWith("/admin")
+            ? "admin"
+            : "brands";
 
   const goToLogin = () => navigate("/login");
 
@@ -190,13 +188,18 @@ function MainLayoutInner({
   );
 
   const handleTabChange = (tab) => {
-    if (!authed && (tab === "groups" || tab === "feedback")) {
+    if (
+      !authed &&
+      (tab === "groups" || tab === "stats" || tab === "feedback")
+    ) {
       goToLogin();
       return;
     }
     if (tab === "brands") navigate("/");
     else if (tab === "groups") navigate("/groups");
+    else if (tab === "stats") navigate("/stats");
     else if (tab === "feedback") navigate("/feedback");
+    scrollAppToTop();
   };
 
   return (
@@ -240,6 +243,13 @@ function MainLayoutInner({
             </NeuPressableButton>
             <NeuPressableButton
               variant="header-bar"
+              active={activeTab === "stats"}
+              onClick={() => handleTabChange("stats")}
+            >
+              {t("stats")}
+            </NeuPressableButton>
+            <NeuPressableButton
+              variant="header-bar"
               active={activeTab === "feedback"}
               onClick={() => handleTabChange("feedback")}
             >
@@ -267,11 +277,7 @@ function MainLayoutInner({
               gap: 12,
             }}
           >
-            {authed ? (
-              renderProfileBtn("/profile")
-            ) : (
-              renderProfileBtn("/login")
-            )}
+            {authed ? renderProfileBtn("/profile") : renderProfileBtn("/login")}
           </div>
         )}
 
@@ -304,6 +310,12 @@ function MainLayoutInner({
             onClick={() => handleTabChange("groups")}
           >
             {t("groups")}
+          </button>
+          <button
+            className={`mobile-menu-item${activeTab === "stats" ? " active" : ""}`}
+            onClick={() => handleTabChange("stats")}
+          >
+            {t("stats")}
           </button>
           <button
             className={`mobile-menu-item${activeTab === "feedback" ? " active" : ""}`}
@@ -344,16 +356,20 @@ function MainLayoutInner({
         {authLoading ? (
           <RouteSkeleton pathname={location.pathname} />
         ) : (
-          <Suspense fallback={<RouteSkeleton pathname={location.pathname} />}>
-            <Outlet />
-          </Suspense>
+          <Outlet />
         )}
       </Content>
     </Layout>
   );
 }
 
-function MainLayout({ authed, profile, isAdmin, authLoading = false, onLogout }) {
+function MainLayout({
+  authed,
+  profile,
+  isAdmin,
+  authLoading = false,
+  onLogout,
+}) {
   return (
     <HeaderProvider>
       <MainLayoutInner
@@ -432,21 +448,11 @@ export default function App() {
     // navigation to /profile is handled inside WechatCallbackPage
   };
 
-  if (loading) {
-    if (usesMainLayout(location.pathname)) {
-      return (
-        <MainLayout
-          authed={false}
-          profile={null}
-          isAdmin={false}
-          authLoading
-          onLogout={handleLogout}
-        />
-      );
-    }
-
-    return <RouteSkeleton pathname={location.pathname} />;
-  }
+  const objectListElement = (
+    <Suspense fallback={<LazyPageFallback />}>
+      <ObjectList isAdmin={isAdmin} />
+    </Suspense>
+  );
 
   return (
     <Routes>
@@ -507,6 +513,7 @@ export default function App() {
             authed={authed}
             profile={profile}
             isAdmin={isAdmin}
+            authLoading={loading}
             onLogout={handleLogout}
           />
         }
@@ -528,31 +535,27 @@ export default function App() {
           }
         />
         <Route
+          index
           element={
             authed ? (
-              <Suspense fallback={<LazyPageFallback />}>
-                <ObjectList isAdmin={isAdmin} />
-              </Suspense>
+              objectListElement
             ) : (
-              <Outlet />
+              <Suspense fallback={<PageLoader variant="brands" />}>
+                <GuestBrandsView />
+              </Suspense>
             )
           }
-        >
-          <Route
-            index
-            element={
-              authed ? null : (
-                <Suspense fallback={<PageLoader variant="brands" />}>
-                  <GuestBrandsView />
-                </Suspense>
-              )
-            }
-          />
-          <Route
-            path="groups"
-            element={authed ? null : <Navigate to="/login" replace />}
-          />
-        </Route>
+        />
+        <Route
+          path="groups"
+          element={
+            authed ? (
+              objectListElement
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
         <Route
           path="brands/:brandId"
           element={
@@ -590,6 +593,18 @@ export default function App() {
             authed ? (
               <Suspense fallback={<PageLoader variant="groupObjectDetail" />}>
                 <GroupObjectDetailPage />
+              </Suspense>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="stats"
+          element={
+            authed ? (
+              <Suspense fallback={<PageLoader variant="stats" />}>
+                <CollectionStatsPage />
               </Suspense>
             ) : (
               <Navigate to="/login" replace />

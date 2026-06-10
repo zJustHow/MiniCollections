@@ -2,10 +2,9 @@ let profilePagePrefetch;
 let registerPagePrefetch;
 let forgotPasswordPagePrefetch;
 let loginPagePrefetch;
-let brandObjectDetailPagePrefetch;
-let groupObjectDetailPagePrefetch;
 let brandObjectsPagePrefetch;
 let groupObjectsPagePrefetch;
+let groupObjectDetailPagePrefetch;
 
 export function prefetchProfilePage() {
   if (!profilePagePrefetch) {
@@ -40,20 +39,6 @@ export function prefetchAuthPages() {
   prefetchForgotPasswordPage();
 }
 
-export function prefetchBrandObjectDetailPage() {
-  if (!brandObjectDetailPagePrefetch) {
-    brandObjectDetailPagePrefetch = import("../pages/BrandObjectDetailPage");
-  }
-  return brandObjectDetailPagePrefetch;
-}
-
-export function prefetchGroupObjectDetailPage() {
-  if (!groupObjectDetailPagePrefetch) {
-    groupObjectDetailPagePrefetch = import("../pages/GroupObjectDetailPage");
-  }
-  return groupObjectDetailPagePrefetch;
-}
-
 export function prefetchBrandObjectsPage() {
   if (!brandObjectsPagePrefetch) {
     brandObjectsPagePrefetch = import("../pages/BrandObjectsPage");
@@ -66,4 +51,11 @@ export function prefetchGroupObjectsPage() {
     groupObjectsPagePrefetch = import("../pages/GroupObjectsPage");
   }
   return groupObjectsPagePrefetch;
+}
+
+export function prefetchGroupObjectDetailPage() {
+  if (!groupObjectDetailPagePrefetch) {
+    groupObjectDetailPagePrefetch = import("../pages/GroupObjectDetailPage");
+  }
+  return groupObjectDetailPagePrefetch;
 }

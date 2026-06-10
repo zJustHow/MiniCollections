@@ -12,6 +12,20 @@ export const getGroupsPage = async ({ size = PAGE_SIZE, page = 0 } = {}) => {
   return handleResponse(response);
 };
 
+export const getGroupOrder = async () => {
+  const response = await fetch("/groups/order", { headers: authHeaders() });
+  return handleResponse(response);
+};
+
+export const reorderGroups = async (orderedIds) => {
+  const response = await fetch("/groups/reorder", {
+    method: "PUT",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ ordered_ids: orderedIds }),
+  });
+  return handleDeleteResponse(response);
+};
+
 export const searchGroupsCombinedPage = async (
   keyword,
   { size = PAGE_SIZE, page = 0 } = {},
@@ -58,6 +72,22 @@ export const getUserObjectsPage = async (groupId, { size = PAGE_SIZE, page = 0 }
     headers: authHeaders(),
   });
   return handleResponse(response);
+};
+
+export const getGroupObjectOrder = async (groupId) => {
+  const response = await fetch(`/groups/${groupId}/objects/order`, {
+    headers: authHeaders(),
+  });
+  return handleResponse(response);
+};
+
+export const reorderGroupObjects = async (groupId, orderedIds) => {
+  const response = await fetch(`/groups/${groupId}/objects/reorder`, {
+    method: "PUT",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify({ ordered_ids: orderedIds }),
+  });
+  return handleDeleteResponse(response);
 };
 
 export const getUserObjectById = async (groupId, userObjectId) => {

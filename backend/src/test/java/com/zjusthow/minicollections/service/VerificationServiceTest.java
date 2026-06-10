@@ -70,6 +70,17 @@ class VerificationServiceTest {
     }
 
     @Test
+    void sendCode_sendsSmsWhenAllowed() {
+        when(redis.getExpire("otp:+14155552671", TimeUnit.SECONDS)).thenReturn(-1L);
+        when(redis.opsForValue()).thenReturn(valueOps);
+
+        verificationService.sendCode("+14155552671", "PHONE");
+
+        verify(valueOps).set(eq("otp:+14155552671"), anyString(), eq(300L), eq(TimeUnit.SECONDS));
+        verify(smsSender).send(eq("+14155552671"), org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
     void verify_rejectsMissingCode() {
         when(redis.opsForValue()).thenReturn(valueOps);
         when(valueOps.get("otp:alice@example.com")).thenReturn(null);
@@ -99,6 +110,16 @@ class VerificationServiceTest {
     }
 
     @Test
+    void verify_rejectsMismatchedCode() {
+        when(redis.opsForValue()).thenReturn(valueOps);
+        when(valueOps.get("otp:alice@example.com")).thenReturn("123456");
+
+        assertThrows(InvalidCodeException.class,
+                () -> verificationService.verify("alice@example.com", "000000"));
+        verify(redis, never()).delete("otp:alice@example.com");
+    }
+
+    @Test
     void sendResetCode_skipsDeliveryWhenUserHasNoPassword() {
         when(redis.hasKey("otp:reset:cooldown:alice@example.com")).thenReturn(false);
         when(redis.opsForValue()).thenReturn(valueOps);
@@ -115,6 +136,17 @@ class VerificationServiceTest {
 
         assertThrows(TooManyRequestsException.class,
                 () -> verificationService.sendResetCode("alice@example.com", "EMAIL", true));
+    }
+
+    @Test
+    void sendResetCode_deliversEmailWhenAllowed() {
+        when(redis.hasKey("otp:reset:cooldown:alice@example.com")).thenReturn(false);
+        when(redis.opsForValue()).thenReturn(valueOps);
+
+        verificationService.sendResetCode("alice@example.com", "EMAIL", true);
+
+        verify(valueOps).set(eq("otp:reset:alice@example.com"), anyString(), eq(300L), eq(TimeUnit.SECONDS));
+        verify(emailService).sendCode(eq("alice@example.com"), org.mockito.ArgumentMatchers.anyString());
     }
 
     @Test

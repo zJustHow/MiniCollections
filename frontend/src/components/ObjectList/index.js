@@ -12,13 +12,15 @@ const CreateGroupModal = createLazyModal(() => import("./modals/CreateGroupModal
 
 export default function ObjectList({ isAdmin }) {
   const location = useLocation();
-  const { setHeaderSlot } = useHeader();
+  const { headerSlot, setHeaderSlot } = useHeader();
   const state = useObjectListState({ isAdmin });
   const activeTab = location.pathname === "/groups" ? "groups" : "brands";
 
   useLayoutEffect(() => {
-    setHeaderSlot(null);
-  }, [setHeaderSlot]);
+    if (headerSlot !== null) {
+      setHeaderSlot(null);
+    }
+  }, [location.pathname, headerSlot, setHeaderSlot]);
 
   const {
     brands,
@@ -48,10 +50,11 @@ export default function ObjectList({ isAdmin }) {
     loadingGroups,
     handleGroupClick,
     handleGroupSearch,
+    handleGroupReorder,
     groupSearchActive,
     groupSearchResultGroups,
     groupSearchResultObjects,
-    groupsListPage,
+    groupsBrowse,
     groupCombinedSearchPage,
     createGroupModalVisible,
     setCreateGroupModalVisible,
@@ -64,7 +67,7 @@ export default function ObjectList({ isAdmin }) {
 
   return (
     <>
-      <div hidden={activeTab !== "brands"}>
+      {activeTab === "brands" ? (
         <BrandsTab
           brands={brands}
           onSearch={handleBrandSearch}
@@ -88,12 +91,13 @@ export default function ObjectList({ isAdmin }) {
           onToggleScale={onToggleScale}
           onToggleSeries={onToggleSeries}
         />
-      </div>
-      <div hidden={activeTab !== "groups"}>
+      ) : null}
+      {activeTab === "groups" ? (
         <GroupsTab
           groups={groups}
           onSearch={handleGroupSearch}
           onGroupClick={handleGroupClick}
+          onGroupReorder={handleGroupReorder}
           onCreateGroup={() => {
             groupForm.resetFields();
             setCreateGroupModalVisible(true);
@@ -102,10 +106,10 @@ export default function ObjectList({ isAdmin }) {
           searchActive={groupSearchActive}
           searchResultGroups={groupSearchResultGroups}
           searchResultObjects={groupSearchResultObjects}
-          groupsListPage={groupsListPage}
+          groupsBrowse={groupsBrowse}
           combinedSearchPage={groupCombinedSearchPage}
         />
-      </div>
+      ) : null}
 
       <BrandModal
         open={brandModalOpen}

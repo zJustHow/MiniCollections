@@ -8,5 +8,6 @@ public record UserProfileDto(
         String preferredLocale,
         String avatarUrl,
         boolean admin,
-        boolean wechatBound
+        boolean wechatBound,
+        boolean passwordSet
 ) {}

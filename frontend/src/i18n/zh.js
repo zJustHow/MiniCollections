@@ -2,6 +2,7 @@ export default {
   // Header / Nav
   brands: "品牌",
   groups: "分组",
+  stats: "统计",
   feedback: "反馈",
   profile: "个人资料",
   logout: "退出登录",
@@ -81,6 +82,12 @@ export default {
   preferredLanguage: "语言偏好",
   saveLanguage: "保存语言",
   languageUpdated: "语言已更新",
+  deleteAccount: "注销账号",
+  deleteAccountPassword: "输入密码以确认注销",
+  deleteAccountWarning: "将永久删除你的账号、收藏和上传的图片，此操作不可恢复。",
+  confirmDeleteAccount: "确认注销",
+  deleteAccountSuccess: "账号已注销",
+  deleteAccountFailed: "注销账号失败",
 
   // Brands / Groups
   searchBrandsAndObjects: "搜索品牌和模型",
@@ -123,6 +130,7 @@ export default {
   failedToAddModel: "添加模型失败",
   groupCreated: "分组已创建",
   failedToCreateGroup: "创建分组失败",
+  failedToReorder: "保存排序失败",
   searchFailed: "搜索失败",
 
   // Drawer detail labels
@@ -340,6 +348,8 @@ export default {
   "error.no_permission": "无权限",
   "error.bad_credentials": "用户名或密码错误",
   "error.password_incorrect": "当前密码错误",
+  "error.password_required": "请输入密码",
+  "error.cannot_delete_last_admin": "无法注销最后一个管理员账号",
   "error.email_registered": "邮箱已注册",
   "error.phone_registered": "手机号已注册",
   "error.identifier_in_use": "{0} 已被使用",
@@ -361,4 +371,16 @@ export default {
   "error.conflict": "操作冲突",
   "error.internal_server_error": "服务器内部错误",
   "error.request_failed": "请求失败",
+
+  // Collection stats
+  collectionStats: "收藏统计",
+  statsTotalObjects: "藏品总数",
+  categoryDistribution: "品类分布",
+  brandCounts: "品牌数量",
+  purchaseTrend: "累计购入金额",
+  statsCumulativeSpend: "累计金额",
+  statsNoCategoryData: "暂无已关联品类的藏品",
+  statsNoBrandData: "暂无已关联品牌的藏品",
+  statsNoPurchaseData: "暂无购入价格记录",
+  statsLoadFailed: "加载统计失败",
 };

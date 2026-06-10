@@ -8,18 +8,29 @@ const mockNavigate = vi.fn();
 const mockSetHeaderSlot = vi.fn();
 const mockMessageSuccess = vi.fn();
 const mockMessageError = vi.fn();
-const mockGroupsListLoadPage = vi.fn();
+const mockRefreshAll = vi.fn().mockResolvedValue(undefined);
+const mockGroupsBrowse = {
+  displayItems: [{ id: 1, name: "Favorites" }],
+  loading: false,
+  orderLoading: false,
+  hasMore: false,
+  loadingMore: false,
+  loadMore: vi.fn(),
+  orderedIds: [1],
+  sortEnabled: true,
+  refreshAll: mockRefreshAll,
+  handleDragEnd: vi.fn(),
+};
+
+vi.mock("../../hooks/useOrderableInfiniteBrowse", () => ({
+  default: () => mockGroupsBrowse,
+}));
+
 const mockCreateGroup = vi.fn();
 const mockValidateFields = vi.fn();
 
 let mockSearchValue = "";
 let mockPathname = "/groups";
-
-const mockGroupsList = {
-  items: [{ id: 1, name: "Favorites" }],
-  loading: false,
-  loadPage: mockGroupsListLoadPage,
-};
 
 const mockCombinedSearch = {
   brands: [{ id: 2 }],
@@ -69,10 +80,6 @@ vi.mock("antd", () => ({
   },
 }));
 
-vi.mock("../../hooks/usePagedList", () => ({
-  default: () => mockGroupsList,
-}));
-
 vi.mock("../../hooks/useCombinedBrandSearch", () => ({
   default: () => mockCombinedSearch,
 }));
@@ -80,6 +87,8 @@ vi.mock("../../hooks/useCombinedBrandSearch", () => ({
 vi.mock("../../utils/groupsApi", () => ({
   createGroup: (...args) => mockCreateGroup(...args),
   getGroupsPage: vi.fn(),
+  getGroupOrder: vi.fn(),
+  reorderGroups: vi.fn(),
   searchGroupsCombinedPage: vi.fn(),
 }));
 
@@ -179,6 +188,6 @@ describe("useGroupsState", () => {
       });
     });
     expect(mockMessageSuccess).toHaveBeenCalledWith("groupCreated");
-    expect(mockGroupsListLoadPage).toHaveBeenCalledWith(0);
+    expect(mockRefreshAll).toHaveBeenCalled();
   });
 });

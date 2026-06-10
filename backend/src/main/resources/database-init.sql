@@ -39,10 +39,11 @@ CREATE TABLE groups
     user_id             INTEGER             NOT NULL,
     name                VARCHAR(255)        NOT NULL,
     image_url           TEXT,
+    sort_order          INTEGER             NOT NULL DEFAULT 0,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
-CREATE INDEX idx_groups_user_id ON groups (user_id, id);
+CREATE INDEX idx_groups_user_id ON groups (user_id, sort_order, id);
 
 CREATE TABLE brands
 (
@@ -273,6 +274,7 @@ CREATE TABLE user_objects
     purchase_date       DATE,
     purchase_price      DECIMAL(10, 2),
     other_notes         TEXT,
+    sort_order          INTEGER             NOT NULL DEFAULT 0,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_group FOREIGN KEY (group_id) REFERENCES groups (id) ON DELETE CASCADE,
     CONSTRAINT fk_brand_object FOREIGN KEY (brand_object_id) REFERENCES brand_objects (id) ON DELETE SET NULL
@@ -280,7 +282,7 @@ CREATE TABLE user_objects
 
 CREATE INDEX idx_user_objects_brand_object_id ON user_objects (brand_object_id)
     WHERE brand_object_id IS NOT NULL;
-CREATE INDEX idx_user_objects_group_id ON user_objects (group_id, id);
+CREATE INDEX idx_user_objects_group_id ON user_objects (group_id, sort_order, id);
 CREATE INDEX idx_user_objects_user_id ON user_objects (user_id, id);
 
 CREATE TABLE authorities
@@ -324,6 +326,28 @@ CREATE TABLE object_submissions
 
 CREATE INDEX idx_submissions_user_submitted ON object_submissions (submitted_by_user_id, submitted_at DESC, id DESC);
 CREATE INDEX idx_submissions_status ON object_submissions (status, submitted_at DESC, id DESC);
+
+-- Trigram GIN indexes for SQL search fallback (ES unavailable).
+-- Expression shapes must match repository queries: LOWER(...) LIKE '%keyword%'.
+CREATE INDEX idx_brands_name_en_trgm
+    ON brands USING gin (lower(name_en) gin_trgm_ops);
+CREATE INDEX idx_brands_name_zh_trgm
+    ON brands USING gin (lower(coalesce(name_zh, '')) gin_trgm_ops);
+CREATE INDEX idx_brands_abbreviation_trgm
+    ON brands USING gin (lower(coalesce(abbreviation, '')) gin_trgm_ops);
+CREATE INDEX idx_brands_name_en_norm_trgm
+    ON brands USING gin (lower(replace(replace(name_en, ' ', ''), '-', '')) gin_trgm_ops);
+
+CREATE INDEX idx_brand_objects_name_en_trgm
+    ON brand_objects USING gin (lower(name_en) gin_trgm_ops);
+CREATE INDEX idx_brand_objects_name_zh_trgm
+    ON brand_objects USING gin (lower(coalesce(name_zh, '')) gin_trgm_ops);
+
+CREATE INDEX idx_groups_name_trgm
+    ON groups USING gin (name gin_trgm_ops);
+
+CREATE INDEX idx_user_objects_name_trgm
+    ON user_objects USING gin (name gin_trgm_ops);
 
 -- MINI GT (MGT): 1242 products in minigt/brand-objects.sql
 INSERT INTO brands (id, name_en, name_zh, abbreviation, image_url) VALUES (1, 'MINI GT', NULL, 'MGT', 'http://localhost:9000/minicollections-media/brands/minigt/logo.svg');

@@ -80,7 +80,7 @@ class WechatAuthControllerTest {
         WechatService.WechatUserInfo info =
                 new WechatService.WechatUserInfo("openid-2", null, "Nick", null);
         UserProfileDto profile = new UserProfileDto(
-                5L, null, null, "Alice", "en-US", null, false, true);
+                5L, null, null, "Alice", "en-US", null, false, true, false);
         when(wechatService.exchangeCode("code-2", "state-2")).thenReturn(info);
         when(userService.bindWechat(5L, info)).thenReturn(profile);
 

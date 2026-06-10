@@ -171,7 +171,8 @@
   padding-block: 4px 2px;
 }
 
-.admin-table-actions .confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn {
+.admin-table-actions
+  .confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn {
   width: var(--neu-control-height-sm);
   min-width: var(--neu-control-height-sm);
   max-width: var(--neu-control-height-sm);
@@ -339,4 +340,3 @@
   pointer-events: none;
   background: rgba(209, 217, 230, 0.35);
 }
-

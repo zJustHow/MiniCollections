@@ -1,9 +1,11 @@
-import NeuCard from "../NeuCard";
+import SortableNeuCard from "../listPage/SortableNeuCard";
 import { useNavigate } from "react-router-dom";
 import useTabListSearchField from "../../hooks/useTabListSearchField";
 import ObjectListPageShell from "../listPage/ObjectListPageShell";
-import TabListPageBody from "../listPage/TabListPageBody";
 import TabCombinedSearchSection from "../listPage/TabCombinedSearchSection";
+import SortableInfiniteBrowseSection from "../listPage/SortableInfiniteBrowseSection";
+import ActivePagePagination from "../listPage/ActivePagePagination";
+import NoSearchResults from "../listPage/NoSearchResults";
 import { withAddCardSlot } from "../../utils/listPageUtils";
 import { useLocale } from "../../LocaleContext";
 import { prefetchGroupObjectDetailPage } from "../../utils/prefetchRoutes";
@@ -13,11 +15,12 @@ export default function GroupsTab({
   onSearch,
   onGroupClick,
   onCreateGroup,
+  onGroupReorder,
   searchValue,
   searchActive,
   searchResultGroups,
   searchResultObjects,
-  groupsListPage,
+  groupsBrowse,
   combinedSearchPage,
 }) {
   const { t } = useLocale();
@@ -29,10 +32,19 @@ export default function GroupsTab({
 
   const renderGroupCard = (group) =>
     group.id === "__add__" ? (
-      <NeuCard key="__add__" add name={t("addGroup")} onClick={onCreateGroup} />
+      <SortableNeuCard
+        key="__add__"
+        id="__add__"
+        sortEnabled={false}
+        add
+        name={t("addGroup")}
+        onClick={onCreateGroup}
+      />
     ) : (
-      <NeuCard
+      <SortableNeuCard
         key={group.id}
+        id={group.id}
+        sortEnabled={groupsBrowse?.sortEnabled}
         name={group.name}
         imageUrl={group.image_url}
         onClick={() => onGroupClick(group)}
@@ -40,8 +52,10 @@ export default function GroupsTab({
     );
 
   const renderObjectCard = (obj) => (
-    <NeuCard
+    <SortableNeuCard
       key={obj.id}
+      id={obj.id}
+      sortEnabled={false}
       name={obj.name}
       subtitle={obj.groupName ?? obj.group_name}
       nameplateVariant="object"
@@ -73,14 +87,11 @@ export default function GroupsTab({
   const showObjectCards =
     searchResultObjects.length > 0 || combinedSearchPage?.loading;
 
-  const spinning = searchActive
-    ? Boolean(combinedSearchPage?.loading)
-    : Boolean(groupsListPage?.loading);
+  const searchSpinning = Boolean(combinedSearchPage?.loading);
+  const searchHasResults = hasGroupResults || showObjectsSection;
 
-  const browseData = withAddCardSlot(
-    groups,
-    (groupsListPage?.page ?? 0) === 0,
-  );
+  const browseData = withAddCardSlot(groups, true);
+  const sortableIds = groupsBrowse?.orderedIds ?? [];
 
   return (
     <ObjectListPageShell
@@ -95,19 +106,11 @@ export default function GroupsTab({
       onDraftChange={handleDraftChange}
       onSearch={onSearch}
     >
-      <TabListPageBody
-        searchActive={searchActive}
-        spinning={spinning}
-        searchHasResults={hasGroupResults || showObjectsSection}
-        searchPaginationPage={combinedSearchPage}
-        browsePaginationPage={groupsListPage}
-        browsePaginationIncludeTotals={false}
-        browseItems={browseData}
-        renderBrowseItem={renderGroupCard}
-        searchContent={
+      {searchActive ? (
+        <>
           <TabCombinedSearchSection
-            spinning={spinning}
-            hasResults={hasGroupResults || showObjectsSection}
+            spinning={searchSpinning}
+            hasResults={searchHasResults}
             showPrimaryCards={showGroupCards}
             showObjectSection={showObjectsSection}
             showObjectCards={showObjectCards}
@@ -117,8 +120,27 @@ export default function GroupsTab({
             primaryCards={searchResultGroups.map(renderGroupCard)}
             objectCards={searchResultObjects.map(renderObjectCard)}
           />
-        }
-      />
+          <ActivePagePagination
+            activePage={combinedSearchPage}
+            includeTotals={false}
+          />
+          {!searchSpinning && !searchHasResults ? <NoSearchResults /> : null}
+        </>
+      ) : (
+        <SortableInfiniteBrowseSection
+          loading={groupsBrowse?.loading}
+          orderLoading={groupsBrowse?.orderLoading}
+          items={browseData}
+          renderItem={renderGroupCard}
+          sortableIds={sortableIds}
+          sortEnabled={groupsBrowse?.sortEnabled}
+          onDragEnd={onGroupReorder}
+          hasMore={groupsBrowse?.hasMore}
+          loadingMore={groupsBrowse?.loadingMore}
+          onLoadMore={groupsBrowse?.loadMore}
+          skeletonVariant="catalog"
+        />
+      )}
     </ObjectListPageShell>
   );
 }

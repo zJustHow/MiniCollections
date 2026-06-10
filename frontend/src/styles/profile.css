@@ -113,6 +113,12 @@
   color: var(--neu-text-2);
 }
 
+.profile-danger-warning {
+  margin: 0 0 16px;
+  color: var(--neu-text-2);
+  line-height: 1.5;
+}
+
 .neu-profile-page-skeleton .neu-profile-skeleton-hero {
   padding-bottom: 0;
 }

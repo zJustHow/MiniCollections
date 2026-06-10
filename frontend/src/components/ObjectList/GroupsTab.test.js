@@ -5,6 +5,7 @@ import GroupsTab from "./GroupsTab";
 const mockNavigate = vi.fn();
 const mockOnGroupClick = vi.fn();
 const mockOnCreateGroup = vi.fn();
+const mockOnGroupReorder = vi.fn();
 
 vi.mock("react-router-dom", async () => {
   const actual = await vi.importActual("react-router-dom");
@@ -29,15 +30,12 @@ vi.mock("../listPage/ObjectListPageShell", () => ({
   default: ({ children }) => <div data-testid="shell">{children}</div>,
 }));
 
-vi.mock("../listPage/TabListPageBody", () => ({
-  default: ({ searchActive, browseItems, renderBrowseItem, searchContent }) =>
-    searchActive ? (
-      <div data-testid="search-body">{searchContent}</div>
-    ) : (
-      <div data-testid="browse-body">
-        {browseItems.map((item) => renderBrowseItem(item))}
-      </div>
-    ),
+vi.mock("../listPage/SortableInfiniteBrowseSection", () => ({
+  default: ({ items, renderItem }) => (
+    <div data-testid="browse-body">
+      {items.map((item) => renderItem(item))}
+    </div>
+  ),
 }));
 
 vi.mock("../listPage/TabCombinedSearchSection", () => ({
@@ -49,7 +47,7 @@ vi.mock("../listPage/TabCombinedSearchSection", () => ({
   ),
 }));
 
-vi.mock("../NeuCard", () => ({
+vi.mock("../listPage/SortableNeuCard", () => ({
   default: ({ name, onClick, add }) => (
     <button type="button" onClick={onClick}>
       {add ? "add-card" : name}
@@ -62,11 +60,18 @@ const baseProps = {
   onSearch: vi.fn(),
   onGroupClick: mockOnGroupClick,
   onCreateGroup: mockOnCreateGroup,
+  onGroupReorder: mockOnGroupReorder,
   searchValue: "",
   searchActive: false,
   searchResultGroups: [],
   searchResultObjects: [],
-  groupsListPage: { page: 0, loading: false },
+  groupsBrowse: {
+    loading: false,
+    orderLoading: false,
+    hasMore: false,
+    orderedIds: [1],
+    sortEnabled: true,
+  },
   combinedSearchPage: { loading: false, totalBrands: 0, totalObjects: 0 },
 };
 
@@ -75,7 +80,7 @@ describe("GroupsTab", () => {
     vi.clearAllMocks();
   });
 
-  test("renders browse groups with add card on first page", () => {
+  test("renders browse groups with add card", () => {
     render(<GroupsTab {...baseProps} />);
 
     expect(screen.getByTestId("browse-body")).toBeInTheDocument();
@@ -116,7 +121,7 @@ describe("GroupsTab", () => {
       />,
     );
 
-    expect(screen.getByTestId("search-body")).toBeInTheDocument();
+    expect(screen.getByTestId("combined")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cars" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Model" })).toBeInTheDocument();
   });

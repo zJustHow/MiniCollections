@@ -90,6 +90,9 @@ export function resolveRouteSkeletonVariant(pathname) {
   if (matchPath({ path: "/admin", end: true }, pathname)) {
     return "admin";
   }
+  if (matchPath({ path: "/stats", end: true }, pathname)) {
+    return "stats";
+  }
   if (matchPath({ path: "/feedback", end: true }, pathname)) {
     return "feedback";
   }

@@ -35,7 +35,6 @@ import {
 } from "../utils/brandsApi";
 import { adminDeleteBrand } from "../utils/adminApi";
 import { scrollAppToTop } from "../utils/scroll";
-import { prefetchBrandObjectDetailPage } from "../utils/prefetchRoutes";
 import { neuRem } from "../theme/fontScale";
 
 const SubmitObjectModal = createLazyModal(
@@ -197,11 +196,6 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   }, [brandId]);
 
   useLayoutEffect(() => {
-    if (!brand) {
-      setHeaderSlot(null);
-      return () => setHeaderSlot(null);
-    }
-
     setHeaderSlot(
       <BrandObjectsPageHeader
         brand={brand}
@@ -215,7 +209,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       />,
     );
     return () => setHeaderSlot(null);
-  }, [brand, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [brand, isAdmin, location.pathname, setHeaderSlot]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshObjects = useCallback(() => {
     activePage.loadPage(activePage.page);
@@ -231,14 +225,11 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
       subtitle={objectCardBrandSubtitle(item)}
       nameplateVariant="object"
       imageUrl={item.image_url}
-      onMouseEnter={prefetchBrandObjectDetailPage}
-      onFocus={prefetchBrandObjectDetailPage}
-      onClick={() => {
-        prefetchBrandObjectDetailPage();
+      onClick={() =>
         navigate(`/brands/${brandId}/objects/${item.id}`, {
           state: { brandObject: item, brand },
-        });
-      }}
+        })
+      }
     />
   );
 

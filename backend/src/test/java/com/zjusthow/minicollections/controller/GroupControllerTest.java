@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zjusthow.minicollections.model.GroupBody;
 import com.zjusthow.minicollections.model.GroupCombinedSearchDto;
 import com.zjusthow.minicollections.model.GroupDto;
+import com.zjusthow.minicollections.model.OrderIdsDto;
 import com.zjusthow.minicollections.model.PageResponse;
+import com.zjusthow.minicollections.model.ReorderBody;
 import com.zjusthow.minicollections.model.UserObjectBody;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.service.GroupService;
@@ -205,6 +207,51 @@ class GroupControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("My Model"))
                 .andExpect(jsonPath("$.imageUrl").value("img.png"));
+    }
+
+    @Test
+    void getGroupOrder_returnsOrderedIds() throws Exception {
+        when(groupService.getGroupOrder(5L)).thenReturn(new OrderIdsDto(List.of(3L, 1L, 2L)));
+
+        mockMvc.perform(get("/groups/order").with(authenticatedUser("5")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ids[0]").value(3))
+                .andExpect(jsonPath("$.ids[1]").value(1));
+    }
+
+    @Test
+    void reorderGroups_returnsNoContent() throws Exception {
+        ReorderBody body = new ReorderBody(List.of(3L, 1L, 2L));
+
+        mockMvc.perform(put("/groups/reorder")
+                        .with(authenticatedUser("5"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isNoContent());
+
+        verify(groupService).reorderGroups(5L, List.of(3L, 1L, 2L));
+    }
+
+    @Test
+    void getUserObjectOrder_returnsOrderedIds() throws Exception {
+        when(groupService.getUserObjectOrder(5L, 2L)).thenReturn(new OrderIdsDto(List.of(10L, 8L)));
+
+        mockMvc.perform(get("/groups/2/objects/order").with(authenticatedUser("5")))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ids[0]").value(10));
+    }
+
+    @Test
+    void reorderUserObjects_returnsNoContent() throws Exception {
+        ReorderBody body = new ReorderBody(List.of(8L, 10L));
+
+        mockMvc.perform(put("/groups/2/objects/reorder")
+                        .with(authenticatedUser("5"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isNoContent());
+
+        verify(groupService).reorderUserObjects(5L, 2L, List.of(8L, 10L));
     }
 
     private static RequestPostProcessor authenticatedUser(String userId) {

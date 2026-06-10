@@ -24,13 +24,38 @@ public interface UserObjectRepository extends ListCrudRepository<UserObjectEntit
     @Query("""
             SELECT * FROM user_objects
             WHERE group_id = :groupId
-            ORDER BY id ASC
+            ORDER BY sort_order ASC, id ASC
             LIMIT :limit OFFSET :offset
             """)
     List<UserObjectEntity> findPageByGroupId(
             @Param("groupId") Long groupId,
             @Param("limit") int limit,
             @Param("offset") int offset);
+
+    @Query("""
+            SELECT id FROM user_objects
+            WHERE group_id = :groupId
+            ORDER BY sort_order ASC, id ASC
+            """)
+    List<Long> findOrderedIdsByGroupId(@Param("groupId") Long groupId);
+
+    @Query("""
+            SELECT COALESCE(MAX(sort_order), -1)
+            FROM user_objects
+            WHERE group_id = :groupId
+            """)
+    int maxSortOrderByGroupId(@Param("groupId") Long groupId);
+
+    @Modifying
+    @Query("""
+            UPDATE user_objects
+            SET sort_order = :sortOrder
+            WHERE id = :id AND group_id = :groupId
+            """)
+    void updateSortOrder(
+            @Param("id") Long id,
+            @Param("groupId") Long groupId,
+            @Param("sortOrder") int sortOrder);
 
     /** Detach catalog model from user collections before deleting the brand object. */
     @Modifying

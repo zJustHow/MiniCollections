@@ -2,12 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSearchParams } from "react-router-dom";
 import { mutateSearchParams } from "../../utils/searchParams";
-import usePagedList from "../../hooks/usePagedList";
 import useCombinedBrandSearch from "../../hooks/useCombinedBrandSearch";
+import useOrderableInfiniteBrowse from "../../hooks/useOrderableInfiniteBrowse";
 import { App, Form } from "antd";
 import { PAGE_SIZE } from "../../utils/apiClient";
 import {
   getGroupsPage,
+  getGroupOrder,
+  reorderGroups,
   searchGroupsCombinedPage,
   createGroup,
 } from "../../utils/groupsApi";
@@ -33,16 +35,16 @@ export default function useGroupsState() {
   const groupSearchActive =
     onGroupsTab && Boolean((searchValue ?? "").trim());
 
-  const groupsList = usePagedList(
-    ({ size, page }) => getGroupsPage({ size, page }),
-    {
-      resetKey: "groups-list",
-      enabled: onGroupsTab && !groupSearchActive,
-      pageSize: PAGE_SIZE,
-      pageParamKey: "page",
-      reservedFirstPageSlots: 1,
-    },
-  );
+  const groupsBrowse = useOrderableInfiniteBrowse({
+    entityKey: "groups",
+    enabled: onGroupsTab && !groupSearchActive,
+    fetchPage: ({ size, page }) => getGroupsPage({ size, page }),
+    fetchOrder: getGroupOrder,
+    reorder: reorderGroups,
+    pageSize: PAGE_SIZE,
+    reservedFirstPageSlots: 1,
+    listResetKey: "groups-list",
+  });
 
   const combinedSearch = useCombinedBrandSearch(
     ({ size, page }) =>
@@ -107,6 +109,16 @@ export default function useGroupsState() {
     [setSearchParams],
   );
 
+  const handleGroupReorder = useCallback(
+    async (activeId, overId) => {
+      const ok = await groupsBrowse.handleDragEnd(activeId, overId);
+      if (ok === false) {
+        message.error(t("failedToReorder"));
+      }
+    },
+    [groupsBrowse, message, t],
+  );
+
   const handleCreateGroup = async () => {
     try {
       const values = await groupForm.validateFields();
@@ -118,7 +130,7 @@ export default function useGroupsState() {
       try {
         await createGroup(payload);
         message.success(t("groupCreated"));
-        groupsList.loadPage(0);
+        await groupsBrowse.refreshAll();
         setCreateGroupModalVisible(false);
         setGroupImageData(null);
         groupForm.resetFields();
@@ -132,19 +144,22 @@ export default function useGroupsState() {
     }
   };
 
-  const loadingGroups = groupSearchActive ? combinedSearch.loading : groupsList.loading;
+  const loadingGroups = groupSearchActive
+    ? combinedSearch.loading
+    : groupsBrowse.loading || groupsBrowse.orderLoading;
 
   return useMemo(
     () => ({
-      groups: groupsList.items,
+      groups: groupsBrowse.displayItems,
       loadingGroups,
       handleGroupClick,
       handleGroupSearch,
+      handleGroupReorder,
       searchValue,
       groupSearchActive,
       groupSearchResultGroups: combinedSearch.brands,
       groupSearchResultObjects: combinedSearch.objects,
-      groupsListPage: groupsList,
+      groupsBrowse,
       groupCombinedSearchPage: combinedSearch,
       createGroupModalVisible,
       setCreateGroupModalVisible,
@@ -155,10 +170,11 @@ export default function useGroupsState() {
       handleCreateGroup,
     }),
     [
-      groupsList,
+      groupsBrowse,
       combinedSearch,
       loadingGroups,
       handleGroupSearch,
+      handleGroupReorder,
       searchValue,
       groupSearchActive,
       createGroupModalVisible,

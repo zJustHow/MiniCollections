@@ -135,7 +135,7 @@ export default function BrandObjectDetailPage({ isAdmin, authed = true }) {
       </div>,
     );
     return () => setHeaderSlot(null);
-  }, [showSkeleton, brandObject, isAdmin]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [showSkeleton, brandObject, isAdmin, location.pathname, setHeaderSlot]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const openAddToGroup = async () => {
     setCustomImageData(undefined);

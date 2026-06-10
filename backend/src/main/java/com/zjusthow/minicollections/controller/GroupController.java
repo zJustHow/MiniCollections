@@ -3,7 +3,9 @@ package com.zjusthow.minicollections.controller;
 import com.zjusthow.minicollections.model.GroupBody;
 import com.zjusthow.minicollections.model.GroupCombinedSearchDto;
 import com.zjusthow.minicollections.model.GroupDto;
+import com.zjusthow.minicollections.model.OrderIdsDto;
 import com.zjusthow.minicollections.model.PageResponse;
+import com.zjusthow.minicollections.model.ReorderBody;
 import com.zjusthow.minicollections.model.UserObjectBody;
 import com.zjusthow.minicollections.model.UserObjectDto;
 import com.zjusthow.minicollections.service.GroupService;
@@ -33,6 +35,19 @@ public class GroupController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "48") int size) {
         return ResponseEntity.ok(groupService.getGroupsPage(userId(user), page, size));
+    }
+
+    @GetMapping("/order")
+    public ResponseEntity<OrderIdsDto> getGroupOrder(@AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(groupService.getGroupOrder(userId(user)));
+    }
+
+    @PutMapping("/reorder")
+    public ResponseEntity<Void> reorderGroups(
+            @AuthenticationPrincipal User user,
+            @RequestBody @Valid ReorderBody body) {
+        groupService.reorderGroups(userId(user), body.orderedIds());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")
@@ -83,6 +98,22 @@ public class GroupController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "48") int size) {
         return ResponseEntity.ok(groupService.getUserObjectsPage(userId(user), groupId, page, size));
+    }
+
+    @GetMapping("/{groupId}/objects/order")
+    public ResponseEntity<OrderIdsDto> getUserObjectOrder(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long groupId) {
+        return ResponseEntity.ok(groupService.getUserObjectOrder(userId(user), groupId));
+    }
+
+    @PutMapping("/{groupId}/objects/reorder")
+    public ResponseEntity<Void> reorderUserObjects(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long groupId,
+            @RequestBody @Valid ReorderBody body) {
+        groupService.reorderUserObjects(userId(user), groupId, body.orderedIds());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{groupId}/objects/search")

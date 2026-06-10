@@ -1,14 +1,19 @@
 package com.zjusthow.minicollections.service;
 
+import com.zjusthow.minicollections.entity.GroupEntity;
+import com.zjusthow.minicollections.entity.ObjectSubmissionEntity;
 import com.zjusthow.minicollections.entity.UserEntity;
 import com.zjusthow.minicollections.entity.UserIdentifierEntity;
+import com.zjusthow.minicollections.entity.UserObjectEntity;
 import com.zjusthow.minicollections.exception.IdentifierExistsException;
 import com.zjusthow.minicollections.exception.UserNotFoundException;
 import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.model.UserProfileDto;
 import com.zjusthow.minicollections.service.WechatService;
 import com.zjusthow.minicollections.repository.GroupRepository;
+import com.zjusthow.minicollections.repository.ObjectSubmissionRepository;
 import com.zjusthow.minicollections.repository.UserIdentifierRepository;
+import com.zjusthow.minicollections.repository.UserObjectRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +25,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +45,8 @@ import static org.mockito.Mockito.when;
 class UserServiceTest {
 
     @Mock GroupRepository groupRepository;
+    @Mock UserObjectRepository userObjectRepository;
+    @Mock ObjectSubmissionRepository submissionRepository;
     @Mock UserRepository userRepository;
     @Mock UserIdentifierRepository identifierRepository;
     @Mock PasswordEncoder passwordEncoder;
@@ -588,5 +597,90 @@ class UserServiceTest {
     void resetPassword_requiresEmailOrPhone() {
         assertThrows(ValidationException.class,
                 () -> userService.resetPassword(null, null, "123456", "newpass"));
+    }
+
+    @Test
+    void deleteAccount_removesUserAfterPasswordVerification() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", "avatar.png");
+        GroupEntity group = new GroupEntity(1L, 5L, "Default", "group.png", 0);
+        UserObjectEntity object = new UserObjectEntity(
+                10L, 5L, 1L, null, "Car", "obj.png", null, null, null, 0);
+        ObjectSubmissionEntity submission = new ObjectSubmissionEntity(
+                20L, 5L, "MISSING_MODEL", null, null, "sub.png", null, null, null, null, null, null, null, null,
+                "PENDING", null, null, null, null, null, null);
+
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+        when(passwordEncoder.matches("secret", "hash")).thenReturn(true);
+        when(groupRepository.findByUserId(5L)).thenReturn(Optional.of(List.of(group)));
+        when(userObjectRepository.findByUserId(5L)).thenReturn(Optional.of(List.of(object)));
+        when(submissionRepository.findBySubmittedByUserId(5L)).thenReturn(List.of(submission));
+
+        userService.deleteAccount(5L, "secret");
+
+        verify(imageStorageService).deleteUserImageIfOwned(5L, "avatar.png");
+        verify(imageStorageService).deleteUserImageIfOwned(5L, "group.png");
+        verify(imageStorageService).deleteUserImageIfOwned(5L, "obj.png");
+        verify(imageStorageService).deleteUserImageIfOwned(5L, "sub.png");
+        verify(jdbc).update(
+                eq("UPDATE object_submissions SET reviewed_by_user_id = NULL WHERE reviewed_by_user_id = ?"),
+                eq(5L));
+        verify(userRepository).deleteById(5L);
+    }
+
+    @Test
+    void deleteAccount_rejectsIncorrectPassword() {
+        UserEntity user = new UserEntity(5L, "Alice", "hash", true, "en-US", null);
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+        when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
+
+        assertThrows(BadCredentialsException.class, () -> userService.deleteAccount(5L, "wrong"));
+        verify(userRepository, never()).deleteById(5L);
+    }
+
+    @Test
+    void deleteAccount_rejectsLastAdmin() {
+        UserEntity user = new UserEntity(5L, "Admin", "hash", true, "en-US", null);
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(true);
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) FROM authorities WHERE authority = 'ROLE_ADMIN'"),
+                eq(Integer.class)))
+                .thenReturn(1);
+
+        assertThrows(ValidationException.class, () -> userService.deleteAccount(5L, "secret"));
+        verify(userRepository, never()).deleteById(5L);
+    }
+
+    @Test
+    void deleteAccount_allowsPasswordlessUser() {
+        UserEntity user = new UserEntity(5L, "WeChat User", null, true, "zh-CN", null);
+        when(userRepository.findById(5L)).thenReturn(Optional.of(user));
+        when(jdbc.queryForObject(
+                eq("SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'"),
+                eq(Boolean.class),
+                eq(5L)))
+                .thenReturn(false);
+        when(groupRepository.findByUserId(5L)).thenReturn(Optional.of(Collections.emptyList()));
+        when(userObjectRepository.findByUserId(5L)).thenReturn(Optional.of(Collections.emptyList()));
+        when(submissionRepository.findBySubmittedByUserId(5L)).thenReturn(Collections.emptyList());
+
+        userService.deleteAccount(5L, null);
+
+        verify(userRepository).deleteById(5L);
+        verify(passwordEncoder, never()).matches(anyString(), anyString());
     }
 }

@@ -65,6 +65,7 @@ export {
   updateIdentifier,
   updateLocale,
   uploadAvatar,
+  deleteAccount,
 } from "./utils/usersApi";
 export {
   getMySubmissionsPage,

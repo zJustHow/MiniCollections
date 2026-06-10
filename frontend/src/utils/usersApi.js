@@ -1,4 +1,4 @@
-import { authHeaders, handleResponse } from "./apiClient";
+import { authHeaders, handleDeleteResponse, handleResponse } from "./apiClient";
 
 export const getMe = async () => {
   const response = await fetch("/users/me", { headers: authHeaders() });
@@ -50,4 +50,13 @@ export const uploadAvatar = async (file) => {
     body: formData,
   });
   return handleResponse(response);
+};
+
+export const deleteAccount = async ({ password } = {}) => {
+  const response = await fetch("/users/me", {
+    method: "DELETE",
+    headers: authHeaders({ "Content-Type": "application/json" }),
+    body: JSON.stringify(password != null ? { password } : {}),
+  });
+  await handleDeleteResponse(response);
 };

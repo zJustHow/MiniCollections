@@ -6,7 +6,7 @@ const pageMocks = vi.hoisted(() => ({
   searchActive: false,
   searchKeyword: "",
   draftQuery: "",
-  displayObjects: [{ id: 10, name: "My M3", image_url: null }],
+  displayItems: [{ id: 10, name: "My M3", image_url: null }],
   loading: false,
 }));
 
@@ -66,11 +66,21 @@ vi.mock("../hooks/useObjectListPageSearch", () => ({
   }),
 }));
 
-vi.mock("../hooks/useDualModePagedList", () => ({
+vi.mock("../hooks/useDualModeBrowseList", () => ({
   default: () => ({
-    activePage: { page: 0, loading: pageMocks.loading, loadPage: vi.fn() },
-    displayObjects: pageMocks.displayObjects,
-    objectsList: { loading: false },
+    browseList: {
+      loading: pageMocks.loading,
+      orderLoading: false,
+      hasMore: false,
+      loadingMore: false,
+      loadMore: vi.fn(),
+      orderedIds: [10],
+      sortEnabled: true,
+      refreshAll: vi.fn(),
+      handleDragEnd: vi.fn(),
+    },
+    searchList: { page: 0, loading: pageMocks.loading, loadPage: vi.fn() },
+    displayItems: pageMocks.displayItems,
   }),
 }));
 
@@ -96,6 +106,23 @@ vi.mock("../components/listPage/ObjectListPageShell", () => ({
   ),
 }));
 
+vi.mock("../components/listPage/SortableInfiniteBrowseSection", () => ({
+  default: ({ items, renderItem, loading, orderLoading }) =>
+    loading || orderLoading ? (
+      <div data-testid="browse-loading" />
+    ) : (
+      <div data-testid="browse-grid">{items.map((item) => renderItem(item))}</div>
+    ),
+}));
+
+vi.mock("../components/listPage/SortableNeuCard", () => ({
+  default: ({ name, onClick, add }) => (
+    <button type="button" onClick={onClick}>
+      {add ? "addModel" : name}
+    </button>
+  ),
+}));
+
 vi.mock("../components/listPage/ObjectBrowseSection", () => ({
   default: ({ children, loading }) =>
     loading ? <div data-testid="browse-loading" /> : <div>{children}</div>,
@@ -107,14 +134,6 @@ vi.mock("../components/listPage/NoSearchResults", () => ({
 
 vi.mock("../components/listPage/ActivePagePagination", () => ({
   default: () => <div data-testid="pagination" />,
-}));
-
-vi.mock("../components/NeuCard", () => ({
-  default: ({ name, onClick }) => (
-    <button type="button" onClick={onClick}>
-      {name}
-    </button>
-  ),
 }));
 
 const sampleGroup = { id: 5, name: "Garage" };
@@ -138,7 +157,7 @@ describe("GroupObjectsPage", () => {
     pageMocks.searchActive = false;
     pageMocks.searchKeyword = "";
     pageMocks.draftQuery = "";
-    pageMocks.displayObjects = [{ id: 10, name: "My M3", image_url: null }];
+    pageMocks.displayItems = [{ id: 10, name: "My M3", image_url: null }];
     pageMocks.loading = false;
   });
 
@@ -154,7 +173,7 @@ describe("GroupObjectsPage", () => {
   test("renders search hits when search is active", () => {
     pageMocks.searchActive = true;
     pageMocks.searchKeyword = "m3";
-    pageMocks.displayObjects = [{ id: 11, name: "M3 Search Hit", image_url: null }];
+    pageMocks.displayItems = [{ id: 11, name: "M3 Search Hit", image_url: null }];
 
     renderPage();
 
@@ -165,7 +184,7 @@ describe("GroupObjectsPage", () => {
   test("shows no-results state for empty search", () => {
     pageMocks.searchActive = true;
     pageMocks.searchKeyword = "missing";
-    pageMocks.displayObjects = [];
+    pageMocks.displayItems = [];
 
     renderPage();
 

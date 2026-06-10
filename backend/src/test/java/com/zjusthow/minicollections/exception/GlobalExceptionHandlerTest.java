@@ -185,4 +185,27 @@ class GlobalExceptionHandlerTest {
 
         assertEquals("error.bad_request", response.code());
     }
+
+    @Test
+    void handleUserObjectNotFoundException_returnsNotFoundCode() {
+        ApiErrorResponse response = handler.handleUserObjectNotFoundException(
+                new UserObjectNotFoundException());
+
+        assertEquals("error.user_object.not_found", response.code());
+    }
+
+    @Test
+    void handleServiceNotConfiguredException_returnsInternalServerErrorCode() {
+        ApiErrorResponse response = handler.handleServiceNotConfiguredException(
+                new ServiceNotConfiguredException("Email service is not configured"));
+
+        assertEquals("error.internal_server_error", response.code());
+    }
+
+    @Test
+    void handleAllExceptions_returnsInternalServerErrorCode() {
+        ApiErrorResponse response = handler.handleAllExceptions(new RuntimeException("boom"));
+
+        assertEquals("error.internal_server_error", response.code());
+    }
 }

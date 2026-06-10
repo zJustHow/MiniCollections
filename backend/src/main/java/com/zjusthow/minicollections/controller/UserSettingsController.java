@@ -1,9 +1,11 @@
 package com.zjusthow.minicollections.controller;
 
 import com.zjusthow.minicollections.model.*;
+import com.zjusthow.minicollections.service.CollectionStatsService;
 import com.zjusthow.minicollections.service.UserService;
 import com.zjusthow.minicollections.service.VerificationService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
@@ -15,16 +17,27 @@ public class UserSettingsController {
 
     private final UserService userService;
     private final VerificationService verificationService;
+    private final CollectionStatsService collectionStatsService;
 
-    public UserSettingsController(UserService userService, VerificationService verificationService) {
+    public UserSettingsController(
+            UserService userService,
+            VerificationService verificationService,
+            CollectionStatsService collectionStatsService) {
         this.userService = userService;
         this.verificationService = verificationService;
+        this.collectionStatsService = collectionStatsService;
     }
 
     @GetMapping("/me")
     public ResponseEntity<UserProfileDto> getMe(@AuthenticationPrincipal User user) {
         Long userId = Long.parseLong(user.getUsername());
         return ResponseEntity.ok(userService.getProfile(userId));
+    }
+
+    @GetMapping("/me/collection-stats")
+    public ResponseEntity<CollectionStatsDto> getCollectionStats(@AuthenticationPrincipal User user) {
+        Long userId = Long.parseLong(user.getUsername());
+        return ResponseEntity.ok(collectionStatsService.getStats(userId));
     }
 
     @PatchMapping("/me")
@@ -58,5 +71,15 @@ public class UserSettingsController {
             @RequestBody @Valid UserLocaleBody body) {
         Long userId = Long.parseLong(user.getUsername());
         return ResponseEntity.ok(userService.updatePreferredLocale(userId, body.preferredLocale()));
+    }
+
+    @DeleteMapping("/me")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccount(
+            @AuthenticationPrincipal User user,
+            @RequestBody(required = false) AccountDeleteBody body) {
+        Long userId = Long.parseLong(user.getUsername());
+        String password = body != null ? body.password() : null;
+        userService.deleteAccount(userId, password);
     }
 }

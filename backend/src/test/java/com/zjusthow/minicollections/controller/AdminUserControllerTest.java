@@ -35,7 +35,7 @@ class AdminUserControllerTest {
     @Test
     void lookupByEmail_returnsProfile() throws Exception {
         UserProfileDto profile = new UserProfileDto(
-                3L, "alice@example.com", null, "Alice", "en-US", null, false, false);
+                3L, "alice@example.com", null, "Alice", "en-US", null, false, false, true);
         when(userService.getProfileByEmail("alice@example.com")).thenReturn(profile);
 
         mockMvc.perform(get("/admin/users/lookup").param("email", "alice@example.com"))

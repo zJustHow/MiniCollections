@@ -7,7 +7,9 @@ import com.zjusthow.minicollections.exception.IdentifierExistsException;
 import com.zjusthow.minicollections.exception.UserNotFoundException;
 import com.zjusthow.minicollections.exception.ValidationException;
 import com.zjusthow.minicollections.repository.GroupRepository;
+import com.zjusthow.minicollections.repository.ObjectSubmissionRepository;
 import com.zjusthow.minicollections.repository.UserIdentifierRepository;
+import com.zjusthow.minicollections.repository.UserObjectRepository;
 import com.zjusthow.minicollections.repository.UserRepository;
 import com.zjusthow.minicollections.i18n.DisplayLocaleResolver;
 import com.zjusthow.minicollections.model.UserProfileDto;
@@ -20,10 +22,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+
 @Service
 public class UserService {
 
     private final GroupRepository groupRepository;
+    private final UserObjectRepository userObjectRepository;
+    private final ObjectSubmissionRepository submissionRepository;
     private final UserRepository userRepository;
     private final UserIdentifierRepository identifierRepository;
     private final PasswordEncoder passwordEncoder;
@@ -33,6 +39,8 @@ public class UserService {
 
     public UserService(
             GroupRepository groupRepository,
+            UserObjectRepository userObjectRepository,
+            ObjectSubmissionRepository submissionRepository,
             UserRepository userRepository,
             UserIdentifierRepository identifierRepository,
             PasswordEncoder passwordEncoder,
@@ -40,6 +48,8 @@ public class UserService {
             VerificationService verificationService,
             @Autowired(required = false) ImageStorageService imageStorageService) {
         this.groupRepository = groupRepository;
+        this.userObjectRepository = userObjectRepository;
+        this.submissionRepository = submissionRepository;
         this.userRepository = userRepository;
         this.identifierRepository = identifierRepository;
         this.passwordEncoder = passwordEncoder;
@@ -82,7 +92,7 @@ public class UserService {
 
         jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", user.id(), "ROLE_USER");
         groupRepository.save(new GroupEntity(
-                null, user.id(), DisplayLocaleResolver.defaultGroupName(locale), null));
+                null, user.id(), DisplayLocaleResolver.defaultGroupName(locale), null, 0));
 
         return user.id();
     }
@@ -104,7 +114,10 @@ public class UserService {
                 "SELECT COUNT(*) > 0 FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
                 Boolean.class, userId));
         boolean wechatBound = identifierRepository.findByUserIdAndType(userId, "wechat_openid").isPresent();
-        return new UserProfileDto(u.id(), email, phone, u.displayName(), u.preferredLocale(), u.avatarUrl(), isAdmin, wechatBound);
+        boolean passwordSet = u.password() != null && !u.password().isBlank();
+        return new UserProfileDto(
+                u.id(), email, phone, u.displayName(), u.preferredLocale(), u.avatarUrl(),
+                isAdmin, wechatBound, passwordSet);
     }
 
     @Transactional
@@ -196,7 +209,7 @@ public class UserService {
         }
         jdbc.update("INSERT INTO authorities (user_id, authority) VALUES (?, ?)", user.id(), "ROLE_USER");
         groupRepository.save(new GroupEntity(
-                null, user.id(), DisplayLocaleResolver.defaultGroupName("zh-CN"), null));
+                null, user.id(), DisplayLocaleResolver.defaultGroupName("zh-CN"), null, 0));
         return user.id();
     }
 
@@ -314,6 +327,52 @@ public class UserService {
         jdbc.update(
                 "DELETE FROM authorities WHERE user_id = ? AND authority = 'ROLE_ADMIN'",
                 targetUserId);
+    }
+
+    @Transactional
+    @CacheEvict(value = {"users", "userDetails"}, key = "#userId", beforeInvocation = true)
+    public void deleteAccount(Long userId, String password) {
+        UserEntity user = userRepository.findById(userId).orElseThrow(UserNotFoundException::new);
+
+        if (isAdmin(userId)) {
+            int adminCount = jdbc.queryForObject(
+                    "SELECT COUNT(*) FROM authorities WHERE authority = 'ROLE_ADMIN'",
+                    Integer.class);
+            if (adminCount <= 1) {
+                throw new ValidationException("error.cannot_delete_last_admin");
+            }
+        }
+
+        boolean passwordSet = user.password() != null && !user.password().isBlank();
+        if (passwordSet) {
+            if (password == null || password.isBlank()) {
+                throw new ValidationException("error.password_required");
+            }
+            if (!passwordEncoder.matches(password, user.password())) {
+                throw new BadCredentialsException("error.password_incorrect");
+            }
+        }
+
+        deleteStoredUserImages(userId, user.avatarUrl());
+        groupRepository.findByUserId(userId)
+                .orElse(Collections.emptyList())
+                .forEach(group -> deleteStoredUserImages(userId, group.imageUrl()));
+        userObjectRepository.findByUserId(userId)
+                .orElse(Collections.emptyList())
+                .forEach(object -> deleteStoredUserImages(userId, object.imageUrl()));
+        submissionRepository.findBySubmittedByUserId(userId)
+                .forEach(submission -> deleteStoredUserImages(userId, submission.imageUrl()));
+
+        jdbc.update(
+                "UPDATE object_submissions SET reviewed_by_user_id = NULL WHERE reviewed_by_user_id = ?",
+                userId);
+        userRepository.deleteById(userId);
+    }
+
+    private void deleteStoredUserImages(long userId, String imageUrl) {
+        if (imageStorageService != null) {
+            imageStorageService.deleteUserImageIfOwned(userId, imageUrl);
+        }
     }
 
     @Transactional

@@ -4,10 +4,9 @@ import {
   prefetchForgotPasswordPage,
   prefetchLoginPage,
   prefetchAuthPages,
-  prefetchBrandObjectDetailPage,
-  prefetchGroupObjectDetailPage,
   prefetchBrandObjectsPage,
   prefetchGroupObjectsPage,
+  prefetchGroupObjectDetailPage,
 } from "./prefetchRoutes";
 
 describe("prefetchProfilePage", () => {
@@ -53,24 +52,6 @@ describe("prefetchAuthPages", () => {
   });
 });
 
-describe("prefetchBrandObjectDetailPage", () => {
-  test("returns the same in-flight import promise", async () => {
-    const first = prefetchBrandObjectDetailPage();
-    const second = prefetchBrandObjectDetailPage();
-    expect(first).toBe(second);
-    await first;
-  });
-});
-
-describe("prefetchGroupObjectDetailPage", () => {
-  test("returns the same in-flight import promise", async () => {
-    const first = prefetchGroupObjectDetailPage();
-    const second = prefetchGroupObjectDetailPage();
-    expect(first).toBe(second);
-    await first;
-  });
-});
-
 describe("prefetchBrandObjectsPage", () => {
   test("returns the same in-flight import promise", async () => {
     const first = prefetchBrandObjectsPage();
@@ -84,6 +65,15 @@ describe("prefetchGroupObjectsPage", () => {
   test("returns the same in-flight import promise", async () => {
     const first = prefetchGroupObjectsPage();
     const second = prefetchGroupObjectsPage();
+    expect(first).toBe(second);
+    await first;
+  });
+});
+
+describe("prefetchGroupObjectDetailPage", () => {
+  test("returns the same in-flight import promise", async () => {
+    const first = prefetchGroupObjectDetailPage();
+    const second = prefetchGroupObjectDetailPage();
     expect(first).toBe(second);
     await first;
   });

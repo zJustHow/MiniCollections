@@ -99,15 +99,15 @@ public class DevRunner implements ApplicationRunner {
                 .orElseThrow(() -> new IllegalStateException("Admin default group not found"));
 
         List<GroupEntity> themedGroups = groupRepository.saveAll(List.of(
-                new GroupEntity(null, adminId, "JDM", null),
-                new GroupEntity(null, adminId, "GT & Supercars", null)
+                new GroupEntity(null, adminId, "JDM", null, 1),
+                new GroupEntity(null, adminId, "GT & Supercars", null, 2)
         ));
         long jdmGroupId = themedGroups.get(0).id();
         long supercarGroupId = themedGroups.get(1).id();
 
         List<GroupEntity> paginationGroups = new ArrayList<>(MOCK_EXTRA_GROUP_COUNT);
         for (int i = 1; i <= MOCK_EXTRA_GROUP_COUNT; i++) {
-            paginationGroups.add(new GroupEntity(null, adminId, "Collection %02d".formatted(i), null));
+            paginationGroups.add(new GroupEntity(null, adminId, "Collection %02d".formatted(i), null, i + 2));
         }
         groupRepository.saveAll(paginationGroups);
 
@@ -160,7 +160,8 @@ public class DevRunner implements ApplicationRunner {
                         brandObject.imageUrl(),
                         basePurchaseDate.plusDays(added),
                         basePurchasePrice.add(BigDecimal.valueOf(added % 20)),
-                        "Dev mock collection item #%d".formatted(added + 1)
+                        "Dev mock collection item #%d".formatted(added + 1),
+                        added
                 ));
                 added++;
             }
@@ -176,7 +177,8 @@ public class DevRunner implements ApplicationRunner {
             LocalDate purchaseDate,
             BigDecimal purchasePrice
     ) {
-        for (BrandObjectEntity brandObject : brandObjects) {
+        for (int i = 0; i < brandObjects.size(); i++) {
+            BrandObjectEntity brandObject = brandObjects.get(i);
             target.add(new UserObjectEntity(
                     null,
                     userId,
@@ -186,7 +188,8 @@ public class DevRunner implements ApplicationRunner {
                     brandObject.imageUrl(),
                     purchaseDate,
                     purchasePrice,
-                    "Dev mock collection item"
+                    "Dev mock collection item",
+                    target.size()
             ));
         }
     }

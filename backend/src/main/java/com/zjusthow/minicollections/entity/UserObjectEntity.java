@@ -16,6 +16,7 @@ public record UserObjectEntity(
         String imageUrl,
         LocalDate purchaseDate,
         BigDecimal purchasePrice,
-        String otherNotes
+        String otherNotes,
+        int sortOrder
 ) {
 }
