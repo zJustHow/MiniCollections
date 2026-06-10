@@ -1,8 +1,6 @@
 -- flyway:executeInTransaction=false
 -- Trigram indexes for SQL search fallback. CONCURRENTLY avoids long write locks.
 
-CREATE EXTENSION IF NOT EXISTS pg_trgm;
-
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_brands_name_en_trgm
     ON brands USING gin (lower(name_en) gin_trgm_ops);
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_brands_name_zh_trgm

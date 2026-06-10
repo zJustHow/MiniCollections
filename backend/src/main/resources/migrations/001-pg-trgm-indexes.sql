@@ -1,2 +1,2 @@
--- Superseded by Flyway migration db/migration/V2__pg_trgm_indexes.sql (runs automatically on prod deploy).
+-- Superseded by Flyway migrations db/migration/V2__pg_trgm_extension.sql and V3__pg_trgm_indexes.sql.
 -- Kept for reference / one-off manual runs outside Flyway.
