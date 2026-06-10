@@ -9,6 +9,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -23,12 +26,10 @@ class SortOrderBatchRepositoryIntegrationTest {
     static SortOrderBatchRepository repository;
 
     @BeforeAll
-    static void setUpSchema() {
-        postgres.start();
-        SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
-        dataSource.setUrl(postgres.getJdbcUrl());
-        dataSource.setUsername(postgres.getUsername());
-        dataSource.setPassword(postgres.getPassword());
+    static void setUpSchema() throws SQLException {
+        Driver driver = DriverManager.getDriver(postgres.getJdbcUrl());
+        SimpleDriverDataSource dataSource = new SimpleDriverDataSource(
+                driver, postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
         jdbcClient = JdbcClient.create(dataSource);
         jdbcClient.sql("""
                 CREATE TABLE groups (
