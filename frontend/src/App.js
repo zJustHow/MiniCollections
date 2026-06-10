@@ -11,7 +11,6 @@ import {
   useEffect,
   useRef,
   useCallback,
-  useLayoutEffect,
 } from "react";
 import { lazyWithRetry } from "./utils/lazyWithRetry";
 import {
@@ -95,13 +94,9 @@ function MainLayoutInner({
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useLocale();
-  const { headerSlot, setHeaderSlot } = useHeader();
+  const { headerSlot } = useHeader();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
-
-  useLayoutEffect(() => {
-    setHeaderSlot(null);
-  }, [location.pathname, setHeaderSlot]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -118,6 +113,7 @@ function MainLayoutInner({
   }, [location.pathname]);
 
   const customHeaderRoute = usesCustomHeader(location.pathname);
+  const showSiteLogo = !headerSlot;
   const showDefaultHeaderNav = !customHeaderRoute && !headerSlot;
 
   const hideProfileButton = customHeaderRoute;
@@ -201,8 +197,8 @@ function MainLayoutInner({
           gap: 24,
         }}
       >
-        {/* Logo — hidden when a page injects its own header slot */}
-        {showDefaultHeaderNav && <SiteLogo />}
+        {/* Logo — hidden only when a page injects its own header slot */}
+        {showSiteLogo && <SiteLogo />}
 
         {/* Center slot: custom page header, skeleton, or default nav tabs */}
         {headerSlot ? (

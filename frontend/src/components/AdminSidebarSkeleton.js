@@ -1,4 +1,5 @@
 const STATUS_NAV_ITEMS = 4;
+const CATALOG_NAV_ITEMS = 2;
 
 export default function AdminSidebarSkeleton() {
   return (
@@ -15,6 +16,13 @@ export default function AdminSidebarSkeleton() {
       <div className="neu-admin-sidebar-skeleton-nav-item">
         <span className="neu-card-skeleton-line neu-admin-sidebar-skeleton-nav-label" />
       </div>
+      <div className="neu-admin-sidebar-skeleton-divider" />
+      <span className="neu-card-skeleton-line neu-admin-sidebar-skeleton-section-title" />
+      {Array.from({ length: CATALOG_NAV_ITEMS }, (_, index) => (
+        <div key={index} className="neu-admin-sidebar-skeleton-nav-item">
+          <span className="neu-card-skeleton-line neu-admin-sidebar-skeleton-nav-label" />
+        </div>
+      ))}
     </div>
   );
 }

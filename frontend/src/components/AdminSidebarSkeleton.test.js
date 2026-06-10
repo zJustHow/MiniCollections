@@ -9,12 +9,12 @@ describe("AdminSidebarSkeleton", () => {
     expect(root).toHaveAttribute("aria-busy", "true");
     expect(
       document.querySelectorAll(".neu-admin-sidebar-skeleton-nav-item"),
-    ).toHaveLength(5);
+    ).toHaveLength(7);
     expect(
       document.querySelectorAll(".neu-admin-sidebar-skeleton-section-title"),
-    ).toHaveLength(2);
+    ).toHaveLength(3);
     expect(
-      document.querySelector(".neu-admin-sidebar-skeleton-divider"),
-    ).toBeInTheDocument();
+      document.querySelectorAll(".neu-admin-sidebar-skeleton-divider"),
+    ).toHaveLength(2);
   });
 });

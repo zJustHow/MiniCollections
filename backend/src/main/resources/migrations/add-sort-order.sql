@@ -1,2 +1,2 @@
--- Superseded by Flyway migration db/migration/V1__add_sort_order.sql (runs automatically on prod deploy).
+-- Superseded by Flyway migrations db/migration/V1__add_sort_order.sql and V4__ensure_sort_order.sql.
 -- Kept for reference / one-off manual runs outside Flyway.

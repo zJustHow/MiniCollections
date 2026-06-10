@@ -18,4 +18,21 @@ describe("AdminTableSkeleton", () => {
     expect(document.querySelectorAll(".neu-table-skeleton-row")).toHaveLength(3);
     expect(document.querySelectorAll(".neu-table-skeleton-cell--header")).toHaveLength(7);
   });
+
+  test("wraps grid in neu-panel to match loaded admin tables", () => {
+    render(<AdminTableSkeleton columns={3} />);
+
+    const panel = document.querySelector(".neu-panel");
+    expect(panel).toBeInTheDocument();
+    expect(panel.querySelector(".neu-table-skeleton")).toHaveAttribute("aria-busy", "true");
+  });
+
+  test("uses category column template for six columns", () => {
+    render(<AdminTableSkeleton columns={6} rows={2} />);
+
+    const header = document.querySelector(".neu-table-skeleton-header");
+    expect(header).toHaveStyle({
+      gridTemplateColumns: "60px 1fr 1fr 1fr 100px 80px",
+    });
+  });
 });

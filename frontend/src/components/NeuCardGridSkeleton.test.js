@@ -10,6 +10,21 @@ vi.mock("../utils/apiClient", () => ({
 }));
 
 describe("NeuCardGridSkeleton", () => {
+  test("search section grid skips aria-busy wrapper so cards participate in parent grid", () => {
+    const { container } = render(
+      <NeuCardGridSkeleton variant="object" className="neu-search-section-grid" />,
+    );
+
+    expect(container.querySelector(".neu-search-section-grid")).toHaveAttribute(
+      "aria-busy",
+      "true",
+    );
+    expect(container.querySelectorAll("[data-testid='card-skeleton']")).toHaveLength(
+      2,
+    );
+    expect(container.childElementCount).toBe(1);
+  });
+
   test("reserveSearchRow renders toolbar placeholder", () => {
     const { container } = render(<NeuCardGridSkeleton reserveSearchRow />);
 

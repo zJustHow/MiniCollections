@@ -1,17 +1,12 @@
-import { lazy, Suspense } from "react";
 import SplashLoader from "./SplashLoader";
 import AuthPageSkeleton from "./AuthPageSkeleton";
 import ProfilePageSkeleton from "./ProfilePageSkeleton";
 import ObjectDetailPageSkeleton from "./ObjectDetailPageSkeleton";
-const FeedbackPageSkeleton = lazy(() => import("./FeedbackPageSkeleton"));
-const StatsPageSkeleton = lazy(() => import("./StatsPageSkeleton"));
-const AdminLayoutSkeleton = lazy(() => import("./AdminLayoutSkeleton"));
-const AdminTableSkeleton = lazy(() => import("./AdminTableSkeleton"));
-const NeuCardGridSkeleton = lazy(() => import("./NeuCardGridSkeleton"));
-
-function LazySkeleton({ children }) {
-  return <Suspense fallback={<SplashLoader />}>{children}</Suspense>;
-}
+import FeedbackPageSkeleton from "./FeedbackPageSkeleton";
+import StatsPageSkeleton from "./StatsPageSkeleton";
+import AdminLayoutSkeleton from "./AdminLayoutSkeleton";
+import AdminTableSkeleton from "./AdminTableSkeleton";
+import NeuCardGridSkeleton from "./NeuCardGridSkeleton";
 
 export default function PageLoader({ variant = "splash" }) {
   if (variant === "register") {
@@ -27,19 +22,11 @@ export default function PageLoader({ variant = "splash" }) {
   }
 
   if (variant === "stats") {
-    return (
-      <LazySkeleton>
-        <StatsPageSkeleton />
-      </LazySkeleton>
-    );
+    return <StatsPageSkeleton />;
   }
 
   if (variant === "feedback") {
-    return (
-      <LazySkeleton>
-        <FeedbackPageSkeleton />
-      </LazySkeleton>
-    );
+    return <FeedbackPageSkeleton />;
   }
 
   if (variant === "profile") {
@@ -47,37 +34,23 @@ export default function PageLoader({ variant = "splash" }) {
   }
 
   if (variant === "admin") {
-    return (
-      <LazySkeleton>
-        <AdminLayoutSkeleton />
-      </LazySkeleton>
-    );
+    return <AdminLayoutSkeleton />;
   }
 
   if (variant === "adminTable") {
     return (
-      <LazySkeleton>
-        <div style={{ maxWidth: 1280, margin: "0 auto" }}>
-          <AdminTableSkeleton />
-        </div>
-      </LazySkeleton>
+      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+        <AdminTableSkeleton />
+      </div>
     );
   }
 
   if (variant === "brands" || variant === "groups") {
-    return (
-      <LazySkeleton>
-        <NeuCardGridSkeleton reserveSearchRow />
-      </LazySkeleton>
-    );
+    return <NeuCardGridSkeleton reserveSearchRow />;
   }
 
   if (variant === "brandObjects" || variant === "groupObjects") {
-    return (
-      <LazySkeleton>
-        <NeuCardGridSkeleton variant="object" reserveSearchRow />
-      </LazySkeleton>
-    );
+    return <NeuCardGridSkeleton variant="object" reserveSearchRow />;
   }
 
   if (variant === "brandObjectDetail") {

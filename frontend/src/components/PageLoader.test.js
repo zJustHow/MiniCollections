@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import PageLoader from "./PageLoader";
 
 vi.mock("./SplashLoader", () => ({
@@ -41,24 +41,21 @@ describe("PageLoader", () => {
     expect(screen.getByTestId("splash-loader")).toBeInTheDocument();
   });
 
-  test("register variant loads auth skeleton", async () => {
+  test("register variant loads auth skeleton", () => {
     render(<PageLoader variant="register" />);
-    await waitFor(() => {
-      expect(screen.getByTestId("auth-skeleton-register")).toBeInTheDocument();
-    });
+    expect(screen.getByTestId("auth-skeleton-register")).toBeInTheDocument();
+    expect(screen.queryByTestId("splash-loader")).not.toBeInTheDocument();
   });
 
-  test("brandObjects variant loads object card grid skeleton", async () => {
+  test("brandObjects variant loads object card grid skeleton", () => {
     render(<PageLoader variant="brandObjects" />);
-    await waitFor(() => {
-      expect(screen.getByTestId("card-grid-object")).toBeInTheDocument();
-    });
+    expect(screen.getByTestId("card-grid-object")).toBeInTheDocument();
+    expect(screen.queryByTestId("splash-loader")).not.toBeInTheDocument();
   });
 
-  test("groupObjectDetail variant loads related object skeleton", async () => {
+  test("groupObjectDetail variant loads related object skeleton", () => {
     render(<PageLoader variant="groupObjectDetail" />);
-    await waitFor(() => {
-      expect(screen.getByTestId("object-detail-related")).toBeInTheDocument();
-    });
+    expect(screen.getByTestId("object-detail-related")).toBeInTheDocument();
+    expect(screen.queryByTestId("splash-loader")).not.toBeInTheDocument();
   });
 });
