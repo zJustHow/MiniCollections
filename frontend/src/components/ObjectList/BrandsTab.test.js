@@ -38,25 +38,13 @@ vi.mock("../listPage/ObjectListPageShell", () => ({
   ),
 }));
 
-vi.mock("../listPage/TabListPageBody", () => ({
-  default: ({
-    searchActive,
-    browseItems,
-    renderBrowseItem,
-    searchContent,
-    spinning,
-    searchHasResults,
-  }) =>
-    searchActive ? (
-      <div data-testid="search-body">
-        {searchContent}
-        {!spinning && !searchHasResults ? <div data-testid="no-results" /> : null}
-      </div>
-    ) : spinning ? (
+vi.mock("../listPage/SortableInfiniteBrowseSection", () => ({
+  default: ({ items, renderItem, loading }) =>
+    loading ? (
       <div data-testid="browse-loading" />
     ) : (
       <div data-testid="browse-body">
-        {browseItems.map((item) => renderBrowseItem(item))}
+        {items.map((item) => renderItem(item))}
       </div>
     ),
 }));
@@ -68,6 +56,14 @@ vi.mock("../listPage/TabCombinedSearchSection", () => ({
       <div data-testid="object-cards">{objectCards}</div>
     </div>
   ),
+}));
+
+vi.mock("../listPage/ActivePagePagination", () => ({
+  default: () => <div data-testid="pagination" />,
+}));
+
+vi.mock("../listPage/NoSearchResults", () => ({
+  default: () => <div data-testid="no-results" />,
 }));
 
 vi.mock("../listPage/ObjectSearchFilterPanelSlot", () => ({
@@ -92,7 +88,7 @@ const baseProps = {
   searchResultBrands: [],
   searchResultObjects: [],
   searchValue: "",
-  brandsListPage: { page: 0, loading: false },
+  brandsBrowse: { loading: false, hasMore: false },
   combinedSearchPage: { loading: false, totalBrands: 0, totalObjects: 0 },
   searchFacets: null,
   facetsLoading: false,
@@ -121,7 +117,7 @@ describe("BrandsTab", () => {
     );
   });
 
-  test("shows admin add card on first browse page", () => {
+  test("shows admin add card in browse mode", () => {
     render(<BrandsTab {...baseProps} isAdmin />);
 
     expect(screen.getByRole("button", { name: "add-card" })).toBeInTheDocument();
@@ -146,7 +142,7 @@ describe("BrandsTab", () => {
       />,
     );
 
-    expect(screen.getByTestId("search-body")).toBeInTheDocument();
+    expect(screen.getByTestId("combined")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mini GT" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Model" })).toBeInTheDocument();
   });
@@ -200,7 +196,7 @@ describe("BrandsTab", () => {
     render(
       <BrandsTab
         {...baseProps}
-        brandsListPage={{ page: 0, loading: true }}
+        brandsBrowse={{ loading: true, hasMore: false }}
       />,
     );
 

@@ -24,7 +24,7 @@ export default function TabCombinedSearchSection({
         </ObjectSearchFilterLayout>
       );
     }
-    return skeleton;
+    return <div className="neu-search-objects-cards">{skeleton}</div>;
   }
 
   if (!hasResults) return null;

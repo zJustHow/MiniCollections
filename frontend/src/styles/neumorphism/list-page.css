@@ -210,15 +210,15 @@
   max-width: 100%;
 }
 
-@media (min-width: 1200px) {
-  .neu-list-page-search {
-    flex: 0 0 auto;
-    margin-left: auto;
-  }
+.ant-layout:not(.content-toolbar-compact) .neu-list-page-search {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
 
-  .neu-list-page-search .ant-input-group-wrapper.ant-input-search {
-    width: 260px;
-  }
+.ant-layout:not(.content-toolbar-compact)
+  .neu-list-page-search
+  .ant-input-group-wrapper.ant-input-search {
+  width: 260px;
 }
 
 .neu-list-page-search-field-skeleton {
@@ -244,10 +244,10 @@
   box-shadow: var(--raised-sm);
 }
 
-@media (min-width: 1200px) {
-  .neu-list-page-search .neu-list-page-search-field-skeleton {
-    width: 260px;
-  }
+.ant-layout:not(.content-toolbar-compact)
+  .neu-list-page-search
+  .neu-list-page-search-field-skeleton {
+  width: 260px;
 }
 
 .neu-list-page-browse-grid,
@@ -307,16 +307,27 @@
   border-top: 1px solid var(--neu-border);
 }
 
-@media (max-width: 1199px) {
-  .neu-list-page-toolbar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 12px;
-  }
+.ant-layout.content-toolbar-compact .neu-list-page-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
 
-  .neu-list-page-search {
-    width: 100%;
-  }
+.ant-layout.content-toolbar-compact .neu-list-page-search {
+  width: 100%;
+  flex: 1 1 auto;
+  margin-left: 0;
+  max-width: 100%;
+}
+
+.ant-layout.content-toolbar-compact
+  .neu-list-page-search
+  .ant-input-group-wrapper.ant-input-search,
+.ant-layout.content-toolbar-compact
+  .neu-list-page-search
+  .neu-list-page-search-field-skeleton {
+  width: 100%;
+  max-width: 100%;
 }
 
 @media (max-width: 992px) {
@@ -382,15 +393,33 @@
   height: 100%;
 }
 
+.neu-sortable-skeleton-wrap {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+}
+
+.neu-sortable-skeleton-wrap .neu-card-skeleton {
+  width: 100%;
+  flex: 1 1 auto;
+  height: 100%;
+}
+
+.neu-sortable-card-wrap--overlay {
+  z-index: 3;
+  cursor: grabbing;
+  touch-action: none;
+  box-shadow: var(--neu-card-shadow-hover);
+}
+
+.neu-sortable-card-wrap--overlay .neu-card {
+  width: 100%;
+}
+
 .neu-infinite-scroll-sentinel {
   width: 100%;
   height: 1px;
-}
-
-.neu-infinite-scroll-loading {
-  width: 100%;
-  padding: 12px 0 24px;
-  text-align: center;
-  color: var(--neu-text-2);
 }
 

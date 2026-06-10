@@ -31,6 +31,21 @@ export function sortItemsByOrderedIds(items, orderedIds) {
   return orderedIds.map((id) => byId.get(id)).filter(Boolean);
 }
 
+/** Reorder loaded ids within full order while keeping unloaded ids in place. */
+export function mergeLoadedOrderIntoFullOrder(fullOrder, loadedOrder) {
+  if (!Array.isArray(fullOrder) || !Array.isArray(loadedOrder)) {
+    return loadedOrder ?? [];
+  }
+  const loadedSet = new Set(loadedOrder);
+  let loadedIdx = 0;
+  return fullOrder.map((id) => {
+    if (loadedSet.has(id)) {
+      return loadedOrder[loadedIdx++];
+    }
+    return id;
+  });
+}
+
 export function getBrowseChunkDataLimit(uiPage, pageSize, reservedFirstPageSlots = 0) {
   return getUiPageDataRange(uiPage, pageSize, reservedFirstPageSlots).dataLimit;
 }

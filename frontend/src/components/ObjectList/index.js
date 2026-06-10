@@ -33,7 +33,7 @@ export default function ObjectList({ isAdmin }) {
     searchResultBrands,
     searchResultObjects,
     searchValue,
-    brandsListPage,
+    brandsBrowse,
     combinedSearchPage,
     searchFacets,
     facetsLoading,
@@ -60,7 +60,7 @@ export default function ObjectList({ isAdmin }) {
           searchResultBrands={searchResultBrands}
           searchResultObjects={searchResultObjects}
           searchValue={searchValue}
-          brandsListPage={brandsListPage}
+          brandsBrowse={brandsBrowse}
           combinedSearchPage={combinedSearchPage}
           searchFacets={searchFacets}
           facetsLoading={facetsLoading}

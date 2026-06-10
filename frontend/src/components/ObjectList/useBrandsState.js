@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useSearchParam from "../../hooks/useSearchParam";
 import useObjectFilterParams from "../../hooks/useObjectFilterParams";
-import usePagedList from "../../hooks/usePagedList";
+import useInfiniteList from "../../hooks/useInfiniteList";
 import useCombinedBrandSearch from "../../hooks/useCombinedBrandSearch";
 import useSearchObjectFacets from "../../hooks/useSearchObjectFacets";
 import { PAGE_SIZE } from "../../utils/apiClient";
@@ -38,13 +38,12 @@ export default function useBrandsState({ isAdmin = false } = {}) {
 
   const onBrandsTab = location.pathname === "/";
 
-  const brandsList = usePagedList(
+  const brandsBrowse = useInfiniteList(
     ({ size, page }) => getBrandsPage({ size, page }),
     {
       resetKey: "brands-list",
       enabled: onBrandsTab && !searchActive,
       pageSize: PAGE_SIZE,
-      pageParamKey: "page",
       reservedFirstPageSlots: isAdmin ? 1 : 0,
     },
   );
@@ -145,15 +144,15 @@ export default function useBrandsState({ isAdmin = false } = {}) {
     if (searchActive) {
       combinedSearch.loadPage(0);
     } else {
-      brandsList.loadPage(0);
+      brandsBrowse.refresh();
     }
-  }, [searchActive, brandsList, combinedSearch]);
+  }, [searchActive, brandsBrowse, combinedSearch]);
 
-  const loadingBrands = searchActive ? combinedSearch.loading : brandsList.loading;
+  const loadingBrands = searchActive ? combinedSearch.loading : brandsBrowse.loading;
 
   return useMemo(
     () => ({
-      brands: brandsList.items,
+      brands: brandsBrowse.items,
       loadingBrands,
       handleBrandClick,
       handleBrandSearch,
@@ -164,7 +163,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       searchResultBrands: combinedSearch.brands,
       searchResultObjects: combinedSearch.objects,
       searchValue,
-      brandsListPage: brandsList,
+      brandsBrowse,
       combinedSearchPage: combinedSearch,
       searchFacets,
       facetsLoading,
@@ -178,7 +177,7 @@ export default function useBrandsState({ isAdmin = false } = {}) {
       onToggleSeries,
     }),
     [
-      brandsList,
+      brandsBrowse,
       combinedSearch,
       loadingBrands,
       handleBrandSearch,

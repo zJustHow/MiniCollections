@@ -23,14 +23,14 @@ import {
   Outlet,
 } from "react-router-dom";
 import UserOutlined from "@ant-design/icons/es/icons/UserOutlined.js";
-import MenuOutlined from "@ant-design/icons/es/icons/MenuOutlined.js";
-import CloseOutlined from "@ant-design/icons/es/icons/CloseOutlined.js";
 import SiteLogo from "./components/SiteLogo";
+import AnimatedMenuIcon from "./components/AnimatedMenuIcon";
 import { getMe } from "./utils/usersApi";
 import { logout } from "./utils/authApi";
 import { scrollAppToTop } from "./utils/scroll";
 import { useLocale } from "./LocaleContext";
 import { HeaderProvider, useHeader } from "./HeaderContext";
+import { useMainNavWouldCollapse } from "./hooks/useHeaderNavCollapse";
 import { prefetchProfilePage } from "./utils/prefetchRoutes";
 
 const ObjectList = lazyWithRetry(() => import("./components/ObjectList"));
@@ -97,6 +97,9 @@ function MainLayoutInner({
   const { headerSlot } = useHeader();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const headerRef = useRef(null);
+  const tabsRef = useRef(null);
+  const profileRef = useRef(null);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -113,10 +116,25 @@ function MainLayoutInner({
   }, [location.pathname]);
 
   const customHeaderRoute = usesCustomHeader(location.pathname);
-  const showSiteLogo = !headerSlot;
-  const showDefaultHeaderNav = !customHeaderRoute && !headerSlot;
+  const headerLoading = authLoading || (customHeaderRoute && !headerSlot);
+  const showSiteLogo = !headerSlot && !headerLoading;
+  const showDefaultHeaderNav =
+    !customHeaderRoute && !headerSlot && !headerLoading;
 
   const hideProfileButton = customHeaderRoute;
+
+  const mainNavWouldCollapse = useMainNavWouldCollapse({
+    enabled: !headerLoading,
+    headerRef,
+    profileRef: hideProfileButton ? null : profileRef,
+    tabCount: isAdmin ? 5 : 4,
+  });
+
+  const headerNavCollapsed = mainNavWouldCollapse && showDefaultHeaderNav;
+
+  useEffect(() => {
+    if (!headerNavCollapsed) setMenuOpen(false);
+  }, [headerNavCollapsed]);
 
   const activeTab =
     location.pathname === "/groups"
@@ -187,8 +205,20 @@ function MainLayoutInner({
   };
 
   return (
-    <Layout style={{ height: "100vh", overflow: "hidden" }}>
+    <Layout
+      className={
+        [
+          headerNavCollapsed && "header-nav-collapsed",
+          mainNavWouldCollapse && "content-toolbar-compact",
+        ]
+          .filter(Boolean)
+          .join(" ") || undefined
+      }
+      style={{ height: "100vh", overflow: "hidden" }}
+    >
       <Header
+        ref={headerRef}
+        aria-busy={headerLoading || undefined}
         style={{
           display: "flex",
           alignItems: "center",
@@ -197,16 +227,15 @@ function MainLayoutInner({
           gap: 24,
         }}
       >
-        {/* Logo — hidden only when a page injects its own header slot */}
+        {/* Logo — hidden while header is loading or a page injects its own slot */}
         {showSiteLogo && <SiteLogo />}
 
-        {/* Center slot: custom page header, skeleton, or default nav tabs */}
-        {headerSlot ? (
-          <div className="header-slot-wrap">{headerSlot}</div>
-        ) : customHeaderRoute ? (
-          <div className="header-slot-wrap" aria-busy="true" />
-        ) : (
-          <div className="header-tabs">
+        {/* Center slot: custom page header or default nav tabs */}
+        {!headerLoading &&
+          (headerSlot ? (
+            <div className="header-slot-wrap">{headerSlot}</div>
+          ) : !customHeaderRoute ? (
+          <div className="header-tabs" ref={tabsRef}>
             <NeuPressableButton
               variant="header-bar"
               active={activeTab === "brands"}
@@ -245,10 +274,11 @@ function MainLayoutInner({
               </NeuPressableButton>
             )}
           </div>
-        )}
+          ) : null)}
 
-        {!hideProfileButton && (
+        {!hideProfileButton && !headerLoading && (
           <div
+            ref={profileRef}
             className="header-right"
             style={{
               flexShrink: 0,
@@ -271,13 +301,13 @@ function MainLayoutInner({
             aria-label={menuOpen ? "close menu" : "menu"}
             aria-expanded={menuOpen}
           >
-            {menuOpen ? <CloseOutlined /> : <MenuOutlined />}
+            <AnimatedMenuIcon open={menuOpen} />
           </NeuPressableButton>
         )}
       </Header>
 
       {/* Mobile dropdown menu */}
-      {menuOpen && showDefaultHeaderNav && (
+      {menuOpen && showDefaultHeaderNav && headerNavCollapsed && (
         <div className="mobile-menu-overlay" ref={menuRef}>
           <button
             className={`mobile-menu-item${activeTab === "brands" ? " active" : ""}`}

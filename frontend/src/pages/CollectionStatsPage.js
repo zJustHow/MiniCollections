@@ -1,31 +1,26 @@
 import { Column, Line, Pie } from "@ant-design/plots";
 import { App } from "antd";
 import NoDataPlaceholder from "../components/NoDataPlaceholder";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import StatsPageSkeleton from "../components/StatsPageSkeleton";
 import useElementWidth from "../hooks/useElementWidth";
 import { useLocale } from "../LocaleContext";
 import { pickLocalizedField } from "../utils/displayLocale";
+import { resolveNeuChartColors } from "../theme/chartColors";
+import { bindCanvasPieLegendToggle } from "../utils/canvasPieLegend";
+import { animatePieDataTransition } from "../utils/pieFilterAnimation";
 import { getCollectionStats } from "../utils/statsApi";
 import "../styles/stats-page.css";
 
 const STATS_CHART_HEIGHT = 280;
+const STATS_PIE_RADIUS = 0.82;
+const STATS_PIE_INNER_RADIUS = 0.5;
+const STATS_PIE_ANIMATE = {
+  enter: { type: "waveIn" },
+  update: { type: null },
+  exit: { type: null },
+};
 const LINE_CHART_MAX_X_LABELS = 8;
-
-/** Matches --neu-* tokens in styles/neumorphism/tokens.css */
-const NEU_CHART_COLORS = [
-  "#5592cc",
-  "#10ab7c",
-  "#1e90ff",
-  "#f5b759",
-  "#00bf9a",
-  "#fa5252",
-  "#ff9c6e",
-  "#b37feb",
-  "#5cdbd3",
-];
-
-const CHART_THEME = { color: NEU_CHART_COLORS };
 
 function createLineChartXLabelFilter(maxLabels) {
   return (_datum, index, data) => {
@@ -66,6 +61,11 @@ export default function CollectionStatsPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const columnWrapRef = useRef(null);
+  const piePlotRef = useRef(null);
+  const pieLegendCleanupRef = useRef(null);
+  const pieAnimationCancelRef = useRef(null);
+  const hiddenPieTypesRef = useRef(new Set());
+  const pieDataRef = useRef([]);
 
   useEffect(() => {
     getCollectionStats()
@@ -91,6 +91,67 @@ export default function CollectionStatsPage() {
       })),
     [stats, locale],
   );
+  pieDataRef.current = pieData;
+
+  const pieLegendDomain = useMemo(
+    () => pieData.map((item) => item.type),
+    [pieData],
+  );
+
+  useEffect(() => {
+    pieAnimationCancelRef.current?.();
+    pieAnimationCancelRef.current = null;
+    hiddenPieTypesRef.current = new Set();
+  }, [pieData]);
+
+  const pieLegendDomainRef = useRef(pieLegendDomain);
+  pieLegendDomainRef.current = pieLegendDomain;
+
+  const chartColors = useMemo(() => resolveNeuChartColors(), []);
+  const chartColorsRef = useRef(chartColors);
+  chartColorsRef.current = chartColors;
+
+  const getPieLegendColor = (type) => {
+    const colors = chartColorsRef.current;
+    if (!colors.length) {
+      return undefined;
+    }
+    const index = pieLegendDomainRef.current.indexOf(type);
+    return colors[index >= 0 ? index % colors.length : 0];
+  };
+
+  const togglePieLegendType = useCallback((type) => {
+    const plot = piePlotRef.current;
+    const fromHidden = hiddenPieTypesRef.current;
+    const next = new Set(fromHidden);
+    if (next.has(type)) {
+      next.delete(type);
+    } else {
+      next.add(type);
+    }
+
+    hiddenPieTypesRef.current = next;
+
+    if (!plot) {
+      return;
+    }
+
+    pieAnimationCancelRef.current?.();
+    pieAnimationCancelRef.current = animatePieDataTransition(
+      plot,
+      pieDataRef.current,
+      fromHidden,
+      next,
+      {
+        legendDomain: pieLegendDomainRef.current,
+        hiddenTypes: next,
+        getLegendColor: getPieLegendColor,
+      },
+    );
+  }, []);
+
+  const togglePieLegendTypeRef = useRef(togglePieLegendType);
+  togglePieLegendTypeRef.current = togglePieLegendType;
 
   const lineData = useMemo(
     () =>
@@ -116,6 +177,50 @@ export default function CollectionStatsPage() {
   const columnChartActive = !loading && barData.length > 0;
   const columnWidth = useElementWidth(columnWrapRef, columnChartActive);
 
+  const pieColorScale = useMemo(
+    () => ({
+      color: {
+        domain: pieLegendDomain,
+        range: chartColors,
+      },
+    }),
+    [pieLegendDomain, chartColors],
+  );
+
+  const bindPieLegend = useCallback((plot) => {
+    pieLegendCleanupRef.current?.();
+    pieLegendCleanupRef.current = bindCanvasPieLegendToggle(plot, {
+      getDomain: () => pieLegendDomainRef.current,
+      getHiddenTypes: () => hiddenPieTypesRef.current,
+      getLegendColor: getPieLegendColor,
+      onToggle: (type) => togglePieLegendTypeRef.current(type),
+    });
+  }, []);
+
+  const handlePieChartReady = useCallback(
+    (plot) => {
+      piePlotRef.current = plot;
+      bindPieLegend(plot);
+    },
+    [bindPieLegend],
+  );
+
+  useEffect(() => {
+    const plot = piePlotRef.current;
+    if (plot) {
+      bindPieLegend(plot);
+    }
+  }, [bindPieLegend, pieLegendDomain]);
+
+  useEffect(() => {
+    return () => {
+      pieAnimationCancelRef.current?.();
+      pieAnimationCancelRef.current = null;
+      pieLegendCleanupRef.current?.();
+      pieLegendCleanupRef.current = null;
+    };
+  }, []);
+
   if (loading) {
     return <StatsPageSkeleton />;
   }
@@ -126,7 +231,7 @@ export default function CollectionStatsPage() {
 
   const chartBaseProps = {
     height: STATS_CHART_HEIGHT,
-    theme: CHART_THEME,
+    theme: { color: chartColors },
     containerStyle: { height: STATS_CHART_HEIGHT },
     style: { overflow: "hidden" },
   };
@@ -150,14 +255,15 @@ export default function CollectionStatsPage() {
               data={pieData}
               angleField="value"
               colorField="type"
-              scale={{ color: { range: NEU_CHART_COLORS } }}
-              radius={0.82}
-              innerRadius={0.5}
+              keyField="type"
+              scale={pieColorScale}
+              radius={STATS_PIE_RADIUS}
+              innerRadius={STATS_PIE_INNER_RADIUS}
+              animate={STATS_PIE_ANIMATE}
+              interaction={{ legendFilter: false }}
               legend={{ position: "bottom" }}
-              label={{
-                text: (datum) => `${datum.type} (${datum.value})`,
-                style: { fontSize: 11 },
-              }}
+              label={false}
+              onReady={handlePieChartReady}
             />
           </StatsChartCard>
 
@@ -177,7 +283,7 @@ export default function CollectionStatsPage() {
               axis={{
                 x: { labelAutoRotate: true, labelAutoHide: true },
               }}
-              style={{ fill: NEU_CHART_COLORS[0] }}
+              style={{ fill: chartColors[0] }}
             />
           </StatsChartCard>
 

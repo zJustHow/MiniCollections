@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { arrayMove } from "@dnd-kit/sortable";
+import { mergeLoadedOrderIntoFullOrder } from "../utils/infiniteBrowse";
 import useInfiniteList from "./useInfiniteList";
 
 export default function useOrderableInfiniteBrowse({
@@ -85,11 +86,11 @@ export default function useOrderableInfiniteBrowse({
   }, [orderedIds, itemsById, items]);
 
   const sortableIds = useMemo(() => {
-    if (orderedIds.length > 0) {
-      return orderedIds;
+    if (displayItems.length > 0) {
+      return displayItems.map((item) => item.id);
     }
     return items.map((item) => item.id);
-  }, [orderedIds, items]);
+  }, [displayItems, items]);
 
   useEffect(() => {
     if (orderedIds.length > 0) {
@@ -105,32 +106,44 @@ export default function useOrderableInfiniteBrowse({
     async (activeId, overId) => {
       if (!overId || sameId(activeId, overId)) return null;
 
-      const currentIds = orderedIdsRef.current;
-      const oldIndex = currentIds.findIndex((id) => sameId(id, activeId));
-      const newIndex = currentIds.findIndex((id) => sameId(id, overId));
+      const fullOrder =
+        orderedIds.length > 0
+          ? orderedIdsRef.current
+          : items.map((item) => item.id);
+      const loadedOrder =
+        displayItems.length > 0
+          ? displayItems.map((item) => item.id)
+          : items.map((item) => item.id);
+
+      const oldIndex = loadedOrder.findIndex((id) => sameId(id, activeId));
+      const newIndex = loadedOrder.findIndex((id) => sameId(id, overId));
       if (oldIndex < 0 || newIndex < 0) return null;
 
-      const nextIds = arrayMove(currentIds, oldIndex, newIndex);
-      const previousIds = currentIds;
+      const nextLoadedOrder = arrayMove(loadedOrder, oldIndex, newIndex);
+      const nextFullOrder =
+        orderedIds.length > 0
+          ? mergeLoadedOrderIntoFullOrder(fullOrder, nextLoadedOrder)
+          : nextLoadedOrder;
+      const previousFullOrder = fullOrder;
 
-      setOrderedIds(nextIds);
-      orderedIdsRef.current = nextIds;
-      reorderLocalItems(nextIds);
+      setOrderedIds(nextFullOrder);
+      orderedIdsRef.current = nextFullOrder;
+      reorderLocalItems(nextFullOrder);
       setReordering(true);
 
       try {
-        await reorderRef.current(nextIds);
+        await reorderRef.current(nextFullOrder);
         return true;
       } catch {
-        setOrderedIds(previousIds);
-        orderedIdsRef.current = previousIds;
-        reorderLocalItems(previousIds);
+        setOrderedIds(previousFullOrder);
+        orderedIdsRef.current = previousFullOrder;
+        reorderLocalItems(previousFullOrder);
         return false;
       } finally {
         setReordering(false);
       }
     },
-    [reorderLocalItems],
+    [displayItems, items, orderedIds.length, reorderLocalItems],
   );
 
   const refreshAll = useCallback(async () => {

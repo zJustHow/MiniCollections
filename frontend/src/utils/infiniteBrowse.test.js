@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import {
   getBrowseChunkDataLimit,
   getNextBrowseUiPage,
+  mergeLoadedOrderIntoFullOrder,
   sortItemsByOrderedIds,
 } from "./infiniteBrowse";
 
@@ -32,5 +33,11 @@ describe("infiniteBrowse", () => {
     const items = [{ id: 1 }, { id: 2 }];
     expect(sortItemsByOrderedIds(items, [])).toEqual(items);
     expect(sortItemsByOrderedIds(items, null)).toEqual(items);
+  });
+
+  test("mergeLoadedOrderIntoFullOrder reorders only loaded ids", () => {
+    expect(
+      mergeLoadedOrderIntoFullOrder([1, 2, 3, 4, 5], [2, 3, 1]),
+    ).toEqual([2, 3, 1, 4, 5]);
   });
 });

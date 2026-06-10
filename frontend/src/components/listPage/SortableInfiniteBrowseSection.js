@@ -1,8 +1,9 @@
+import { cloneElement, isValidElement, useState } from "react";
 import {
   DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -15,8 +16,17 @@ import ListLoadError from "../ListLoadError";
 import NoDataPlaceholder from "../NoDataPlaceholder";
 import ObjectBrowseSection from "./ObjectBrowseSection";
 import InfiniteScrollSentinel from "./InfiniteScrollSentinel";
+import InfiniteScrollSkeletonCards, {
+  buildLoadMoreSkeletonIds,
+  isLoadMoreSkeletonId,
+} from "./InfiniteScrollSkeletonCards";
 import { shouldShowNoData } from "../../utils/listPageUtils";
+import { sortablePointerCollision } from "../../utils/sortableModifiers";
 import { useLocale } from "../../LocaleContext";
+
+function isSameSortableId(left, right) {
+  return String(left) === String(right);
+}
 
 export default function SortableInfiniteBrowseSection({
   loading,
@@ -38,6 +48,7 @@ export default function SortableInfiniteBrowseSection({
   gridClassName,
 }) {
   const { t } = useLocale();
+  const [activeId, setActiveId] = useState(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
@@ -50,11 +61,54 @@ export default function SortableInfiniteBrowseSection({
   const spinning = loading || orderLoading;
   const showEmpty = shouldShowNoData(items, { loading: spinning });
   const resolvedErrorMessage = errorMessage ?? t("failedToLoadModels");
+  const skeletonIds = buildLoadMoreSkeletonIds({
+    variant: skeletonVariant,
+    sortEnabled,
+    loadingMore,
+  });
+  const sortableContextItems = sortEnabled
+    ? [...sortableIds, ...skeletonIds]
+    : [];
+
+  const resolveDropTargetId = (overId) => {
+    if (!isLoadMoreSkeletonId(overId)) {
+      return overId;
+    }
+    if (sortableIds.length === 0) {
+      return null;
+    }
+    return sortableIds[sortableIds.length - 1];
+  };
+
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
 
   const handleDragEnd = (event) => {
+    setActiveId(null);
     const { active, over } = event;
     if (!over) return;
-    onDragEnd?.(active.id, over.id);
+    const resolvedOverId = resolveDropTargetId(over.id);
+    if (!resolvedOverId) return;
+    onDragEnd?.(active.id, resolvedOverId);
+  };
+
+  const handleDragCancel = () => {
+    setActiveId(null);
+  };
+
+  const activeItem = activeId
+    ? items.find((item) => isSameSortableId(item.id, activeId))
+    : null;
+  const showDragOverlay =
+    activeItem &&
+    sortableIds.some((id) => isSameSortableId(id, activeId));
+
+  const renderDragOverlay = () => {
+    if (!showDragOverlay) return null;
+    const element = renderItem(activeItem);
+    if (!isValidElement(element)) return null;
+    return cloneElement(element, { overlay: true });
   };
 
   if (!spinning && loadError) {
@@ -71,29 +125,40 @@ export default function SortableInfiniteBrowseSection({
     <>
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={sortablePointerCollision}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
       >
         <SortableContext
-          items={sortEnabled ? sortableIds : []}
+          items={sortableContextItems}
           strategy={rectSortingStrategy}
         >
           <ObjectBrowseSection
             loading={spinning}
             skeletonVariant={skeletonVariant}
             gridClassName={gridClassName}
+            loadingMore={loadingMore}
           >
-            {spinning ? null : items.map(renderItem)}
+          {spinning ? null : (
+            <>
+              {items.map(renderItem)}
+              {loadingMore ? (
+                <InfiniteScrollSkeletonCards
+                  variant={skeletonVariant}
+                  sortEnabled={sortEnabled}
+                />
+              ) : null}
+            </>
+          )}
           </ObjectBrowseSection>
         </SortableContext>
+        <DragOverlay adjustScale={false} dropAnimation={null}>
+          {renderDragOverlay()}
+        </DragOverlay>
       </DndContext>
       {!spinning ? (
         <>
-          {loadingMore ? (
-            <div className="neu-infinite-scroll-loading" aria-live="polite">
-              …
-            </div>
-          ) : null}
           {loadMoreError ? (
             <ListLoadError
               className="neu-infinite-scroll-error"

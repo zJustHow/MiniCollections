@@ -3,7 +3,24 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import NeuCard from "../NeuCard";
 
-function SortableNeuCard({
+function SortableNeuCardOverlay({ className = "", ...cardProps }) {
+  return (
+    <div
+      className={[
+        "neu-sortable-card-wrap",
+        "neu-sortable-card-wrap--dragging",
+        "neu-sortable-card-wrap--overlay",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
+      <NeuCard {...cardProps} />
+    </div>
+  );
+}
+
+function SortableNeuCardSortable({
   id,
   sortEnabled,
   disabled,
@@ -27,6 +44,7 @@ function SortableNeuCard({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0 : undefined,
     touchAction: isSortable ? "none" : undefined,
   };
 
@@ -49,6 +67,13 @@ function SortableNeuCard({
       <NeuCard {...cardProps} />
     </div>
   );
+}
+
+function SortableNeuCard({ overlay = false, ...props }) {
+  if (overlay) {
+    return <SortableNeuCardOverlay {...props} />;
+  }
+  return <SortableNeuCardSortable {...props} />;
 }
 
 export default memo(SortableNeuCard);

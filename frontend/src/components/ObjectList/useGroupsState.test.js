@@ -100,6 +100,12 @@ vi.mock("../pageHeaders/GroupObjectsPageHeader", () => ({
   default: () => null,
 }));
 
+const mockScrollAppToTop = vi.fn();
+
+vi.mock("../../utils/scroll", () => ({
+  scrollAppToTop: (...args) => mockScrollAppToTop(...args),
+}));
+
 function GroupsProbe() {
   const state = useGroupsState();
   return (
@@ -158,7 +164,7 @@ describe("useGroupsState", () => {
     });
   });
 
-  test("handleGroupClick navigates to group detail", async () => {
+  test("handleGroupClick scrolls to top and navigates to group detail", async () => {
     render(
       <MemoryRouter initialEntries={["/groups?q=test"]}>
         <Routes>
@@ -169,6 +175,7 @@ describe("useGroupsState", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "open" }));
 
+    expect(mockScrollAppToTop).toHaveBeenCalled();
     expect(mockNavigate).toHaveBeenCalledWith(
       expect.objectContaining({ pathname: "/groups/7" }),
       expect.any(Object),

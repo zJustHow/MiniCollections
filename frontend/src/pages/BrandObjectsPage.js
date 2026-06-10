@@ -4,14 +4,14 @@ import useSearchParam from "../hooks/useSearchParam";
 import useObjectFilterParams from "../hooks/useObjectFilterParams";
 import useReturnSearchRef from "../hooks/useReturnSearchRef";
 import useObjectListPageSearch from "../hooks/useObjectListPageSearch";
-import useDualModePagedList from "../hooks/useDualModePagedList";
+import useDualModeInfiniteList from "../hooks/useDualModeInfiniteList";
 import useSearchObjectFacets from "../hooks/useSearchObjectFacets";
 import { App } from "antd";
 import NeuCard from "../components/NeuCard";
 import BrandObjectsPageHeader from "../components/pageHeaders/BrandObjectsPageHeader";
 import ObjectListPageShell from "../components/listPage/ObjectListPageShell";
 import NoSearchResults from "../components/listPage/NoSearchResults";
-import ObjectBrowseSection from "../components/listPage/ObjectBrowseSection";
+import SortableInfiniteBrowseSection from "../components/listPage/SortableInfiniteBrowseSection";
 import ActivePagePagination from "../components/listPage/ActivePagePagination";
 import FilteredObjectSearchSection from "../components/listPage/FilteredObjectSearchSection";
 import ObjectSearchFilterPanelSlot from "../components/listPage/ObjectSearchFilterPanelSlot";
@@ -20,8 +20,7 @@ import {
   buildFilterLayoutProps,
   resolveFilterColumnState,
 } from "../utils/objectFilterUtils";
-import { shouldShowNoData, withAddCardSlot } from "../utils/listPageUtils";
-import NoDataPlaceholder from "../components/NoDataPlaceholder";
+import { withAddCardSlot } from "../utils/listPageUtils";
 import { createLazyModal } from "../utils/lazyModal";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
@@ -109,7 +108,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     selectedSeriesIds,
   );
 
-  const { activePage, displayObjects, objectsSearch } = useDualModePagedList({
+  const { browseList, searchList, displayItems } = useDualModeInfiniteList({
     entityKey: brandId,
     searchActive,
     searchKeyword,
@@ -149,16 +148,13 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
     includeBrands: false,
   });
 
-  const listData = withAddCardSlot(
-    displayObjects,
-    isAdmin && !searchActive && activePage.page === 0,
-  );
+  const listData = withAddCardSlot(displayItems, isAdmin && !searchActive);
 
   const showSearchObjectsSection =
     searchActive &&
-    (displayObjects.length > 0 ||
+    (displayItems.length > 0 ||
       showFilterColumn ||
-      objectsSearch.loading);
+      searchList.loading);
 
   const [submitModalVisible, setSubmitModalVisible] = useState(false);
   const [brandModalOpen, setBrandModalOpen] = useState(false);
@@ -218,8 +214,12 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   }, [brand, isAdmin, location.pathname, setHeaderSlot]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const refreshObjects = useCallback(() => {
-    activePage.loadPage(activePage.page);
-  }, [activePage]);
+    if (searchActive) {
+      searchList.loadPage(searchList.page);
+    } else {
+      browseList.refresh();
+    }
+  }, [searchActive, browseList, searchList]);
 
   const objectCardBrandSubtitle = (obj) =>
     pickBrandName(obj, locale) || brand?.name;
@@ -252,9 +252,8 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   });
 
   const spinning = searchActive
-    ? objectsSearch.loading || facetsLoading
-    : activePage.loading;
-  const showBrowseEmpty = !searchActive && shouldShowNoData(listData, { loading: spinning });
+    ? searchList.loading || facetsLoading
+    : browseList.loading;
 
   return (
     <div>
@@ -263,7 +262,7 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
         showFilterColumn={searchActive && showFilterColumn}
         searchActive={searchActive}
         searchKeyword={searchKeyword}
-        resultPage={activePage}
+        resultPage={searchList}
         searchFieldId="brand-objects-search"
         searchFieldName="brandObjectsSearch"
         searchPlaceholder={t("searchModels")}
@@ -291,36 +290,44 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
                 loading={spinning}
                 showContent={showSearchObjectsSection}
               >
-                {displayObjects.map(renderObjectCard)}
+                {displayItems.map(renderObjectCard)}
               </FilteredObjectSearchSection>
-              {!spinning && !showSearchObjectsSection && !objectsSearch.loading && (
+              {!spinning && !showSearchObjectsSection && !searchList.loading && (
                 <NoSearchResults />
               )}
-              <ActivePagePagination activePage={activePage} />
+              <ActivePagePagination activePage={searchList} />
             </>
-          ) : showBrowseEmpty ? (
-            <NoDataPlaceholder />
           ) : (
-            <>
-              <ObjectBrowseSection loading={spinning}>
-                {listData.map((item) =>
-                  item.id === "__add__" ? (
-                    <NeuCard
-                      key="__add__"
-                      add
-                      name={t("addBrandObject")}
-                      onClick={() => {
-                        setEditingBrandObject(null);
-                        setBrandObjectModalOpen(true);
-                      }}
-                    />
-                  ) : (
-                    renderObjectCard(item)
-                  ),
-                )}
-              </ObjectBrowseSection>
-              <ActivePagePagination activePage={activePage} />
-            </>
+            <SortableInfiniteBrowseSection
+              loading={browseList.loading}
+              items={listData}
+              renderItem={(item) =>
+                item.id === "__add__" ? (
+                  <NeuCard
+                    key="__add__"
+                    add
+                    name={t("addBrandObject")}
+                    onClick={() => {
+                      setEditingBrandObject(null);
+                      setBrandObjectModalOpen(true);
+                    }}
+                  />
+                ) : (
+                  renderObjectCard(item)
+                )
+              }
+              sortableIds={[]}
+              sortEnabled={false}
+              hasMore={browseList.hasMore}
+              loadingMore={browseList.loadingMore}
+              onLoadMore={browseList.loadMore}
+              loadError={browseList.loadError}
+              loadMoreError={browseList.loadMoreError}
+              errorMessage={t("failedToLoadBrandObjects")}
+              onRetry={browseList.retry}
+              onRetryLoadMore={browseList.retryLoadMore}
+              skeletonVariant="object"
+            />
           )}
       </ObjectListPageShell>
 

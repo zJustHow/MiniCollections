@@ -2,8 +2,10 @@ import NeuCard from "../NeuCard";
 import { useNavigate } from "react-router-dom";
 import useTabListSearchField from "../../hooks/useTabListSearchField";
 import ObjectListPageShell from "../listPage/ObjectListPageShell";
-import TabListPageBody from "../listPage/TabListPageBody";
 import TabCombinedSearchSection from "../listPage/TabCombinedSearchSection";
+import SortableInfiniteBrowseSection from "../listPage/SortableInfiniteBrowseSection";
+import ActivePagePagination from "../listPage/ActivePagePagination";
+import NoSearchResults from "../listPage/NoSearchResults";
 import ObjectSearchFilterPanelSlot from "../listPage/ObjectSearchFilterPanelSlot";
 import {
   buildFilterLayoutProps,
@@ -23,7 +25,7 @@ export default function BrandsTab({
   searchResultBrands,
   searchResultObjects,
   searchValue,
-  brandsListPage,
+  brandsBrowse,
   combinedSearchPage,
   searchFacets,
   facetsLoading,
@@ -72,10 +74,7 @@ export default function BrandsTab({
     />
   );
 
-  const dataSource = withAddCardSlot(
-    brands,
-    isAdmin && (brandsListPage?.page ?? 0) === 0,
-  );
+  const browseData = withAddCardSlot(brands, isAdmin);
 
   const { showFilterColumn } = resolveFilterColumnState({
     searchActive,
@@ -99,9 +98,8 @@ export default function BrandsTab({
     showFilterColumn ||
     combinedSearchPage?.loading;
 
-  const spinning = searchActive
-    ? combinedSearchPage?.loading || facetsLoading
-    : Boolean(brandsListPage?.loading);
+  const searchSpinning = Boolean(combinedSearchPage?.loading || facetsLoading);
+  const searchHasResults = hasBrandResults || showObjectsSection;
 
   const filterLayoutProps = buildFilterLayoutProps({
     showFilterColumn,
@@ -150,20 +148,13 @@ export default function BrandsTab({
         />
       }
     >
-      <TabListPageBody
-        searchActive={searchActive}
-        spinning={spinning}
-        searchHasResults={hasBrandResults || showObjectsSection}
-        searchPaginationPage={combinedSearchPage}
-        browsePaginationPage={brandsListPage}
-        browseItems={dataSource}
-        renderBrowseItem={renderBrandCard}
-        searchContent={
+      {searchActive ? (
+        <>
           <TabCombinedSearchSection
-            spinning={spinning}
+            spinning={searchSpinning}
             withFilterLayout
             filterLayoutProps={filterLayoutProps}
-            hasResults={hasBrandResults || showObjectsSection}
+            hasResults={searchHasResults}
             showPrimaryCards={showBrandCards}
             showObjectSection={showObjectsSection}
             showObjectCards={showObjectCards}
@@ -173,8 +164,30 @@ export default function BrandsTab({
             primaryCards={searchResultBrands.map(renderBrandCard)}
             objectCards={searchResultObjects.map(renderObjectCard)}
           />
-        }
-      />
+          <ActivePagePagination
+            activePage={combinedSearchPage}
+            includeTotals={false}
+          />
+          {!searchSpinning && !searchHasResults ? <NoSearchResults /> : null}
+        </>
+      ) : (
+        <SortableInfiniteBrowseSection
+          loading={brandsBrowse?.loading}
+          items={browseData}
+          renderItem={renderBrandCard}
+          sortableIds={[]}
+          sortEnabled={false}
+          hasMore={brandsBrowse?.hasMore}
+          loadingMore={brandsBrowse?.loadingMore}
+          onLoadMore={brandsBrowse?.loadMore}
+          loadError={brandsBrowse?.loadError}
+          loadMoreError={brandsBrowse?.loadMoreError}
+          errorMessage={t("failedToLoadBrands")}
+          onRetry={brandsBrowse?.retry}
+          onRetryLoadMore={brandsBrowse?.retryLoadMore}
+          skeletonVariant="catalog"
+        />
+      )}
     </ObjectListPageShell>
   );
 }

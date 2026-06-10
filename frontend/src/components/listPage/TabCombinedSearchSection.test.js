@@ -13,7 +13,7 @@ vi.mock("../ObjectSearchFilterLayout", () => ({
 
 describe("TabCombinedSearchSection", () => {
   test("shows skeleton while spinning", () => {
-    render(
+    const { container } = render(
       <TabCombinedSearchSection
         spinning
         hasResults={false}
@@ -27,6 +27,9 @@ describe("TabCombinedSearchSection", () => {
     );
 
     expect(screen.getByTestId("search-skeleton")).toBeInTheDocument();
+    expect(
+      container.querySelector(".neu-search-objects-cards"),
+    ).toBeInTheDocument();
   });
 
   test("returns null when there are no results", () => {

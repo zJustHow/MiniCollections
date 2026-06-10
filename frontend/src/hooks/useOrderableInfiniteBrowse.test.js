@@ -204,6 +204,58 @@ describe("useOrderableInfiniteBrowse", () => {
     expect(infiniteState.reorderLocalItems).not.toHaveBeenCalled();
   });
 
+  test("exposes only loaded ids as sortableIds when more items exist in order", async () => {
+    infiniteState.items = [
+      { id: 1, name: "A" },
+      { id: 2, name: "B" },
+    ];
+    const fetchOrder = vi.fn(async () => ({ ids: [1, 2, 3, 4, 5] }));
+
+    const { result } = renderHook(() =>
+      useOrderableInfiniteBrowse({
+        entityKey: "groups",
+        enabled: true,
+        fetchPage: vi.fn(),
+        fetchOrder,
+        reorder: vi.fn(),
+        pageSize: 48,
+      }),
+    );
+
+    await waitFor(() => expect(result.current.orderLoading).toBe(false));
+    expect(result.current.orderedIds).toEqual([1, 2]);
+    expect(result.current.displayItems.map((item) => item.id)).toEqual([1, 2]);
+  });
+
+  test("handleDragEnd merges reorder into full order when only a prefix is loaded", async () => {
+    infiniteState.items = [
+      { id: 1, name: "A" },
+      { id: 2, name: "B" },
+    ];
+    const fetchOrder = vi.fn(async () => ({ ids: [1, 2, 3, 4, 5] }));
+    const reorder = vi.fn(async () => {});
+
+    const { result } = renderHook(() =>
+      useOrderableInfiniteBrowse({
+        entityKey: "groups",
+        enabled: true,
+        fetchPage: vi.fn(),
+        fetchOrder,
+        reorder,
+        pageSize: 48,
+      }),
+    );
+
+    await waitFor(() => expect(result.current.orderLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.handleDragEnd(1, 2);
+    });
+
+    expect(reorder).toHaveBeenCalledWith([2, 1, 3, 4, 5]);
+    expect(result.current.orderedIds).toEqual([2, 1]);
+  });
+
   test("disables sorting when browse is disabled", async () => {
     const fetchOrder = vi.fn(async () => ({ ids: [2, 1] }));
 

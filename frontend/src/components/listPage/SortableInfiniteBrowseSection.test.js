@@ -16,12 +16,26 @@ vi.mock("@dnd-kit/core", () => ({
       >
         drag
       </button>
+      <button
+        type="button"
+        data-testid="simulate-drag-skeleton"
+        onClick={() =>
+          onDragEnd({
+            active: { id: 1 },
+            over: { id: "__load-more-skeleton-0" },
+          })
+        }
+      >
+        drag skeleton
+      </button>
       {children}
     </div>
   ),
+  DragOverlay: ({ children }) => (
+    <div data-testid="drag-overlay">{children}</div>
+  ),
   KeyboardSensor: class {},
   PointerSensor: class {},
-  closestCenter: vi.fn(),
   useSensor: vi.fn(() => ({})),
   useSensors: vi.fn(() => []),
 }));
@@ -33,9 +47,29 @@ vi.mock("@dnd-kit/sortable", () => ({
 }));
 
 vi.mock("./ObjectBrowseSection", () => ({
-  default: ({ children, loading }) =>
-    loading ? <div data-testid="browse-loading" /> : <div data-testid="browse-grid">{children}</div>,
+  default: ({ children, loading, loadingMore }) =>
+    loading ? (
+      <div data-testid="browse-loading" />
+    ) : (
+      <div data-testid="browse-grid" data-loading-more={loadingMore ? "true" : "false"}>
+        {children}
+      </div>
+    ),
 }));
+
+vi.mock("./InfiniteScrollSkeletonCards", async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    default: ({ variant, sortEnabled }) => (
+      <div
+        data-testid="load-more-skeletons"
+        data-variant={variant}
+        data-sort-enabled={sortEnabled ? "true" : "false"}
+      />
+    ),
+  };
+});
 
 vi.mock("./InfiniteScrollSentinel", () => ({
   default: ({ enabled, onLoadMore }) =>
@@ -226,7 +260,60 @@ describe("SortableInfiniteBrowseSection", () => {
     expect(onRetryLoadMore).toHaveBeenCalledTimes(1);
   });
 
-  test("shows loading-more indicator", () => {
+  test("appends skeleton cards inside browse grid while loading more", () => {
+    render(
+      <SortableInfiniteBrowseSection
+        loading={false}
+        orderLoading={false}
+        items={[{ id: 1, name: "Model A" }]}
+        renderItem={(item) => <div key={item.id}>{item.name}</div>}
+        sortableIds={[1]}
+        sortEnabled
+        onDragEnd={vi.fn()}
+        hasMore
+        loadingMore
+        onLoadMore={vi.fn()}
+        skeletonVariant="object"
+      />,
+    );
+
+    expect(screen.getByText("Model A")).toBeInTheDocument();
+    expect(screen.getByTestId("load-more-skeletons")).toHaveAttribute(
+      "data-variant",
+      "object",
+    );
+    expect(screen.getByTestId("browse-grid")).toHaveAttribute(
+      "data-loading-more",
+      "true",
+    );
+  });
+
+  test("maps skeleton drop target to the last loaded item", async () => {
+    const onDragEnd = vi.fn();
+
+    render(
+      <SortableInfiniteBrowseSection
+        loading={false}
+        orderLoading={false}
+        items={[
+          { id: 1, name: "A" },
+          { id: 2, name: "B" },
+        ]}
+        renderItem={(item) => <div key={item.id}>{item.name}</div>}
+        sortableIds={[1, 2]}
+        sortEnabled
+        onDragEnd={onDragEnd}
+        hasMore
+        loadingMore
+        onLoadMore={vi.fn()}
+      />,
+    );
+
+    await userEvent.click(screen.getByTestId("simulate-drag-skeleton"));
+    expect(onDragEnd).toHaveBeenCalledWith(1, 2);
+  });
+
+  test("passes sortEnabled to load-more skeletons", () => {
     render(
       <SortableInfiniteBrowseSection
         loading={false}
@@ -242,6 +329,28 @@ describe("SortableInfiniteBrowseSection", () => {
       />,
     );
 
-    expect(screen.getByText("…")).toBeInTheDocument();
+    expect(screen.getByTestId("load-more-skeletons")).toHaveAttribute(
+      "data-sort-enabled",
+      "true",
+    );
+  });
+
+  test("does not render load-more skeletons when not loading more", () => {
+    render(
+      <SortableInfiniteBrowseSection
+        loading={false}
+        orderLoading={false}
+        items={[{ id: 1, name: "Model A" }]}
+        renderItem={(item) => <div key={item.id}>{item.name}</div>}
+        sortableIds={[1]}
+        sortEnabled
+        onDragEnd={vi.fn()}
+        hasMore
+        loadingMore={false}
+        onLoadMore={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByTestId("load-more-skeletons")).not.toBeInTheDocument();
   });
 });

@@ -6,7 +6,7 @@ const pageMocks = vi.hoisted(() => ({
   searchActive: false,
   searchKeyword: "",
   draftQuery: "",
-  displayObjects: [{ id: 1, name: "M3", image_url: null }],
+  displayItems: [{ id: 1, name: "M3", image_url: null }],
   facetsLoading: false,
   searchFacets: null,
 }));
@@ -77,11 +77,11 @@ vi.mock("../hooks/useObjectListPageSearch", () => ({
   }),
 }));
 
-vi.mock("../hooks/useDualModePagedList", () => ({
+vi.mock("../hooks/useDualModeInfiniteList", () => ({
   default: () => ({
-    activePage: { page: 0, loading: false, loadPage: vi.fn() },
-    displayObjects: pageMocks.displayObjects,
-    objectsSearch: { loading: false },
+    browseList: { loading: false, hasMore: false },
+    searchList: { page: 0, loading: false, loadPage: vi.fn() },
+    displayItems: pageMocks.displayItems,
   }),
 }));
 
@@ -106,9 +106,13 @@ vi.mock("../components/listPage/ObjectListPageShell", () => ({
   ),
 }));
 
-vi.mock("../components/listPage/ObjectBrowseSection", () => ({
-  default: ({ children, loading }) =>
-    loading ? <div data-testid="browse-loading" /> : <div>{children}</div>,
+vi.mock("../components/listPage/SortableInfiniteBrowseSection", () => ({
+  default: ({ items, renderItem, loading }) =>
+    loading ? (
+      <div data-testid="browse-loading" />
+    ) : (
+      <div data-testid="browse-body">{items.map((item) => renderItem(item))}</div>
+    ),
 }));
 
 vi.mock("../components/listPage/FilteredObjectSearchSection", () => ({
@@ -157,7 +161,7 @@ describe("BrandObjectsPage", () => {
     pageMocks.searchActive = false;
     pageMocks.searchKeyword = "";
     pageMocks.draftQuery = "";
-    pageMocks.displayObjects = [{ id: 1, name: "M3", image_url: null }];
+    pageMocks.displayItems = [{ id: 1, name: "M3", image_url: null }];
     pageMocks.facetsLoading = false;
     pageMocks.searchFacets = null;
     vi.stubGlobal("sessionStorage", {
@@ -185,7 +189,7 @@ describe("BrandObjectsPage", () => {
     pageMocks.searchActive = true;
     pageMocks.searchKeyword = "m3";
     pageMocks.draftQuery = "m3";
-    pageMocks.displayObjects = [{ id: 2, name: "M3 Competition", image_url: null }];
+    pageMocks.displayItems = [{ id: 2, name: "M3 Competition", image_url: null }];
 
     renderPage();
 
@@ -204,7 +208,7 @@ describe("BrandObjectsPage", () => {
       scales: [],
       series: [],
     };
-    pageMocks.displayObjects = [{ id: 2, name: "M3", image_url: null }];
+    pageMocks.displayItems = [{ id: 2, name: "M3", image_url: null }];
 
     renderPage();
 
@@ -215,7 +219,7 @@ describe("BrandObjectsPage", () => {
     pageMocks.searchActive = true;
     pageMocks.searchKeyword = "missing";
     pageMocks.draftQuery = "missing";
-    pageMocks.displayObjects = [];
+    pageMocks.displayItems = [];
     pageMocks.searchFacets = null;
     pageMocks.facetsLoading = false;
 

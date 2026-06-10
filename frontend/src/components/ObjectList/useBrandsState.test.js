@@ -7,16 +7,16 @@ const mockSetHeaderSlot = vi.fn();
 const mockClearSearchAndFilters = vi.fn();
 const mockSetSearchQueryClearingFilters = vi.fn();
 const mockClearObjectFilters = vi.fn();
-const mockBrandsListLoadPage = vi.fn();
+const mockBrandsBrowseRefresh = vi.fn();
 const mockCombinedLoadPage = vi.fn();
 
 let mockSearchValue = "";
 let mockPathname = "/";
 
-const mockBrandsList = {
+const mockBrandsBrowse = {
   items: [{ id: 1, name_en: "Kyosho" }],
   loading: false,
-  loadPage: mockBrandsListLoadPage,
+  refresh: mockBrandsBrowseRefresh,
 };
 
 const mockCombinedSearch = {
@@ -62,8 +62,8 @@ vi.mock("../../hooks/useObjectFilterParams", () => ({
   }),
 }));
 
-vi.mock("../../hooks/usePagedList", () => ({
-  default: () => mockBrandsList,
+vi.mock("../../hooks/useInfiniteList", () => ({
+  default: () => mockBrandsBrowse,
 }));
 
 vi.mock("../../hooks/useCombinedBrandSearch", () => ({
@@ -150,7 +150,7 @@ describe("useBrandsState", () => {
     });
 
     expect(mockCombinedLoadPage).toHaveBeenCalledWith(0);
-    expect(mockBrandsListLoadPage).not.toHaveBeenCalled();
+    expect(mockBrandsBrowseRefresh).not.toHaveBeenCalled();
   });
 
   test("refreshBrands reloads browse list when search is inactive", () => {
@@ -160,7 +160,7 @@ describe("useBrandsState", () => {
       result.current.refreshBrands();
     });
 
-    expect(mockBrandsListLoadPage).toHaveBeenCalledWith(0);
+    expect(mockBrandsBrowseRefresh).toHaveBeenCalled();
     expect(mockCombinedLoadPage).not.toHaveBeenCalled();
   });
 
