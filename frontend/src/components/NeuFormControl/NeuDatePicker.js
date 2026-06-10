@@ -1,7 +1,7 @@
 import React from "react";
 import { DatePicker } from "antd";
 import { setupPickerCellPress, syncPickerPopup } from "./pickerPopup.js";
-import { neuControlStyle } from "./shared.js";
+import { neuControlStyle, useNeuFieldIdentity } from "./shared.js";
 
 export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
   {
@@ -12,10 +12,13 @@ export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
     classNames,
     popupClassName,
     cellRender: userCellRender,
+    id,
+    name,
     ...props
   },
   ref,
 ) {
+  const fieldIdentity = useNeuFieldIdentity({ id, name, prefix: "neu-date" });
   const popupClassRef = React.useRef(
     `neu-date-picker-popup-${Math.random().toString(36).slice(2)}`,
   );
@@ -98,6 +101,7 @@ export const NeuDatePicker = React.forwardRef(function NeuDatePicker(
       onPanelChange={handlePanelChange}
       classNames={mergedClassNames}
       cellRender={neuCellRender}
+      {...fieldIdentity}
       {...props}
     />
   );

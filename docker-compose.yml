@@ -25,7 +25,8 @@ services:
   redis:
     image: redis:7-alpine
     ports:
-      - "6379:6379"
+      # 6380 avoids clashing with other local Redis on the default 6379 (e.g. other docker projects).
+      - "6380:6379"
 
   minio:
     image: minio/minio:RELEASE.2024-10-29T16-01-48Z

@@ -5,7 +5,7 @@ import {
   mapNeuSelectOptions,
   NEU_SELECT_POPUP_MARKER,
 } from "./selectPopup.js";
-import { neuControlStyle } from "./shared.js";
+import { neuControlStyle, useNeuFieldIdentity } from "./shared.js";
 
 function buildNeuSelectPopupClass(
   popupClassRef,
@@ -35,10 +35,13 @@ export const NeuSelect = React.forwardRef(function NeuSelect(
     dropdownClassName,
     options,
     onOpenChange,
+    id,
+    name,
     ...props
   },
   ref,
 ) {
+  const fieldIdentity = useNeuFieldIdentity({ id, name, prefix: "neu-select" });
   const popupClassRef = React.useRef(
     `neu-select-popup-${Math.random().toString(36).slice(2)}`,
   );
@@ -89,6 +92,7 @@ export const NeuSelect = React.forwardRef(function NeuSelect(
       classNames={mergedClassNames}
       {...(neuOptions ? { options: neuOptions } : {})}
       onOpenChange={handleOpenChange}
+      {...fieldIdentity}
       {...props}
     />
   );

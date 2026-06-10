@@ -94,6 +94,7 @@ function SignupForm({ linkMode = false }) {
             ] : []}
           >
             <NeuInput
+              name="email"
               prefix={<UserOutlined />}
               placeholder={t("email")}
               autoComplete="email"
@@ -122,6 +123,7 @@ function SignupForm({ linkMode = false }) {
                 ] : []}
               >
                 <NeuInput
+                  name="phoneNumber"
                   fullWidth
                   placeholder={t("phoneNumber")}
                   autoComplete="tel-national"
@@ -138,6 +140,7 @@ function SignupForm({ linkMode = false }) {
             ]}
           >
             <NeuInput.Password
+              name="password"
               prefix={<LockOutlined />}
               placeholder={t("password")}
               autoComplete="new-password"
@@ -159,6 +162,7 @@ function SignupForm({ linkMode = false }) {
             ]}
           >
             <NeuInput.Password
+              name="confirmPassword"
               prefix={<LockOutlined />}
               placeholder={t("confirmPassword")}
               autoComplete="new-password"
@@ -169,6 +173,7 @@ function SignupForm({ linkMode = false }) {
             rules={[{ required: true, message: t("signupNameRequired") }]}
           >
             <NeuInput
+              name="name"
               prefix={<UserOutlined />}
               placeholder={t("username")}
               autoComplete="username"

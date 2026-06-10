@@ -187,6 +187,7 @@ function LoginForm({ onSuccess }) {
           }
         >
           <NeuInput
+            name="email"
             prefix={<MailOutlined />}
             placeholder={t("email")}
             size="large"
@@ -229,6 +230,7 @@ function LoginForm({ onSuccess }) {
               }
             >
               <NeuInput
+                name="phoneNumber"
                 fullWidth
                 placeholder={t("phoneNumber")}
                 size="large"
@@ -244,6 +246,7 @@ function LoginForm({ onSuccess }) {
           rules={[{ required: true, message: t("passwordRequired") }]}
         >
           <NeuInput.Password
+            name="password"
             prefix={<LockOutlined />}
             placeholder={t("password")}
             size="large"

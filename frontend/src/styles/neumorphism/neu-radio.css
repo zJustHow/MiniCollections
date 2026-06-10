@@ -1,0 +1,199 @@
+/* neumorphism/neu-radio.css */
+/* Circular neumorphic radio — size/shape unchanged; shadows + motion only */
+
+.neu-radio.ant-radio-wrapper {
+  align-items: center;
+}
+
+.neu-radio .ant-radio .ant-radio-inner {
+  background: var(--neu-bg);
+  border: none;
+  box-shadow: var(--raised-sm);
+  transition: var(--neu-btn-transition);
+  transform: scale(1);
+}
+
+.neu-radio .ant-radio-checked .ant-radio-inner {
+  background: var(--neu-accent);
+  border-color: var(--neu-accent);
+  box-shadow: var(--inset-accent);
+}
+
+.neu-radio.ant-radio-wrapper:hover:not(.ant-radio-wrapper-disabled)
+  .ant-radio:not(.ant-radio-checked)
+  .ant-radio-inner {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-radio.ant-radio-wrapper:active:not(.ant-radio-wrapper-disabled)
+  .ant-radio:not(.ant-radio-checked)
+  .ant-radio-inner {
+  box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-radio.ant-radio-wrapper:active:not(.ant-radio-wrapper-disabled)
+  .ant-radio-checked
+  .ant-radio-inner {
+  box-shadow: var(--inset-accent);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-radio .ant-radio-input:focus-visible + .ant-radio-inner {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-radio .ant-radio-checked .ant-radio-input:focus-visible + .ant-radio-inner {
+  box-shadow: var(--inset-accent);
+}
+
+.neu-radio .ant-radio-checked .ant-radio-inner::after {
+  background-color: #fff;
+}
+
+.neu-radio.ant-radio-wrapper-disabled .ant-radio .ant-radio-inner {
+  box-shadow: var(--inset-sm);
+  background: var(--neu-bg);
+  transform: none;
+  cursor: not-allowed;
+}
+
+/* ── FILTER: scrollable inset track ── */
+.neu-radio-filter-track {
+  position: relative;
+}
+
+.neu-radio-filter-option {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 5px;
+  font-size: var(--neu-fs-13);
+  font-weight: 400;
+  text-align: left;
+  flex-shrink: 0;
+  cursor: pointer;
+  color: var(--neu-text);
+  border: none;
+  background: transparent;
+  outline: none;
+  transition: color var(--neu-btn-transition);
+}
+
+.neu-radio-filter-option::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--neu-bg);
+  box-shadow: none;
+  pointer-events: none;
+  transition: box-shadow var(--neu-btn-transition);
+}
+
+.neu-radio-filter-option > * {
+  position: relative;
+  z-index: 1;
+}
+
+.neu-radio-filter-option[aria-checked="true"]::before {
+  box-shadow: var(--inset);
+}
+
+.neu-radio-filter-option:hover:not([aria-checked="true"])::before {
+  box-shadow: var(--inset-sm);
+}
+
+.neu-radio-filter-option:active::before,
+.neu-radio-filter-option:active:hover::before,
+.neu-radio-filter-option[aria-checked="true"]:active::before,
+.neu-radio-filter-option[aria-checked="true"]:active:hover::before {
+  box-shadow: var(--inset);
+}
+
+.neu-radio-filter-option:last-child {
+  margin-bottom: 0;
+}
+
+.neu-radio-filter-option:focus-visible {
+  color: var(--neu-accent);
+}
+
+.neu-radio-filter-option .ant-radio-wrapper {
+  pointer-events: none;
+  margin-inline-end: 0;
+  flex-shrink: 0;
+}
+
+/* Row hover/press drives circle shadow (wrapper has pointer-events: none) */
+.neu-radio-filter-option[aria-checked="true"]
+  .neu-radio
+  .ant-radio-checked
+  .ant-radio-inner {
+  box-shadow: var(--inset-accent);
+}
+
+.neu-radio-filter-option:hover:not([aria-checked="true"])
+  .neu-radio
+  .ant-radio:not(.ant-radio-checked)
+  .ant-radio-inner {
+  box-shadow: var(--inset-sm);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-radio-filter-option:active:not([aria-checked="true"])
+  .neu-radio
+  .ant-radio:not(.ant-radio-checked)
+  .ant-radio-inner,
+.neu-radio-filter-option:active:hover:not([aria-checked="true"])
+  .neu-radio
+  .ant-radio:not(.ant-radio-checked)
+  .ant-radio-inner {
+  box-shadow: var(--inset);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-radio-filter-option[aria-checked="true"]:active
+  .neu-radio
+  .ant-radio-checked
+  .ant-radio-inner,
+.neu-radio-filter-option[aria-checked="true"]:active:hover
+  .neu-radio
+  .ant-radio-checked
+  .ant-radio-inner {
+  box-shadow: var(--inset-accent);
+  transform: scale(var(--neu-btn-scale-hover));
+}
+
+.neu-radio-filter-option .neu-filter-option-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+}
+
+.neu-radio-filter-option .neu-filter-option-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.neu-radio-filter-option .neu-filter-option-count {
+  color: var(--neu-text-2);
+  flex-shrink: 0;
+  font-size: var(--neu-fs-12);
+  font-weight: 400;
+  transition: color var(--neu-btn-transition);
+}
+
+.neu-radio-filter-option[aria-checked="true"] .neu-filter-option-count {
+  color: var(--neu-accent);
+}

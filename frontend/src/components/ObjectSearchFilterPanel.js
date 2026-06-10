@@ -1,5 +1,5 @@
 import FilterPanelSkeleton from "./FilterPanelSkeleton";
-import NeuPressableButton from "./NeuPressableButton";
+import { NeuRadio } from "./NeuFormControl";
 import { useLocale } from "../LocaleContext";
 
 function formatFacetCount(count) {
@@ -13,24 +13,19 @@ function FilterSection({ title, children }) {
   return (
     <div className="neu-filter-section">
       <div className="neu-filter-section-title">{title}</div>
-      <div className="neu-filter-options-inset">{children}</div>
+      <NeuRadio.FilterGroup>{children}</NeuRadio.FilterGroup>
     </div>
   );
 }
 
 function FilterOption({ label, count, selected, onClick }) {
   return (
-    <NeuPressableButton
-      filter
-      active={selected}
+    <NeuRadio.FilterOption
+      label={label}
+      count={formatFacetCount(count)}
+      checked={selected}
       onClick={onClick}
-      aria-pressed={selected}
-    >
-      <span className="neu-filter-option-body">
-        <span className="neu-filter-option-label">{label}</span>
-        <span className="neu-filter-option-count">{formatFacetCount(count)}</span>
-      </span>
-    </NeuPressableButton>
+    />
   );
 }
 

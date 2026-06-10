@@ -1,16 +1,9 @@
-import {
-  App,
-  Avatar,
-  Divider,
-  Form,
-  Radio,
-  Upload,
-} from "antd";
+import { App, Avatar, Divider, Form, Upload } from "antd";
 import HeaderActionButton from "../components/HeaderActionButton";
 import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
 import NeuButton from "../components/NeuButton";
 import PageLoader from "../components/PageLoader";
-import { NeuInput, NeuSelect } from "../components/NeuFormControl";
+import { NeuInput, NeuRadio, NeuSelect } from "../components/NeuFormControl";
 import ArrowLeftOutlined from "@ant-design/icons/es/icons/ArrowLeftOutlined.js";
 import LoadingOutlined from "@ant-design/icons/es/icons/LoadingOutlined.js";
 import LockOutlined from "@ant-design/icons/es/icons/LockOutlined.js";
@@ -36,7 +29,10 @@ import { ensureLocaleLoaded, translate } from "../i18n";
 import { useLocale } from "../LocaleContext";
 import { useHeader } from "../HeaderContext";
 import { scrollAppToTop } from "../utils/scroll";
-import { PHONE_AUTH_ENABLED, WECHAT_AUTH_ENABLED } from "../components/auth/authFeatures";
+import {
+  PHONE_AUTH_ENABLED,
+  WECHAT_AUTH_ENABLED,
+} from "../components/auth/authFeatures";
 import "../styles/profile.css";
 
 function SectionLabel({ title }) {
@@ -58,7 +54,11 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   const [pwLoading, setPwLoading] = useState(false);
   const [emailLoading, setEmailLoading] = useState(false);
   const [emailCodeLoading, setEmailCodeLoading] = useState(false);
-  const { countdown: emailCodeCountdown, start: startEmailCodeCountdown, reset: resetEmailCodeCountdown } = useCountdown();
+  const {
+    countdown: emailCodeCountdown,
+    start: startEmailCodeCountdown,
+    reset: resetEmailCodeCountdown,
+  } = useCountdown();
   const [phoneLoading, setPhoneLoading] = useState(false);
   const [localeLoading, setLocaleLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -247,351 +247,363 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
   return (
     <div className="profile-page-content">
       <div className="profile-page-inner">
-          <div className="profile-hero">
-            <Upload
-              id="profile-avatar-upload"
-              className="profile-avatar-upload"
-              name="avatar"
-              accept="image/*"
-              showUploadList={false}
-              beforeUpload={() => false}
-              onChange={({ file }) => handleAvatarUpload({ file })}
-            >
-              <div className="neu-card neu-card--avatar profile-avatar-wrap">
-                <Avatar
-                  size={96}
-                  src={profile.avatar_url}
-                  icon={!profile.avatar_url && <UserOutlined />}
-                  style={{
-                    background: profile.avatar_url
-                      ? "transparent"
-                      : "var(--neu-accent)",
-                  }}
-                />
-                {avatarLoading && (
-                  <div className="profile-avatar-overlay">
-                    <LoadingOutlined />
-                  </div>
-                )}
-              </div>
-            </Upload>
-            <div className="profile-display-name">{profile.display_name}</div>
-            {profile.email && (
-              <div className="profile-display-email">{profile.email}</div>
-            )}
-          </div>
+        <div className="profile-hero">
+          <Upload
+            id="profile-avatar-upload"
+            className="profile-avatar-upload"
+            name="avatar"
+            accept="image/*"
+            showUploadList={false}
+            beforeUpload={() => false}
+            onChange={({ file }) => handleAvatarUpload({ file })}
+          >
+            <div className="neu-card neu-card--avatar profile-avatar-wrap">
+              <Avatar
+                size={96}
+                src={profile.avatar_url}
+                icon={!profile.avatar_url && <UserOutlined />}
+                style={{
+                  background: profile.avatar_url
+                    ? "transparent"
+                    : "var(--neu-accent)",
+                }}
+              />
+              {avatarLoading && (
+                <div className="profile-avatar-overlay">
+                  <LoadingOutlined />
+                </div>
+              )}
+            </div>
+          </Upload>
+          <div className="profile-display-name">{profile.display_name}</div>
+          {profile.email && (
+            <div className="profile-display-email">{profile.email}</div>
+          )}
+        </div>
 
-          <Divider className="profile-divider" />
+        <Divider className="profile-divider" />
 
-          {/* Display Name */}
-          <SectionCard>
-            <SectionLabel title={t("displayName")} />
-            <Form
-              form={nameForm}
-              onFinish={handleNameSave}
-              initialValues={{ displayName: profile.display_name }}
-              layout="vertical"
+        {/* Display Name */}
+        <SectionCard>
+          <SectionLabel title={t("displayName")} />
+          <Form
+            form={nameForm}
+            onFinish={handleNameSave}
+            initialValues={{ displayName: profile.display_name }}
+            layout="vertical"
+          >
+            <Form.Item
+              name="displayName"
+              rules={[
+                { required: true, message: t("displayNameRequired") },
+                { max: 64, message: t("displayNameMax") },
+              ]}
+              className="profile-form-item-submit"
             >
-              <Form.Item
+              <NeuInput
                 name="displayName"
-                rules={[
-                  { required: true, message: t("displayNameRequired") },
-                  { max: 64, message: t("displayNameMax") },
-                ]}
-                className="profile-form-item-submit"
+                prefix={<UserOutlined />}
+                placeholder={t("displayName")}
+                autoComplete="name"
+              />
+            </Form.Item>
+            <Form.Item className="profile-form-item-none">
+              <NeuButton
+                type="primary"
+                htmlType="submit"
+                loading={nameLoading}
+                className="profile-btn-full"
               >
-                <NeuInput
-                  prefix={<UserOutlined />}
-                  placeholder={t("displayName")}
-                  autoComplete="name"
-                />
-              </Form.Item>
-              <Form.Item className="profile-form-item-none">
-                <NeuButton
-                  type="primary"
-                  htmlType="submit"
-                  loading={nameLoading}
-                  className="profile-btn-full"
-                >
-                  {t("saveDisplayName")}
-                </NeuButton>
-              </Form.Item>
-            </Form>
-          </SectionCard>
+                {t("saveDisplayName")}
+              </NeuButton>
+            </Form.Item>
+          </Form>
+        </SectionCard>
 
-          {/* Password */}
-          <SectionCard>
-            <SectionLabel title={t("changePassword")} />
-            <Form form={pwForm} onFinish={handlePasswordSave} layout="vertical">
-              <Form.Item
+        {/* Password */}
+        <SectionCard>
+          <SectionLabel title={t("changePassword")} />
+          <Form form={pwForm} onFinish={handlePasswordSave} layout="vertical">
+            <Form.Item
+              name="currentPassword"
+              rules={[
+                { required: true, message: t("currentPasswordRequired") },
+              ]}
+              className="profile-form-item-tight"
+            >
+              <NeuInput.Password
                 name="currentPassword"
-                rules={[
-                  { required: true, message: t("currentPasswordRequired") },
-                ]}
-                className="profile-form-item-tight"
+                prefix={<LockOutlined />}
+                placeholder={t("currentPassword")}
+                autoComplete="current-password"
+              />
+            </Form.Item>
+            <Form.Item
+              name="newPassword"
+              rules={[
+                { required: true, message: t("newPasswordRequired") },
+                { min: 6, message: t("newPasswordMin") },
+              ]}
+              className="profile-form-item-tight"
+            >
+              <NeuInput.Password
+                name="newPassword"
+                prefix={<LockOutlined />}
+                placeholder={t("newPassword")}
+                autoComplete="new-password"
+              />
+            </Form.Item>
+            <Form.Item
+              name="confirmPassword"
+              dependencies={["newPassword"]}
+              rules={[
+                { required: true, message: t("confirmPasswordRequired") },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("newPassword") === value)
+                      return Promise.resolve();
+                    return Promise.reject(new Error(t("passwordMismatch")));
+                  },
+                }),
+              ]}
+              className="profile-form-item-submit"
+            >
+              <NeuInput.Password
+                name="confirmPassword"
+                prefix={<LockOutlined />}
+                placeholder={t("confirmPassword")}
+                autoComplete="new-password"
+              />
+            </Form.Item>
+            <Form.Item className="profile-form-item-none">
+              <NeuButton
+                type="primary"
+                htmlType="submit"
+                loading={pwLoading}
+                className="profile-btn-full"
               >
+                {t("updatePassword")}
+              </NeuButton>
+            </Form.Item>
+          </Form>
+        </SectionCard>
+
+        {/* Email */}
+        <SectionCard>
+          <SectionLabel title={t("loginEmail")} />
+          <Form
+            form={emailForm}
+            onFinish={handleEmailSave}
+            initialValues={{ email: profile.email }}
+            layout="vertical"
+          >
+            <Form.Item
+              name="email"
+              rules={[
+                { required: true, message: t("emailRequired") },
+                { type: "email", message: t("emailInvalid") },
+              ]}
+              className="profile-form-item-tight"
+            >
+              <NeuInput
+                name="email"
+                prefix={<MailOutlined />}
+                placeholder={t("emailAddress")}
+                autoComplete="email"
+              />
+            </Form.Item>
+            <Form.Item className="profile-form-item-submit">
+              <div className="profile-inline-row">
+                <Form.Item
+                  name="emailCode"
+                  noStyle
+                  rules={[{ required: true, message: t("codeRequired") }]}
+                  className="profile-inline-grow"
+                >
+                  <NeuInput
+                    name="emailCode"
+                    placeholder={t("verificationCode")}
+                    autoComplete="one-time-code"
+                  />
+                </Form.Item>
+                <NeuButton
+                  loading={emailCodeLoading}
+                  disabled={emailCodeCountdown > 0}
+                  onClick={handleEmailSendCode}
+                  className="profile-btn-shrink"
+                >
+                  {emailCodeCountdown > 0
+                    ? `${emailCodeCountdown}s`
+                    : t("sendCode")}
+                </NeuButton>
+              </div>
+            </Form.Item>
+            <Form.Item className="profile-form-item-none">
+              <NeuButton
+                type="primary"
+                htmlType="submit"
+                loading={emailLoading}
+                className="profile-btn-full"
+              >
+                {t("updateEmail")}
+              </NeuButton>
+            </Form.Item>
+          </Form>
+        </SectionCard>
+
+        {/* Phone */}
+        <SectionCard>
+          <SectionLabel
+            title={
+              PHONE_AUTH_ENABLED
+                ? t("phoneNumber")
+                : `${t("phoneNumber")} (${t("underDevelopment")})`
+            }
+          />
+          <Form
+            form={phoneForm}
+            onFinish={handlePhoneSave}
+            initialValues={parsePhone(profile.phone)}
+            key={profile.phone}
+            layout="vertical"
+          >
+            <Form.Item className="profile-form-item-submit">
+              <div className="neu-phone-row">
+                <Form.Item name="countryCode" noStyle>
+                  <NeuSelect
+                    fullWidth={false}
+                    style={{ width: 110 }}
+                    disabled={!PHONE_AUTH_ENABLED}
+                    options={COUNTRIES.map((c) => ({
+                      value: c.code,
+                      label: `${locale === "zh-CN" ? c.zh : c.en} ${c.code}`,
+                    }))}
+                    optionLabelProp="value"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="phoneNumber"
+                  noStyle
+                  rules={[
+                    { required: true, message: t("phoneRequired") },
+                    { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
+                  ]}
+                >
+                  <NeuInput
+                    name="phoneNumber"
+                    fullWidth
+                    placeholder={t("phoneNumber")}
+                    disabled={!PHONE_AUTH_ENABLED}
+                    autoComplete="tel-national"
+                  />
+                </Form.Item>
+              </div>
+            </Form.Item>
+            <Form.Item className="profile-form-item-none">
+              <NeuButton
+                type="primary"
+                htmlType="submit"
+                loading={phoneLoading}
+                disabled={!PHONE_AUTH_ENABLED}
+                className="profile-btn-full"
+              >
+                {profile.phone ? t("updatePhone") : t("bindPhone")}
+                {!PHONE_AUTH_ENABLED && ` (${t("underDevelopment")})`}
+              </NeuButton>
+            </Form.Item>
+          </Form>
+        </SectionCard>
+
+        {/* WeChat */}
+        <SectionCard>
+          <SectionLabel
+            title={
+              WECHAT_AUTH_ENABLED
+                ? t("wechatAccount")
+                : `${t("wechatAccount")} (${t("underDevelopment")})`
+            }
+          />
+          <div className="profile-wechat-row">
+            <span
+              className={`profile-wechat-status ${profile.wechat_bound ? "profile-wechat-status--bound" : "profile-wechat-status--unbound"}`}
+            >
+              {profile.wechat_bound ? t("wechatBound") : t("wechatNotBound")}
+            </span>
+            <NeuButton
+              loading={wechatLoading}
+              onClick={handleWechatBind}
+              disabled={!WECHAT_AUTH_ENABLED}
+              className="profile-btn-shrink"
+            >
+              {profile.wechat_bound ? t("changeWechat") : t("bindWechat")}
+              {!WECHAT_AUTH_ENABLED && ` (${t("underDevelopment")})`}
+            </NeuButton>
+          </div>
+        </SectionCard>
+
+        {/* Language */}
+        <SectionCard>
+          <SectionLabel title={t("preferredLanguage")} />
+          <Form
+            form={localeForm}
+            onFinish={handleLocaleSave}
+            initialValues={{
+              preferredLocale: profile.preferred_locale || locale,
+            }}
+            key={profile.preferred_locale}
+            layout="vertical"
+          >
+            <Form.Item
+              name="preferredLocale"
+              className="profile-form-item-submit"
+            >
+              <NeuRadio.Group>
+                <NeuRadio value="en-US">{t("localeEnglish")}</NeuRadio>
+                <NeuRadio value="zh-CN">{t("localeChinese")}</NeuRadio>
+              </NeuRadio.Group>
+            </Form.Item>
+            <Form.Item className="profile-form-item-none">
+              <NeuButton
+                type="primary"
+                htmlType="submit"
+                loading={localeLoading}
+                className="profile-btn-full"
+              >
+                {t("saveLanguage")}
+              </NeuButton>
+            </Form.Item>
+          </Form>
+        </SectionCard>
+
+        <SectionCard>
+          <SectionLabel title={t("deleteAccount")} />
+          <p className="profile-danger-warning">{t("deleteAccountWarning")}</p>
+          {profile.password_set && (
+            <Form layout="vertical">
+              <Form.Item className="profile-form-item-submit">
                 <NeuInput.Password
+                  id="delete-account-password"
+                  name="deleteAccountPassword"
                   prefix={<LockOutlined />}
-                  placeholder={t("currentPassword")}
+                  placeholder={t("deleteAccountPassword")}
+                  value={deletePassword}
+                  onChange={(event) => setDeletePassword(event.target.value)}
                   autoComplete="current-password"
                 />
               </Form.Item>
-              <Form.Item
-                name="newPassword"
-                rules={[
-                  { required: true, message: t("newPasswordRequired") },
-                  { min: 6, message: t("newPasswordMin") },
-                ]}
-                className="profile-form-item-tight"
-              >
-                <NeuInput.Password
-                  prefix={<LockOutlined />}
-                  placeholder={t("newPassword")}
-                  autoComplete="new-password"
-                />
-              </Form.Item>
-              <Form.Item
-                name="confirmPassword"
-                dependencies={["newPassword"]}
-                rules={[
-                  { required: true, message: t("confirmPasswordRequired") },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value || getFieldValue("newPassword") === value)
-                        return Promise.resolve();
-                      return Promise.reject(new Error(t("passwordMismatch")));
-                    },
-                  }),
-                ]}
-                className="profile-form-item-submit"
-              >
-                <NeuInput.Password
-                  prefix={<LockOutlined />}
-                  placeholder={t("confirmPassword")}
-                  autoComplete="new-password"
-                />
-              </Form.Item>
-              <Form.Item className="profile-form-item-none">
-                <NeuButton
-                  type="primary"
-                  htmlType="submit"
-                  loading={pwLoading}
-                  className="profile-btn-full"
-                >
-                  {t("updatePassword")}
-                </NeuButton>
-              </Form.Item>
             </Form>
-          </SectionCard>
-
-          {/* Email */}
-          <SectionCard>
-            <SectionLabel title={t("loginEmail")} />
-            <Form
-              form={emailForm}
-              onFinish={handleEmailSave}
-              initialValues={{ email: profile.email }}
-              layout="vertical"
-            >
-              <Form.Item
-                name="email"
-                rules={[
-                  { required: true, message: t("emailRequired") },
-                  { type: "email", message: t("emailInvalid") },
-                ]}
-                className="profile-form-item-tight"
-              >
-                <NeuInput
-                  prefix={<MailOutlined />}
-                  placeholder={t("emailAddress")}
-                  autoComplete="email"
-                />
-              </Form.Item>
-              <Form.Item className="profile-form-item-submit">
-                <div className="profile-inline-row">
-                  <Form.Item
-                    name="emailCode"
-                    noStyle
-                    rules={[{ required: true, message: t("codeRequired") }]}
-                    className="profile-inline-grow"
-                  >
-                    <NeuInput
-                      placeholder={t("verificationCode")}
-                      autoComplete="one-time-code"
-                    />
-                  </Form.Item>
-                  <NeuButton
-                    loading={emailCodeLoading}
-                    disabled={emailCodeCountdown > 0}
-                    onClick={handleEmailSendCode}
-                    className="profile-btn-shrink"
-                  >
-                    {emailCodeCountdown > 0
-                      ? `${emailCodeCountdown}s`
-                      : t("sendCode")}
-                  </NeuButton>
-                </div>
-              </Form.Item>
-              <Form.Item className="profile-form-item-none">
-                <NeuButton
-                  type="primary"
-                  htmlType="submit"
-                  loading={emailLoading}
-                  className="profile-btn-full"
-                >
-                  {t("updateEmail")}
-                </NeuButton>
-              </Form.Item>
-            </Form>
-          </SectionCard>
-
-          {/* Phone */}
-          <SectionCard>
-            <SectionLabel
-              title={
-                PHONE_AUTH_ENABLED
-                  ? t("phoneNumber")
-                  : `${t("phoneNumber")} (${t("underDevelopment")})`
-              }
-            />
-            <Form
-              form={phoneForm}
-              onFinish={handlePhoneSave}
-              initialValues={parsePhone(profile.phone)}
-              key={profile.phone}
-              layout="vertical"
-            >
-              <Form.Item className="profile-form-item-submit">
-                <div className="neu-phone-row">
-                  <Form.Item name="countryCode" noStyle>
-                    <NeuSelect
-                      fullWidth={false}
-                      style={{ width: 110 }}
-                      disabled={!PHONE_AUTH_ENABLED}
-                      options={COUNTRIES.map((c) => ({
-                        value: c.code,
-                        label: `${locale === "zh-CN" ? c.zh : c.en} ${c.code}`,
-                      }))}
-                      optionLabelProp="value"
-                    />
-                  </Form.Item>
-                  <Form.Item
-                    name="phoneNumber"
-                    noStyle
-                    rules={[
-                      { required: true, message: t("phoneRequired") },
-                      { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
-                    ]}
-                  >
-                    <NeuInput
-                      fullWidth
-                      placeholder={t("phoneNumber")}
-                      disabled={!PHONE_AUTH_ENABLED}
-                      autoComplete="tel-national"
-                    />
-                  </Form.Item>
-                </div>
-              </Form.Item>
-              <Form.Item className="profile-form-item-none">
-                <NeuButton
-                  type="primary"
-                  htmlType="submit"
-                  loading={phoneLoading}
-                  disabled={!PHONE_AUTH_ENABLED}
-                  className="profile-btn-full"
-                >
-                  {profile.phone ? t("updatePhone") : t("bindPhone")}
-                  {!PHONE_AUTH_ENABLED && ` (${t("underDevelopment")})`}
-                </NeuButton>
-              </Form.Item>
-            </Form>
-          </SectionCard>
-
-          {/* WeChat */}
-          <SectionCard>
-            <SectionLabel
-              title={
-                WECHAT_AUTH_ENABLED
-                  ? t("wechatAccount")
-                  : `${t("wechatAccount")} (${t("underDevelopment")})`
-              }
-            />
-            <div className="profile-wechat-row">
-              <span
-                className={`profile-wechat-status ${profile.wechat_bound ? "profile-wechat-status--bound" : "profile-wechat-status--unbound"}`}
-              >
-                {profile.wechat_bound ? t("wechatBound") : t("wechatNotBound")}
-              </span>
-              <NeuButton
-                loading={wechatLoading}
-                onClick={handleWechatBind}
-                disabled={!WECHAT_AUTH_ENABLED}
-                className="profile-btn-shrink"
-              >
-                {profile.wechat_bound ? t("changeWechat") : t("bindWechat")}
-                {!WECHAT_AUTH_ENABLED && ` (${t("underDevelopment")})`}
-              </NeuButton>
-            </div>
-          </SectionCard>
-
-          {/* Language */}
-          <SectionCard>
-            <SectionLabel title={t("preferredLanguage")} />
-            <Form
-              form={localeForm}
-              onFinish={handleLocaleSave}
-              initialValues={{
-                preferredLocale: profile.preferred_locale || locale,
-              }}
-              key={profile.preferred_locale}
-              layout="vertical"
-            >
-              <Form.Item name="preferredLocale" className="profile-form-item-submit">
-                <Radio.Group>
-                  <Radio value="en-US">{t("localeEnglish")}</Radio>
-                  <Radio value="zh-CN">{t("localeChinese")}</Radio>
-                </Radio.Group>
-              </Form.Item>
-              <Form.Item className="profile-form-item-none">
-                <NeuButton
-                  type="primary"
-                  htmlType="submit"
-                  loading={localeLoading}
-                  className="profile-btn-full"
-                >
-                  {t("saveLanguage")}
-                </NeuButton>
-              </Form.Item>
-            </Form>
-          </SectionCard>
-
-          <SectionCard>
-            <SectionLabel title={t("deleteAccount")} />
-            <p className="profile-danger-warning">{t("deleteAccountWarning")}</p>
-            {profile.password_set && (
-              <Form layout="vertical">
-                <Form.Item className="profile-form-item-submit">
-                  <NeuInput.Password
-                    prefix={<LockOutlined />}
-                    placeholder={t("deleteAccountPassword")}
-                    value={deletePassword}
-                    onChange={(event) => setDeletePassword(event.target.value)}
-                    autoComplete="current-password"
-                  />
-                </Form.Item>
-              </Form>
-            )}
-            <ConfirmDeleteButton
-              variant="neu"
-              className="profile-btn-full profile-delete-account-btn"
-              icon={t("deleteAccount")}
-              onConfirm={handleDeleteAccount}
-              confirmLabel={t("confirmDeleteAccount")}
-              deleteLabel={t("deleteAccount")}
-              loading={deleteLoading}
-              disabled={profile.password_set && !deletePassword}
-            />
-          </SectionCard>
+          )}
+          <ConfirmDeleteButton
+            variant="neu"
+            className="profile-btn-full profile-delete-account-btn"
+            icon={t("deleteAccount")}
+            onConfirm={handleDeleteAccount}
+            confirmLabel={t("confirmDeleteAccount")}
+            deleteLabel={t("deleteAccount")}
+            loading={deleteLoading}
+            disabled={profile.password_set && !deletePassword}
+          />
+        </SectionCard>
       </div>
     </div>
   );

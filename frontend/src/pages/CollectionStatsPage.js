@@ -7,7 +7,7 @@ import useElementWidth from "../hooks/useElementWidth";
 import { useLocale } from "../LocaleContext";
 import { pickLocalizedField } from "../utils/displayLocale";
 import { resolveNeuChartColors } from "../theme/chartColors";
-import { bindCanvasPieLegendToggle } from "../utils/canvasPieLegend";
+import { bindCanvasPieLegendToggle, syncPieLegendOpacity } from "../utils/canvasPieLegend";
 import { animatePieDataTransition } from "../utils/pieFilterAnimation";
 import { getCollectionStats } from "../utils/statsApi";
 import "../styles/stats-page.css";
@@ -135,6 +135,12 @@ export default function CollectionStatsPage() {
     if (!plot) {
       return;
     }
+
+    syncPieLegendOpacity(plot, {
+      domain: pieLegendDomainRef.current,
+      hiddenTypes: next,
+      getLegendColor: getPieLegendColor,
+    });
 
     pieAnimationCancelRef.current?.();
     pieAnimationCancelRef.current = animatePieDataTransition(

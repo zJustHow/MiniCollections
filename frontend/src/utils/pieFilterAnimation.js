@@ -3,6 +3,26 @@ import { resolveG2Chart } from "./g2Chart";
 
 export const MIN_SLICE_VALUE = 0.001;
 
+function withLegendPreserve(child) {
+  if (child?.legend === false) {
+    return child.legend;
+  }
+
+  const existingLegend =
+    typeof child?.legend === "object" && child.legend !== null
+      ? child.legend
+      : {};
+  const colorLegend =
+    typeof existingLegend.color === "object" && existingLegend.color !== null
+      ? existingLegend.color
+      : {};
+
+  return {
+    ...existingLegend,
+    color: { ...colorLegend, preserve: true },
+  };
+}
+
 const PIE_TRANSITION_ANIMATE = {
   enter: { type: null },
   update: { type: null },
@@ -59,6 +79,8 @@ export function updatePieChartData(
     hiddenTypes = new Set(),
     legendDomain = [],
     getLegendColor,
+    syncLegend = true,
+    preserveLegend = false,
   } = {},
 ) {
   const g2Chart = resolveG2Chart(plot);
@@ -67,23 +89,33 @@ export function updatePieChartData(
   }
 
   const spec = g2Chart.options();
-  const children = spec.children?.map((child) =>
-    child?.type === "interval"
-      ? {
-          ...child,
-          data,
-          animate: PIE_TRANSITION_ANIMATE,
-        }
-      : child,
-  );
+  const children = spec.children?.map((child) => {
+    if (child?.type !== "interval") {
+      return child;
+    }
+
+    const nextChild = {
+      ...child,
+      data,
+      animate: PIE_TRANSITION_ANIMATE,
+    };
+
+    if (preserveLegend) {
+      nextChild.legend = withLegendPreserve(child);
+    }
+
+    return nextChild;
+  });
 
   g2Chart.options({ children });
   g2Chart.render();
-  schedulePieLegendOpacitySync(plot, {
-    domain: legendDomain,
-    hiddenTypes,
-    getLegendColor,
-  });
+  if (syncLegend) {
+    schedulePieLegendOpacitySync(plot, {
+      domain: legendDomain,
+      hiddenTypes,
+      getLegendColor,
+    });
+  }
 }
 
 export function animatePieDataTransition(
@@ -103,6 +135,11 @@ export function animatePieDataTransition(
     hiddenTypes: targetHidden,
     legendDomain,
     getLegendColor,
+  };
+  const animationOptions = {
+    ...chartOptions,
+    syncLegend: false,
+    preserveLegend: true,
   };
 
   if (!plot || hiddenSetsEqual(fromHidden, toHidden)) {
@@ -127,14 +164,12 @@ export function animatePieDataTransition(
     updatePieChartData(
       plot,
       buildTransitionPieData(pieData, fromHidden, toHidden, t),
-      chartOptions,
+      animationOptions,
     );
 
     if (t < 1) {
       frameId = requestAnimationFrame(run);
-      return;
     }
-
   };
 
   frameId = requestAnimationFrame(run);
@@ -144,5 +179,10 @@ export function animatePieDataTransition(
     if (frameId) {
       cancelAnimationFrame(frameId);
     }
+    updatePieChartData(
+      plot,
+      buildTransitionPieData(pieData, fromHidden, toHidden, 1),
+      animationOptions,
+    );
   };
 }

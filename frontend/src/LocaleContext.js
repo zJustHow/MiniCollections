@@ -23,6 +23,16 @@ import NoDataPlaceholder from "./components/NoDataPlaceholder";
 
 const LocaleContext = createContext(null);
 
+function renderAntdEmpty(componentName) {
+  if (componentName === "Table.filter") {
+    return null;
+  }
+  if (componentName === "Table" || componentName === "List") {
+    return <NoDataPlaceholder />;
+  }
+  return undefined;
+}
+
 function AppConfigShell({ children, antdLocale, antdTheme }) {
   const mergedLocale = useMemo(
     () => ({
@@ -38,6 +48,7 @@ function AppConfigShell({ children, antdLocale, antdTheme }) {
   return (
     <ConfigProvider
       locale={mergedLocale}
+      renderEmpty={renderAntdEmpty}
       wave={{ disabled: true }}
       theme={antdTheme}
     >

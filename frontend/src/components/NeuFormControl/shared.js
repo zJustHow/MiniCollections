@@ -1,5 +1,17 @@
 import React from "react";
 
+/** Ensure native inputs have id or name for autofill and a11y audits. */
+export function useNeuFieldIdentity({ id, name, prefix = "neu" }) {
+  const generatedId = React.useId();
+  if (id || name) {
+    return { id, name };
+  }
+  return {
+    id: `${prefix}-${generatedId.replace(/:/g, "")}`,
+    name: undefined,
+  };
+}
+
 /** Default width for controls inside vertical Form.Item layouts */
 export const NEU_CONTROL_FULL_WIDTH = { width: "100%" };
 
@@ -15,15 +27,17 @@ export function neuControlStyle(style, fullWidth = true) {
   return style ? { ...NEU_CONTROL_FULL_WIDTH, ...style } : NEU_CONTROL_FULL_WIDTH;
 }
 
-export function createNeuControl(Component, displayName, { defaultFullWidth = true } = {}) {
+export function createNeuControl(Component, displayName, { defaultFullWidth = true, idPrefix = "neu" } = {}) {
   const Neu = React.forwardRef(function NeuControl(
-    { fullWidth = defaultFullWidth, style, ...props },
+    { fullWidth = defaultFullWidth, style, id, name, ...props },
     ref,
   ) {
+    const fieldIdentity = useNeuFieldIdentity({ id, name, prefix: idPrefix });
     return (
       <Component
         ref={ref}
         style={neuControlStyle(style, fullWidth)}
+        {...fieldIdentity}
         {...props}
       />
     );

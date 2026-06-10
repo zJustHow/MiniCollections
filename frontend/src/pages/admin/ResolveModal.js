@@ -45,7 +45,12 @@ export default function ResolveModal({ open, submission, onClose, onSuccess }) {
     >
       <Form layout="vertical">
         <Form.Item label={t("adminNote")}>
-          <NeuInput.TextArea rows={3} value={adminNote} onChange={(e) => setAdminNote(e.target.value)} />
+          <NeuInput.TextArea
+            name="adminNote"
+            rows={3}
+            value={adminNote}
+            onChange={(e) => setAdminNote(e.target.value)}
+          />
         </Form.Item>
       </Form>
     </NeuFormDrawer>

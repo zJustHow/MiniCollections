@@ -49,6 +49,7 @@ export default function RejectModal({ open, submission, onClose, onSuccess }) {
           label={isMissingModel ? t("rejectReason") : t("closeReason")}
         >
           <NeuInput.TextArea
+            name="reason"
             rows={3}
             value={reason}
             onChange={(e) => setReason(e.target.value)}

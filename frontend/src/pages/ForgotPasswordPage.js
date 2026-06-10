@@ -181,6 +181,7 @@ export default function ForgotPasswordPage() {
               }
             >
               <NeuInput
+                name="email"
                 prefix={<MailOutlined />}
                 placeholder={t("email")}
                 size="large"
@@ -222,6 +223,7 @@ export default function ForgotPasswordPage() {
                   }
                 >
                   <NeuInput
+                    name="phoneNumber"
                     fullWidth
                     placeholder={t("phoneNumber")}
                     size="large"
@@ -239,6 +241,7 @@ export default function ForgotPasswordPage() {
                   rules={[{ required: true, message: t("codeRequired") }]}
                 >
                   <NeuInput
+                    name="code"
                     fullWidth={false}
                     placeholder={t("verificationCode")}
                     size="large"
@@ -267,6 +270,7 @@ export default function ForgotPasswordPage() {
               ]}
             >
               <NeuInput.Password
+                name="newPassword"
                 prefix={<LockOutlined />}
                 placeholder={t("newPassword")}
                 size="large"
@@ -290,6 +294,7 @@ export default function ForgotPasswordPage() {
               ]}
             >
               <NeuInput.Password
+                name="confirmPassword"
                 prefix={<LockOutlined />}
                 placeholder={t("confirmPassword")}
                 size="large"

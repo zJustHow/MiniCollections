@@ -50,9 +50,9 @@ until curl -sf "http://localhost:9200/_cluster/health?wait_for_status=yellow&tim
 done
 log "Elasticsearch is ready."
 
-log "Waiting for Redis to be ready..."
+log "Waiting for Redis to be ready (localhost:6380)..."
 REDIS_RETRIES=0
-until nc -z 127.0.0.1 6379 2>/dev/null; do
+until nc -z 127.0.0.1 6380 2>/dev/null; do
   REDIS_RETRIES=$((REDIS_RETRIES + 1))
   if [ "$REDIS_RETRIES" -ge 30 ]; then
     echo -e "${RED}[dev]${NC} Redis did not become ready after 60s. Try: docker compose -f \"$ROOT/docker-compose.yml\" up -d redis --force-recreate" >&2
@@ -95,6 +95,8 @@ export S3_ACCESS_KEY="${S3_ACCESS_KEY:-minioadmin}"
 export S3_SECRET_KEY="${S3_SECRET_KEY:-minioadmin}"
 export S3_ENABLED="${S3_ENABLED:-true}"
 log "S3_PUBLIC_BASE_URL=$S3_PUBLIC_BASE_URL"
+export REDIS_PORT="${REDIS_PORT:-6380}"
+log "REDIS_PORT=$REDIS_PORT"
 # LetsVPN (and similar tools) often leave 127.0.0.1:17891 in macOS proxy settings while the
 # local proxy is stopped, which makes Gradle fail to reach Maven Central.
 if nc -z 127.0.0.1 17891 2>/dev/null; then

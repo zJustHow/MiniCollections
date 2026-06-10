@@ -196,6 +196,7 @@ export default function RegisterPage() {
               }
             >
               <NeuInput
+                name="email"
                 prefix={<MailOutlined />}
                 placeholder={t("email")}
                 size="large"
@@ -238,6 +239,7 @@ export default function RegisterPage() {
                   }
                 >
                   <NeuInput
+                    name="phoneNumber"
                     fullWidth
                     placeholder={t("phoneNumber")}
                     size="large"
@@ -256,6 +258,7 @@ export default function RegisterPage() {
                   rules={[{ required: true, message: t("codeRequired") }]}
                 >
                   <NeuInput
+                    name="code"
                     fullWidth={false}
                     placeholder={t("verificationCode")}
                     size="large"
@@ -285,6 +288,7 @@ export default function RegisterPage() {
               ]}
             >
               <NeuInput.Password
+                name="password"
                 prefix={<LockOutlined />}
                 placeholder={t("password")}
                 size="large"
@@ -308,6 +312,7 @@ export default function RegisterPage() {
               ]}
             >
               <NeuInput.Password
+                name="confirmPassword"
                 prefix={<LockOutlined />}
                 placeholder={t("confirmPassword")}
                 size="large"
@@ -321,6 +326,7 @@ export default function RegisterPage() {
               rules={[{ required: true, message: t("signupNameRequired") }]}
             >
               <NeuInput
+                name="name"
                 prefix={<UserOutlined />}
                 placeholder={t("username")}
                 size="large"
@@ -330,7 +336,7 @@ export default function RegisterPage() {
 
             {/* Language toggle */}
             <Form.Item name="preferred_locale" hidden>
-              <NeuInput autoComplete="off" />
+              <NeuInput name="preferred_locale" autoComplete="off" />
             </Form.Item>
             <div style={{ marginBottom: 24 }}>
               <div
