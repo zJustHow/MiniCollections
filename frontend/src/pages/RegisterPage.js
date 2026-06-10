@@ -212,7 +212,7 @@ export default function RegisterPage() {
                 marginBottom: 24,
               }}
             >
-              <div style={{ display: "flex", gap: 10 }}>
+              <div className="neu-phone-row">
                 <Form.Item name="countryCode" noStyle>
                   <NeuSelect
                     fullWidth={false}
@@ -240,10 +240,9 @@ export default function RegisterPage() {
                   }
                 >
                   <NeuInput
-                    fullWidth={false}
+                    fullWidth
                     placeholder={t("phoneNumber")}
                     size="large"
-                    style={{ flex: 1, minWidth: 0 }}
                     autoComplete="tel-national"
                   />
                 </Form.Item>
@@ -290,6 +289,29 @@ export default function RegisterPage() {
               <NeuInput.Password
                 prefix={<LockOutlined />}
                 placeholder={t("password")}
+                size="large"
+                autoComplete="new-password"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="confirmPassword"
+              dependencies={["password"]}
+              rules={[
+                { required: true, message: t("confirmPasswordRequired") },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error(t("passwordMismatch")));
+                  },
+                }),
+              ]}
+            >
+              <NeuInput.Password
+                prefix={<LockOutlined />}
+                placeholder={t("confirmPassword")}
                 size="large"
                 autoComplete="new-password"
               />

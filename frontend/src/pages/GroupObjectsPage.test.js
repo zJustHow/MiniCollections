@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import GroupObjectsPage from "./GroupObjectsPage";
 
@@ -8,6 +9,9 @@ const pageMocks = vi.hoisted(() => ({
   draftQuery: "",
   displayItems: [{ id: 10, name: "My M3", image_url: null }],
   loading: false,
+  orderLoading: false,
+  handleDragEnd: vi.fn(async () => true),
+  messageError: vi.fn(),
 }));
 
 vi.mock("antd", async () => {
@@ -15,7 +19,12 @@ vi.mock("antd", async () => {
   return {
     ...actual,
     App: Object.assign(actual.App, {
-      useApp: () => ({ message: { success: vi.fn(), error: vi.fn() } }),
+      useApp: () => ({
+        message: {
+          success: vi.fn(),
+          error: pageMocks.messageError,
+        },
+      }),
     }),
     Form: Object.assign(actual.Form, {
       useForm: () => [vi.fn()],
@@ -70,14 +79,14 @@ vi.mock("../hooks/useDualModeBrowseList", () => ({
   default: () => ({
     browseList: {
       loading: pageMocks.loading,
-      orderLoading: false,
+      orderLoading: pageMocks.orderLoading,
       hasMore: false,
       loadingMore: false,
       loadMore: vi.fn(),
       orderedIds: [10],
       sortEnabled: true,
       refreshAll: vi.fn(),
-      handleDragEnd: vi.fn(),
+      handleDragEnd: pageMocks.handleDragEnd,
     },
     searchList: { page: 0, loading: pageMocks.loading, loadPage: vi.fn() },
     displayItems: pageMocks.displayItems,
@@ -107,11 +116,20 @@ vi.mock("../components/listPage/ObjectListPageShell", () => ({
 }));
 
 vi.mock("../components/listPage/SortableInfiniteBrowseSection", () => ({
-  default: ({ items, renderItem, loading, orderLoading }) =>
+  default: ({ items, renderItem, loading, orderLoading, onDragEnd }) =>
     loading || orderLoading ? (
       <div data-testid="browse-loading" />
     ) : (
-      <div data-testid="browse-grid">{items.map((item) => renderItem(item))}</div>
+      <div data-testid="browse-grid">
+        {items.map((item) => renderItem(item))}
+        <button
+          type="button"
+          data-testid="trigger-drag"
+          onClick={() => onDragEnd?.(10, 11)}
+        >
+          drag
+        </button>
+      </div>
     ),
 }));
 
@@ -159,6 +177,10 @@ describe("GroupObjectsPage", () => {
     pageMocks.draftQuery = "";
     pageMocks.displayItems = [{ id: 10, name: "My M3", image_url: null }];
     pageMocks.loading = false;
+    pageMocks.orderLoading = false;
+    pageMocks.handleDragEnd.mockReset();
+    pageMocks.handleDragEnd.mockResolvedValue(true);
+    pageMocks.messageError.mockReset();
   });
 
   test("renders group models and add card on first page", () => {
@@ -189,5 +211,24 @@ describe("GroupObjectsPage", () => {
     renderPage();
 
     expect(screen.getByTestId("no-results")).toBeInTheDocument();
+  });
+
+  test("shows browse loading while order is loading", () => {
+    pageMocks.orderLoading = true;
+
+    renderPage();
+
+    expect(screen.getByTestId("browse-loading")).toBeInTheDocument();
+    expect(screen.queryByText("My M3")).not.toBeInTheDocument();
+  });
+
+  test("shows error when reorder fails", async () => {
+    pageMocks.handleDragEnd.mockResolvedValue(false);
+
+    renderPage();
+    await userEvent.click(screen.getByTestId("trigger-drag"));
+
+    expect(pageMocks.handleDragEnd).toHaveBeenCalledWith(10, 11);
+    expect(pageMocks.messageError).toHaveBeenCalledWith("failedToReorder");
   });
 });

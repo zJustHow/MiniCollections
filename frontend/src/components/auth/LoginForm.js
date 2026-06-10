@@ -203,7 +203,7 @@ function LoginForm({ onSuccess }) {
             marginBottom: 24,
           }}
         >
-          <div style={{ display: "flex", gap: 10 }}>
+          <div className="neu-phone-row">
             <Form.Item name="countryCode" noStyle>
               <NeuSelect
                 fullWidth={false}
@@ -231,10 +231,9 @@ function LoginForm({ onSuccess }) {
               }
             >
               <NeuInput
-                fullWidth={false}
+                fullWidth
                 placeholder={t("phoneNumber")}
                 size="large"
-                style={{ flex: 1, minWidth: 0 }}
                 autoComplete="tel-national"
               />
             </Form.Item>
@@ -269,21 +268,7 @@ function LoginForm({ onSuccess }) {
           </Link>
         </div>
 
-        {error && (
-          <div
-            style={{
-              color: "#fff",
-              background: "var(--neu-danger-light)",
-              borderRadius: radius.md,
-              padding: "8px 14px",
-              marginBottom: 16,
-              fontSize: neuRem(13),
-              boxShadow: "var(--inset-danger)",
-            }}
-          >
-            {error}
-          </div>
-        )}
+        {error && <div className="neu-auth-error">{error}</div>}
 
         <Form.Item style={{ marginBottom: 0 }}>
           <NeuButton

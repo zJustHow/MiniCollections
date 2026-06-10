@@ -1,5 +1,4 @@
 import {
-  resolveHeaderSkeletonEndActions,
   resolveRouteSkeletonVariant,
   usesCustomHeader,
   usesMainLayout,
@@ -39,26 +38,6 @@ describe("usesCustomHeader", () => {
     expect(usesCustomHeader("/groups")).toBe(false);
     expect(usesCustomHeader("/feedback")).toBe(false);
     expect(usesCustomHeader("/admin")).toBe(false);
-  });
-});
-
-describe("resolveHeaderSkeletonEndActions", () => {
-  it("maps routes to the expected action button count", () => {
-    expect(resolveHeaderSkeletonEndActions("/profile")).toBe(1);
-    expect(resolveHeaderSkeletonEndActions("/admin/brands")).toBe(1);
-    expect(resolveHeaderSkeletonEndActions("/admin/brands/12")).toBe(1);
-    expect(resolveHeaderSkeletonEndActions("/admin/categories")).toBe(1);
-    expect(resolveHeaderSkeletonEndActions("/admin/scales")).toBe(1);
-    expect(resolveHeaderSkeletonEndActions("/groups/2")).toBe(2);
-    expect(resolveHeaderSkeletonEndActions("/groups/2/objects/7")).toBe(2);
-    expect(resolveHeaderSkeletonEndActions("/brands/3")).toBe(0);
-    expect(resolveHeaderSkeletonEndActions("/brands/3/objects/9")).toBe(0);
-    expect(resolveHeaderSkeletonEndActions("/brands/3", { isAdmin: true })).toBe(
-      2,
-    );
-    expect(
-      resolveHeaderSkeletonEndActions("/brands/3/objects/9", { isAdmin: true }),
-    ).toBe(2);
   });
 });
 

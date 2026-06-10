@@ -24,6 +24,20 @@
   color: var(--neu-accent);
 }
 
+.neu-auth-error {
+  color: var(--neu-danger-dark);
+  background: transparent;
+  box-shadow: var(--inset);
+  border: none;
+  border-radius: 0;
+  padding: 8px 14px;
+  margin-bottom: 16px;
+  font-size: var(--neu-fs-13);
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+}
+
 .neu-auth-page-skeleton {
   display: flex;
   flex-direction: column;

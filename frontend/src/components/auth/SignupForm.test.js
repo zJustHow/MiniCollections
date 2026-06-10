@@ -58,6 +58,7 @@ describe("SignupForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "register" }));
     await userEvent.type(screen.getByPlaceholderText("email"), "alice@example.com");
     await userEvent.type(screen.getByPlaceholderText("password"), "secret12");
+    await userEvent.type(screen.getByPlaceholderText("confirmPassword"), "secret12");
     await userEvent.type(screen.getByPlaceholderText("username"), "Alice");
     await userEvent.click(screen.getAllByRole("button", { name: "register" })[1]);
 

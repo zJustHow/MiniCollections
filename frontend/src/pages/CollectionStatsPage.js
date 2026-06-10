@@ -1,7 +1,7 @@
 import { Column, Line, Pie } from "@ant-design/plots";
 import { App, Empty } from "antd";
 import { useEffect, useMemo, useRef, useState } from "react";
-import PageLoader from "../components/PageLoader";
+import StatsPageSkeleton from "../components/StatsPageSkeleton";
 import useElementWidth from "../hooks/useElementWidth";
 import { useLocale } from "../LocaleContext";
 import { pickLocalizedField } from "../utils/displayLocale";
@@ -102,7 +102,7 @@ export default function CollectionStatsPage() {
   const columnWidth = useElementWidth(columnWrapRef, columnChartActive);
 
   if (loading) {
-    return <PageLoader variant="stats" />;
+    return <StatsPageSkeleton />;
   }
 
   if (!stats) {

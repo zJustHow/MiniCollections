@@ -29,42 +29,6 @@ export function usesCustomHeader(pathname) {
   );
 }
 
-export function resolveHeaderSkeletonEndActions(
-  pathname,
-  { isAdmin = false } = {},
-) {
-  if (matchPath({ path: "/profile", end: true }, pathname)) {
-    return 1;
-  }
-  if (
-    matchPath({ path: "/admin/brands", end: true }, pathname) ||
-    matchPath({ path: "/admin/brands/:brandId", end: true }, pathname) ||
-    matchPath({ path: "/admin/categories", end: true }, pathname) ||
-    matchPath({ path: "/admin/scales", end: true }, pathname)
-  ) {
-    return 1;
-  }
-  if (
-    matchPath({ path: "/brands/:brandId", end: true }, pathname) ||
-    matchPath(
-      { path: "/brands/:brandId/objects/:objectId", end: true },
-      pathname,
-    )
-  ) {
-    return isAdmin ? 2 : 0;
-  }
-  if (
-    matchPath({ path: "/groups/:groupId", end: true }, pathname) ||
-    matchPath(
-      { path: "/groups/:groupId/objects/:objectId", end: true },
-      pathname,
-    )
-  ) {
-    return 2;
-  }
-  return 0;
-}
-
 export function resolveRouteSkeletonVariant(pathname) {
   if (matchPath({ path: "/register", end: true }, pathname)) {
     return "register";

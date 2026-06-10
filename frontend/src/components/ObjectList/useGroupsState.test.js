@@ -121,6 +121,7 @@ describe("useGroupsState", () => {
     vi.clearAllMocks();
     mockValidateFields.mockResolvedValue({ name: "New Group" });
     mockCreateGroup.mockResolvedValue({ id: 99 });
+    mockGroupsBrowse.handleDragEnd.mockResolvedValue(true);
   });
 
   test("exposes browse list on groups tab", () => {
@@ -189,5 +190,44 @@ describe("useGroupsState", () => {
     });
     expect(mockMessageSuccess).toHaveBeenCalledWith("groupCreated");
     expect(mockRefreshAll).toHaveBeenCalled();
+  });
+
+  test("handleCreateGroup shows error when api fails", async () => {
+    mockCreateGroup.mockRejectedValue(new Error("create failed"));
+
+    render(
+      <MemoryRouter initialEntries={["/groups"]}>
+        <Routes>
+          <Route path="*" element={<GroupsProbe />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "create" }));
+
+    await waitFor(() => {
+      expect(mockMessageError).toHaveBeenCalledWith("create failed");
+    });
+    expect(mockRefreshAll).not.toHaveBeenCalled();
+  });
+
+  test("handleGroupReorder shows error when drag fails", async () => {
+    mockGroupsBrowse.handleDragEnd.mockResolvedValue(false);
+
+    const { result } = renderHook(() => useGroupsState(), {
+      wrapper: ({ children }) => (
+        <MemoryRouter initialEntries={["/groups"]}>
+          <Routes>
+            <Route path="*" element={children} />
+          </Routes>
+        </MemoryRouter>
+      ),
+    });
+
+    await act(async () => {
+      await result.current.handleGroupReorder(1, 2);
+    });
+
+    expect(mockMessageError).toHaveBeenCalledWith("failedToReorder");
   });
 });

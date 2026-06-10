@@ -39,9 +39,21 @@ vi.mock("../listPage/ObjectListPageShell", () => ({
 }));
 
 vi.mock("../listPage/TabListPageBody", () => ({
-  default: ({ searchActive, browseItems, renderBrowseItem, searchContent }) =>
+  default: ({
+    searchActive,
+    browseItems,
+    renderBrowseItem,
+    searchContent,
+    spinning,
+    searchHasResults,
+  }) =>
     searchActive ? (
-      <div data-testid="search-body">{searchContent}</div>
+      <div data-testid="search-body">
+        {searchContent}
+        {!spinning && !searchHasResults ? <div data-testid="no-results" /> : null}
+      </div>
+    ) : spinning ? (
+      <div data-testid="browse-loading" />
     ) : (
       <div data-testid="browse-body">
         {browseItems.map((item) => renderBrowseItem(item))}
@@ -137,5 +149,62 @@ describe("BrandsTab", () => {
     expect(screen.getByTestId("search-body")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Mini GT" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Model" })).toBeInTheDocument();
+  });
+
+  test("navigates to object detail from search results", async () => {
+    render(
+      <BrandsTab
+        {...baseProps}
+        searchActive
+        searchValue="m3"
+        searchResultObjects={[
+          { id: 3, name: "M3", brand_id: 2, image_url: null },
+        ]}
+        combinedSearchPage={{
+          loading: false,
+          totalBrands: 0,
+          totalObjects: 1,
+        }}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "M3" }));
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/brands/2/objects/3",
+      expect.objectContaining({
+        state: expect.objectContaining({
+          brandObject: expect.objectContaining({ id: 3, name: "M3" }),
+        }),
+      }),
+    );
+  });
+
+  test("shows no-results state for empty search", () => {
+    render(
+      <BrandsTab
+        {...baseProps}
+        searchActive
+        searchValue="missing"
+        combinedSearchPage={{
+          loading: false,
+          totalBrands: 0,
+          totalObjects: 0,
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("no-results")).toBeInTheDocument();
+  });
+
+  test("shows browse loading state", () => {
+    render(
+      <BrandsTab
+        {...baseProps}
+        brandsListPage={{ page: 0, loading: true }}
+      />,
+    );
+
+    expect(screen.getByTestId("browse-loading")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Kyosho" })).not.toBeInTheDocument();
   });
 });

@@ -3,6 +3,7 @@ import RightOutlined from "@ant-design/icons/es/icons/RightOutlined.js";
 import { Grid } from "antd";
 import NeuButton from "./NeuButton";
 import { useLocale } from "../LocaleContext";
+import { scrollAppToTop } from "../utils/scroll";
 
 const { useBreakpoint } = Grid;
 
@@ -53,6 +54,11 @@ export default function ListPagination({
 
   const pageNumbers = getPageNumbers(current, totalPages);
 
+  const handlePageChange = (nextPage) => {
+    scrollAppToTop();
+    onPageChange(nextPage);
+  };
+
   return (
     <div
       className="neu-pagination-row"
@@ -64,7 +70,7 @@ export default function ListPagination({
           icon={<LeftOutlined />}
           disabled={loading || current <= 1}
           aria-label={t("previousPage")}
-          onClick={() => onPageChange(current - 1)}
+          onClick={() => handlePageChange(current - 1)}
         />
 
         {pageNumbers.map((item, index) =>
@@ -83,7 +89,7 @@ export default function ListPagination({
               current={item === current}
               disabled={loading}
               aria-current={item === current ? "page" : undefined}
-              onClick={() => onPageChange(item)}
+              onClick={() => handlePageChange(item)}
             >
               {item}
             </NeuButton>
@@ -95,7 +101,7 @@ export default function ListPagination({
           icon={<RightOutlined />}
           disabled={loading || current >= totalPages}
           aria-label={t("nextPage")}
-          onClick={() => onPageChange(current + 1)}
+          onClick={() => handlePageChange(current + 1)}
         />
       </div>
     </div>

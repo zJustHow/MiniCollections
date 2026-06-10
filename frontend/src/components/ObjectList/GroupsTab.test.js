@@ -31,11 +31,29 @@ vi.mock("../listPage/ObjectListPageShell", () => ({
 }));
 
 vi.mock("../listPage/SortableInfiniteBrowseSection", () => ({
-  default: ({ items, renderItem }) => (
-    <div data-testid="browse-body">
-      {items.map((item) => renderItem(item))}
-    </div>
-  ),
+  default: ({ items, renderItem, loading, orderLoading, onDragEnd }) =>
+    loading || orderLoading ? (
+      <div data-testid="browse-loading" />
+    ) : (
+      <div data-testid="browse-body">
+        {items.map((item) => renderItem(item))}
+        <button
+          type="button"
+          data-testid="trigger-reorder"
+          onClick={() => onDragEnd?.(1, 2)}
+        >
+          drag
+        </button>
+      </div>
+    ),
+}));
+
+vi.mock("../listPage/NoSearchResults", () => ({
+  default: () => <div data-testid="no-results" />,
+}));
+
+vi.mock("../../utils/prefetchRoutes", () => ({
+  prefetchGroupObjectDetailPage: vi.fn(),
 }));
 
 vi.mock("../listPage/TabCombinedSearchSection", () => ({
@@ -124,5 +142,78 @@ describe("GroupsTab", () => {
     expect(screen.getByTestId("combined")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Cars" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Model" })).toBeInTheDocument();
+  });
+
+  test("shows browse loading while order is loading", () => {
+    render(
+      <GroupsTab
+        {...baseProps}
+        groupsBrowse={{
+          ...baseProps.groupsBrowse,
+          orderLoading: true,
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("browse-loading")).toBeInTheDocument();
+    expect(screen.queryByText("Favorites")).not.toBeInTheDocument();
+  });
+
+  test("forwards group reorder drag events", async () => {
+    render(<GroupsTab {...baseProps} />);
+
+    await userEvent.click(screen.getByTestId("trigger-reorder"));
+    expect(mockOnGroupReorder).toHaveBeenCalledWith(1, 2);
+  });
+
+  test("navigates to object detail from search results", async () => {
+    render(
+      <GroupsTab
+        {...baseProps}
+        searchActive
+        searchValue="bmw"
+        searchResultObjects={[
+          {
+            id: 9,
+            name: "M3",
+            group_id: 2,
+            group_name: "Cars",
+            image_url: null,
+          },
+        ]}
+        combinedSearchPage={{
+          loading: false,
+          totalBrands: 0,
+          totalObjects: 1,
+        }}
+      />,
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "M3" }));
+    expect(mockNavigate).toHaveBeenCalledWith(
+      "/groups/2/objects/9",
+      expect.objectContaining({
+        state: expect.objectContaining({
+          userObject: expect.objectContaining({ id: 9, name: "M3" }),
+        }),
+      }),
+    );
+  });
+
+  test("shows no-results state for empty search", () => {
+    render(
+      <GroupsTab
+        {...baseProps}
+        searchActive
+        searchValue="missing"
+        combinedSearchPage={{
+          loading: false,
+          totalBrands: 0,
+          totalObjects: 0,
+        }}
+      />,
+    );
+
+    expect(screen.getByTestId("no-results")).toBeInTheDocument();
   });
 });

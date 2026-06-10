@@ -119,6 +119,32 @@
   line-height: 1.5;
 }
 
+.profile-delete-account-btn.confirm-delete-btn--neu.neu-pressable-btn {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  height: var(--neu-control-height);
+  min-height: var(--neu-control-height);
+  padding: 0 16px;
+}
+
+.profile-delete-account-btn.confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+
+.profile-delete-account-btn .confirm-delete-label,
+.profile-delete-account-btn.confirm-delete-btn--pending.confirm-delete-btn--neu.neu-pressable-btn
+  .confirm-delete-label {
+  writing-mode: horizontal-tb;
+  text-orientation: mixed;
+  letter-spacing: normal;
+  text-transform: none;
+  font-size: var(--neu-fs-14);
+  overflow: visible;
+}
+
 .neu-profile-page-skeleton .neu-profile-skeleton-hero {
   padding-bottom: 0;
 }

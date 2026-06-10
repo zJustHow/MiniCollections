@@ -221,6 +221,35 @@
   }
 }
 
+.neu-list-page-search-field-skeleton {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.neu-list-page-search-skeleton-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: var(--neu-control-height);
+  box-shadow: var(--raised-sm);
+}
+
+.neu-list-page-search-skeleton-btn {
+  flex: 0 0 var(--neu-control-height);
+  width: var(--neu-control-height);
+  min-width: var(--neu-control-height);
+  height: var(--neu-control-height);
+  box-shadow: var(--raised-sm);
+}
+
+@media (min-width: 1200px) {
+  .neu-list-page-search .neu-list-page-search-field-skeleton {
+    width: 260px;
+  }
+}
+
 .neu-list-page-browse-grid,
 .neu-list-page-content > .neu-search-objects-cards {
   display: grid;

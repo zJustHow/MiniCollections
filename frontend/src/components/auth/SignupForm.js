@@ -103,7 +103,7 @@ function SignupForm({ linkMode = false }) {
           <Form.Item
             style={{ display: registerType === "phone" ? "block" : "none", marginBottom: 24 }}
           >
-            <div style={{ display: "flex", gap: 8 }}>
+            <div className="neu-phone-row">
               <Form.Item name="countryCode" noStyle>
                 <NeuSelect fullWidth={false} style={{ width: 110 }} optionLabelProp="label">
                   {COUNTRIES.map((c) => (
@@ -113,21 +113,20 @@ function SignupForm({ linkMode = false }) {
                   ))}
                 </NeuSelect>
               </Form.Item>
-              <div style={{ flex: 1 }}>
-                <Form.Item
-                  name="phoneNumber"
-                  noStyle
-                  rules={registerType === "phone" ? [
-                    { required: true, message: t("phoneRequired") },
-                    { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
-                  ] : []}
-                >
-                  <NeuInput
-                    placeholder={t("phoneNumber")}
-                    autoComplete="tel-national"
-                  />
-                </Form.Item>
-              </div>
+              <Form.Item
+                name="phoneNumber"
+                noStyle
+                rules={registerType === "phone" ? [
+                  { required: true, message: t("phoneRequired") },
+                  { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
+                ] : []}
+              >
+                <NeuInput
+                  fullWidth
+                  placeholder={t("phoneNumber")}
+                  autoComplete="tel-national"
+                />
+              </Form.Item>
             </div>
           </Form.Item>
 
@@ -141,6 +140,27 @@ function SignupForm({ linkMode = false }) {
             <NeuInput.Password
               prefix={<LockOutlined />}
               placeholder={t("password")}
+              autoComplete="new-password"
+            />
+          </Form.Item>
+          <Form.Item
+            name="confirmPassword"
+            dependencies={["password"]}
+            rules={[
+              { required: true, message: t("confirmPasswordRequired") },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || getFieldValue("password") === value) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject(new Error(t("passwordMismatch")));
+                },
+              }),
+            ]}
+          >
+            <NeuInput.Password
+              prefix={<LockOutlined />}
+              placeholder={t("confirmPassword")}
               autoComplete="new-password"
             />
           </Form.Item>

@@ -1,7 +1,7 @@
 /* neumorphism/tags.css */
 /* ── TAGS ─────────────────────────────────────────────────── */
 .ant-tag {
-  background: var(--neu-bg);
+  background: transparent;
   border: none;
   border-radius: 0;
   font-size: var(--neu-fs-11);
@@ -15,24 +15,29 @@
 }
 
 .ant-tag-orange {
-  color: var(--neu-warning);
-}
-.ant-tag-green {
-  color: var(--neu-success);
-}
-.ant-tag-red {
-  color: var(--neu-danger);
-}
-.ant-tag-cyan {
-  color: var(--neu-info);
-}
-.ant-tag-blue {
-  color: var(--neu-accent);
-}
-.ant-tag-volcano {
-  color: #c2501a;
-}
-.ant-tag-purple {
-  color: #6d28d9;
+  color: var(--neu-warning-dark);
 }
 
+.ant-tag-green {
+  color: var(--neu-success-dark);
+}
+
+.ant-tag-red {
+  color: var(--neu-danger-dark);
+}
+
+.ant-tag-cyan {
+  color: var(--neu-cyan-dark);
+}
+
+.ant-tag-blue {
+  color: var(--neu-accent-dark);
+}
+
+.ant-tag-volcano {
+  color: var(--neu-volcano-dark);
+}
+
+.ant-tag-purple {
+  color: var(--neu-purple-dark);
+}

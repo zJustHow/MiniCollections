@@ -150,6 +150,28 @@ class VerificationServiceTest {
     }
 
     @Test
+    void sendResetCode_deliversSmsWhenAllowed() {
+        when(redis.hasKey("otp:reset:cooldown:+14155552671")).thenReturn(false);
+        when(redis.opsForValue()).thenReturn(valueOps);
+
+        verificationService.sendResetCode("+14155552671", "PHONE", true);
+
+        verify(valueOps).set(eq("otp:reset:+14155552671"), anyString(), eq(300L), eq(TimeUnit.SECONDS));
+        verify(smsSender).send(eq("+14155552671"), org.mockito.ArgumentMatchers.anyString());
+    }
+
+    @Test
+    void sendResetCode_rejectsUnknownType() {
+        when(redis.hasKey("otp:reset:cooldown:target")).thenReturn(false);
+        when(redis.opsForValue()).thenReturn(valueOps);
+
+        assertThrows(ValidationException.class,
+                () -> verificationService.sendResetCode("target", "FAX", true));
+        verify(emailService, never()).sendCode(anyString(), anyString());
+        verify(smsSender, never()).send(anyString(), anyString());
+    }
+
+    @Test
     void verifyResetCode_acceptsMatchingCodeAndDeletesKey() {
         when(redis.opsForValue()).thenReturn(valueOps);
         when(valueOps.get("otp:reset:alice@example.com")).thenReturn("654321");
@@ -157,5 +179,25 @@ class VerificationServiceTest {
         verificationService.verifyResetCode("alice@example.com", "654321");
 
         verify(redis).delete("otp:reset:alice@example.com");
+    }
+
+    @Test
+    void verifyResetCode_rejectsMismatchedCode() {
+        when(redis.opsForValue()).thenReturn(valueOps);
+        when(valueOps.get("otp:reset:alice@example.com")).thenReturn("654321");
+
+        assertThrows(InvalidCodeException.class,
+                () -> verificationService.verifyResetCode("alice@example.com", "000000"));
+        verify(redis, never()).delete("otp:reset:alice@example.com");
+    }
+
+    @Test
+    void verifyResetCode_rejectsExpiredCode() {
+        when(redis.opsForValue()).thenReturn(valueOps);
+        when(valueOps.get("otp:reset:alice@example.com")).thenReturn(null);
+
+        assertThrows(InvalidCodeException.class,
+                () -> verificationService.verifyResetCode("alice@example.com", "654321"));
+        verify(redis, never()).delete("otp:reset:alice@example.com");
     }
 }

@@ -1,13 +1,10 @@
 import NeuPressableButton from "./components/NeuPressableButton";
 import PageLoader from "./components/PageLoader";
 import RouteSkeleton from "./components/RouteSkeleton";
-import HeaderSlotSkeleton from "./components/HeaderSlotSkeleton";
 import { Layout, Avatar } from "antd";
 import {
-  resolveHeaderSkeletonEndActions,
   usesCustomHeader,
 } from "./utils/routeSkeleton";
-import { resolveRouteHeader } from "./utils/routeHeader";
 import {
   Suspense,
   useState,
@@ -121,16 +118,7 @@ function MainLayoutInner({
   }, [location.pathname]);
 
   const customHeaderRoute = usesCustomHeader(location.pathname);
-  const headerSkeletonEndActions = resolveHeaderSkeletonEndActions(
-    location.pathname,
-    { isAdmin },
-  );
-  const interimHeader =
-    !headerSlot && customHeaderRoute
-      ? resolveRouteHeader({ location, isAdmin })
-      : null;
-  const showDefaultHeaderNav =
-    !customHeaderRoute && !headerSlot && !interimHeader;
+  const showDefaultHeaderNav = !customHeaderRoute && !headerSlot;
 
   const hideProfileButton = customHeaderRoute;
 
@@ -219,12 +207,8 @@ function MainLayoutInner({
         {/* Center slot: custom page header, skeleton, or default nav tabs */}
         {headerSlot ? (
           <div className="header-slot-wrap">{headerSlot}</div>
-        ) : interimHeader ? (
-          <div className="header-slot-wrap">{interimHeader}</div>
         ) : customHeaderRoute ? (
-          <div className="header-slot-wrap">
-            <HeaderSlotSkeleton endActions={headerSkeletonEndActions} />
-          </div>
+          <div className="header-slot-wrap" aria-busy="true" />
         ) : (
           <div className="header-tabs">
             <NeuPressableButton

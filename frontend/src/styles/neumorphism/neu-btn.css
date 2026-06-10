@@ -69,6 +69,27 @@
 .ant-btn.neu-btn.ant-btn-disabled:hover {
   transform: none;
   cursor: not-allowed;
+  opacity: 1;
+}
+
+.ant-btn.neu-btn.ant-btn-default[disabled],
+.ant-btn.neu-btn.ant-btn-default.ant-btn-disabled,
+.ant-btn.neu-btn.ant-btn-default[disabled]:hover,
+.ant-btn.neu-btn.ant-btn-default.ant-btn-disabled:hover {
+  box-shadow: var(--inset-sm);
+  background: var(--neu-bg);
+  color: var(--neu-text-2);
+  border-color: var(--neu-bg);
+}
+
+.ant-btn.neu-btn.ant-btn-primary[disabled],
+.ant-btn.neu-btn.ant-btn-primary.ant-btn-disabled,
+.ant-btn.neu-btn.ant-btn-primary[disabled]:hover,
+.ant-btn.neu-btn.ant-btn-primary.ant-btn-disabled:hover {
+  background: var(--neu-accent-light);
+  color: #fff;
+  border-color: var(--neu-accent-light);
+  box-shadow: var(--inset-accent-sm);
 }
 
 .ant-btn.neu-btn.ant-btn-default:hover:not([disabled]):not(:active):not(
@@ -135,7 +156,10 @@
 .ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous.ant-btn-disabled,
 .ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous[disabled]:hover,
 .ant-btn.neu-btn.ant-btn-dangerous.ant-btn-color-dangerous.ant-btn-disabled:hover {
-  box-shadow: var(--inset-danger);
+  background: var(--neu-danger-light);
+  color: #fff;
+  border-color: var(--neu-danger-light);
+  box-shadow: var(--inset-danger-sm);
 }
 
 .ant-btn.neu-btn.neu-btn--pagination-current,

@@ -196,6 +196,11 @@ export default function BrandObjectsPage({ isAdmin, authed = true }) {
   }, [brandId]);
 
   useLayoutEffect(() => {
+    if (!brand) {
+      setHeaderSlot(null);
+      return () => setHeaderSlot(null);
+    }
+
     setHeaderSlot(
       <BrandObjectsPageHeader
         brand={brand}

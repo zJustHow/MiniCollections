@@ -196,7 +196,7 @@ export default function ForgotPasswordPage() {
                 marginBottom: 24,
               }}
             >
-              <div style={{ display: "flex", gap: 10 }}>
+              <div className="neu-phone-row">
                 <Form.Item name="countryCode" noStyle>
                   <NeuSelect
                     fullWidth={false}
@@ -224,10 +224,9 @@ export default function ForgotPasswordPage() {
                   }
                 >
                   <NeuInput
-                    fullWidth={false}
+                    fullWidth
                     placeholder={t("phoneNumber")}
                     size="large"
-                    style={{ flex: 1, minWidth: 0 }}
                     autoComplete="tel-national"
                   />
                 </Form.Item>

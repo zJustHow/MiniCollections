@@ -462,7 +462,7 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
               layout="vertical"
             >
               <Form.Item className="profile-form-item-submit">
-                <div className="profile-inline-row">
+                <div className="neu-phone-row">
                   <Form.Item name="countryCode" noStyle>
                     <NeuSelect
                       fullWidth={false}
@@ -475,22 +475,21 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
                       optionLabelProp="value"
                     />
                   </Form.Item>
-                  <div className="profile-inline-grow">
-                    <Form.Item
-                      name="phoneNumber"
-                      noStyle
-                      rules={[
-                        { required: true, message: t("phoneRequired") },
-                        { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
-                      ]}
-                    >
-                      <NeuInput
-                        placeholder={t("phoneNumber")}
-                        disabled={!PHONE_AUTH_ENABLED}
-                        autoComplete="tel-national"
-                      />
-                    </Form.Item>
-                  </div>
+                  <Form.Item
+                    name="phoneNumber"
+                    noStyle
+                    rules={[
+                      { required: true, message: t("phoneRequired") },
+                      { pattern: /^\d{5,15}$/, message: t("phoneInvalid") },
+                    ]}
+                  >
+                    <NeuInput
+                      fullWidth
+                      placeholder={t("phoneNumber")}
+                      disabled={!PHONE_AUTH_ENABLED}
+                      autoComplete="tel-national"
+                    />
+                  </Form.Item>
                 </div>
               </Form.Item>
               <Form.Item className="profile-form-item-none">
@@ -584,6 +583,8 @@ export default function ProfilePage({ profile, onProfileChange, onLogout }) {
             )}
             <ConfirmDeleteButton
               variant="neu"
+              className="profile-btn-full profile-delete-account-btn"
+              icon={<span className="confirm-delete-label">{t("deleteAccount")}</span>}
               onConfirm={handleDeleteAccount}
               confirmLabel={t("confirmDeleteAccount")}
               deleteLabel={t("deleteAccount")}

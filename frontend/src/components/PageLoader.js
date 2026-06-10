@@ -4,6 +4,7 @@ import AuthPageSkeleton from "./AuthPageSkeleton";
 import ProfilePageSkeleton from "./ProfilePageSkeleton";
 import ObjectDetailPageSkeleton from "./ObjectDetailPageSkeleton";
 const FeedbackPageSkeleton = lazy(() => import("./FeedbackPageSkeleton"));
+const StatsPageSkeleton = lazy(() => import("./StatsPageSkeleton"));
 const AdminLayoutSkeleton = lazy(() => import("./AdminLayoutSkeleton"));
 const AdminTableSkeleton = lazy(() => import("./AdminTableSkeleton"));
 const NeuCardGridSkeleton = lazy(() => import("./NeuCardGridSkeleton"));
@@ -26,7 +27,11 @@ export default function PageLoader({ variant = "splash" }) {
   }
 
   if (variant === "stats") {
-    return <SplashLoader />;
+    return (
+      <LazySkeleton>
+        <StatsPageSkeleton />
+      </LazySkeleton>
+    );
   }
 
   if (variant === "feedback") {
@@ -62,7 +67,7 @@ export default function PageLoader({ variant = "splash" }) {
   if (variant === "brands" || variant === "groups") {
     return (
       <LazySkeleton>
-        <NeuCardGridSkeleton />
+        <NeuCardGridSkeleton reserveSearchRow />
       </LazySkeleton>
     );
   }
@@ -70,7 +75,7 @@ export default function PageLoader({ variant = "splash" }) {
   if (variant === "brandObjects" || variant === "groupObjects") {
     return (
       <LazySkeleton>
-        <NeuCardGridSkeleton variant="object" />
+        <NeuCardGridSkeleton variant="object" reserveSearchRow />
       </LazySkeleton>
     );
   }

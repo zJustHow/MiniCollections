@@ -1,6 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import ListPagination from "./ListPagination";
+import { scrollAppToTop } from "../utils/scroll";
+
+vi.mock("../utils/scroll", () => ({
+  scrollAppToTop: vi.fn(),
+}));
 
 vi.mock("../LocaleContext", () => ({
   useLocale: () => ({ t: (key) => key }),
@@ -35,6 +40,7 @@ describe("ListPagination", () => {
     expect(screen.getByRole("button", { name: "3" })).toBeInTheDocument();
 
     await userEvent.click(screen.getByLabelText("nextPage"));
+    expect(scrollAppToTop).toHaveBeenCalled();
     expect(onPageChange).toHaveBeenCalledWith(2);
   });
 

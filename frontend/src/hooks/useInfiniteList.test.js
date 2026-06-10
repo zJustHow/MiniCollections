@@ -171,4 +171,51 @@ describe("useInfiniteList", () => {
 
     expect(renderCount).toBeLessThan(10);
   });
+
+  test("refresh reloads first page", async () => {
+    const fetchPage = vi.fn(async ({ page }) => ({
+      content: page === 0 ? [{ id: 1 }] : [{ id: 2 }],
+      total_elements: 2,
+    }));
+
+    const { result } = renderHook(() =>
+      useInfiniteList(fetchPage, { resetKey: "list", enabled: true, pageSize: 1 }),
+    );
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+
+    await act(async () => {
+      await result.current.loadMore();
+    });
+    await waitFor(() => expect(result.current.items).toHaveLength(2));
+
+    fetchPage.mockClear();
+
+    await act(async () => {
+      await result.current.refresh();
+    });
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.items).toEqual([{ id: 1 }]);
+    expect(fetchPage).toHaveBeenCalledWith({ page: 0, size: 1 });
+  });
+
+  test("resetKey change reloads list", async () => {
+    const fetchPage = vi.fn(async () => ({
+      content: [{ id: 1 }],
+      total_elements: 1,
+    }));
+
+    const { rerender } = renderHook(
+      ({ resetKey }) =>
+        useInfiniteList(fetchPage, { resetKey, enabled: true }),
+      { initialProps: { resetKey: "list-a" } },
+    );
+
+    await waitFor(() => expect(fetchPage).toHaveBeenCalledTimes(1));
+
+    rerender({ resetKey: "list-b" });
+
+    await waitFor(() => expect(fetchPage).toHaveBeenCalledTimes(2));
+  });
 });

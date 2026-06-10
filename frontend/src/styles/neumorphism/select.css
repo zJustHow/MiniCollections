@@ -129,7 +129,14 @@
 }
 
 .ant-select-dropdown.neu-select-dropdown
-  .ant-select-item.neu-pressable-btn.ant-select-item-option-disabled,
+  .ant-select-item.neu-pressable-btn.ant-select-item-option-disabled {
+  opacity: 1;
+  cursor: not-allowed;
+  background-color: transparent !important;
+  color: var(--neu-text-2) !important;
+  box-shadow: var(--inset) !important;
+}
+
 .ant-select-dropdown.neu-select-dropdown
   .ant-select-item-option.ant-select-item-option-disabled {
   opacity: 0.65;

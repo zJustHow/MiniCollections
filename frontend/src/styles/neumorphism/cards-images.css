@@ -123,44 +123,37 @@
   line-height: 20px;
   letter-spacing: 0.2px;
   white-space: nowrap;
-  color: #fff;
-  background: var(--neu-tag-bg, var(--neu-text-2));
-  box-shadow: var(--neu-tag-inset, var(--inset-sm));
+  color: var(--neu-tag-color, var(--neu-text-2));
+  background: transparent;
+  box-shadow: var(--inset);
 }
 
 .neu-tag--blue {
-  --neu-tag-bg: var(--neu-accent-light);
-  --neu-tag-inset: var(--inset-accent-sm);
+  --neu-tag-color: var(--neu-accent-dark);
 }
 
 .neu-tag--volcano {
-  --neu-tag-bg: var(--neu-volcano);
-  --neu-tag-inset: var(--inset-volcano-sm);
+  --neu-tag-color: var(--neu-volcano-dark);
 }
 
 .neu-tag--purple {
-  --neu-tag-bg: var(--neu-purple);
-  --neu-tag-inset: var(--inset-purple-sm);
+  --neu-tag-color: var(--neu-purple-dark);
 }
 
 .neu-tag--orange {
-  --neu-tag-bg: var(--neu-warning);
-  --neu-tag-inset: var(--inset-warning-sm);
+  --neu-tag-color: var(--neu-warning-dark);
 }
 
 .neu-tag--green {
-  --neu-tag-bg: var(--neu-success);
-  --neu-tag-inset: var(--inset-success-sm);
+  --neu-tag-color: var(--neu-success-dark);
 }
 
 .neu-tag--red {
-  --neu-tag-bg: var(--neu-danger-light);
-  --neu-tag-inset: var(--inset-danger-sm);
+  --neu-tag-color: var(--neu-danger-dark);
 }
 
 .neu-tag--cyan {
-  --neu-tag-bg: var(--neu-cyan);
-  --neu-tag-inset: var(--inset-cyan-sm);
+  --neu-tag-color: var(--neu-cyan-dark);
 }
 
 .neu-panel-body {

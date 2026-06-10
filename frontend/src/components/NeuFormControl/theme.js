@@ -4,6 +4,7 @@ const neuFieldBorder = {
   colorBorder: "#fcfbf8",
   hoverBorderColor: "#fcfbf8",
   activeBorderColor: "#fcfbf8",
+  colorTextDisabled: "#44476a",
 };
 
 /** Merged once in LocaleContext ConfigProvider — do not wrap each Neu* separately */
@@ -26,7 +27,6 @@ export const neuFormControlComponents = {
     colorBgElevated: "#fcfbf8",
     colorText: "#44476A",
     colorTextHeading: "#2a354f",
-    colorTextDisabled: "#66799e",
     colorIcon: "#66799e",
     colorIconHover: "#5592cc",
     colorPrimary: "#6aa8dc",

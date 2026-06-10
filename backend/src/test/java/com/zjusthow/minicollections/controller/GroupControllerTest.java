@@ -25,10 +25,14 @@ import org.springframework.security.web.method.annotation.AuthenticationPrincipa
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -48,7 +52,10 @@ class GroupControllerTest {
 
     @BeforeEach
     void setUp() {
+        LocalValidatorFactoryBean validator = new LocalValidatorFactoryBean();
+        validator.afterPropertiesSet();
         mockMvc = MockMvcBuilders.standaloneSetup(new GroupController(groupService))
+                .setValidator(validator)
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter())
                 .build();
@@ -252,6 +259,50 @@ class GroupControllerTest {
                 .andExpect(status().isNoContent());
 
         verify(groupService).reorderUserObjects(5L, 2L, List.of(8L, 10L));
+    }
+
+    @Test
+    void reorderGroups_rejectsEmptyOrderedIds() throws Exception {
+        mockMvc.perform(put("/groups/reorder")
+                        .with(authenticatedUser("5"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ordered_ids\": []}"))
+                .andExpect(status().isBadRequest());
+
+        verify(groupService, never()).reorderGroups(anyLong(), anyList());
+    }
+
+    @Test
+    void reorderUserObjects_rejectsEmptyOrderedIds() throws Exception {
+        mockMvc.perform(put("/groups/2/objects/reorder")
+                        .with(authenticatedUser("5"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ordered_ids\": []}"))
+                .andExpect(status().isBadRequest());
+
+        verify(groupService, never()).reorderUserObjects(anyLong(), anyLong(), anyList());
+    }
+
+    @Test
+    void reorderGroups_rejectsMissingOrderedIds() throws Exception {
+        mockMvc.perform(put("/groups/reorder")
+                        .with(authenticatedUser("5"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+
+        verify(groupService, never()).reorderGroups(anyLong(), anyList());
+    }
+
+    @Test
+    void reorderUserObjects_rejectsMissingOrderedIds() throws Exception {
+        mockMvc.perform(put("/groups/2/objects/reorder")
+                        .with(authenticatedUser("5"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isBadRequest());
+
+        verify(groupService, never()).reorderUserObjects(anyLong(), anyLong(), anyList());
     }
 
     private static RequestPostProcessor authenticatedUser(String userId) {

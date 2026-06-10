@@ -132,4 +132,77 @@ describe("useOrderableInfiniteBrowse", () => {
     expect(result.current.orderedIds).toEqual([1, 2]);
     expect(infiniteState.reorderLocalItems).toHaveBeenLastCalledWith([1, 2]);
   });
+
+  test("refreshAll reloads order and list", async () => {
+    const fetchOrder = vi.fn(async () => ({ ids: [1, 2] }));
+
+    const { result } = renderHook(() =>
+      useOrderableInfiniteBrowse({
+        entityKey: "groups",
+        enabled: true,
+        fetchPage: vi.fn(),
+        fetchOrder,
+        reorder: vi.fn(),
+        pageSize: 48,
+      }),
+    );
+
+    await waitFor(() => expect(result.current.orderLoading).toBe(false));
+
+    await act(async () => {
+      await result.current.refreshAll();
+    });
+
+    expect(fetchOrder).toHaveBeenCalledTimes(2);
+    expect(infiniteState.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  test("falls back to item ids when fetchOrder fails", async () => {
+    const fetchOrder = vi.fn(async () => {
+      throw new Error("order failed");
+    });
+
+    const { result } = renderHook(() =>
+      useOrderableInfiniteBrowse({
+        entityKey: "groups",
+        enabled: true,
+        fetchPage: vi.fn(),
+        fetchOrder,
+        reorder: vi.fn(),
+        pageSize: 48,
+      }),
+    );
+
+    await waitFor(() => expect(result.current.orderLoading).toBe(false));
+    expect(fetchOrder).toHaveBeenCalled();
+    expect(infiniteState.reorderLocalItems).not.toHaveBeenCalled();
+    expect(result.current.orderedIds).toEqual([1, 2]);
+    expect(result.current.displayItems).toEqual(infiniteState.items);
+  });
+
+  test("disables sorting when browse is disabled", async () => {
+    const fetchOrder = vi.fn(async () => ({ ids: [2, 1] }));
+
+    const { result, rerender } = renderHook(
+      ({ enabled }) =>
+        useOrderableInfiniteBrowse({
+          entityKey: "groups",
+          enabled,
+          fetchPage: vi.fn(),
+          fetchOrder,
+          reorder: vi.fn(),
+          pageSize: 48,
+        }),
+      { initialProps: { enabled: true } },
+    );
+
+    await waitFor(() => expect(result.current.orderLoading).toBe(false));
+    expect(result.current.sortEnabled).toBe(true);
+
+    rerender({ enabled: false });
+
+    await waitFor(() => {
+      expect(result.current.sortEnabled).toBe(false);
+    });
+  });
 });

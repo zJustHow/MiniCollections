@@ -168,6 +168,7 @@ export default function useCombinedBrandSearch(fetchPage, options = {}) {
   const onPageChange = useCallback(
     (nextPageOneBased) => {
       const targetPage = nextPageOneBased - 1;
+      scrollAppToTop();
       pendingScrollRef.current = true;
       setPageParam(targetPage);
       loadPage(targetPage);

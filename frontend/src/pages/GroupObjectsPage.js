@@ -146,6 +146,11 @@ export default function GroupObjectsPage() {
   }, [groupId]);
 
   useLayoutEffect(() => {
+    if (!group) {
+      setHeaderSlot(null);
+      return () => setHeaderSlot(null);
+    }
+
     setHeaderSlot(
       <GroupObjectsPageHeader
         group={group}
@@ -155,7 +160,7 @@ export default function GroupObjectsPage() {
       />,
     );
     return () => setHeaderSlot(null);
-  }, [group]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [group, location.pathname, setHeaderSlot]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleUpdateGroup = async () => {
     if (!group) return;

@@ -272,14 +272,14 @@
   background: transparent;
   border: none;
   border-radius: 0;
-  box-shadow: none;
-  color: var(--neu-text);
+  box-shadow: var(--inset);
+  color: var(--neu-text-2);
   transition: var(--neu-btn-transition);
 }
 
 .ant-picker-ranges .ant-picker-preset > .ant-tag:hover {
-  color: var(--neu-dark);
-  background: var(--neu-item-hover-bg);
+  color: var(--neu-text-2);
+  background: transparent;
   box-shadow: var(--inset);
 }
 
