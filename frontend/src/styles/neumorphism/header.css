@@ -32,18 +32,29 @@
 
 .neu-pressable-btn:disabled {
   cursor: not-allowed;
+  opacity: 1;
+}
+
+.neu-pressable-btn:disabled:not(.neu-pressable-btn--danger) {
+  color: var(--neu-text-2);
+  box-shadow: var(--inset-sm);
+}
+
+.neu-pressable-btn--danger:disabled {
+  color: var(--neu-danger-dark);
+  box-shadow: var(--inset-sm);
 }
 
 .neu-pressable-btn:hover:not(:disabled):not(.active):not(:active):not(
     .neu-pressable-btn--danger
   ) {
   color: var(--neu-text-2);
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
 }
 
 .neu-pressable-btn--danger:hover:not(:disabled):not(.active):not(:active) {
   color: var(--neu-danger-dark);
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
 }
 
 .neu-pressable-btn:focus {

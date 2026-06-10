@@ -95,7 +95,7 @@
   ):not(.ant-select-item-option-selected):not(:active):not([data-neu-pressed]) {
   background-color: transparent !important;
   color: var(--neu-text-2) !important;
-  box-shadow: var(--inset) !important;
+  box-shadow: var(--inset-sm) !important;
 }
 
 .ant-select-dropdown.neu-select-dropdown
@@ -134,7 +134,7 @@
   cursor: not-allowed;
   background-color: transparent !important;
   color: var(--neu-text-2) !important;
-  box-shadow: var(--inset) !important;
+  box-shadow: var(--inset-sm) !important;
 }
 
 .ant-select-dropdown.neu-select-dropdown

@@ -125,7 +125,7 @@
   white-space: nowrap;
   color: var(--neu-tag-color, var(--neu-text-2));
   background: transparent;
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
 }
 
 .neu-tag--blue {

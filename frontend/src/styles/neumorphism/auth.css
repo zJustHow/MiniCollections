@@ -27,7 +27,7 @@
 .neu-auth-error {
   color: var(--neu-danger-dark);
   background: transparent;
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
   border: none;
   border-radius: 0;
   padding: 8px 14px;

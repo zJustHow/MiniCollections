@@ -2,6 +2,8 @@
 /* ── CARD COVER nameplate ─────────────────────────────────── */
 .neu-nameplate {
   --neu-nameplate-subtitle-slot: calc(var(--neu-fs-11) * 1.25 + 2px);
+  --neu-nameplate-title-line-height: 1.35;
+  --neu-nameplate-title-lines: 2;
   padding: 6px 24px 12px;
   min-width: 0;
   background: transparent;
@@ -13,6 +15,7 @@
 .neu-nameplate--catalog {
   display: flex;
   flex-direction: column;
+  --neu-nameplate-title-lines: 1;
 }
 
 .neu-nameplate--catalog::before {
@@ -29,6 +32,7 @@
   text-overflow: ellipsis;
   -webkit-line-clamp: unset;
   -webkit-box-orient: unset;
+  min-height: calc(var(--neu-nameplate-title-line-height) * 1em);
 }
 
 .neu-nameplate-subtitle {
@@ -48,10 +52,13 @@
   font-size: var(--neu-fs-15);
   font-weight: 400;
   letter-spacing: 0.3px;
-  line-height: 1.35;
+  line-height: var(--neu-nameplate-title-line-height);
+  min-height: calc(
+    var(--neu-nameplate-title-lines) * var(--neu-nameplate-title-line-height) * 1em
+  );
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: var(--neu-nameplate-title-lines);
   overflow: hidden;
 }
 

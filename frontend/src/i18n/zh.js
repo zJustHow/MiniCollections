@@ -84,7 +84,8 @@ export default {
   languageUpdated: "语言已更新",
   deleteAccount: "注销账号",
   deleteAccountPassword: "输入密码以确认注销",
-  deleteAccountWarning: "将永久删除你的账号、收藏和上传的图片，此操作不可恢复。",
+  deleteAccountWarning:
+    "将永久删除你的账号、收藏和上传的图片，此操作不可恢复。",
   confirmDeleteAccount: "确认注销",
   deleteAccountSuccess: "账号已注销",
   deleteAccountFailed: "注销账号失败",

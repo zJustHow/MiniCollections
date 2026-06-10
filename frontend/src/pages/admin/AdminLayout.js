@@ -173,13 +173,7 @@ export default function AdminLayout() {
                   {icon}
                   {label}
                 </span>
-                <span
-                  style={{
-                    color: "var(--neu-text-2)",
-                    fontSize: neuRem(13),
-                    fontVariantNumeric: "tabular-nums",
-                  }}
-                >
+                <span className="neu-admin-submission-count">
                   {statusCounts[key]}
                 </span>
               </NeuPressableButton>

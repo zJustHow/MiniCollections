@@ -272,7 +272,7 @@
   background: transparent;
   border: none;
   border-radius: 0;
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
   color: var(--neu-text-2);
   transition: var(--neu-btn-transition);
 }
@@ -280,6 +280,6 @@
 .ant-picker-ranges .ant-picker-preset > .ant-tag:hover {
   color: var(--neu-text-2);
   background: transparent;
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
 }
 

@@ -10,7 +10,7 @@
   text-transform: uppercase;
   padding: 2px 8px;
   line-height: 20px;
-  box-shadow: var(--inset);
+  box-shadow: var(--inset-sm);
   color: var(--neu-text-2);
 }
 

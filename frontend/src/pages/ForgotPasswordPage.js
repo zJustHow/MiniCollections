@@ -151,8 +151,6 @@ export default function ForgotPasswordPage() {
                 flex: 1,
                 padding: "8px 0",
                 fontSize: neuRem(13),
-                opacity: PHONE_AUTH_ENABLED ? 1 : 0.6,
-                cursor: PHONE_AUTH_ENABLED ? "pointer" : "not-allowed",
               }}
               onClick={() => PHONE_AUTH_ENABLED && handleTypeChange("phone")}
             >

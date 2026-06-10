@@ -68,7 +68,11 @@
 
 .neu-card-skeleton-line--title {
   width: 72%;
-  height: 1.35em;
+  height: calc(2 * 1.35em);
+}
+
+.neu-nameplate--catalog .neu-card-skeleton-line--title {
+  height: calc(1.35 * 1em);
 }
 
 .neu-page-loader {
@@ -327,6 +331,25 @@
   height: 1px;
   background: rgba(184, 182, 176, 0.25);
   margin: 4px 8px;
+}
+
+.neu-panel-tab-btn .neu-admin-submission-count {
+  flex-shrink: 0;
+  color: var(--neu-text-2);
+  font-size: var(--neu-fs-13);
+  font-variant-numeric: tabular-nums;
+  transition: var(--neu-btn-transition);
+}
+
+.neu-panel-tab-btn:hover:not(:disabled):not(.active):not(:active)
+  .neu-admin-submission-count {
+  opacity: 0.45;
+}
+
+.neu-panel-tab-btn:active:not(:disabled) .neu-admin-submission-count,
+.neu-panel-tab-btn.active .neu-admin-submission-count {
+  color: #fff;
+  opacity: 1;
 }
 
 .neu-admin-layout-skeleton-content {

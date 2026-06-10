@@ -331,7 +331,7 @@ export default {
   rejectionReason: "Rejection Reason",
   failedToLoadMySubmissions: "Failed to load your submissions",
   deleteFeedbackTitle: "Delete feedback",
-  deleteFeedbackContent: 'Delete this feedback? This cannot be undone.',
+  deleteFeedbackContent: "Delete this feedback? This cannot be undone.",
   feedbackDeleted: "Feedback deleted",
   failedToDeleteFeedback: "Failed to delete feedback",
 
