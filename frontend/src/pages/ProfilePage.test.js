@@ -72,10 +72,12 @@ vi.mock("../components/ConfirmDeleteButton", () => ({
   ),
 }));
 
-vi.mock("../components/NeuFormControl", () => {
+vi.mock("../components/NeuFormControl", async (importOriginal) => {
+  const actual = await importOriginal();
   const NeuInput = (props) => <input {...props} />;
   NeuInput.Password = (props) => <input type="password" {...props} />;
   return {
+    ...actual,
     NeuInput,
     NeuSelect: ({ children, ...props }) => <select {...props}>{children}</select>,
   };
