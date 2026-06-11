@@ -21,7 +21,7 @@ function SortableNeuCardOverlay({
         .filter(Boolean)
         .join(" ")}
     >
-      <NeuCard {...cardProps} />
+      <NeuCard {...cardProps} hoverable={false} />
     </div>
   );
 }

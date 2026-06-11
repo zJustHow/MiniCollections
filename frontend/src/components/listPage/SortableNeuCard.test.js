@@ -13,14 +13,16 @@ vi.mock("@dnd-kit/sortable", () => ({
 }));
 
 vi.mock("../NeuCard", () => ({
-  default: ({ name, sortEnabled, id }) => {
+  default: ({ name, sortEnabled, id, hoverable }) => {
     if (sortEnabled !== undefined) {
       throw new Error("sortEnabled leaked to NeuCard");
     }
     if (id !== undefined) {
       throw new Error("id leaked to NeuCard");
     }
-    return <span>{name}</span>;
+    return (
+      <span data-hoverable={hoverable === false ? "false" : "true"}>{name}</span>
+    );
   },
 }));
 
@@ -42,7 +44,7 @@ describe("SortableNeuCard", () => {
 
     expect(container.querySelector(".neu-sortable-card-wrap--overlay")).toBeTruthy();
     expect(screen.queryByTestId("sortable-attrs")).not.toBeInTheDocument();
-    expect(screen.getByText("Kyosho")).toBeInTheDocument();
+    expect(screen.getByText("Kyosho")).toHaveAttribute("data-hoverable", "false");
   });
 
   test("does not mark wrapper as sortable when sorting is disabled", () => {

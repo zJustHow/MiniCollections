@@ -364,11 +364,20 @@
   z-index: 3;
   cursor: grabbing;
   touch-action: none;
-  box-shadow: var(--neu-card-shadow-hover);
 }
 
 .neu-sortable-card-wrap--overlay .neu-card {
   width: 100%;
+  box-shadow: var(--raised-xs);
+  transform: none;
+}
+
+.neu-sortable-card-wrap--overlay button.neu-card.neu-card--tile:hover:not(:disabled),
+.neu-sortable-card-wrap--overlay div.neu-card.neu-card--tile:hover,
+.neu-sortable-card-wrap--overlay button.neu-card.neu-card--tile:active:not(:disabled),
+.neu-sortable-card-wrap--overlay div.neu-card.neu-card--tile:active {
+  box-shadow: var(--raised-xs);
+  transform: none;
 }
 
 .neu-infinite-scroll-sentinel {
