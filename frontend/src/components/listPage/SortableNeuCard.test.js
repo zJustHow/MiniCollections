@@ -13,7 +13,15 @@ vi.mock("@dnd-kit/sortable", () => ({
 }));
 
 vi.mock("../NeuCard", () => ({
-  default: ({ name }) => <span>{name}</span>,
+  default: ({ name, sortEnabled, id }) => {
+    if (sortEnabled !== undefined) {
+      throw new Error("sortEnabled leaked to NeuCard");
+    }
+    if (id !== undefined) {
+      throw new Error("id leaked to NeuCard");
+    }
+    return <span>{name}</span>;
+  },
 }));
 
 describe("SortableNeuCard", () => {

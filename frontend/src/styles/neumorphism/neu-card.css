@@ -191,4 +191,3 @@ button.neu-card.neu-card--avatar:active:not(:disabled),
   transform: scale(var(--neu-card-active-scale));
   box-shadow: var(--neu-card-shadow-active);
 }
-

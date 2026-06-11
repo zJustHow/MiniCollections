@@ -27,7 +27,8 @@ export function parsePhone(phone) {
   if (!phone) return { countryCode: "+86", phoneNumber: "" };
   const sorted = [...COUNTRIES].sort((a, b) => b.code.length - a.code.length);
   for (const { code } of sorted) {
-    if (phone.startsWith(code)) return { countryCode: code, phoneNumber: phone.slice(code.length) };
+    if (phone.startsWith(code))
+      return { countryCode: code, phoneNumber: phone.slice(code.length) };
   }
   return { countryCode: "+86", phoneNumber: phone };
 }

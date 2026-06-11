@@ -2,8 +2,9 @@ import { parsePhone, resolveMediaUrl } from "./constants";
 
 describe("resolveMediaUrl", () => {
   test("appends cache-bust query for minio media urls", () => {
-    expect(resolveMediaUrl("http://localhost:9000/minicollections-media/foo.png"))
-      .toBe("http://localhost:9000/minicollections-media/foo.png?v=2");
+    expect(
+      resolveMediaUrl("http://localhost:9000/minicollections-media/foo.png"),
+    ).toBe("http://localhost:9000/minicollections-media/foo.png?v=2");
   });
 
   test("leaves other urls unchanged", () => {

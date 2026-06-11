@@ -328,12 +328,12 @@
 
 .neu-sortable-card-wrap--sortable {
   cursor: grab;
-  touch-action: none;
 }
 
 .neu-sortable-card-wrap--sortable:active,
 .neu-sortable-card-wrap--dragging {
   cursor: grabbing;
+  touch-action: none;
 }
 
 .neu-sortable-card-wrap--dragging {

@@ -3,7 +3,13 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import NeuCard from "../NeuCard";
 
-function SortableNeuCardOverlay({ className = "", ...cardProps }) {
+function SortableNeuCardOverlay({
+  className = "",
+  sortEnabled,
+  id,
+  disabled,
+  ...cardProps
+}) {
   return (
     <div
       className={[
@@ -45,7 +51,7 @@ function SortableNeuCardSortable({
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0 : undefined,
-    touchAction: isSortable ? "none" : undefined,
+    touchAction: isDragging ? "none" : undefined,
   };
 
   return (

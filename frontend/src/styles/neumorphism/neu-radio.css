@@ -45,7 +45,10 @@
   transform: scale(var(--neu-btn-scale-hover));
 }
 
-.neu-radio .ant-radio-checked .ant-radio-input:focus-visible + .ant-radio-inner {
+.neu-radio
+  .ant-radio-checked
+  .ant-radio-input:focus-visible
+  + .ant-radio-inner {
   box-shadow: var(--inset-accent);
 }
 
