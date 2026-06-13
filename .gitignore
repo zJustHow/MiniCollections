@@ -24,6 +24,7 @@ scripts/
 .env
 .env.*
 !.env.example
+deploy/aws/rds.env
 deploy/aws/app-secrets.json
 
 # Python virtual environments

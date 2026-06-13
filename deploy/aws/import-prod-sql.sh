@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Import production SQL (S3 URLs) into RDS in the same order as local dev.
+# WARNING: Runs database-init.sql first — drops all tables (users/collections lost).
+# For incremental brand updates on an existing deployment, use import-prod-brands.sh instead.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
