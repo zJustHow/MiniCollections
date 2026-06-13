@@ -1,4 +1,4 @@
--- MODELCOLLECT brand_objects (brand_id=48). 16 products; image_source: https://ig-model.com/
+-- MODELCOLLECT brand_objects (brand_id=48). 15 products; image_source: https://ig-model.com/
 INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_price_cny, release_price_usd, release_date, brand_id, category_id, scale_id) VALUES
 ('1/64 RWB 930 Ducktail Wing Yellow', '1/64 RWB 930 Ducktail Wing 黄色', 'http://localhost:9000/minicollections-media/modelcollect/mc640002a.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 1, 64),
 ('1/64 RWB 930 Ducktail Wing Blue', '1/64 RWB 930 Ducktail Wing 蓝色', 'http://localhost:9000/minicollections-media/modelcollect/mc640002b.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 1, 64),
@@ -15,4 +15,3 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('1/64 RWB 930 Black ※Wheel: Black', '1/64 RWB 930 黑色 ※Wheel: 黑色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003a-2.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 18, 64),
 ('1/64 RWB 930 GT Wing Black', '1/64 RWB 930 GT Wing 黑色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003e.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 1, 64),
 ('1/64 RWB 930 GT Wing Cement Grey', '1/64 RWB 930 GT Wing Cement 灰色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003g-1.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 1, 64),
-('1/64 RWB 930 GT Wing Cement Grey', '1/64 RWB 930 GT Wing Cement 灰色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003g-2.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 1, 64);

@@ -1,4 +1,4 @@
--- BMC brand_objects (brand_id=43). 195 products; image_source: https://modelmatic.uk/ (when image present)
+-- BMC brand_objects (brand_id=43). 193 products; image_source: https://modelmatic.uk/ (when image present)
 INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_price_cny, release_price_usd, release_date, brand_id, series_id, category_id, scale_id) VALUES
 ('1980 Toyota Hilux (Black)', '1980 丰田 Hilux (黑色)', 'http://localhost:9000/minicollections-media/bmc/1980-toyota-hilux-black.jpg', 'https://modelmatic.uk/', NULL, 19.99, NULL, 43, 43001, 1, 64),
 ('1980 Toyota Hilux (Ivory)', '1980 丰田 Hilux (象牙色)', 'http://localhost:9000/minicollections-media/bmc/1980-toyota-hilux-ivory.jpg', 'https://modelmatic.uk/', NULL, 21.99, NULL, 43, 43001, 1, 64),
@@ -29,8 +29,6 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('1996 Toyota Corolla AE100 (Blue)', '1996 丰田 Corolla AE100 (蓝色)', 'http://localhost:9000/minicollections-media/bmc/1996-toyota-corolla-ae100-blue.jpg', 'https://modelmatic.uk/', NULL, 19.99, NULL, 43, 43001, 1, 64),
 ('1996 Toyota Corolla AE100 (Grey)', '1996 丰田 Corolla AE100 (灰色)', 'http://localhost:9000/minicollections-media/bmc/1996-toyota-corolla-ae100-grey.jpg', 'https://modelmatic.uk/', NULL, 19.99, NULL, 43, 43001, 1, 64),
 ('1996 Toyota Corolla AE100 (White)', '1996 丰田 Corolla AE100 (白色)', 'http://localhost:9000/minicollections-media/bmc/1996-toyota-corolla-ae100-white-2.jpg', 'https://modelmatic.uk/', NULL, 19.99, NULL, 43, 43001, 1, 64),
-('1996 Toyota Corolla AE100 (White)', '1996 丰田 Corolla AE100 (白色)', 'http://localhost:9000/minicollections-media/bmc/1996-toyota-corolla-ae100-white-1.jpg', 'https://modelmatic.uk/', NULL, 19.99, NULL, 43, 43001, 1, 64),
-('1996 Toyota Corolla AE100 (White)', '1996 丰田 Corolla AE100 (白色)', 'http://localhost:9000/minicollections-media/bmc/1996-toyota-corolla-ae100-white.jpg', 'https://modelmatic.uk/', NULL, 19.99, NULL, 43, 43001, 1, 64),
 ('1998 Land Rover Discovery 1 with extra wheels (White)', '1998 路虎 Discovery 1 with extra wheels (白色)', 'http://localhost:9000/minicollections-media/bmc/1998-land-rover-discovery-1-with-extra-wheels-white.jpg', 'https://modelmatic.uk/', NULL, 14.99, NULL, 43, 43001, 1, 64),
 ('1998 Suzuki Cappuccino (Black)', '1998 铃木 Cappuccino (黑色)', 'http://localhost:9000/minicollections-media/bmc/1998-suzuki-cappuccino-black.jpg', 'https://modelmatic.uk/', NULL, 19.99, NULL, 43, 43001, 1, 64),
 ('1998 Suzuki Cappuccino (Red)', '1998 铃木 Cappuccino (红色)', 'http://localhost:9000/minicollections-media/bmc/1998-suzuki-cappuccino-red.jpg', 'https://modelmatic.uk/', NULL, 19.99, NULL, 43, 43001, 1, 64),
