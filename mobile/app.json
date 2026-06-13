@@ -1,0 +1,22 @@
+{
+  "expo": {
+    "name": "Mini Collections",
+    "slug": "minicollections",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "backgroundColor": "#fcfbf8"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.minicollections.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#fcfbf8"
+      },
+      "package": "com.minicollections.app"
+    }
+  }
+}

@@ -81,6 +81,9 @@ export default defineConfig({
       include: "**/*.{jsx,js,tsx,ts}",
     }),
   ],
+  resolve: {
+    preserveSymlinks: true,
+  },
   esbuild: {
     loader: "jsx",
     include: /src\/.*\.jsx?$/,

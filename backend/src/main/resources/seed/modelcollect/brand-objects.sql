@@ -14,4 +14,4 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('1/64 RWB 930 Black ※Wheel: Gold', '1/64 RWB 930 黑色 ※Wheel: 金色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003a-1.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 18, 64),
 ('1/64 RWB 930 Black ※Wheel: Black', '1/64 RWB 930 黑色 ※Wheel: 黑色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003a-2.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 18, 64),
 ('1/64 RWB 930 GT Wing Black', '1/64 RWB 930 GT Wing 黑色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003e.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 1, 64),
-('1/64 RWB 930 GT Wing Cement Grey', '1/64 RWB 930 GT Wing Cement 灰色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003g-1.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 1, 64),
+('1/64 RWB 930 GT Wing Cement Grey', '1/64 RWB 930 GT Wing Cement 灰色', 'http://localhost:9000/minicollections-media/modelcollect/mc640003g-1.jpg', 'https://ig-model.com/', NULL, NULL, NULL, 48, 1, 64);

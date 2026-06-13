@@ -116,6 +116,7 @@ if os.environ.get("RDS_PASSWORD") and not secret_arn:
     env.append({"name": "DATABASE_PASSWORD", "value": os.environ["RDS_PASSWORD"]})
 
 import_cmd = r"""
+set -euo pipefail
 apk add --no-cache aws-cli zip >/dev/null
 aws s3 cp s3://${IMPORT_BUCKET}/${IMPORT_KEY} /tmp/bundle.zip --region ${AWS_REGION}
 mkdir -p /tmp/import && cd /tmp/import && unzip -q /tmp/bundle.zip
@@ -134,6 +135,12 @@ while IFS= read -r brand; do
     $PSQL -f "$series"
   fi
   $PSQL -f "$objects"
+  actual=$($PSQL -tAc "SELECT COUNT(*) FROM brand_objects WHERE brand_id = ${brand_id};")
+  echo "Imported ${actual} brand_objects for brand_id=${brand_id}"
+  if [ "${actual}" = "0" ]; then
+    echo "error: no brand_objects imported for ${brand}" >&2
+    exit 1
+  fi
   $PSQL -c "SELECT setval(pg_get_serial_sequence('brand_objects', 'id'), COALESCE((SELECT MAX(id) FROM brand_objects), 1));"
 done < brands.txt
 echo Done.

@@ -1,0 +1,14 @@
+{
+  "name": "@minicollections/hooks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "dependencies": {
+    "@minicollections/api": "0.1.0",
+    "@minicollections/core": "0.1.0"
+  }
+}

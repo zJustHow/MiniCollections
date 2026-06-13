@@ -1,0 +1,17 @@
+{
+  "name": "@minicollections/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.js",
+  "dependencies": {
+    "@minicollections/core": "0.1.0",
+    "@minicollections/i18n": "0.1.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

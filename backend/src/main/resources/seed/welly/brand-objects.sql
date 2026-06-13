@@ -100,7 +100,7 @@ INSERT INTO brand_objects (name_en, name_zh, image_url, image_source, release_pr
 ('1967 Pontiac Firebird 47009S1', '1967 庞蒂亚克 Firebird 47009S1', 'http://localhost:9000/minicollections-media/welly/47009S1.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 45, 1, 34),
 ('2023 Ford Explorer 47011S', '2023 福特 Explorer 47011S', 'http://localhost:9000/minicollections-media/welly/47011S.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 45, 1, 34),
 ('1969 Pontiac GTO 47008S1', '1969 庞蒂亚克 GTO 47008S1', 'http://localhost:9000/minicollections-media/welly/47008S1.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 45, 1, 34),
-('FSO Polonez 1500 MR\'78 43841', 'FSO 波罗涅兹 1500 MR\'78 43841', 'http://localhost:9000/minicollections-media/welly/43841.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 45, 1, 34),
+('FSO Polonez 1500 MR''78 43841', 'FSO 波罗涅兹 1500 MR''78 43841', 'http://localhost:9000/minicollections-media/welly/43841.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 45, 1, 34),
 ('2023 Ford Bronco 43840', '2023 福特 Bronco 43840', 'http://localhost:9000/minicollections-media/welly/43840.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 45, 1, 34),
 ('Mercedes-Benz GLC 43838', '奔驰 GLC 43838', 'http://localhost:9000/minicollections-media/welly/43838.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 45, 1, 34),
 ('2023 Ford Explorer 43837P', '2023 福特 Explorer 43837P', 'http://localhost:9000/minicollections-media/welly/43837P.jpg', 'https://www.wellydiecast.com/', NULL, NULL, NULL, 45, 1, 34),
