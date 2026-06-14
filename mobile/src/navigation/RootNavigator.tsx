@@ -8,6 +8,7 @@ import RegisterScreen from "../screens/RegisterScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import MainTabNavigator from "./MainTabNavigator";
 import type { RootStackParamList } from "./types";
+import { linking } from "./linking";
 import { colors } from "@minicollections/theme";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -24,7 +25,7 @@ export default function RootNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,

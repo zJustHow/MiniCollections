@@ -4,8 +4,10 @@ import { Ionicons } from "@expo/vector-icons";
 import BrandsStackNavigator from "./BrandsStackNavigator";
 import GroupsStackNavigator from "./GroupsStackNavigator";
 import StatsStackNavigator from "./StatsStackNavigator";
+import FeedbackStackNavigator from "./FeedbackStackNavigator";
 import ProfileStackNavigator from "./ProfileStackNavigator";
 import type { MainTabParamList, RootStackParamList } from "./types";
+import { openLogin } from "./openLogin";
 import { colors } from "@minicollections/theme";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
@@ -53,7 +55,7 @@ export default function MainTabNavigator() {
           tabPress: (event) => {
             if (!authed) {
               event.preventDefault();
-              navigation.getParent()?.navigate("Login");
+              openLogin(navigation.getParent(), { returnTab: "GroupsTab" });
             }
           },
         })}
@@ -71,7 +73,7 @@ export default function MainTabNavigator() {
           tabPress: (event) => {
             if (!authed) {
               event.preventDefault();
-              navigation.getParent()?.navigate("Login");
+              openLogin(navigation.getParent(), { returnTab: "StatsTab" });
             }
           },
         })}
@@ -79,6 +81,24 @@ export default function MainTabNavigator() {
           title: t("stats"),
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="bar-chart-outline" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="FeedbackTab"
+        component={FeedbackStackNavigator}
+        listeners={({ navigation }) => ({
+          tabPress: (event) => {
+            if (!authed) {
+              event.preventDefault();
+              openLogin(navigation.getParent(), { returnTab: "FeedbackTab" });
+            }
+          },
+        })}
+        options={{
+          title: t("feedback"),
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="chatbubble-ellipses-outline" size={size} color={color} />
           ),
         }}
       />

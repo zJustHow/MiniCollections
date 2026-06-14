@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { CommonActions } from "@react-navigation/native";
 import { formatPhoneIdentifier } from "@minicollections/core";
 import AuthTypeToggle, { type AuthChannel } from "../components/AuthTypeToggle";
 import PhoneField from "../components/PhoneField";
@@ -24,9 +25,10 @@ import { colors, spacing, typography } from "@minicollections/theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
-export default function LoginScreen({ navigation }: Props) {
+export default function LoginScreen({ navigation, route }: Props) {
   const { login } = useAuth();
   const { t } = useLocale();
+  const returnTab = route.params?.returnTab;
   const [authType, setAuthType] = useState<AuthChannel>("email");
   const [email, setEmail] = useState("");
   const [countryCode, setCountryCode] = useState("+86");
@@ -56,13 +58,22 @@ export default function LoginScreen({ navigation }: Props) {
         password,
         loginType: authType,
       });
-      navigation.goBack();
+      if (returnTab) {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: "MainTabs", params: { screen: returnTab } }],
+          }),
+        );
+      } else {
+        navigation.goBack();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("passwordRequired"));
     } finally {
       setLoading(false);
     }
-  }, [authType, countryCode, email, login, navigation, password, phoneNumber, t]);
+  }, [authType, countryCode, email, login, navigation, password, phoneNumber, returnTab, t]);
 
   return (
     <SafeAreaView style={styles.safe}>

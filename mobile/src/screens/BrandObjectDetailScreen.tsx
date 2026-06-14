@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,13 +12,20 @@ import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CommonActions } from "@react-navigation/native";
-import { getBrandObjectById, resolveMediaUrl } from "@minicollections/api";
+import { getBrandObjectById, recordModelView, resolveMediaUrl } from "@minicollections/api";
+import { formatReleasePrice, formatViewCount } from "@minicollections/core";
 import ScreenHeader from "../components/ScreenHeader";
 import NeuButton from "../components/neu/NeuButton";
 import AddToGroupSheet from "../components/AddToGroupSheet";
+import ImageViewerModal from "../components/ImageViewerModal";
 import { useLocale } from "../providers/LocaleProvider";
 import { useAuth } from "../providers/AuthProvider";
 import type { BrandsStackParamList } from "../navigation/types";
+import { pickDetailField, pickDetailText } from "../utils/detailFields";
+import { trackModelViewOnce } from "../utils/viewTracking";
+import { catalogObjectDeepLink } from "../utils/deepLinks";
+import { shareModelLink } from "../utils/shareModel";
+import { openLogin } from "../navigation/openLogin";
 import { colors, spacing } from "@minicollections/theme";
 
 type Props = NativeStackScreenProps<BrandsStackParamList, "BrandObjectDetail">;
@@ -29,10 +37,21 @@ type BrandObjectDetail = {
   description?: string | null;
   description_en?: string | null;
   description_zh?: string | null;
-  scale?: { name?: string };
-  series?: { name?: string };
+  brand?: string | { name?: string | null };
+  category?: string | { name?: string | null };
+  scale?: string | { name?: string | null };
+  series?: string | { name?: string | null };
   release_price?: string | number | null;
+  release_price_cny?: number | string | null;
+  release_price_usd?: number | string | null;
+  releasePriceCny?: number | string | null;
+  releasePriceUsd?: number | string | null;
+  release_date?: string | null;
+  releaseDate?: string | null;
+  image_source?: string | null;
+  imageSource?: string | null;
   view_count?: number;
+  viewCount?: number;
 };
 
 function pickDescription(obj: BrandObjectDetail | null, locale: string) {
@@ -48,13 +67,14 @@ function pickDescription(obj: BrandObjectDetail | null, locale: string) {
 }
 
 export default function BrandObjectDetailScreen({ route, navigation }: Props) {
-  const { objectId, objectName } = route.params;
+  const { brandId, brandName, objectId, objectName } = route.params;
   const { t, locale } = useLocale();
-  const { authed } = useAuth();
+  const { authed, isAdmin } = useAuth();
   const [detail, setDetail] = useState<BrandObjectDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -73,9 +93,29 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
     void load();
   }, [load]);
 
+  useEffect(() => {
+    trackModelViewOnce(objectId, isAdmin, recordModelView);
+  }, [objectId, isAdmin]);
+
   const title = detail?.name ?? objectName ?? "…";
   const imageUri = resolveMediaUrl(detail?.image_url ?? undefined);
   const description = pickDescription(detail, locale);
+  const viewCountLabel = formatViewCount(
+    detail?.view_count ?? detail?.viewCount,
+    t,
+  );
+  const brandLabel =
+    pickDetailField(detail?.brand) ?? pickDetailText(brandName) ?? null;
+  const seriesLabel = pickDetailField(detail?.series);
+  const categoryLabel = pickDetailField(detail?.category);
+  const scaleLabel = pickDetailField(detail?.scale);
+  const releasePriceLabel = detail ? formatReleasePrice(detail) : null;
+  const releaseDateLabel = pickDetailText(
+    detail?.release_date ?? detail?.releaseDate,
+  );
+  const imageSourceLabel = pickDetailText(
+    detail?.image_source ?? detail?.imageSource,
+  );
 
   const handleAddSuccess = (groupId: string, groupName: string) => {
     Alert.alert(t("addedToGroupSuccessfully"));
@@ -89,6 +129,32 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
       }),
     );
   };
+
+  const openDataCorrection = () => {
+    navigation.dispatch(
+      CommonActions.navigate({
+        name: "FeedbackTab",
+        params: {
+          screen: "FeedbackHome",
+          params: {
+            openSubmit: true,
+            brandId,
+            brandName: brandName ?? undefined,
+            submissionType: "DATA_CORRECTION",
+            initialNameEn: title !== "…" ? title : undefined,
+          },
+        },
+      }),
+    );
+  };
+
+  const shareObject = useCallback(async () => {
+    try {
+      await shareModelLink(title, catalogObjectDeepLink(brandId, objectId));
+    } catch {
+      // user dismissed
+    }
+  }, [brandId, objectId, title]);
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
@@ -104,7 +170,12 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.imageWell}>
+          <Pressable
+            accessibilityRole="button"
+            disabled={!imageUri}
+            onPress={() => imageUri && setImageViewerVisible(true)}
+            style={styles.imageWell}
+          >
             {imageUri ? (
               <Image
                 source={{ uri: imageUri }}
@@ -115,19 +186,31 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
             ) : (
               <View style={styles.placeholder} />
             )}
-          </View>
+          </Pressable>
 
-          {detail?.scale?.name ? (
-            <DetailRow label={t("scale")} value={detail.scale.name} />
+          {brandLabel ? (
+            <DetailRow label={t("brand")} value={brandLabel} />
           ) : null}
-          {detail?.series?.name ? (
-            <DetailRow label={t("series")} value={detail.series.name} />
+          {seriesLabel ? (
+            <DetailRow label={t("series")} value={seriesLabel} />
           ) : null}
-          {detail?.release_price != null && detail.release_price !== "" ? (
-            <DetailRow
-              label={t("releasePrice")}
-              value={String(detail.release_price)}
-            />
+          {categoryLabel ? (
+            <DetailRow label={t("category")} value={categoryLabel} />
+          ) : null}
+          {scaleLabel ? (
+            <DetailRow label={t("scale")} value={scaleLabel} />
+          ) : null}
+          {releasePriceLabel ? (
+            <DetailRow label={t("releasePrice")} value={releasePriceLabel} />
+          ) : null}
+          {releaseDateLabel ? (
+            <DetailRow label={t("releaseDate")} value={releaseDateLabel} />
+          ) : null}
+          {imageSourceLabel ? (
+            <DetailRow label={t("imageSource")} value={imageSourceLabel} />
+          ) : null}
+          {viewCountLabel ? (
+            <DetailRow label={t("viewCount")} value={viewCountLabel} />
           ) : null}
           {description ? (
             <View style={styles.descriptionBlock}>
@@ -136,18 +219,31 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
             </View>
           ) : null}
 
+          <NeuButton
+            title={t("share")}
+            variant="ghost"
+            onPress={() => void shareObject()}
+            style={styles.action}
+          />
+
           {authed ? (
-            <NeuButton
-              title={t("addToGroup")}
-              onPress={() => setAddSheetVisible(true)}
-              style={styles.action}
-            />
+            <>
+              <NeuButton
+                title={t("addToGroup")}
+                onPress={() => setAddSheetVisible(true)}
+                style={styles.action}
+              />
+              <NeuButton
+                title={t("feedbackTypeDataCorrection")}
+                variant="ghost"
+                onPress={openDataCorrection}
+                style={styles.action}
+              />
+            </>
           ) : (
             <NeuButton
               title={t("signIn")}
-              onPress={() =>
-                navigation.getParent()?.getParent()?.navigate("Login")
-              }
+              onPress={() => openLogin(navigation)}
               style={styles.action}
             />
           )}
@@ -164,6 +260,11 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
           defaultImageUrl={detail.image_url}
         />
       ) : null}
+      <ImageViewerModal
+        visible={imageViewerVisible}
+        imageUri={imageUri}
+        onClose={() => setImageViewerVisible(false)}
+      />
     </SafeAreaView>
   );
 }

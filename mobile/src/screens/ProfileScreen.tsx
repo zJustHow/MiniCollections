@@ -24,25 +24,30 @@ import NeuButton from "../components/neu/NeuButton";
 import NeuInput from "../components/neu/NeuInput";
 import ChangePasswordSheet from "../components/ChangePasswordSheet";
 import BindPhoneSheet from "../components/BindPhoneSheet";
+import UpdateEmailSheet from "../components/UpdateEmailSheet";
 import DeleteAccountSheet from "../components/DeleteAccountSheet";
 import { PHONE_AUTH_ENABLED } from "../constants/authFeatures";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
-import type { RootStackParamList } from "../navigation/types";
+import type { ProfileStackParamList } from "../navigation/types";
+import { API_BASE_URL, APP_VERSION, IS_DEV_BUILD } from "../config";
+import { WEB_BASE_URL } from "../utils/appLinks";
+import { openLogin } from "../navigation/openLogin";
 import { colors, spacing } from "@minicollections/theme";
 
+type ProfileNavigation = NativeStackNavigationProp<ProfileStackParamList, "ProfileHome">;
+
 export default function ProfileScreen() {
-  const { authed, profile, logout, refreshProfile } = useAuth();
+  const { authed, profile, logout, refreshProfile, isAdmin } = useAuth();
   const { t, locale, setLocale } = useLocale();
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const rootNavigation = navigation.getParent()?.getParent();
+  const navigation = useNavigation<ProfileNavigation>();
 
   const [displayName, setDisplayName] = useState("");
   const [savingName, setSavingName] = useState(false);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [localeLoading, setLocaleLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [emailVisible, setEmailVisible] = useState(false);
   const [phoneVisible, setPhoneVisible] = useState(false);
   const [deleteVisible, setDeleteVisible] = useState(false);
 
@@ -171,12 +176,16 @@ export default function ProfileScreen() {
               />
             </View>
 
-            {profile.email ? (
-              <View style={styles.card}>
-                <Text style={styles.label}>{t("email")}</Text>
-                <Text style={styles.value}>{profile.email}</Text>
-              </View>
-            ) : null}
+            <View style={styles.card}>
+              <Text style={styles.label}>{t("loginEmail")}</Text>
+              <Text style={styles.value}>{profile.email ?? "—"}</Text>
+              <NeuButton
+                title={t("updateEmail")}
+                variant="ghost"
+                onPress={() => setEmailVisible(true)}
+                style={styles.action}
+              />
+            </View>
 
             <View style={styles.card}>
               <Text style={styles.label}>{t("phoneNumber")}</Text>
@@ -204,13 +213,22 @@ export default function ProfileScreen() {
               onPress={() => setPasswordVisible(true)}
               style={styles.action}
             />
+
+            {isAdmin ? (
+              <NeuButton
+                title={t("adminSubmissions")}
+                variant="ghost"
+                onPress={() => navigation.navigate("AdminSubmissions")}
+                style={styles.action}
+              />
+            ) : null}
           </>
         ) : (
           <View style={styles.card}>
             <Text style={styles.guest}>{t("signIn")}</Text>
             <NeuButton
               title={t("signIn")}
-              onPress={() => rootNavigation?.navigate("Login")}
+              onPress={() => openLogin(navigation, { returnTab: "ProfileTab" })}
               style={styles.action}
             />
           </View>
@@ -252,12 +270,35 @@ export default function ProfileScreen() {
             />
           </>
         ) : null}
+
+        <Text style={styles.version}>v{APP_VERSION}</Text>
+        {IS_DEV_BUILD ? (
+          <>
+            <Text style={styles.devMeta} selectable>
+              API: {API_BASE_URL}
+            </Text>
+            {WEB_BASE_URL ? (
+              <Text style={styles.devMeta} selectable>
+                Web: {WEB_BASE_URL}
+              </Text>
+            ) : null}
+          </>
+        ) : null}
       </ScrollView>
 
       <ChangePasswordSheet
         visible={passwordVisible}
         onClose={() => setPasswordVisible(false)}
         onSuccess={() => Alert.alert(t("passwordUpdated"))}
+      />
+      <UpdateEmailSheet
+        visible={emailVisible}
+        currentEmail={profile?.email}
+        onClose={() => setEmailVisible(false)}
+        onSuccess={async () => {
+          await refreshProfile();
+          Alert.alert(t("emailUpdated"));
+        }}
       />
       <BindPhoneSheet
         visible={phoneVisible}
@@ -365,5 +406,18 @@ const styles = StyleSheet.create({
   deleteBtn: {
     marginTop: spacing.sm,
     borderColor: colors.danger,
+  },
+  version: {
+    marginTop: spacing.lg,
+    textAlign: "center",
+    color: colors.textSecondary,
+    fontSize: 12,
+  },
+  devMeta: {
+    marginTop: spacing.xs,
+    textAlign: "center",
+    color: colors.textSecondary,
+    fontSize: 11,
+    paddingHorizontal: spacing.md,
   },
 });

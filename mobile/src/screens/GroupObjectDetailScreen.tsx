@@ -23,8 +23,13 @@ import ScreenHeader from "../components/ScreenHeader";
 import NeuButton from "../components/neu/NeuButton";
 import NeuCard from "../components/neu/NeuCard";
 import EditGroupObjectSheet from "../components/EditGroupObjectSheet";
+import ImageViewerModal from "../components/ImageViewerModal";
+import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { GroupsStackParamList } from "../navigation/types";
+import { openLogin } from "../navigation/openLogin";
+import { groupObjectDeepLink } from "../utils/deepLinks";
+import { shareModelLink } from "../utils/shareModel";
 import { colors, spacing } from "@minicollections/theme";
 
 type Props = NativeStackScreenProps<GroupsStackParamList, "GroupObjectDetail">;
@@ -54,6 +59,7 @@ type BrandObjectSummary = {
 
 export default function GroupObjectDetailScreen({ route, navigation }: Props) {
   const { groupId, objectId, objectName } = route.params;
+  const { authed } = useAuth();
   const { t } = useLocale();
   const [detail, setDetail] = useState<UserObjectDetail | null>(null);
   const [brandObject, setBrandObject] = useState<BrandObjectSummary | null>(null);
@@ -61,9 +67,11 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
   const [loadingBrand, setLoadingBrand] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editVisible, setEditVisible] = useState(false);
+  const [imageViewerVisible, setImageViewerVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    if (!authed) return;
     setLoading(true);
     setError(null);
     try {
@@ -74,13 +82,18 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [groupId, objectId, t]);
+  }, [authed, groupId, objectId, t]);
 
   useEffect(() => {
+    if (!authed) {
+      setLoading(false);
+      return;
+    }
     void load();
-  }, [load]);
+  }, [authed, load]);
 
   useEffect(() => {
+    if (!authed) return;
     const brandObjectId = detail?.brand_object_id ?? detail?.brandObjectId;
     if (!brandObjectId) {
       setBrandObject(null);
@@ -91,13 +104,21 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
       .then(setBrandObject)
       .catch(() => setBrandObject(null))
       .finally(() => setLoadingBrand(false));
-  }, [detail]);
+  }, [authed, detail]);
 
   const title = detail?.name ?? objectName ?? "…";
   const imageUri = resolveMediaUrl(detail?.image_url ?? undefined);
   const purchasePrice = displayPurchasePriceFromObject(detail);
   const purchaseDate = detail?.purchase_date ?? detail?.purchaseDate ?? null;
   const notes = detail?.other_notes ?? detail?.otherNotes ?? null;
+
+  const shareObject = useCallback(async () => {
+    try {
+      await shareModelLink(title, groupObjectDeepLink(groupId, objectId));
+    } catch {
+      // user dismissed
+    }
+  }, [groupId, objectId, title]);
 
   const openCatalogObject = () => {
     if (!brandObject) return;
@@ -151,6 +172,21 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
     }
   };
 
+  if (!authed) {
+    return (
+      <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
+        <ScreenHeader title={objectName ?? t("groups")} showBack />
+        <View style={styles.centered}>
+          <Text style={styles.guestText}>{t("signIn")}</Text>
+          <NeuButton
+            title={t("signIn")}
+            onPress={() => openLogin(navigation)}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
       <ScreenHeader
@@ -179,7 +215,12 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.imageWell}>
+          <Pressable
+            accessibilityRole="button"
+            disabled={!imageUri}
+            onPress={() => imageUri && setImageViewerVisible(true)}
+            style={styles.imageWell}
+          >
             {imageUri ? (
               <Image
                 source={{ uri: imageUri }}
@@ -190,7 +231,7 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
             ) : (
               <View style={styles.placeholder} />
             )}
-          </View>
+          </Pressable>
 
           {purchasePrice != null ? (
             <DetailRow label={t("purchasePrice")} value={purchasePrice} />
@@ -227,6 +268,13 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
           )}
 
           <NeuButton
+            title={t("share")}
+            variant="ghost"
+            onPress={() => void shareObject()}
+            style={styles.shareBtn}
+          />
+
+          <NeuButton
             title={t("delete")}
             variant="ghost"
             loading={deleting}
@@ -245,6 +293,11 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
         }}
         groupId={groupId}
         userObject={detail}
+      />
+      <ImageViewerModal
+        visible={imageViewerVisible}
+        imageUri={imageUri}
+        onClose={() => setImageViewerVisible(false)}
       />
     </SafeAreaView>
   );
@@ -336,6 +389,14 @@ const styles = StyleSheet.create({
   deleteBtn: {
     marginTop: spacing.lg,
     borderColor: colors.danger,
+  },
+  shareBtn: {
+    marginTop: spacing.md,
+  },
+  guestText: {
+    color: colors.textSecondary,
+    fontSize: 15,
+    textAlign: "center",
   },
   editBtn: {
     paddingHorizontal: spacing.xs,

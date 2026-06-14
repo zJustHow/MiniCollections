@@ -9,6 +9,9 @@
   "scripts": {
     "dev:web": "npm run dev -w frontend",
     "dev:mobile": "npm run start -w mobile",
+    "typecheck:mobile": "npm run typecheck -w mobile",
+    "build:mobile:preview:android": "npm run build:preview:android -w mobile",
+    "build:mobile:preview:ios": "npm run build:preview:ios -w mobile",
     "test:web": "npm run test -w frontend",
     "test:packages": "npm run test -w @minicollections/api && npm run test -w @minicollections/hooks"
   }

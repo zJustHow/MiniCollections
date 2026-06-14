@@ -28,7 +28,12 @@ export default function useCodeCountdown(initial = 0) {
     [clear],
   );
 
+  const reset = useCallback(() => {
+    clear();
+    setCountdown(0);
+  }, [clear]);
+
   useEffect(() => clear, [clear]);
 
-  return { countdown, start, clear };
+  return { countdown, start, clear, reset };
 }

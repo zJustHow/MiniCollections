@@ -4,8 +4,11 @@
     "slug": "minicollections",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
       "backgroundColor": "#fcfbf8"
     },
     "ios": {
@@ -14,9 +17,15 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png",
         "backgroundColor": "#fcfbf8"
       },
       "package": "com.minicollections.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     }
   }
 }

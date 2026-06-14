@@ -25,3 +25,4 @@ export * from "./groupsApi.js";
 export * from "./statsApi.js";
 export * from "./uploadsApi.js";
 export * from "./usersApi.js";
+export * from "./submissionsApi.js";

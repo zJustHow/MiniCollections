@@ -8,14 +8,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { getCollectionStats } from "@minicollections/api";
 import ScreenHeader from "../components/ScreenHeader";
 import StatsBarChart from "../components/StatsBarChart";
 import NeuButton from "../components/neu/NeuButton";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
-import type { RootStackParamList } from "../navigation/types";
+import { openLogin } from "../navigation/openLogin";
 import { colors, spacing } from "@minicollections/theme";
 
 type NamedCount = {
@@ -54,8 +53,7 @@ function pickLocalizedName(item: NamedCount, locale: string) {
 export default function StatsScreen() {
   const { authed } = useAuth();
   const { t, locale } = useLocale();
-  const rootNavigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation();
 
   const [stats, setStats] = useState<StatsPayload | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,7 +104,7 @@ export default function StatsScreen() {
           <Text style={styles.guest}>{t("signIn")}</Text>
           <NeuButton
             title={t("signIn")}
-            onPress={() => rootNavigation.navigate("Login")}
+            onPress={() => openLogin(navigation, { returnTab: "StatsTab" })}
           />
         </View>
       </SafeAreaView>

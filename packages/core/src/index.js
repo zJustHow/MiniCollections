@@ -14,5 +14,7 @@ export {
   purchasePriceFromFormValue,
   normalizePurchaseDateInput,
   displayPurchasePriceFromObject,
+  formatViewCount,
+  formatReleasePrice,
 } from "./format.js";
 export { COUNTRIES, parsePhone, formatPhoneIdentifier } from "./phone.js";

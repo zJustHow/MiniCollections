@@ -16,6 +16,7 @@ export type UserProfile = {
   email?: string;
   phone?: string | null;
   is_admin?: boolean;
+  admin?: boolean;
   preferred_locale?: string;
   avatar_url?: string;
   wechat_bound?: boolean;
@@ -95,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       authed: profile != null,
       profile,
-      isAdmin: Boolean(profile?.is_admin),
+      isAdmin: Boolean(profile?.is_admin ?? profile?.admin),
       loading,
       login,
       logout,

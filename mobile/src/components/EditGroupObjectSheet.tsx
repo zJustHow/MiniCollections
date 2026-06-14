@@ -9,7 +9,12 @@ import {
 } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { resolveMediaUrl, updateUserObject, uploadImage } from "@minicollections/api";
+import {
+  getBrandObjectById,
+  resolveMediaUrl,
+  updateUserObject,
+  uploadImage,
+} from "@minicollections/api";
 import {
   displayPurchasePriceFromObject,
   normalizePurchaseDateInput,
@@ -17,6 +22,7 @@ import {
 } from "@minicollections/core";
 import NeuButton from "./neu/NeuButton";
 import NeuInput from "./neu/NeuInput";
+import ModelPickerField, { type CatalogModelOption } from "./ModelPickerField";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
 
@@ -56,11 +62,13 @@ export default function EditGroupObjectSheet({
   userObject,
 }: EditGroupObjectSheetProps) {
   const { t } = useLocale();
+  const [selectedModel, setSelectedModel] = useState<CatalogModelOption | null>(null);
   const [name, setName] = useState("");
   const [purchasePrice, setPurchasePrice] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [notes, setNotes] = useState("");
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
+  const [catalogImageUrl, setCatalogImageUrl] = useState<string | null>(null);
   const [pickedImage, setPickedImage] = useState<PickedImage | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,9 +80,49 @@ export default function EditGroupObjectSheet({
     setPurchaseDate(userObject.purchase_date ?? userObject.purchaseDate ?? "");
     setNotes(userObject.other_notes ?? userObject.otherNotes ?? "");
     setExistingImageUrl(userObject.image_url ?? null);
+    setCatalogImageUrl(null);
     setPickedImage(null);
     setError(null);
+
+    const brandObjectId = userObject.brand_object_id ?? userObject.brandObjectId;
+    if (!brandObjectId) {
+      setSelectedModel(null);
+      return;
+    }
+
+    let cancelled = false;
+    getBrandObjectById(brandObjectId)
+      .then((brandObject) => {
+        if (cancelled) return;
+        setSelectedModel({
+          id: brandObject.id ?? brandObjectId,
+          name: brandObject.name,
+          image_url: brandObject.image_url ?? null,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSelectedModel({ id: brandObjectId, name: "" });
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [visible, userObject]);
+
+  const handleSelectModel = (model: CatalogModelOption | null) => {
+    setSelectedModel(model);
+    if (model) {
+      if (model.name?.trim()) {
+        setName(model.name.trim());
+      }
+      setCatalogImageUrl(model.image_url ?? null);
+      setPickedImage(null);
+      return;
+    }
+    setCatalogImageUrl(null);
+  };
 
   const pickImage = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -108,18 +156,20 @@ export default function EditGroupObjectSheet({
       return;
     }
 
-    const brandObjectId = userObject.brand_object_id ?? userObject.brandObjectId;
-
     setSubmitting(true);
     setError(null);
     try {
-      let imageUrl = existingImageUrl;
+      let imageUrl = pickedImage ? null : (existingImageUrl ?? catalogImageUrl);
       if (pickedImage) {
         imageUrl = await uploadImage(pickedImage);
+      } else if (!imageUrl && catalogImageUrl) {
+        imageUrl = catalogImageUrl;
       }
       await updateUserObject(groupId, userObject.id, {
         brand_object_id:
-          brandObjectId != null && brandObjectId !== "" ? Number(brandObjectId) : null,
+          selectedModel?.id != null && selectedModel.id !== ""
+            ? Number(selectedModel.id)
+            : null,
         name: name.trim(),
         image_url: imageUrl ?? null,
         purchase_date: normalizedDate ?? null,
@@ -137,7 +187,11 @@ export default function EditGroupObjectSheet({
 
   const previewUri =
     pickedImage?.uri ??
-    (existingImageUrl ? resolveMediaUrl(existingImageUrl) : null);
+    (existingImageUrl
+      ? resolveMediaUrl(existingImageUrl)
+      : catalogImageUrl
+        ? resolveMediaUrl(catalogImageUrl)
+        : null);
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
@@ -146,6 +200,10 @@ export default function EditGroupObjectSheet({
         <View style={styles.sheet}>
           <Text style={styles.title}>{t("editModel")}</Text>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+            <ModelPickerField
+              selectedModel={selectedModel}
+              onSelectModel={handleSelectModel}
+            />
             <NeuInput label={t("name")} value={name} onChangeText={setName} />
             <Text style={styles.coverLabel}>{t("image")}</Text>
             <View style={styles.coverWell}>

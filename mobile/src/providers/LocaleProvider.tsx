@@ -2,13 +2,15 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 import { ensureLocaleLoaded, translate, translateError } from "@minicollections/i18n";
 import { setCurrentLocale } from "@minicollections/api";
+import type { AppLocale } from "../utils/deviceLocale";
 
-type Locale = "en-US" | "zh-CN";
+type Locale = AppLocale;
 
 type LocaleContextValue = {
   locale: Locale;
@@ -27,6 +29,11 @@ export function LocaleProvider({
   initialLocale?: Locale;
 }) {
   const [locale, setLocaleState] = useState<Locale>(initialLocale);
+
+  useEffect(() => {
+    setCurrentLocale(initialLocale);
+    void ensureLocaleLoaded(initialLocale);
+  }, [initialLocale]);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
