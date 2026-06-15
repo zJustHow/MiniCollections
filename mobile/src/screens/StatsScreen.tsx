@@ -11,11 +11,12 @@ import { useNavigation } from "@react-navigation/native";
 import { getCollectionStats } from "@minicollections/api";
 import ScreenHeader from "../components/ScreenHeader";
 import StatsBarChart from "../components/StatsBarChart";
-import NeuButton from "../components/neu/NeuButton";
+import NeuButton from "../components/NeuButton";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import { openLogin } from "../navigation/openLogin";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuRaised, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type NamedCount = {
   name_en?: string;
@@ -191,14 +192,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     color: colors.text,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
   card: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
     padding: spacing.md,
     gap: spacing.sm,
+    ...neuRaised("sm"),
+    backgroundColor: colors.bg,
   },
   cardTitle: {
     fontSize: 16,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   },
   trendValue: {
     color: colors.text,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
   guest: {
     color: colors.textSecondary,

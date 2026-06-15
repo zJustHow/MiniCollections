@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Pressable,
@@ -7,15 +7,20 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { createGroup, uploadImage, resolveMediaUrl } from "@minicollections/api";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
+import {
+  adminCreateBrand,
+  uploadBrandLogo,
+  uploadImage,
+} from "@minicollections/api";
+import NeuButton from "./NeuButton";
+import NeuInput from "./NeuFormControl/NeuInput";
+import GroovedImage from "./GroovedImage";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
-type CreateGroupSheetProps = {
+type BrandModalProps = {
   visible: boolean;
   onClose: () => void;
   onCreated: () => void;
@@ -27,31 +32,29 @@ type PickedImage = {
   type?: string;
 };
 
-export default function CreateGroupSheet({
-  visible,
-  onClose,
-  onCreated,
-}: CreateGroupSheetProps) {
+export default function BrandModal({ visible, onClose, onCreated }: BrandModalProps) {
   const { t } = useLocale();
-  const [name, setName] = useState("");
+  const [nameEn, setNameEn] = useState("");
+  const [nameZh, setNameZh] = useState("");
+  const [abbreviation, setAbbreviation] = useState("");
   const [pickedImage, setPickedImage] = useState<PickedImage | null>(null);
-  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const reset = () => {
-    setName("");
+  useEffect(() => {
+    if (!visible) return;
+    setNameEn("");
+    setNameZh("");
+    setAbbreviation("");
     setPickedImage(null);
-    setUploadedUrl(null);
     setError(null);
-  };
+  }, [visible]);
 
   const handleClose = () => {
-    reset();
     onClose();
   };
 
-  const pickCover = async () => {
+  const pickLogo = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
       setError(t("uploadFailed"));
@@ -68,15 +71,14 @@ export default function CreateGroupSheet({
     const asset = result.assets[0];
     setPickedImage({
       uri: asset.uri,
-      name: asset.fileName ?? "group-cover.jpg",
+      name: asset.fileName ?? "brand-logo.jpg",
       type: asset.mimeType ?? "image/jpeg",
     });
-    setUploadedUrl(null);
   };
 
   const handleCreate = async () => {
-    const trimmed = name.trim();
-    if (!trimmed) {
+    const trimmedEn = nameEn.trim();
+    if (!trimmedEn) {
       setError(t("nameRequired"));
       return;
     }
@@ -84,50 +86,52 @@ export default function CreateGroupSheet({
     setSubmitting(true);
     setError(null);
     try {
-      let imageUrl = uploadedUrl;
-      if (pickedImage && !imageUrl) {
-        imageUrl = await uploadImage(pickedImage);
-        setUploadedUrl(imageUrl);
+      const created = await adminCreateBrand({
+        name_en: trimmedEn,
+        name_zh: nameZh.trim() || null,
+        abbreviation: abbreviation.trim() || null,
+        image_url: null,
+      });
+
+      if (pickedImage && created?.id != null) {
+        await uploadBrandLogo(created.id, pickedImage);
       }
 
-      await createGroup({
-        name: trimmed,
-        image_url: imageUrl ?? null,
-      });
       onCreated();
       handleClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToCreateGroup"));
+      setError(err instanceof Error ? err.message : t("failedToCreateBrand"));
     } finally {
       setSubmitting(false);
     }
   };
 
-  const previewUri = pickedImage?.uri ?? (uploadedUrl ? resolveMediaUrl(uploadedUrl) : null);
+  const previewUri = pickedImage?.uri ?? undefined;
 
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View style={styles.backdrop}>
         <Pressable style={styles.dismissArea} onPress={handleClose} />
         <View style={styles.sheet}>
-          <Text style={styles.title}>{t("addGroup")}</Text>
+          <Text style={styles.title}>{t("addBrand")}</Text>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            <NeuInput label={t("name")} value={name} onChangeText={setName} />
+            <NeuInput label={t("nameEn")} value={nameEn} onChangeText={setNameEn} />
+            <NeuInput label={t("nameZh")} value={nameZh} onChangeText={setNameZh} />
+            <NeuInput
+              label={t("abbreviation")}
+              value={abbreviation}
+              onChangeText={setAbbreviation}
+              placeholder={t("abbreviationPlaceholder")}
+            />
 
             <Text style={styles.coverLabel}>{t("image")}</Text>
-            <View style={styles.coverWell}>
-              {previewUri ? (
-                <Image source={{ uri: previewUri }} style={styles.coverImage} contentFit="cover" />
-              ) : (
-                <Text style={styles.coverPlaceholder}>{t("image")}</Text>
-              )}
-            </View>
-            <NeuButton title={t("image")} variant="ghost" onPress={() => void pickCover()} />
+            <GroovedImage uri={previewUri} variant="brand" />
+            <NeuButton title={t("image")} variant="ghost" onPress={() => void pickLogo()} />
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
             <NeuButton
-              title={t("addGroup")}
+              title={t("addBrand")}
               loading={submitting}
               onPress={() => void handleCreate()}
               style={styles.submit}
@@ -157,9 +161,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {
@@ -170,22 +172,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 13,
     fontWeight: "600",
-  },
-  coverWell: {
-    aspectRatio: 1.6,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  coverImage: {
-    width: "100%",
-    height: "100%",
-  },
-  coverPlaceholder: {
-    color: colors.textSecondary,
   },
   error: {
     color: colors.danger,

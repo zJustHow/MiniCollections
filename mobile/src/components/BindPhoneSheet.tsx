@@ -10,9 +10,10 @@ import {
 import { updateIdentifier } from "@minicollections/api";
 import { formatPhoneIdentifier } from "@minicollections/core";
 import PhoneField from "./PhoneField";
-import NeuButton from "./neu/NeuButton";
+import NeuButton from "./NeuButton";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type BindPhoneSheetProps = {
   visible: boolean;
@@ -110,9 +111,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {

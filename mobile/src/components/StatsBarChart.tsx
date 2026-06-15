@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type StatsBarChartProps = {
   title: string;
@@ -80,8 +81,8 @@ const styles = StyleSheet.create({
   value: {
     width: 28,
     textAlign: "right",
+        ...neuText.body,
     color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
 });

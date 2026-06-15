@@ -8,10 +8,11 @@ import {
   View,
 } from "react-native";
 import { updatePassword } from "@minicollections/api";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
+import NeuButton from "./NeuButton";
+import NeuInput from "./NeuFormControl/NeuInput";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type ChangePasswordSheetProps = {
   visible: boolean;
@@ -132,9 +133,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {

@@ -7,9 +7,9 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { FEEDBACK_PAGE_SIZE, getMySubmissionsPage } from "@minicollections/api";
 import { useInfiniteList } from "@minicollections/hooks";
 import ScreenHeader from "../components/ScreenHeader";
-import NeuButton from "../components/neu/NeuButton";
-import SubmitFeedbackSheet from "../components/SubmitFeedbackSheet";
-import FeedbackDetailSheet, { type FeedbackItem } from "../components/FeedbackDetailSheet";
+import NeuButton from "../components/NeuButton";
+import SubmitObjectModal from "../components/SubmitObjectModal";
+import SubmissionDrawer, { type FeedbackItem } from "../components/SubmissionDrawer";
 import {
   ListFooterSpinner,
   ListStateBoundary,
@@ -24,7 +24,8 @@ import {
   feedbackStatusLabel,
   feedbackTypeLabel,
 } from "../utils/feedbackLabels";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuCardStyle, neuControlStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 function formatDate(value?: string | null) {
   if (!value) return "";
@@ -44,7 +45,11 @@ function SubmissionRow({
   const brand = item.brand_name || item.custom_brand_name;
 
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.rowCard}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.rowCard, neuCardStyle({ pressed })]}
+    >
       <View style={styles.rowTop}>
         <Text style={styles.typePill}>{feedbackTypeLabel(item.submission_type, t)}</Text>
         <Text style={[styles.statusPill, { color: feedbackStatusColor(item.status) }]}>
@@ -132,7 +137,7 @@ export default function FeedbackScreen() {
             <Pressable
               accessibilityRole="button"
               onPress={() => setSubmitVisible(true)}
-              style={styles.addBtn}
+              style={({ pressed }) => [styles.addBtn, neuControlStyle({ pressed })]}
             >
               <Text style={styles.addLabel}>+</Text>
             </Pressable>
@@ -195,7 +200,7 @@ export default function FeedbackScreen() {
         </SafeAreaView>
       </ListStateBoundary>
 
-      <SubmitFeedbackSheet
+      <SubmitObjectModal
         visible={submitVisible}
         onClose={() => {
           setSubmitVisible(false);
@@ -213,7 +218,7 @@ export default function FeedbackScreen() {
         initialSubmissionType={seedSubmissionType}
         initialNameEn={seedNameEn}
       />
-      <FeedbackDetailSheet
+      <SubmissionDrawer
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
         onDeleted={() => {
@@ -248,8 +253,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   addLabel: {
-    fontSize: 28,
-    fontWeight: "300",
+    ...neuText.fabAction,
     color: colors.accent,
     lineHeight: 30,
   },
@@ -257,9 +261,6 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
     padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
     gap: spacing.xs,
   },
   rowTop: {
@@ -269,13 +270,11 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   typePill: {
-    fontSize: 11,
-    fontWeight: "700",
+    ...neuText.badge,
     color: colors.accent,
   },
   statusPill: {
-    fontSize: 11,
-    fontWeight: "700",
+    ...neuText.badge,
   },
   date: {
     marginLeft: "auto",
@@ -284,16 +283,14 @@ const styles = StyleSheet.create({
   },
   rowTitle: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
     color: colors.text,
   },
   rowMeta: {
-    fontSize: 13,
-    color: colors.textSecondary,
+    ...neuText.bodySecondary,
   },
   rowNotes: {
-    fontSize: 13,
-    color: colors.textSecondary,
+    ...neuText.bodySecondary,
     lineHeight: 18,
   },
   emptyWrap: {

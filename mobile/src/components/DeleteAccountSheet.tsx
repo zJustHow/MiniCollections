@@ -9,10 +9,11 @@ import {
   View,
 } from "react-native";
 import { deleteAccount } from "@minicollections/api";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
+import NeuButton from "./NeuButton";
+import NeuInput from "./NeuFormControl/NeuInput";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type DeleteAccountSheetProps = {
   visible: boolean;
@@ -92,6 +93,7 @@ export default function DeleteAccountSheet({
             {error ? <Text style={styles.error}>{error}</Text> : null}
             <NeuButton
               title={t("deleteAccount")}
+              variant="danger"
               loading={submitting}
               onPress={confirmDelete}
               style={styles.deleteBtn}
@@ -141,6 +143,5 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     marginTop: spacing.md,
-    borderColor: colors.danger,
   },
 });

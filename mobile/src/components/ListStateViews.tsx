@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, spacing } from "@minicollections/theme";
-import NeuButton from "./neu/NeuButton";
+import NeuButton from "./NeuButton";
 
 type ListStateProps = {
   loading?: boolean;

@@ -8,9 +8,9 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
+import NeuButton from "./NeuButton";
+import GroovedImage from "./GroovedImage";
 import { deleteMySubmission, resolveMediaUrl } from "@minicollections/api";
-import NeuButton from "./neu/NeuButton";
 import { useLocale } from "../providers/LocaleProvider";
 import {
   feedbackStatusColor,
@@ -18,6 +18,7 @@ import {
   feedbackTypeLabel,
 } from "../utils/feedbackLabels";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 export type FeedbackItem = {
   id: number | string;
@@ -35,7 +36,7 @@ export type FeedbackItem = {
   scale?: string | null;
 };
 
-type FeedbackDetailSheetProps = {
+type SubmissionDrawerProps = {
   item: FeedbackItem | null;
   onClose: () => void;
   onDeleted: () => void;
@@ -51,11 +52,11 @@ function DetailRow({ label, value }: { label: string; value?: string | null }) {
   );
 }
 
-export default function FeedbackDetailSheet({
+export default function SubmissionDrawer({
   item,
   onClose,
   onDeleted,
-}: FeedbackDetailSheetProps) {
+}: SubmissionDrawerProps) {
   const { t } = useLocale();
   if (!item) return null;
 
@@ -115,7 +116,7 @@ export default function FeedbackDetailSheet({
             {imageUri ? (
               <View style={styles.imageBlock}>
                 <Text style={styles.rowLabel}>{t("image")}</Text>
-                <Image source={{ uri: imageUri }} style={styles.image} contentFit="contain" />
+                <GroovedImage uri={imageUri} variant="detail" />
               </View>
             ) : null}
 
@@ -133,7 +134,7 @@ export default function FeedbackDetailSheet({
               </View>
             ) : null}
 
-            <NeuButton title={t("delete")} variant="ghost" onPress={confirmDelete} style={styles.deleteBtn} />
+            <NeuButton title={t("delete")} variant="danger" onPress={confirmDelete} style={styles.deleteBtn} />
             <NeuButton title={t("cancel")} variant="ghost" onPress={onClose} />
           </ScrollView>
         </View>
@@ -159,9 +160,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {
@@ -175,16 +174,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   typeTag: {
-    fontSize: 12,
-    fontWeight: "700",
+    ...neuText.tag,
     color: colors.accent,
     backgroundColor: colors.sl,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
   statusTag: {
-    fontSize: 12,
-    fontWeight: "700",
+    ...neuText.tag,
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
   },
@@ -208,13 +205,6 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginTop: spacing.sm,
   },
-  image: {
-    width: "100%",
-    aspectRatio: 1.2,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
   noteBlock: {
     marginTop: spacing.sm,
     padding: spacing.md,
@@ -227,8 +217,7 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.danger,
   },
   noteHeading: {
-    fontSize: 11,
-    fontWeight: "700",
+    ...neuText.badge,
     color: colors.textSecondary,
     textTransform: "uppercase",
   },
@@ -239,6 +228,5 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     marginTop: spacing.md,
-    borderColor: colors.danger,
   },
 });

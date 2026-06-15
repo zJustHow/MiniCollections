@@ -10,20 +10,24 @@ import {
   searchBrandObjectsFacets,
   searchBrandsCombinedPage,
 } from "@minicollections/api";
-import NeuCard from "../components/neu/NeuCard";
+import NeuCard from "../components/NeuCard";
+import BrandModal from "../components/BrandModal";
 import ScreenHeader from "../components/ScreenHeader";
-import SearchField from "../components/SearchField";
-import SearchFiltersSheet, { type SearchFacets } from "../components/SearchFiltersSheet";
+import ListSearchField from "../components/ListSearchField";
+import ObjectSearchFilterPanel, { type SearchFacets } from "../components/ObjectSearchFilterPanel";
 import {
   ListFooterSpinner,
   ListStateBoundary,
   listRefreshControl,
 } from "../components/ListStateViews";
 import { useObjectFilters } from "../hooks/useObjectFilters";
+import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { BrandsStackParamList } from "../navigation/types";
 import { pickBrandName } from "../utils/displayLocale";
-import { colors, spacing } from "@minicollections/theme";
+import { isAddCardItem, listBrowseContentStyle, listBrowseHeaderStyle, withAddCardSlot } from "../utils/listPageUtils";
+import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<BrandsStackParamList, "BrandsList">;
 
@@ -53,10 +57,12 @@ function isSearchObject(item: BrandsListItem): item is SearchObjectItem {
 }
 
 export default function BrandsScreen({ navigation }: Props) {
+  const { isAdmin } = useAuth();
   const { t, locale } = useLocale();
   const [draftQuery, setDraftQuery] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [brandModalVisible, setBrandModalVisible] = useState(false);
   const [facets, setFacets] = useState<SearchFacets | null>(null);
   const [facetsLoading, setFacetsLoading] = useState(false);
   const searchActive = searchKeyword.trim().length > 0;
@@ -129,9 +135,13 @@ export default function BrandsScreen({ navigation }: Props) {
     retry,
   } = useInfiniteList(fetchPage, {
     resetKey: searchActive ? `search:${searchKeyword}:${filterKey}` : "browse",
+    reservedFirstPageSlots: !searchActive && isAdmin ? 1 : 0,
   });
 
-  const rows = items as BrandsListItem[];
+  const rows = withAddCardSlot(
+    items as BrandsListItem[],
+    isAdmin && !searchActive,
+  );
 
   useEffect(() => {
     if (!searchActive) {
@@ -180,7 +190,7 @@ export default function BrandsScreen({ navigation }: Props) {
     () => (
       <View>
         <ScreenHeader title={t("brands")} />
-        <SearchField
+        <ListSearchField
           value={draftQuery}
           onChangeText={setDraftQuery}
           onSubmit={runSearch}
@@ -202,7 +212,7 @@ export default function BrandsScreen({ navigation }: Props) {
             <Pressable
               accessibilityRole="button"
               onPress={() => setFiltersVisible(true)}
-              style={styles.filterBtn}
+              style={({ pressed }) => [styles.filterBtn, neuControlStyle({ pressed })]}
             >
               <Ionicons name="options-outline" size={18} color={colors.accent} />
               <Text style={styles.filterBtnLabel}>{t("searchFilters")}</Text>
@@ -245,7 +255,9 @@ export default function BrandsScreen({ navigation }: Props) {
             keyExtractor={(item) =>
               `${isSearchObject(item) ? "object" : "brand"}:${String(item.id)}`
             }
+            contentContainerStyle={listBrowseContentStyle}
             ListHeaderComponent={listHeader}
+            ListHeaderComponentStyle={listBrowseHeaderStyle}
             ListEmptyComponent={
               !loading && searchActive ? (
                 <View style={styles.emptyWrap}>
@@ -255,7 +267,14 @@ export default function BrandsScreen({ navigation }: Props) {
             }
             renderItem={({ item }) => (
               <View style={styles.cell}>
-                {isSearchObject(item) ? (
+                {isAddCardItem(item) ? (
+                  <NeuCard
+                    add
+                    name={t("addBrand")}
+                    variant="brand"
+                    onPress={() => setBrandModalVisible(true)}
+                  />
+                ) : isSearchObject(item) ? (
                   <NeuCard
                     item={item}
                     variant="object"
@@ -274,6 +293,7 @@ export default function BrandsScreen({ navigation }: Props) {
                 ) : (
                   <NeuCard
                     item={item}
+                    variant="brand"
                     onPress={() =>
                       navigation.navigate("BrandObjects", {
                         brandId: String(item.id),
@@ -296,7 +316,7 @@ export default function BrandsScreen({ navigation }: Props) {
         </SafeAreaView>
       </ListStateBoundary>
 
-      <SearchFiltersSheet
+      <ObjectSearchFilterPanel
         visible={filtersVisible}
         onClose={() => setFiltersVisible(false)}
         facets={facets}
@@ -310,6 +330,12 @@ export default function BrandsScreen({ navigation }: Props) {
         onToggleScale={toggleScale}
         onToggleSeries={toggleSeries}
         onClearFilters={clearFilters}
+      />
+
+      <BrandModal
+        visible={brandModalVisible}
+        onClose={() => setBrandModalVisible(false)}
+        onCreated={() => void refresh()}
       />
     </>
   );
@@ -341,14 +367,9 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
   },
   filterBtnLabel: {
-    color: colors.accent,
-    fontSize: 13,
-    fontWeight: "700",
+    ...neuText.link,
   },
   filterBadge: {
     minWidth: 18,
@@ -360,9 +381,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   filterBadgeLabel: {
+    ...neuText.badge,
     color: "#fff",
-    fontSize: 11,
-    fontWeight: "700",
   },
   cell: {
     flex: 1,

@@ -8,12 +8,13 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
+import GroovedImage from "./GroovedImage";
 import { Ionicons } from "@expo/vector-icons";
 import { resolveMediaUrl } from "@minicollections/api";
-import SearchField from "./SearchField";
+import ListSearchField from "./ListSearchField";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 import useRemoteModelSelectSearch from "../hooks/useRemoteModelSelectSearch";
 
 export type CatalogModelOption = {
@@ -80,7 +81,7 @@ export default function ModelPickerField({
               <Text style={styles.close}>{t("cancel")}</Text>
             </Pressable>
           </View>
-          <SearchField
+          <ListSearchField
             value={draftQuery}
             onChangeText={setDraftQuery}
             onSubmit={runSearch}
@@ -110,11 +111,7 @@ export default function ModelPickerField({
                     style={styles.row}
                   >
                     <View style={styles.thumbWell}>
-                      {imageUri ? (
-                        <Image source={{ uri: imageUri }} style={styles.thumb} contentFit="contain" />
-                      ) : (
-                        <View style={styles.thumbPlaceholder} />
-                      )}
+                      <GroovedImage uri={imageUri ?? undefined} variant="thumb" />
                     </View>
                     <Text style={styles.rowName} numberOfLines={2}>
                       {item.name ?? "—"}
@@ -132,9 +129,7 @@ export default function ModelPickerField({
 
 const styles = StyleSheet.create({
   label: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: "600",
+    ...neuText.formLabel,
     marginBottom: spacing.xs,
   },
   field: {
@@ -167,13 +162,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.pickerModalTitle,
   },
   close: {
     color: colors.accent,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
   spinner: {
     marginTop: spacing.xl,
@@ -195,20 +188,6 @@ const styles = StyleSheet.create({
   thumbWell: {
     width: 48,
     height: 48,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  thumb: {
-    width: "88%",
-    height: "88%",
-  },
-  thumbPlaceholder: {
-    width: "50%",
-    height: "50%",
-    backgroundColor: colors.border,
   },
   rowName: {
     flex: 1,

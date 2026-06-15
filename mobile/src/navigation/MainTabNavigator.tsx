@@ -8,7 +8,7 @@ import FeedbackStackNavigator from "./FeedbackStackNavigator";
 import ProfileStackNavigator from "./ProfileStackNavigator";
 import type { MainTabParamList, RootStackParamList } from "./types";
 import { openLogin } from "./openLogin";
-import { colors } from "@minicollections/theme";
+import { colors, neuRaisedUp, neuFontFamily, neuFontSize } from "@minicollections/theme";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
@@ -34,7 +34,12 @@ export default function MainTabNavigator() {
         tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           backgroundColor: colors.bg,
-          borderTopColor: colors.border,
+          borderTopWidth: 0,
+          ...neuRaisedUp("sm"),
+        },
+        tabBarLabelStyle: {
+          fontFamily: neuFontFamily.regular,
+          fontSize: neuFontSize.fs12,
         },
       }}
     >

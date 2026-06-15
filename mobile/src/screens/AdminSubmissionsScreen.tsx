@@ -27,6 +27,7 @@ import {
   feedbackTypeLabel,
 } from "../utils/feedbackLabels";
 import { colors, radius, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<ProfileStackParamList, "AdminSubmissions">;
 
@@ -260,13 +261,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   statusChipLabel: {
-    fontSize: 12,
-    fontWeight: "600",
+    ...neuText.tag,
     color: colors.textSecondary,
   },
   statusChipLabelActive: {
     color: colors.accent,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
   rowCard: {
     marginHorizontal: spacing.md,
@@ -284,28 +284,24 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   id: {
-    fontSize: 12,
-    fontWeight: "700",
+    ...neuText.tag,
     color: colors.textSecondary,
   },
   typePill: {
-    fontSize: 11,
-    fontWeight: "700",
+    ...neuText.badge,
     color: colors.accent,
   },
   statusPill: {
-    fontSize: 11,
-    fontWeight: "700",
+    ...neuText.badge,
     marginLeft: "auto",
   },
   rowTitle: {
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
     color: colors.text,
   },
   rowMeta: {
-    fontSize: 13,
-    color: colors.textSecondary,
+    ...neuText.bodySecondary,
   },
   date: {
     fontSize: 11,

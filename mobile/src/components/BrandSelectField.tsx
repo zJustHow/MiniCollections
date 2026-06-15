@@ -9,17 +9,18 @@ import {
   View,
 } from "react-native";
 import { getBrandsPage, searchBrandsPage } from "@minicollections/api";
-import SearchField from "./SearchField";
-import NeuInput from "./neu/NeuInput";
+import ListSearchField from "./ListSearchField";
+import NeuInput from "./NeuFormControl/NeuInput";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type BrandOption = {
   id: number | string;
   name?: string;
 };
 
-type BrandPickerFieldProps = {
+type BrandSelectFieldProps = {
   brandId: string | null;
   brandName: string | null;
   useOtherBrand: boolean;
@@ -30,7 +31,7 @@ type BrandPickerFieldProps = {
   onClearBrand: () => void;
 };
 
-export default function BrandPickerField({
+export default function BrandSelectField({
   brandId,
   brandName,
   useOtherBrand,
@@ -39,7 +40,7 @@ export default function BrandPickerField({
   onSelectOtherBrand,
   onCustomBrandNameChange,
   onClearBrand,
-}: BrandPickerFieldProps) {
+}: BrandSelectFieldProps) {
   const { t } = useLocale();
   const [pickerVisible, setPickerVisible] = useState(false);
   const [draftQuery, setDraftQuery] = useState("");
@@ -107,7 +108,7 @@ export default function BrandPickerField({
           <Pressable style={styles.dismiss} onPress={() => setPickerVisible(false)} />
           <View style={styles.modalSheet}>
             <Text style={styles.modalTitle}>{t("brand")}</Text>
-            <SearchField
+            <ListSearchField
               value={draftQuery}
               onChangeText={setDraftQuery}
               onSubmit={runSearch}
@@ -160,9 +161,7 @@ export default function BrandPickerField({
 
 const styles = StyleSheet.create({
   label: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: "600",
+    ...neuText.formLabel,
     marginBottom: spacing.xs,
   },
   selectorRow: {
@@ -210,9 +209,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.pickerModalTitle,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
   },
@@ -228,7 +225,7 @@ const styles = StyleSheet.create({
   },
   otherLabel: {
     color: colors.accent,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
   brandRow: {
     paddingVertical: spacing.sm,

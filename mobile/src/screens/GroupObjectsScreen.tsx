@@ -11,13 +11,13 @@ import {
   reorderGroupObjects,
   searchGroupObjectsPage,
 } from "@minicollections/api";
-import NeuCard from "../components/neu/NeuCard";
-import NeuButton from "../components/neu/NeuButton";
-import AddUserObjectSheet from "../components/AddUserObjectSheet";
-import EditGroupSheet from "../components/EditGroupSheet";
+import NeuCard from "../components/NeuCard";
+import NeuButton from "../components/NeuButton";
+import AddUserObjectInGroupModal from "../components/AddUserObjectInGroupModal";
+import EditGroupModal from "../components/EditGroupModal";
 import ScreenHeader from "../components/ScreenHeader";
-import SearchField from "../components/SearchField";
-import SortableBrowseList from "../components/SortableBrowseList";
+import ListSearchField from "../components/ListSearchField";
+import SortableInfiniteBrowseSection from "../components/SortableInfiniteBrowseSection";
 import {
   ListFooterSpinner,
   ListStateBoundary,
@@ -28,8 +28,10 @@ import { useLocale } from "../providers/LocaleProvider";
 import type { GroupsStackParamList } from "../navigation/types";
 import { openLogin } from "../navigation/openLogin";
 import { groupObjectsDeepLink } from "../utils/deepLinks";
+import { isAddCardItem, withAddCardSlot } from "../utils/listPageUtils";
 import { shareModelLink } from "../utils/shareModel";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<GroupsStackParamList, "GroupObjects">;
 
@@ -102,10 +104,14 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
       reorderGroupObjects(groupId, orderedIds),
     listResetKey: "group-objects",
     searchResetKey: "group-objects-search",
+    listOptions: { reservedFirstPageSlots: 1 },
   });
 
   const activeList = searchActive ? searchList : browseList;
-  const objects = displayItems as UserObjectItem[];
+  const objects = withAddCardSlot(
+    displayItems as UserObjectItem[],
+    !searchActive,
+  );
 
   const runSearch = useCallback(() => {
     setSearchKeyword(draftQuery.trim());
@@ -138,24 +144,17 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
           showBack
           rightSlot={
             <View style={styles.headerActions}>
-              {!searchActive && !reorderMode ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t("addModel")}
-                  onPress={() => setAddVisible(true)}
-                  style={styles.addBtn}
-                >
-                  <Text style={styles.addLabel}>+</Text>
-                </Pressable>
-              ) : null}
               {!searchActive && browseList.sortEnabled ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t("sortOrder")}
                   onPress={toggleReorderMode}
-                  style={[
+                  style={({ pressed }) => [
                     styles.headerBtn,
-                    reorderMode && styles.headerBtnActive,
+                    neuControlStyle({
+                      variant: reorderMode ? "primary" : "default",
+                      pressed,
+                    }),
                   ]}
                 >
                   <Ionicons
@@ -169,7 +168,7 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
                 accessibilityRole="button"
                 accessibilityLabel={t("share")}
                 onPress={() => void shareGroup()}
-                style={styles.shareBtn}
+                style={({ pressed }) => [styles.shareBtn, neuControlStyle({ pressed })]}
               >
                 <Ionicons name="share-outline" size={22} color={colors.accent} />
               </Pressable>
@@ -177,14 +176,14 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
                 accessibilityRole="button"
                 accessibilityLabel={t("editGroup")}
                 onPress={() => setEditVisible(true)}
-                style={styles.editBtn}
+                style={({ pressed }) => [styles.editBtn, neuControlStyle({ pressed })]}
               >
                 <Ionicons name="create-outline" size={22} color={colors.accent} />
               </Pressable>
             </View>
           }
         />
-        <SearchField
+        <ListSearchField
           value={draftQuery}
           onChangeText={setDraftQuery}
           onSubmit={runSearch}
@@ -250,38 +249,47 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
       onRetry={() => void activeList.retry()}
     >
       <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-        <SortableBrowseList
+        <SortableInfiniteBrowseSection
           data={objects}
           reorderMode={reorderMode}
           sortEnabled={browseList.sortEnabled}
           reordering={browseList.reordering}
           onMoveItem={browseList.handleDragEnd}
           moveFailedLabel={t("failedToReorder")}
-          renderCard={(item) => (
-            <NeuCard
-              item={{
-                id: item.id,
-                name: item.name ?? item.brand_object?.name,
-                image_url: item.image_url,
-              }}
-              variant="object"
-              subtitle={
-                item.brand_object?.brand?.name ??
-                item.brand_object?.name ??
-                undefined
-              }
-              onPress={
-                reorderMode
-                  ? undefined
-                  : () =>
-                      navigation.navigate("GroupObjectDetail", {
-                        groupId,
-                        objectId: String(item.id),
-                        objectName: item.name ?? item.brand_object?.name ?? "",
-                      })
-              }
-            />
-          )}
+          renderCard={(item) =>
+            isAddCardItem(item) ? (
+              <NeuCard
+                add
+                name={t("addModel")}
+                variant="object"
+                onPress={() => setAddVisible(true)}
+              />
+            ) : (
+              <NeuCard
+                item={{
+                  id: item.id,
+                  name: item.name ?? item.brand_object?.name,
+                  image_url: item.image_url,
+                }}
+                variant="object"
+                subtitle={
+                  item.brand_object?.brand?.name ??
+                  item.brand_object?.name ??
+                  undefined
+                }
+                onPress={
+                  reorderMode
+                    ? undefined
+                    : () =>
+                        navigation.navigate("GroupObjectDetail", {
+                          groupId,
+                          objectId: String(item.id),
+                          objectName: item.name ?? item.brand_object?.name ?? "",
+                        })
+                }
+              />
+            )
+          }
           listHeader={listHeader}
           listEmpty={listEmpty}
           listFooter={listFooter}
@@ -295,14 +303,14 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
             }
           }}
         />
-        <EditGroupSheet
+        <EditGroupModal
           visible={editVisible}
           groupId={groupId}
           onClose={() => setEditVisible(false)}
           onUpdated={(name) => setDisplayName(name)}
           onDeleted={() => navigation.goBack()}
         />
-        <AddUserObjectSheet
+        <AddUserObjectInGroupModal
           visible={addVisible}
           groupId={groupId}
           onClose={() => setAddVisible(false)}
@@ -350,13 +358,6 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
-  },
-  headerBtnActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
   },
   shareBtn: {
     width: 40,
@@ -369,18 +370,6 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: "center",
     justifyContent: "center",
-  },
-  addBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  addLabel: {
-    fontSize: 28,
-    fontWeight: "300",
-    color: colors.accent,
-    lineHeight: 30,
   },
   reorderHint: {
     color: colors.textSecondary,

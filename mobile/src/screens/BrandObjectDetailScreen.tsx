@@ -8,15 +8,15 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CommonActions } from "@react-navigation/native";
 import { getBrandObjectById, recordModelView, resolveMediaUrl } from "@minicollections/api";
 import { formatReleasePrice, formatViewCount } from "@minicollections/core";
 import ScreenHeader from "../components/ScreenHeader";
-import NeuButton from "../components/neu/NeuButton";
-import AddToGroupSheet from "../components/AddToGroupSheet";
+import NeuButton from "../components/NeuButton";
+import DetailImage from "../components/DetailImage";
+import AddToGroupModal from "../components/AddToGroupModal";
 import ImageViewerModal from "../components/ImageViewerModal";
 import { useLocale } from "../providers/LocaleProvider";
 import { useAuth } from "../providers/AuthProvider";
@@ -27,6 +27,7 @@ import { catalogObjectDeepLink } from "../utils/deepLinks";
 import { shareModelLink } from "../utils/shareModel";
 import { openLogin } from "../navigation/openLogin";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<BrandsStackParamList, "BrandObjectDetail">;
 
@@ -170,23 +171,10 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
-          <Pressable
-            accessibilityRole="button"
-            disabled={!imageUri}
+          <DetailImage
+            imageUrl={imageUri}
             onPress={() => imageUri && setImageViewerVisible(true)}
-            style={styles.imageWell}
-          >
-            {imageUri ? (
-              <Image
-                source={{ uri: imageUri }}
-                style={styles.image}
-                contentFit="contain"
-                transition={200}
-              />
-            ) : (
-              <View style={styles.placeholder} />
-            )}
-          </Pressable>
+          />
 
           {brandLabel ? (
             <DetailRow label={t("brand")} value={brandLabel} />
@@ -251,7 +239,7 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
       )}
 
       {detail?.id != null ? (
-        <AddToGroupSheet
+        <AddToGroupModal
           visible={addSheetVisible}
           onClose={() => setAddSheetVisible(false)}
           onSuccess={handleAddSuccess}
@@ -294,23 +282,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  imageWell: {
-    aspectRatio: 1,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  image: {
-    width: "92%",
-    height: "92%",
-  },
-  placeholder: {
-    width: "40%",
-    height: "40%",
-    backgroundColor: colors.border,
-  },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -320,28 +291,21 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   rowLabel: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    fontWeight: "600",
+    ...neuText.panelLabel,
   },
   rowValue: {
+    ...neuText.panelValue,
     flex: 1,
     textAlign: "right",
-    color: colors.text,
-    fontSize: 14,
   },
   descriptionBlock: {
     gap: spacing.xs,
   },
   descriptionLabel: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    fontWeight: "700",
+    ...neuText.panelLabel,
   },
   descriptionText: {
-    color: colors.text,
-    fontSize: 15,
-    lineHeight: 22,
+    ...neuText.panelBody,
   },
   action: {
     marginTop: spacing.md,

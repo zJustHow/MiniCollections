@@ -9,7 +9,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import {
   deleteGroup,
@@ -18,12 +17,14 @@ import {
   updateGroup,
   uploadImage,
 } from "@minicollections/api";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
+import NeuButton from "./NeuButton";
+import GroovedImage from "./GroovedImage";
+import NeuInput from "./NeuFormControl/NeuInput";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
-type EditGroupSheetProps = {
+type EditGroupModalProps = {
   visible: boolean;
   groupId: string;
   onClose: () => void;
@@ -37,13 +38,13 @@ type PickedImage = {
   type?: string;
 };
 
-export default function EditGroupSheet({
+export default function EditGroupModal({
   visible,
   groupId,
   onClose,
   onUpdated,
   onDeleted,
-}: EditGroupSheetProps) {
+}: EditGroupModalProps) {
   const { t } = useLocale();
   const [name, setName] = useState("");
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null);
@@ -154,13 +155,7 @@ export default function EditGroupSheet({
             <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
               <NeuInput label={t("name")} value={name} onChangeText={setName} />
               <Text style={styles.coverLabel}>{t("image")}</Text>
-              <View style={styles.coverWell}>
-                {previewUri ? (
-                  <Image source={{ uri: previewUri }} style={styles.coverImage} contentFit="cover" />
-                ) : (
-                  <Text style={styles.coverPlaceholder}>{t("image")}</Text>
-                )}
-              </View>
+              <GroovedImage uri={previewUri ?? undefined} variant="cover" />
               <NeuButton title={t("image")} variant="ghost" onPress={() => void pickCover()} />
               {error ? <Text style={styles.error}>{error}</Text> : null}
               <NeuButton
@@ -201,9 +196,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   loading: {
@@ -217,22 +210,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 13,
     fontWeight: "600",
-  },
-  coverWell: {
-    aspectRatio: 1.6,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  coverImage: {
-    width: "100%",
-    height: "100%",
-  },
-  coverPlaceholder: {
-    color: colors.textSecondary,
   },
   error: {
     color: colors.danger,

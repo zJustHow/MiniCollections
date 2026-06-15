@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocale } from "../providers/LocaleProvider";
 import { spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type ImageViewerModalProps = {
   visible: boolean;

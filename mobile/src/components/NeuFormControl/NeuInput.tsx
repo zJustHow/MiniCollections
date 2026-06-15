@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,7 +6,8 @@ import {
   TextInputProps,
   View,
 } from "react-native";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuFieldStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../../theme/neuText";
 
 type NeuInputProps = TextInputProps & {
   label: string;
@@ -14,12 +15,27 @@ type NeuInputProps = TextInputProps & {
 };
 
 export default function NeuInput({ label, error, style, ...rest }: NeuInputProps) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
       <TextInput
         placeholderTextColor={colors.textSecondary}
-        style={[styles.input, error ? styles.inputError : null, style]}
+        style={[
+          styles.input,
+          neuFieldStyle({ focused, disabled: rest.editable === false }),
+          error ? styles.inputError : null,
+          style,
+        ]}
+        onFocus={(event) => {
+          setFocused(true);
+          rest.onFocus?.(event);
+        }}
+        onBlur={(event) => {
+          setFocused(false);
+          rest.onBlur?.(event);
+        }}
         {...rest}
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -32,26 +48,20 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   label: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: "600",
+    ...neuText.formLabel,
     marginBottom: spacing.xs,
   },
   input: {
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
+    ...neuText.formInput,
+    minHeight: 40,
     paddingHorizontal: spacing.md,
-    color: colors.text,
-    fontSize: 16,
   },
   inputError: {
-    borderColor: colors.danger,
+    borderTopColor: colors.danger,
+    borderLeftColor: colors.danger,
   },
   error: {
+    ...neuText.formError,
     marginTop: spacing.xs,
-    color: colors.danger,
-    fontSize: 13,
   },
 });

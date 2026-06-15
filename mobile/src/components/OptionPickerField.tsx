@@ -8,7 +8,8 @@ import {
   View,
 } from "react-native";
 import { useLocale } from "../providers/LocaleProvider";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuControlStyle, neuFieldStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 export type PickerOption = {
   id: string;
@@ -48,7 +49,10 @@ export default function OptionPickerField({
           accessibilityRole="button"
           disabled={disabled}
           onPress={() => !disabled && setPickerVisible(true)}
-          style={[styles.selector, disabled && styles.selectorDisabled]}
+          style={({ pressed }) => [
+            styles.selector,
+            neuFieldStyle({ pressed, focused: pickerVisible, disabled }),
+          ]}
         >
           <Text style={[styles.selectorText, !value && styles.placeholder]} numberOfLines={1}>
             {displayLabel}
@@ -58,7 +62,7 @@ export default function OptionPickerField({
           <Pressable
             accessibilityRole="button"
             onPress={() => onChange(null, null)}
-            style={styles.clearBtn}
+            style={({ pressed }) => [styles.clearBtn, neuControlStyle({ pressed })]}
           >
             <Text style={styles.clear}>×</Text>
           </Pressable>
@@ -97,9 +101,7 @@ export default function OptionPickerField({
 
 const styles = StyleSheet.create({
   label: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: "600",
+    ...neuText.formLabel,
     marginBottom: spacing.xs,
   },
   row: {
@@ -110,10 +112,7 @@ const styles = StyleSheet.create({
   },
   selector: {
     flex: 1,
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
+    minHeight: 40,
     paddingHorizontal: spacing.md,
     justifyContent: "center",
   },
@@ -129,7 +128,7 @@ const styles = StyleSheet.create({
   },
   clearBtn: {
     width: 40,
-    height: 48,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -152,9 +151,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.pickerModalTitle,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
   },

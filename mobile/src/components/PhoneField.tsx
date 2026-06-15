@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import { COUNTRIES } from "@minicollections/core";
 import { useLocale } from "../providers/LocaleProvider";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuControlStyle, neuFieldStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type PhoneFieldProps = {
   countryCode: string;
@@ -27,6 +28,7 @@ export default function PhoneField({
 }: PhoneFieldProps) {
   const { t, locale } = useLocale();
   const [pickerVisible, setPickerVisible] = useState(false);
+  const [focused, setFocused] = useState(false);
 
   const countryLabel = useMemo(() => {
     const match = COUNTRIES.find((c) => c.code === countryCode);
@@ -41,7 +43,7 @@ export default function PhoneField({
         <Pressable
           accessibilityRole="button"
           onPress={() => setPickerVisible(true)}
-          style={styles.codeBtn}
+          style={({ pressed }) => [styles.codeBtn, neuControlStyle({ pressed })]}
         >
           <Text style={styles.codeText}>{countryCode}</Text>
           <Text style={styles.codeHint} numberOfLines={1}>
@@ -54,7 +56,9 @@ export default function PhoneField({
           keyboardType="phone-pad"
           autoCapitalize="none"
           placeholderTextColor={colors.textSecondary}
-          style={styles.numberInput}
+          style={[styles.numberInput, neuFieldStyle({ focused })]}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
         />
       </View>
 
@@ -93,9 +97,7 @@ export default function PhoneField({
 
 const styles = StyleSheet.create({
   label: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: "600",
+    ...neuText.formLabel,
     marginBottom: spacing.xs,
   },
   row: {
@@ -108,14 +110,9 @@ const styles = StyleSheet.create({
     width: 96,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.sm,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
   },
   codeText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.text,
+    ...neuText.pickerTrigger,
   },
   codeHint: {
     marginTop: 2,
@@ -124,10 +121,7 @@ const styles = StyleSheet.create({
   },
   numberInput: {
     flex: 1,
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
+    minHeight: 40,
     paddingHorizontal: spacing.md,
     color: colors.text,
     fontSize: 16,
@@ -147,9 +141,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.pickerModalTitle,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
   },
@@ -165,8 +157,7 @@ const styles = StyleSheet.create({
   },
   countryCode: {
     width: 48,
-    fontWeight: "700",
-    color: colors.accent,
+    ...neuText.link,
   },
   countryName: {
     flex: 1,

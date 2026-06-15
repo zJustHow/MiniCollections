@@ -15,14 +15,15 @@ import { resetPassword, sendForgotPasswordCode } from "@minicollections/api";
 import { formatPhoneIdentifier } from "@minicollections/core";
 import AuthTypeToggle, { type AuthChannel } from "../components/AuthTypeToggle";
 import PhoneField from "../components/PhoneField";
-import NeuButton from "../components/neu/NeuButton";
-import NeuInput from "../components/neu/NeuInput";
+import NeuButton from "../components/NeuButton";
+import NeuInput from "../components/NeuFormControl/NeuInput";
 import ScreenHeader from "../components/ScreenHeader";
 import useCodeCountdown from "../hooks/useCodeCountdown";
 import { PHONE_AUTH_ENABLED } from "../constants/authFeatures";
 import { useLocale } from "../providers/LocaleProvider";
 import type { RootStackParamList } from "../navigation/types";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ForgotPassword">;
 
@@ -264,6 +265,6 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
     textAlign: "center",
     color: colors.accent,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
 });

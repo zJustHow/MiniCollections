@@ -8,7 +8,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import {
   createGroup,
@@ -21,17 +20,19 @@ import {
   normalizePurchaseDateInput,
   purchasePriceFromFormValue,
 } from "@minicollections/core";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
+import NeuButton from "./NeuButton";
+import GroovedImage from "./GroovedImage";
+import NeuInput from "./NeuFormControl/NeuInput";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type GroupOption = {
   id: number | string;
   name?: string;
 };
 
-type AddToGroupSheetProps = {
+type AddToGroupModalProps = {
   visible: boolean;
   onClose: () => void;
   onSuccess: (groupId: string, groupName: string) => void;
@@ -46,14 +47,14 @@ type PickedImage = {
   type?: string;
 };
 
-export default function AddToGroupSheet({
+export default function AddToGroupModal({
   visible,
   onClose,
   onSuccess,
   brandObjectId,
   defaultName,
   defaultImageUrl,
-}: AddToGroupSheetProps) {
+}: AddToGroupModalProps) {
   const { t } = useLocale();
   const [groups, setGroups] = useState<GroupOption[]>([]);
   const [loadingGroups, setLoadingGroups] = useState(false);
@@ -186,13 +187,7 @@ export default function AddToGroupSheet({
 
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <Text style={styles.coverLabel}>{t("image")}</Text>
-            <View style={styles.coverWell}>
-              {previewUri ? (
-                <Image source={{ uri: previewUri }} style={styles.coverImage} contentFit="cover" />
-              ) : (
-                <Text style={styles.coverPlaceholder}>{t("image")}</Text>
-              )}
-            </View>
+            <GroovedImage uri={previewUri ?? undefined} variant="cover" />
             <NeuButton title={t("image")} variant="ghost" onPress={() => void pickImage()} />
             <NeuInput label={t("name")} value={name} onChangeText={setName} />
             <NeuInput
@@ -290,9 +285,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {
@@ -303,22 +296,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 13,
     fontWeight: "600",
-  },
-  coverWell: {
-    aspectRatio: 1,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  coverImage: {
-    width: "100%",
-    height: "100%",
-  },
-  coverPlaceholder: {
-    color: colors.textSecondary,
   },
   groupLabel: {
     color: colors.textSecondary,
@@ -364,7 +341,7 @@ const styles = StyleSheet.create({
   createLabel: {
     color: colors.text,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
   error: {
     color: colors.danger,

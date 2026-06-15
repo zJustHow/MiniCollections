@@ -124,12 +124,13 @@ function MainLayoutInner({
   const hideProfileButton = customHeaderRoute;
 
   const mainNavWouldCollapse = useMainNavWouldCollapse({
-    enabled: !headerLoading,
+    enabled: !authLoading,
     headerRef,
     profileRef: hideProfileButton ? null : profileRef,
     tabCount: isAdmin ? 5 : 4,
   });
 
+  const headerBarCompact = mainNavWouldCollapse;
   const headerNavCollapsed = mainNavWouldCollapse && showDefaultHeaderNav;
 
   useEffect(() => {
@@ -208,6 +209,7 @@ function MainLayoutInner({
     <Layout
       className={
         [
+          headerBarCompact && "header-bar-compact",
           headerNavCollapsed && "header-nav-collapsed",
           mainNavWouldCollapse && "content-toolbar-compact",
         ]

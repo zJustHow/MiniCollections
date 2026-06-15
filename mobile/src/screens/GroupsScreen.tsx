@@ -10,13 +10,13 @@ import {
   reorderGroups,
   searchGroupsCombinedPage,
 } from "@minicollections/api";
-import NeuCard from "../components/neu/NeuCard";
-import NeuButton from "../components/neu/NeuButton";
+import NeuCard from "../components/NeuCard";
+import NeuButton from "../components/NeuButton";
 import ScreenHeader from "../components/ScreenHeader";
-import SearchField from "../components/SearchField";
-import SortableBrowseList from "../components/SortableBrowseList";
-import CreateGroupSheet from "../components/CreateGroupSheet";
-import EditGroupSheet from "../components/EditGroupSheet";
+import ListSearchField from "../components/ListSearchField";
+import SortableInfiniteBrowseSection from "../components/SortableInfiniteBrowseSection";
+import CreateGroupModal from "../components/CreateGroupModal";
+import EditGroupModal from "../components/EditGroupModal";
 import {
   ListFooterSpinner,
   ListStateBoundary,
@@ -26,7 +26,9 @@ import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { GroupsStackParamList } from "../navigation/types";
 import { openLogin } from "../navigation/openLogin";
-import { colors, spacing } from "@minicollections/theme";
+import { isAddCardItem, withAddCardSlot } from "../utils/listPageUtils";
+import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<GroupsStackParamList, "GroupsList">;
 
@@ -100,10 +102,14 @@ export default function GroupsScreen({ navigation }: Props) {
     reorder: reorderGroups,
     listResetKey: "groups",
     searchResetKey: "groups-search",
+    listOptions: { reservedFirstPageSlots: 1 },
   });
 
   const activeList = searchActive ? searchList : browseList;
-  const groups = displayItems as GroupsListItem[];
+  const groups = withAddCardSlot(
+    displayItems as GroupsListItem[],
+    !searchActive,
+  );
 
   const runSearch = useCallback(() => {
     setSearchKeyword(draftQuery.trim());
@@ -136,35 +142,29 @@ export default function GroupsScreen({ navigation }: Props) {
         <ScreenHeader
           title={t("groups")}
           rightSlot={
-            <View style={styles.headerActions}>
-              {!searchActive && browseList.sortEnabled ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t("sortOrder")}
-                  onPress={toggleReorderMode}
-                  style={[
-                    styles.headerBtn,
-                    reorderMode && styles.headerBtnActive,
-                  ]}
-                >
-                  <Ionicons
-                    name="reorder-three"
-                    size={22}
-                    color={reorderMode ? "#fff" : colors.accent}
-                  />
-                </Pressable>
-              ) : null}
+            !searchActive && browseList.sortEnabled ? (
               <Pressable
                 accessibilityRole="button"
-                onPress={() => setCreateVisible(true)}
-                style={styles.addBtn}
+                accessibilityLabel={t("sortOrder")}
+                onPress={toggleReorderMode}
+                style={({ pressed }) => [
+                  styles.headerBtn,
+                  neuControlStyle({
+                    variant: reorderMode ? "primary" : "default",
+                    pressed,
+                  }),
+                ]}
               >
-                <Text style={styles.addLabel}>+</Text>
+                <Ionicons
+                  name="reorder-three"
+                  size={22}
+                  color={reorderMode ? "#fff" : colors.accent}
+                />
               </Pressable>
-            </View>
+            ) : null
           }
         />
-        <SearchField
+        <ListSearchField
           value={draftQuery}
           onChangeText={setDraftQuery}
           onSubmit={runSearch}
@@ -245,7 +245,7 @@ export default function GroupsScreen({ navigation }: Props) {
         onRetry={() => void activeList.retry()}
       >
         <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-          <SortableBrowseList
+          <SortableInfiniteBrowseSection
             data={groups}
             reorderMode={reorderMode}
             sortEnabled={browseList.sortEnabled}
@@ -253,7 +253,13 @@ export default function GroupsScreen({ navigation }: Props) {
             onMoveItem={browseList.handleDragEnd}
             moveFailedLabel={t("failedToReorder")}
             renderCard={(item) =>
-              isSearchObject(item) ? (
+              isAddCardItem(item) ? (
+                <NeuCard
+                  add
+                  name={t("addGroup")}
+                  onPress={() => setCreateVisible(true)}
+                />
+              ) : isSearchObject(item) ? (
                 <NeuCard
                   item={{
                     id: item.id,
@@ -306,14 +312,14 @@ export default function GroupsScreen({ navigation }: Props) {
         </SafeAreaView>
       </ListStateBoundary>
 
-      <CreateGroupSheet
+      <CreateGroupModal
         visible={createVisible}
         onClose={() => setCreateVisible(false)}
         onCreated={() => void browseList.refreshAll()}
       />
 
       {editingGroupId ? (
-        <EditGroupSheet
+        <EditGroupModal
           visible={editVisible}
           groupId={editingGroupId}
           onClose={closeEditGroup}
@@ -345,35 +351,11 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: "center",
   },
-  headerActions: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
   headerBtn: {
     width: 36,
     height: 36,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
-  },
-  headerBtnActive: {
-    backgroundColor: colors.accent,
-    borderColor: colors.accent,
-  },
-  addBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  addLabel: {
-    fontSize: 28,
-    fontWeight: "300",
-    color: colors.accent,
-    lineHeight: 30,
   },
   reorderHint: {
     color: colors.textSecondary,

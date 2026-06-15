@@ -19,7 +19,8 @@ services:
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
       TZ: UTC
     ports:
-      - "9200:9200"
+      # 9201 avoids clashing with other local Elasticsearch on the default 9200 (e.g. other docker projects).
+      - "9201:9200"
     volumes:
       - minicollections-es-local:/usr/share/elasticsearch/data
 

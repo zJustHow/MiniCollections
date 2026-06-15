@@ -118,7 +118,6 @@ export function useMainNavWouldCollapse({
 
   useLayoutEffect(() => {
     if (!enabled) {
-      setWouldCollapse(false);
       return undefined;
     }
 

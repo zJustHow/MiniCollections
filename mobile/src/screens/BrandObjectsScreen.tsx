@@ -13,10 +13,11 @@ import {
   searchBrandObjectsByBrandIdFacets,
   searchBrandObjectsByBrandIdPage,
 } from "@minicollections/api";
-import NeuCard from "../components/neu/NeuCard";
+import NeuCard from "../components/NeuCard";
+import BrandObjectModal from "../components/BrandObjectModal";
 import ScreenHeader from "../components/ScreenHeader";
-import SearchField from "../components/SearchField";
-import SearchFiltersSheet, { type SearchFacets } from "../components/SearchFiltersSheet";
+import ListSearchField from "../components/ListSearchField";
+import ObjectSearchFilterPanel, { type SearchFacets } from "../components/ObjectSearchFilterPanel";
 import {
   ListFooterSpinner,
   ListStateBoundary,
@@ -26,8 +27,10 @@ import { useBrandObjectSearchFilters } from "../hooks/useBrandObjectSearchFilter
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { BrandsStackParamList } from "../navigation/types";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 import { trackBrandViewOnce } from "../utils/viewTracking";
+import { isAddCardItem, listBrowseContentStyle, listBrowseHeaderStyle, withAddCardSlot } from "../utils/listPageUtils";
 
 type Props = NativeStackScreenProps<BrandsStackParamList, "BrandObjects">;
 
@@ -48,6 +51,7 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
   const [filtersVisible, setFiltersVisible] = useState(false);
   const [facets, setFacets] = useState<SearchFacets | null>(null);
   const [facetsLoading, setFacetsLoading] = useState(false);
+  const [brandObjectModalVisible, setBrandObjectModalVisible] = useState(false);
   const searchActive = searchKeyword.trim().length > 0;
 
   const {
@@ -118,9 +122,15 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
     loadMore,
     refresh,
     retry,
-  } = useInfiniteList(fetchPage, { resetKey });
+  } = useInfiniteList(fetchPage, {
+    resetKey,
+    reservedFirstPageSlots: !searchActive && isAdmin ? 1 : 0,
+  });
 
-  const objects = items as BrandObjectItem[];
+  const objects = withAddCardSlot(
+    items as BrandObjectItem[],
+    isAdmin && !searchActive,
+  );
 
   useEffect(() => {
     if (!searchActive) {
@@ -203,7 +213,7 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
     () => (
       <View>
         <ScreenHeader title={brandTitle} showBack />
-        <SearchField
+        <ListSearchField
           value={draftQuery}
           onChangeText={setDraftQuery}
           onSubmit={runSearch}
@@ -225,7 +235,7 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
             <Pressable
               accessibilityRole="button"
               onPress={() => setFiltersVisible(true)}
-              style={styles.filterBtn}
+              style={({ pressed }) => [styles.filterBtn, neuControlStyle({ pressed })]}
             >
               <Ionicons name="options-outline" size={18} color={colors.accent} />
               <Text style={styles.filterBtnLabel}>{t("searchFilters")}</Text>
@@ -269,7 +279,9 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
             data={objects}
             numColumns={2}
             keyExtractor={(item) => String(item.id)}
+            contentContainerStyle={listBrowseContentStyle}
             ListHeaderComponent={listHeader}
+            ListHeaderComponentStyle={listBrowseHeaderStyle}
             ListEmptyComponent={
               !loading && searchActive ? (
                 <View style={styles.emptyWrap}>
@@ -279,19 +291,28 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
             }
             renderItem={({ item }) => (
               <View style={styles.cell}>
-                <NeuCard
-                  item={item}
-                  variant="object"
-                  subtitle={item.brand?.name ?? brandTitle}
-                  onPress={() =>
-                    navigation.navigate("BrandObjectDetail", {
-                      brandId,
-                      brandName: brandTitle,
-                      objectId: String(item.id),
-                      objectName: item.name ?? "",
-                    })
-                  }
-                />
+                {isAddCardItem(item) ? (
+                  <NeuCard
+                    add
+                    name={t("addBrandObject")}
+                    variant="object"
+                    onPress={() => setBrandObjectModalVisible(true)}
+                  />
+                ) : (
+                  <NeuCard
+                    item={item}
+                    variant="object"
+                    subtitle={item.brand?.name ?? brandTitle}
+                    onPress={() =>
+                      navigation.navigate("BrandObjectDetail", {
+                        brandId,
+                        brandName: brandTitle,
+                        objectId: String(item.id),
+                        objectName: item.name ?? "",
+                      })
+                    }
+                  />
+                )}
               </View>
             )}
             onEndReached={() => {
@@ -306,7 +327,7 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
         </SafeAreaView>
       </ListStateBoundary>
 
-      <SearchFiltersSheet
+      <ObjectSearchFilterPanel
         visible={filtersVisible}
         onClose={() => setFiltersVisible(false)}
         facets={facets}
@@ -321,6 +342,13 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
         onToggleSeries={toggleSeries}
         onClearFilters={clearFilters}
         showBrands={false}
+      />
+
+      <BrandObjectModal
+        visible={brandObjectModalVisible}
+        brandId={brandId}
+        onClose={() => setBrandObjectModalVisible(false)}
+        onCreated={() => void refresh()}
       />
     </>
   );
@@ -355,14 +383,9 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
   },
   filterBtnLabel: {
-    color: colors.accent,
-    fontSize: 13,
-    fontWeight: "700",
+    ...neuText.link,
   },
   filterBadge: {
     minWidth: 18,
@@ -374,9 +397,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   filterBadgeLabel: {
+    ...neuText.badge,
     color: "#fff",
-    fontSize: 11,
-    fontWeight: "700",
   },
   emptyWrap: {
     padding: spacing.xl,

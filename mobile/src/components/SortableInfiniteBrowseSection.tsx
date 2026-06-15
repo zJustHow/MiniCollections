@@ -10,7 +10,8 @@ import {
 } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { isAddCardItem, listBrowseContentStyle, listBrowseHeaderStyle } from "../utils/listPageUtils";
 
 type ItemWithId = { id: number | string };
 
@@ -33,7 +34,7 @@ type Props<T extends ItemWithId> = {
   numColumns?: number;
 };
 
-export default function SortableBrowseList<T extends ItemWithId>({
+export default function SortableInfiniteBrowseSection<T extends ItemWithId>({
   data,
   reorderMode,
   sortEnabled,
@@ -49,10 +50,13 @@ export default function SortableBrowseList<T extends ItemWithId>({
   numColumns = 2,
 }: Props<T>) {
   const showReorderControls = reorderMode && sortEnabled;
+  const reorderData = showReorderControls
+    ? data.filter((item) => !isAddCardItem(item))
+    : data;
 
   const moveItem = useCallback(
     async (itemId: number | string, direction: -1 | 1) => {
-      const ids = data.map((item) => item.id);
+      const ids = reorderData.map((item) => item.id);
       const index = ids.findIndex((id) => String(id) === String(itemId));
       const targetIndex = index + direction;
       if (index < 0 || targetIndex < 0 || targetIndex >= ids.length) return;
@@ -62,16 +66,18 @@ export default function SortableBrowseList<T extends ItemWithId>({
         Alert.alert(moveFailedLabel);
       }
     },
-    [data, moveFailedLabel, onMoveItem],
+    [reorderData, moveFailedLabel, onMoveItem],
   );
 
   if (showReorderControls) {
     return (
       <FlashList
-        data={data}
+        data={reorderData}
         numColumns={1}
         keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={listBrowseContentStyle}
         ListHeaderComponent={listHeader}
+        ListHeaderComponentStyle={listBrowseHeaderStyle}
         ListEmptyComponent={listEmpty}
         ListFooterComponent={
           <>
@@ -95,7 +101,13 @@ export default function SortableBrowseList<T extends ItemWithId>({
                 accessibilityLabel="Move up"
                 disabled={index === 0 || reordering}
                 onPress={() => void moveItem(item.id, -1)}
-                style={[styles.moveBtn, index === 0 && styles.moveBtnDisabled]}
+                style={({ pressed }) => [
+                  styles.moveBtn,
+                  neuControlStyle({
+                    pressed,
+                    disabled: index === 0 || reordering,
+                  }),
+                ]}
               >
                 <Ionicons
                   name="chevron-up"
@@ -106,18 +118,21 @@ export default function SortableBrowseList<T extends ItemWithId>({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Move down"
-                disabled={index === data.length - 1 || reordering}
+                disabled={index === reorderData.length - 1 || reordering}
                 onPress={() => void moveItem(item.id, 1)}
-                style={[
+                style={({ pressed }) => [
                   styles.moveBtn,
-                  index === data.length - 1 && styles.moveBtnDisabled,
+                  neuControlStyle({
+                    pressed,
+                    disabled: index === reorderData.length - 1 || reordering,
+                  }),
                 ]}
               >
                 <Ionicons
                   name="chevron-down"
                   size={22}
                   color={
-                    index === data.length - 1 ? colors.border : colors.accent
+                    index === reorderData.length - 1 ? colors.border : colors.accent
                   }
                 />
               </Pressable>
@@ -133,7 +148,9 @@ export default function SortableBrowseList<T extends ItemWithId>({
       data={data}
       numColumns={numColumns}
       keyExtractor={(item) => String(item.id)}
+      contentContainerStyle={listBrowseContentStyle}
       ListHeaderComponent={listHeader}
+      ListHeaderComponentStyle={listBrowseHeaderStyle}
       ListEmptyComponent={listEmpty}
       ListFooterComponent={listFooter}
       refreshControl={refreshControl}
@@ -153,7 +170,6 @@ const styles = StyleSheet.create({
   reorderRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
     gap: spacing.sm,
   },
@@ -168,12 +184,6 @@ const styles = StyleSheet.create({
     height: 36,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
-  },
-  moveBtnDisabled: {
-    opacity: 0.5,
   },
   reorderSpinner: {
     paddingVertical: spacing.md,

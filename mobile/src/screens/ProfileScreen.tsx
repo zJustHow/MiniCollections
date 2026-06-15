@@ -8,7 +8,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
@@ -20,8 +19,9 @@ import {
   uploadAvatar,
 } from "@minicollections/api";
 import ScreenHeader from "../components/ScreenHeader";
-import NeuButton from "../components/neu/NeuButton";
-import NeuInput from "../components/neu/NeuInput";
+import NeuButton from "../components/NeuButton";
+import GroovedImage from "../components/GroovedImage";
+import NeuInput from "../components/NeuFormControl/NeuInput";
 import ChangePasswordSheet from "../components/ChangePasswordSheet";
 import BindPhoneSheet from "../components/BindPhoneSheet";
 import UpdateEmailSheet from "../components/UpdateEmailSheet";
@@ -33,7 +33,8 @@ import type { ProfileStackParamList } from "../navigation/types";
 import { API_BASE_URL, APP_VERSION, IS_DEV_BUILD } from "../config";
 import { WEB_BASE_URL } from "../utils/appLinks";
 import { openLogin } from "../navigation/openLogin";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuRaised, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type ProfileNavigation = NativeStackNavigationProp<ProfileStackParamList, "ProfileHome">;
 
@@ -145,15 +146,12 @@ export default function ProfileScreen() {
               disabled={avatarLoading}
             >
               <View style={styles.avatarRing}>
-                {avatarUri ? (
-                  <Image source={{ uri: avatarUri }} style={styles.avatar} contentFit="cover" />
-                ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <Text style={styles.avatarInitial}>
-                      {(profile.display_name ?? profile.email ?? "?").charAt(0).toUpperCase()}
-                    </Text>
-                  </View>
-                )}
+                <GroovedImage
+                  uri={avatarUri ?? undefined}
+                  variant="avatar"
+                  style={{ width: 96, height: 96 }}
+                  placeholderLabel={(profile.display_name ?? profile.email ?? "?").charAt(0).toUpperCase()}
+                />
                 {avatarLoading ? (
                   <View style={styles.avatarOverlay}>
                     <ActivityIndicator color={colors.accent} />
@@ -264,7 +262,7 @@ export default function ProfileScreen() {
             />
             <NeuButton
               title={t("deleteAccount")}
-              variant="ghost"
+              variant="danger"
               onPress={() => setDeleteVisible(true)}
               style={styles.deleteBtn}
             />
@@ -338,28 +336,6 @@ const styles = StyleSheet.create({
     height: 96,
     position: "relative",
   },
-  avatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  avatarPlaceholder: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  avatarInitial: {
-    fontSize: 36,
-    fontWeight: "800",
-    color: colors.accent,
-  },
   avatarOverlay: {
     ...StyleSheet.absoluteFill,
     borderRadius: 48,
@@ -373,20 +349,17 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
     gap: spacing.xs,
+    backgroundColor: colors.bg,
+    ...neuRaised("sm"),
   },
   label: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: "600",
+    ...neuText.formLabel,
   },
   value: {
     color: colors.text,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
   guest: {
     color: colors.textSecondary,
@@ -405,7 +378,6 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     marginTop: spacing.sm,
-    borderColor: colors.danger,
   },
   version: {
     marginTop: spacing.lg,

@@ -7,17 +7,18 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { resolveMediaUrl, submitFeedback, uploadImage } from "@minicollections/api";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
-import BrandPickerField from "./BrandPickerField";
+import NeuButton from "./NeuButton";
+import GroovedImage from "./GroovedImage";
+import NeuInput from "./NeuFormControl/NeuInput";
+import BrandSelectField from "./BrandSelectField";
 import { useLocale } from "../providers/LocaleProvider";
 import type { FeedbackSubmissionType } from "../utils/feedbackLabels";
 import { colors, radius, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
-type SubmitFeedbackSheetProps = {
+type SubmitObjectModalProps = {
   visible: boolean;
   onClose: () => void;
   onSubmitted: () => void;
@@ -45,7 +46,7 @@ const TITLE_KEY: Record<FeedbackSubmissionType, string> = {
   DATA_CORRECTION: "reportModalTitleDataCorrection",
 };
 
-export default function SubmitFeedbackSheet({
+export default function SubmitObjectModal({
   visible,
   onClose,
   onSubmitted,
@@ -53,7 +54,7 @@ export default function SubmitFeedbackSheet({
   initialBrandName = null,
   initialSubmissionType = "MISSING_MODEL",
   initialNameEn = "",
-}: SubmitFeedbackSheetProps) {
+}: SubmitObjectModalProps) {
   const { t } = useLocale();
   const [submissionType, setSubmissionType] =
     useState<FeedbackSubmissionType>("MISSING_MODEL");
@@ -180,7 +181,7 @@ export default function SubmitFeedbackSheet({
             </View>
 
             {submissionType !== "BUG_REPORT" ? (
-              <BrandPickerField
+              <BrandSelectField
                 brandId={brandId}
                 brandName={brandName}
                 useOtherBrand={useOtherBrand}
@@ -236,13 +237,7 @@ export default function SubmitFeedbackSheet({
             />
 
             <Text style={styles.coverLabel}>{t("image")}</Text>
-            <View style={styles.coverWell}>
-              {pickedImage?.uri ? (
-                <Image source={{ uri: pickedImage.uri }} style={styles.coverImage} contentFit="cover" />
-              ) : (
-                <Text style={styles.coverPlaceholder}>{t("image")}</Text>
-              )}
-            </View>
+            <GroovedImage uri={pickedImage?.uri ?? undefined} variant="cover" />
             <NeuButton title={t("image")} variant="ghost" onPress={() => void pickImage()} />
 
             {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -277,9 +272,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {
@@ -305,35 +298,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bg,
   },
   typeLabel: {
-    fontSize: 11,
-    fontWeight: "600",
+    ...neuText.caption,
     color: colors.textSecondary,
     textAlign: "center",
   },
   typeLabelActive: {
     color: colors.accent,
-    fontWeight: "700",
+    fontWeight: neuText.body.fontWeight,
   },
   coverLabel: {
     color: colors.textSecondary,
     fontSize: 13,
     fontWeight: "600",
-  },
-  coverWell: {
-    aspectRatio: 1.6,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  coverImage: {
-    width: "100%",
-    height: "100%",
-  },
-  coverPlaceholder: {
-    color: colors.textSecondary,
   },
   error: {
     color: colors.danger,

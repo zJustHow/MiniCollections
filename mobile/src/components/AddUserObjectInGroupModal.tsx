@@ -7,20 +7,21 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { createUserObject, resolveMediaUrl, uploadImage } from "@minicollections/api";
 import {
   normalizePurchaseDateInput,
   purchasePriceFromFormValue,
 } from "@minicollections/core";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
+import NeuButton from "./NeuButton";
+import GroovedImage from "./GroovedImage";
+import NeuInput from "./NeuFormControl/NeuInput";
 import ModelPickerField, { type CatalogModelOption } from "./ModelPickerField";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
-type AddUserObjectSheetProps = {
+type AddUserObjectInGroupModalProps = {
   visible: boolean;
   onClose: () => void;
   onAdded: () => void;
@@ -33,12 +34,12 @@ type PickedImage = {
   type?: string;
 };
 
-export default function AddUserObjectSheet({
+export default function AddUserObjectInGroupModal({
   visible,
   onClose,
   onAdded,
   groupId,
-}: AddUserObjectSheetProps) {
+}: AddUserObjectInGroupModalProps) {
   const { t } = useLocale();
   const [selectedModel, setSelectedModel] = useState<CatalogModelOption | null>(null);
   const [name, setName] = useState("");
@@ -145,13 +146,7 @@ export default function AddUserObjectSheet({
             />
             <NeuInput label={t("name")} value={name} onChangeText={setName} />
             <Text style={styles.coverLabel}>{t("image")}</Text>
-            <View style={styles.coverWell}>
-              {previewUri ? (
-                <Image source={{ uri: previewUri }} style={styles.coverImage} contentFit="cover" />
-              ) : (
-                <Text style={styles.coverPlaceholder}>{t("image")}</Text>
-              )}
-            </View>
+            <GroovedImage uri={previewUri ?? undefined} variant="cover" />
             <NeuButton title={t("image")} variant="ghost" onPress={() => void pickImage()} />
             <NeuInput
               label={t("purchasePrice")}
@@ -205,9 +200,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {
@@ -218,22 +211,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 13,
     fontWeight: "600",
-  },
-  coverWell: {
-    aspectRatio: 1,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  coverImage: {
-    width: "100%",
-    height: "100%",
-  },
-  coverPlaceholder: {
-    color: colors.textSecondary,
   },
   error: {
     color: colors.danger,

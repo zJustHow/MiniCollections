@@ -1,15 +1,18 @@
 import Constants from "expo-constants";
+import { normalizePublicUrl } from "../../expoPublicUrl";
 
 type AppExtra = {
-  webUrl?: string | null;
+  webUrl?: unknown;
 };
 
 function readConfiguredWebUrl(): string | undefined {
-  const fromEnv = process.env.EXPO_PUBLIC_WEB_URL?.trim();
-  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  const fromEnv = normalizePublicUrl(process.env.EXPO_PUBLIC_WEB_URL);
+  if (fromEnv) return fromEnv;
 
-  const fromExtra = (Constants.expoConfig?.extra as AppExtra | undefined)?.webUrl?.trim();
-  if (fromExtra) return fromExtra.replace(/\/$/, "");
+  const fromExtra = normalizePublicUrl(
+    (Constants.expoConfig?.extra as AppExtra | undefined)?.webUrl,
+  );
+  if (fromExtra) return fromExtra;
 
   return undefined;
 }

@@ -40,7 +40,7 @@ log "Postgres is ready."
 
 log "Waiting for Elasticsearch to be ready..."
 ES_RETRIES=0
-until curl -sf "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=1s" > /dev/null 2>&1; do
+until curl -sf "http://localhost:9201/_cluster/health?wait_for_status=yellow&timeout=1s" > /dev/null 2>&1; do
   ES_RETRIES=$((ES_RETRIES + 1))
   if [ "$ES_RETRIES" -ge 30 ]; then
     echo -e "${RED}[dev]${NC} Elasticsearch did not become ready after 60s. Check docker logs." >&2
@@ -61,6 +61,18 @@ until nc -z 127.0.0.1 6380 2>/dev/null; do
   sleep 2
 done
 log "Redis is ready."
+
+log "Waiting for MinIO to be ready (localhost:9000)..."
+MINIO_RETRIES=0
+until curl -sf "http://localhost:9000/minio/health/live" > /dev/null 2>&1; do
+  MINIO_RETRIES=$((MINIO_RETRIES + 1))
+  if [ "$MINIO_RETRIES" -ge 30 ]; then
+    echo -e "${RED}[dev]${NC} MinIO did not become ready after 60s. Try: docker compose -f \"$ROOT/docker-compose.yml\" up -d minio --force-recreate" >&2
+    exit 1
+  fi
+  sleep 2
+done
+log "MinIO is ready."
 
 log "Ensuring pg_trgm extension..."
 if ! docker compose -f "$ROOT/docker-compose.yml" exec -T db \

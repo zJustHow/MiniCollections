@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Pressable,
   StyleSheet,
@@ -7,9 +7,15 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { colors, spacing } from "@minicollections/theme";
+import {
+  colors,
+  neuControlStyle,
+  neuFieldStyle,
+  spacing,
+} from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
-type SearchFieldProps = {
+type ListSearchFieldProps = {
   value: string;
   onChangeText: (text: string) => void;
   onSubmit: () => void;
@@ -17,13 +23,15 @@ type SearchFieldProps = {
   placeholder: string;
 };
 
-export default function SearchField({
+export default function ListSearchField({
   value,
   onChangeText,
   onSubmit,
   onClear,
   placeholder,
-}: SearchFieldProps) {
+}: ListSearchFieldProps) {
+  const [focused, setFocused] = useState(false);
+
   return (
     <View style={styles.wrap}>
       <TextInput
@@ -31,18 +39,31 @@ export default function SearchField({
         onChangeText={onChangeText}
         placeholder={placeholder}
         placeholderTextColor={colors.textSecondary}
-        style={styles.input}
+        style={[styles.input, neuFieldStyle({ focused })]}
         returnKeyType="search"
         onSubmitEditing={onSubmit}
         autoCapitalize="none"
         autoCorrect={false}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
       />
       {value.length > 0 && onClear ? (
-        <Pressable accessibilityRole="button" onPress={onClear} style={styles.clearBtn}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={onClear}
+          style={({ pressed }) => [styles.clearBtn, neuControlStyle({ pressed })]}
+        >
           <Text style={styles.clearLabel}>×</Text>
         </Pressable>
       ) : null}
-      <Pressable accessibilityRole="button" onPress={onSubmit} style={styles.submitBtn}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onSubmit}
+        style={({ pressed }) => [
+          styles.submitBtn,
+          neuControlStyle({ variant: "primary", pressed }),
+        ]}
+      >
         <Ionicons name="search" size={20} color="#fff" />
       </Pressable>
     </View>
@@ -58,31 +79,26 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.sm,
   },
   input: {
+    ...neuText.formInput,
     flex: 1,
-    minHeight: 44,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
+    minHeight: 40,
     paddingHorizontal: spacing.md,
-    color: colors.text,
-    fontSize: 15,
   },
   clearBtn: {
     width: 36,
-    height: 44,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
   },
   clearLabel: {
-    fontSize: 24,
+    ...neuText.screenHeaderBack,
     color: colors.textSecondary,
     lineHeight: 28,
   },
   submitBtn: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.accent,
   },
 });

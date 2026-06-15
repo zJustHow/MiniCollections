@@ -1,7 +1,8 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuControlStyle, neuRaisedUp, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type ScreenHeaderProps = {
   title: string;
@@ -27,7 +28,7 @@ export default function ScreenHeader({
           <Pressable
             accessibilityRole="button"
             onPress={onBack ?? (() => navigation.goBack())}
-            style={styles.backBtn}
+            style={({ pressed }) => [styles.backBtn, neuControlStyle({ pressed })]}
           >
             <Text style={styles.backLabel}>←</Text>
           </Pressable>
@@ -55,9 +56,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.sm,
     paddingBottom: spacing.sm,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
     backgroundColor: colors.bg,
+    ...neuRaisedUp("sm"),
   },
   row: {
     flexDirection: "row",
@@ -71,9 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   backLabel: {
-    fontSize: 24,
-    color: colors.accent,
-    fontWeight: "700",
+    ...neuText.screenHeaderBack,
   },
   backPlaceholder: {
     width: 40,
@@ -82,14 +80,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.screenHeaderTitle,
   },
   subtitle: {
+    ...neuText.screenHeaderSubtitle,
     marginTop: 2,
-    fontSize: 13,
-    color: colors.textSecondary,
   },
   rightSlot: {
     minWidth: 40,

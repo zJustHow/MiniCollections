@@ -92,7 +92,8 @@
   display: none;
 }
 
-/* Header collapse: when profile would overlap top-bar tabs */
+/* Compact top bar — default nav (hamburger) and custom header routes */
+.header-bar-compact > .ant-layout-header,
 .header-nav-collapsed > .ant-layout-header {
   height: var(--header-height-mobile) !important;
   line-height: normal !important;

@@ -14,12 +14,13 @@ import {
   getSeriesByBrandId,
 } from "@minicollections/api";
 import type { AdminSubmissionItem } from "./AdminSubmissionDetailSheet";
-import BrandPickerField from "./BrandPickerField";
+import BrandSelectField from "./BrandSelectField";
 import OptionPickerField, { type PickerOption } from "./OptionPickerField";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
+import NeuButton from "./NeuButton";
+import NeuInput from "./NeuFormControl/NeuInput";
 import { useLocale } from "../providers/LocaleProvider";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type ApproveSubmissionSheetProps = {
   visible: boolean;
@@ -189,7 +190,7 @@ export default function ApproveSubmissionSheet({
         <View style={styles.sheet}>
           <Text style={styles.title}>{t("approveTitle")}</Text>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-            <BrandPickerField
+            <BrandSelectField
               brandId={brandId}
               brandName={brandName}
               useOtherBrand={useOtherBrand}
@@ -298,9 +299,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {

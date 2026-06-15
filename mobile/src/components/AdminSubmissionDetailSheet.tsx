@@ -8,14 +8,14 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
+import NeuButton from "./NeuButton";
+import GroovedImage from "./GroovedImage";
 import {
   approveSubmission,
   rejectSubmission,
   resolveMediaUrl,
 } from "@minicollections/api";
-import NeuButton from "./neu/NeuButton";
-import NeuInput from "./neu/NeuInput";
+import NeuInput from "./NeuFormControl/NeuInput";
 import ApproveSubmissionSheet from "./ApproveSubmissionSheet";
 import { useLocale } from "../providers/LocaleProvider";
 import {
@@ -24,6 +24,7 @@ import {
   feedbackTypeLabel,
 } from "../utils/feedbackLabels";
 import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 export type AdminSubmissionItem = {
   id: number | string;
@@ -149,7 +150,7 @@ export default function AdminSubmissionDetailSheet({
             {imageUri ? (
               <View style={styles.imageBlock}>
                 <Text style={styles.rowLabel}>{t("image")}</Text>
-                <Image source={{ uri: imageUri }} style={styles.image} contentFit="contain" />
+                <GroovedImage uri={imageUri} variant="detail" />
               </View>
             ) : null}
 
@@ -241,9 +242,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
     marginBottom: spacing.md,
   },
   content: {
@@ -257,13 +256,11 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   typeTag: {
-    fontSize: 12,
-    fontWeight: "700",
+    ...neuText.tag,
     color: colors.accent,
   },
   statusTag: {
-    fontSize: 12,
-    fontWeight: "700",
+    ...neuText.tag,
   },
   row: {
     paddingVertical: spacing.xs,
@@ -285,13 +282,6 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     marginTop: spacing.sm,
   },
-  image: {
-    width: "100%",
-    aspectRatio: 1.2,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
   noteBlock: {
     marginTop: spacing.sm,
     padding: spacing.md,
@@ -304,8 +294,7 @@ const styles = StyleSheet.create({
     borderLeftColor: colors.danger,
   },
   noteHeading: {
-    fontSize: 11,
-    fontWeight: "700",
+    ...neuText.badge,
     color: colors.textSecondary,
   },
   noteText: {

@@ -8,7 +8,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CommonActions } from "@react-navigation/native";
@@ -20,9 +19,10 @@ import {
 } from "@minicollections/api";
 import { displayPurchasePriceFromObject } from "@minicollections/core";
 import ScreenHeader from "../components/ScreenHeader";
-import NeuButton from "../components/neu/NeuButton";
-import NeuCard from "../components/neu/NeuCard";
-import EditGroupObjectSheet from "../components/EditGroupObjectSheet";
+import NeuButton from "../components/NeuButton";
+import NeuCard from "../components/NeuCard";
+import DetailImage from "../components/DetailImage";
+import EditUserObjectModal from "../components/EditUserObjectModal";
 import ImageViewerModal from "../components/ImageViewerModal";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
@@ -30,7 +30,8 @@ import type { GroupsStackParamList } from "../navigation/types";
 import { openLogin } from "../navigation/openLogin";
 import { groupObjectDeepLink } from "../utils/deepLinks";
 import { shareModelLink } from "../utils/shareModel";
-import { colors, spacing } from "@minicollections/theme";
+import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<GroupsStackParamList, "GroupObjectDetail">;
 
@@ -197,7 +198,7 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
             <Pressable
               accessibilityRole="button"
               onPress={() => setEditVisible(true)}
-              style={styles.editBtn}
+              style={({ pressed }) => [styles.editBtn, neuControlStyle({ pressed })]}
             >
               <Text style={styles.editLabel}>{t("editModel")}</Text>
             </Pressable>
@@ -215,23 +216,10 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content}>
-          <Pressable
-            accessibilityRole="button"
-            disabled={!imageUri}
+          <DetailImage
+            imageUrl={imageUri}
             onPress={() => imageUri && setImageViewerVisible(true)}
-            style={styles.imageWell}
-          >
-            {imageUri ? (
-              <Image
-                source={{ uri: imageUri }}
-                style={styles.image}
-                contentFit="contain"
-                transition={200}
-              />
-            ) : (
-              <View style={styles.placeholder} />
-            )}
-          </Pressable>
+          />
 
           {purchasePrice != null ? (
             <DetailRow label={t("purchasePrice")} value={purchasePrice} />
@@ -276,7 +264,7 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
 
           <NeuButton
             title={t("delete")}
-            variant="ghost"
+            variant="danger"
             loading={deleting}
             onPress={confirmDelete}
             style={styles.deleteBtn}
@@ -284,7 +272,7 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
         </ScrollView>
       )}
 
-      <EditGroupObjectSheet
+      <EditUserObjectModal
         visible={editVisible}
         onClose={() => setEditVisible(false)}
         onSaved={() => {
@@ -328,23 +316,6 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
   },
-  imageWell: {
-    aspectRatio: 1,
-    backgroundColor: colors.sl,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  image: {
-    width: "92%",
-    height: "92%",
-  },
-  placeholder: {
-    width: "40%",
-    height: "40%",
-    backgroundColor: colors.border,
-  },
   row: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -354,60 +325,49 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   rowLabel: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    fontWeight: "600",
+    ...neuText.panelLabel,
   },
   rowValue: {
+    ...neuText.panelValue,
     flex: 1,
     textAlign: "right",
-    color: colors.text,
-    fontSize: 14,
   },
   notesBlock: {
     gap: spacing.xs,
   },
   notesLabel: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    fontWeight: "700",
+    ...neuText.panelLabel,
   },
   notesText: {
-    color: colors.text,
-    fontSize: 15,
-    lineHeight: 22,
+    ...neuText.panelBody,
   },
   relatedBlock: {
     gap: spacing.sm,
     marginTop: spacing.sm,
   },
   relatedLabel: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    fontWeight: "700",
+    ...neuText.panelLabel,
   },
   deleteBtn: {
     marginTop: spacing.lg,
-    borderColor: colors.danger,
   },
   shareBtn: {
     marginTop: spacing.md,
   },
   guestText: {
+    ...neuText.bodyLg,
     color: colors.textSecondary,
-    fontSize: 15,
     textAlign: "center",
   },
   editBtn: {
-    paddingHorizontal: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
   },
   editLabel: {
-    color: colors.accent,
-    fontSize: 13,
-    fontWeight: "700",
+    ...neuText.link,
   },
   error: {
-    color: colors.danger,
+    ...neuText.authError,
     textAlign: "center",
   },
 });

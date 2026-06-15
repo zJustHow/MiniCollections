@@ -14,14 +14,15 @@ import { CommonActions } from "@react-navigation/native";
 import { formatPhoneIdentifier } from "@minicollections/core";
 import AuthTypeToggle, { type AuthChannel } from "../components/AuthTypeToggle";
 import PhoneField from "../components/PhoneField";
-import NeuButton from "../components/neu/NeuButton";
-import NeuInput from "../components/neu/NeuInput";
+import NeuButton from "../components/NeuButton";
+import NeuInput from "../components/NeuFormControl/NeuInput";
 import ScreenHeader from "../components/ScreenHeader";
 import { PHONE_AUTH_ENABLED } from "../constants/authFeatures";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { RootStackParamList } from "../navigation/types";
-import { colors, spacing, typography } from "@minicollections/theme";
+import { colors, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Login">;
 
@@ -166,9 +167,7 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   title: {
-    fontSize: typography.titleSize,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.authTitle,
     textAlign: "center",
     marginBottom: spacing.xl,
   },
@@ -176,7 +175,7 @@ const styles = StyleSheet.create({
     color: colors.accent,
   },
   error: {
-    color: colors.danger,
+    ...neuText.authError,
     marginBottom: spacing.md,
     textAlign: "center",
   },
@@ -189,8 +188,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   link: {
-    color: colors.accent,
-    fontWeight: "700",
-    fontSize: 15,
+    ...neuText.link,
+    fontSize: neuText.bodyLg.fontSize,
   },
 });

@@ -1,5 +1,12 @@
 import type { ConfigContext, ExpoConfig } from "expo/config";
 
+function normalizePublicUrl(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  return trimmed.replace(/\/$/, "");
+}
+
 function parseWebHost(webUrl: string | null): string | null {
   if (!webUrl) return null;
   try {
@@ -10,19 +17,23 @@ function parseWebHost(webUrl: string | null): string | null {
 }
 
 export default ({ config }: ConfigContext): ExpoConfig => {
-  const apiUrl = process.env.EXPO_PUBLIC_API_URL?.trim().replace(/\/$/, "") ?? null;
-  const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.trim().replace(/\/$/, "") ?? null;
-  const webHost = parseWebHost(webUrl);
+  const apiUrl = normalizePublicUrl(process.env.EXPO_PUBLIC_API_URL);
+  const webUrl = normalizePublicUrl(process.env.EXPO_PUBLIC_WEB_URL);
+  const webHost = parseWebHost(webUrl ?? null);
   const baseAndroid = config.android ?? {};
   const baseIos = config.ios ?? {};
+  const baseExtra =
+    typeof config.extra === "object" && config.extra != null ? { ...config.extra } : {};
+  delete baseExtra.apiUrl;
+  delete baseExtra.webUrl;
 
   return {
     ...(config as ExpoConfig),
     scheme: "minicollections",
     extra: {
-      ...(typeof config.extra === "object" && config.extra != null ? config.extra : {}),
-      apiUrl,
-      webUrl,
+      ...baseExtra,
+      ...(apiUrl ? { apiUrl } : {}),
+      ...(webUrl ? { webUrl } : {}),
     },
     ios: {
       ...baseIos,

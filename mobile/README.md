@@ -77,7 +77,8 @@ Examples:
 
 ```
 mobile/src/
-  components/neu/   # RN UI components (NeuCard, NeuButton, …)
+  components/          # Shared UI (names aligned with web frontend/src/components)
+  components/NeuFormControl/
   navigation/       # React Navigation stacks
   platform/         # Token storage & future native adapters
   providers/        # Auth, Locale

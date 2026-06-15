@@ -1,18 +1,21 @@
 import { Platform } from "react-native";
 import Constants from "expo-constants";
+import { normalizePublicUrl } from "../expoPublicUrl";
 
 const devHost = Platform.OS === "android" ? "10.0.2.2" : "localhost";
 
 type AppExtra = {
-  apiUrl?: string | null;
+  apiUrl?: unknown;
 };
 
 function readConfiguredApiUrl(): string | undefined {
-  const fromEnv = process.env.EXPO_PUBLIC_API_URL?.trim();
-  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  const fromEnv = normalizePublicUrl(process.env.EXPO_PUBLIC_API_URL);
+  if (fromEnv) return fromEnv;
 
-  const fromExtra = (Constants.expoConfig?.extra as AppExtra | undefined)?.apiUrl?.trim();
-  if (fromExtra) return fromExtra.replace(/\/$/, "");
+  const fromExtra = normalizePublicUrl(
+    (Constants.expoConfig?.extra as AppExtra | undefined)?.apiUrl,
+  );
+  if (fromExtra) return fromExtra;
 
   return undefined;
 }

@@ -8,9 +8,10 @@ import {
   Text,
   View,
 } from "react-native";
-import NeuButton from "./neu/NeuButton";
+import NeuButton from "./NeuButton";
 import { useLocale } from "../providers/LocaleProvider";
-import { colors, radius, spacing } from "@minicollections/theme";
+import { colors, neuControlStyle, radius, spacing } from "@minicollections/theme";
+import { neuText } from "../theme/neuText";
 
 export type FacetItem = {
   id: number;
@@ -26,7 +27,7 @@ export type SearchFacets = {
   series?: FacetItem[];
 };
 
-type SearchFiltersSheetProps = {
+type ObjectSearchFilterPanelProps = {
   visible: boolean;
   onClose: () => void;
   facets: SearchFacets | null;
@@ -67,7 +68,13 @@ function FilterChip({
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      style={[styles.chip, selected && styles.chipActive]}
+      style={({ pressed }) => [
+        styles.chip,
+        neuControlStyle({
+          variant: selected ? "primary" : "default",
+          pressed,
+        }),
+      ]}
     >
       <Text style={[styles.chipLabel, selected && styles.chipLabelActive]} numberOfLines={2}>
         {label}
@@ -93,7 +100,7 @@ function FilterSection({
   );
 }
 
-export default function SearchFiltersSheet({
+export default function ObjectSearchFilterPanel({
   visible,
   onClose,
   facets,
@@ -108,7 +115,7 @@ export default function SearchFiltersSheet({
   onToggleSeries,
   onClearFilters,
   showBrands = true,
-}: SearchFiltersSheetProps) {
+}: ObjectSearchFilterPanelProps) {
   const { t } = useLocale();
 
   const hasCategories = (facets?.categories?.length ?? 0) > 0;
@@ -214,9 +221,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: colors.text,
+    ...neuText.modalTitle,
   },
   content: {
     gap: spacing.md,
@@ -235,8 +240,8 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: "700",
+    ...neuText.body,
+    fontWeight: neuText.body.fontWeight,
     color: colors.textSecondary,
     textTransform: "uppercase",
     letterSpacing: 0.5,
@@ -247,25 +252,17 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
   },
   chip: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.sl,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.card,
     maxWidth: "100%",
   },
-  chipActive: {
-    borderColor: colors.accent,
-    backgroundColor: colors.bg,
-  },
   chipLabel: {
-    fontSize: 13,
-    color: colors.textSecondary,
+    ...neuText.bodySecondary,
     fontWeight: "600",
   },
   chipLabelActive: {
-    color: colors.accent,
-    fontWeight: "700",
+    color: "#fff",
+    fontWeight: neuText.body.fontWeight,
   },
 });
