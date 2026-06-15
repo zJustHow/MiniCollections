@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CommonActions } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
 import { useInfiniteList } from "@minicollections/hooks";
 import {
+  adminDeleteBrand,
   getBrandByBrandId,
   getBrandObjectsPage,
   recordBrandView,
@@ -14,22 +14,29 @@ import {
   searchBrandObjectsByBrandIdPage,
 } from "@minicollections/api";
 import NeuCard from "../components/NeuCard";
+import BrandModal from "../components/BrandModal";
 import BrandObjectModal from "../components/BrandObjectModal";
-import ScreenHeader from "../components/ScreenHeader";
+import BrandObjectsPageHeader from "../components/pageHeaders/BrandObjectsPageHeader";
 import ListSearchField from "../components/ListSearchField";
+import ListSearchFilterBar from "../components/ListSearchFilterBar";
+import ListSearchSummary from "../components/ListSearchSummary";
+import { useHeaderSlot } from "../hooks/useHeaderSlot";
 import ObjectSearchFilterPanel, { type SearchFacets } from "../components/ObjectSearchFilterPanel";
 import {
-  ListFooterSpinner,
+  ListFooterSkeleton,
   ListStateBoundary,
   listRefreshControl,
 } from "../components/ListStateViews";
+import { NeuCardSkeleton } from "../components/skeleton";
+import { INITIAL_SKELETON_ITEMS, isSkeletonItem } from "../utils/skeletonUtils";
 import { useBrandObjectSearchFilters } from "../hooks/useBrandObjectSearchFilters";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { BrandsStackParamList } from "../navigation/types";
-import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { colors, spacing } from "@minicollections/theme";
 import { neuText } from "../theme/neuText";
 import { trackBrandViewOnce } from "../utils/viewTracking";
+import { resolveFilterColumnState } from "../utils/objectFilterUtils";
 import { isAddCardItem, listBrowseContentStyle, listBrowseHeaderStyle, withAddCardSlot } from "../utils/listPageUtils";
 
 type Props = NativeStackScreenProps<BrandsStackParamList, "BrandObjects">;
@@ -46,6 +53,8 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
   const { authed, isAdmin } = useAuth();
   const { t } = useLocale();
   const [brandTitle, setBrandTitle] = useState(routeBrandName?.trim() || "…");
+  const [brandRecord, setBrandRecord] = useState<Record<string, unknown> | null>(null);
+  const [brandEditVisible, setBrandEditVisible] = useState(false);
   const [draftQuery, setDraftQuery] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
   const [filtersVisible, setFiltersVisible] = useState(false);
@@ -80,6 +89,7 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
     getBrandByBrandId(brandId)
       .then((brand) => {
         if (cancelled) return;
+        setBrandRecord(brand as Record<string, unknown>);
         const name =
           typeof brand?.name === "string" && brand.name.trim()
             ? brand.name.trim()
@@ -131,6 +141,14 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
     items as BrandObjectItem[],
     isAdmin && !searchActive,
   );
+  const showInitialSkeleton = loading && objects.length === 0;
+  const listData = useMemo(
+    () =>
+      showInitialSkeleton
+        ? (INITIAL_SKELETON_ITEMS as BrandObjectItem[])
+        : objects,
+    [showInitialSkeleton, objects],
+  );
 
   useEffect(() => {
     if (!searchActive) {
@@ -174,6 +192,22 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
     clearFilters();
   }, [clearFilters]);
 
+  const { showFilterColumn } = resolveFilterColumnState({
+    searchActive,
+    searchKeyword,
+    searchFacets: facets,
+    facetsLoading,
+    includeBrands: false,
+  });
+
+  const searchSummary =
+    searchActive && !(loading && objects.length === 0)
+      ? t("searchResultsSummary", {
+          count: totalElements,
+          query: searchKeyword,
+        })
+      : null;
+
   const openMissingModelReport = useCallback(() => {
     navigation.dispatch(
       CommonActions.navigate({
@@ -194,7 +228,7 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
   const listFooter = useMemo(
     () => (
       <View style={styles.footer}>
-        <ListFooterSpinner visible={loadingMore} />
+        <ListFooterSkeleton visible={loadingMore} variant="object" />
         {authed ? (
           <Pressable
             accessibilityRole="button"
@@ -212,7 +246,6 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
   const listHeader = useMemo(
     () => (
       <View>
-        <ScreenHeader title={brandTitle} showBack />
         <ListSearchField
           value={draftQuery}
           onChangeText={setDraftQuery}
@@ -220,63 +253,71 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
           onClear={searchActive || draftQuery ? clearSearch : undefined}
           placeholder={t("searchModels")}
         />
-        {searchActive ? (
-          <View style={styles.searchMetaRow}>
-            {!(loading && objects.length === 0) ? (
-              <Text style={styles.searchHint}>
-                {t("searchResultsSummary", {
-                  count: totalElements,
-                  query: searchKeyword,
-                })}
-              </Text>
-            ) : (
-              <View style={styles.searchHintSpacer} />
-            )}
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setFiltersVisible(true)}
-              style={({ pressed }) => [styles.filterBtn, neuControlStyle({ pressed })]}
-            >
-              <Ionicons name="options-outline" size={18} color={colors.accent} />
-              <Text style={styles.filterBtnLabel}>{t("searchFilters")}</Text>
-              {activeCount > 0 ? (
-                <View style={styles.filterBadge}>
-                  <Text style={styles.filterBadgeLabel}>{activeCount}</Text>
-                </View>
-              ) : null}
-            </Pressable>
-          </View>
+        {searchActive && showFilterColumn ? (
+          <ListSearchFilterBar
+            summary={searchSummary}
+            summaryLoading={loading && objects.length === 0}
+            filterLabel={t("searchFilters")}
+            activeFilterCount={activeCount}
+            onOpenFilters={() => setFiltersVisible(true)}
+          />
+        ) : searchSummary ? (
+          <ListSearchSummary summary={searchSummary} />
         ) : null}
       </View>
     ),
     [
       activeCount,
-      brandTitle,
       clearSearch,
       draftQuery,
       loading,
       objects.length,
       runSearch,
       searchActive,
-      searchKeyword,
+      searchSummary,
+      showFilterColumn,
       t,
-      totalElements,
     ],
+  );
+
+  const handleDeleteBrand = useCallback(async () => {
+    try {
+      await adminDeleteBrand(brandId);
+      navigation.goBack();
+    } catch (err) {
+      Alert.alert(err instanceof Error ? err.message : t("failedToDeleteBrand"));
+    }
+  }, [brandId, navigation, t]);
+
+  useHeaderSlot(
+    <BrandObjectsPageHeader
+      title={brandTitle}
+      onBack={() => navigation.goBack()}
+      isAdmin={isAdmin}
+      onEditBrand={
+        isAdmin && brandRecord
+          ? () => setBrandEditVisible(true)
+          : undefined
+      }
+      onDeleteBrand={isAdmin && brandRecord ? handleDeleteBrand : undefined}
+    />,
+    [brandRecord, brandTitle, handleDeleteBrand, isAdmin, navigation],
   );
 
   return (
     <>
       <ListStateBoundary
-        loading={loading && objects.length === 0}
+        loading={showInitialSkeleton}
+        inlineSkeleton
         errorMessage={
           loadError && objects.length === 0 ? t("failedToLoadModels") : null
         }
         retryLabel={t("retry")}
         onRetry={() => void retry()}
       >
-        <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+        <SafeAreaView style={styles.safe} edges={["left", "right"]}>
           <FlashList
-            data={objects}
+            data={listData}
             numColumns={2}
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={listBrowseContentStyle}
@@ -291,7 +332,9 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
             }
             renderItem={({ item }) => (
               <View style={styles.cell}>
-                {isAddCardItem(item) ? (
+                {isSkeletonItem(item) ? (
+                  <NeuCardSkeleton variant="object" />
+                ) : isAddCardItem(item) ? (
                   <NeuCard
                     add
                     name={t("addBrandObject")}
@@ -340,7 +383,6 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
         onToggleBrand={() => {}}
         onToggleScale={toggleScale}
         onToggleSeries={toggleSeries}
-        onClearFilters={clearFilters}
         showBrands={false}
       />
 
@@ -348,7 +390,47 @@ export default function BrandObjectsScreen({ route, navigation }: Props) {
         visible={brandObjectModalVisible}
         brandId={brandId}
         onClose={() => setBrandObjectModalVisible(false)}
-        onCreated={() => void refresh()}
+        onSuccess={() => void refresh()}
+      />
+
+      <BrandModal
+        visible={brandEditVisible}
+        brand={
+          brandRecord
+            ? {
+                id: brandId,
+                name_en:
+                  typeof brandRecord.name_en === "string"
+                    ? brandRecord.name_en
+                    : undefined,
+                name_zh:
+                  typeof brandRecord.name_zh === "string"
+                    ? brandRecord.name_zh
+                    : undefined,
+                abbreviation:
+                  typeof brandRecord.abbreviation === "string"
+                    ? brandRecord.abbreviation
+                    : undefined,
+                image_url:
+                  typeof brandRecord.image_url === "string"
+                    ? brandRecord.image_url
+                    : typeof brandRecord.imageUrl === "string"
+                      ? brandRecord.imageUrl
+                      : undefined,
+              }
+            : null
+        }
+        onClose={() => setBrandEditVisible(false)}
+        onSuccess={() => {
+          void getBrandByBrandId(brandId).then((brand) => {
+            setBrandRecord(brand as Record<string, unknown>);
+            const name =
+              typeof brand?.name === "string" && brand.name.trim()
+                ? brand.name.trim()
+                : null;
+            if (name) setBrandTitle(name);
+          });
+        }}
       />
     </>
   );
@@ -361,44 +443,6 @@ const styles = StyleSheet.create({
   },
   cell: {
     flex: 1,
-  },
-  searchMetaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  searchHint: {
-    flex: 1,
-    color: colors.textSecondary,
-    fontSize: 13,
-  },
-  searchHintSpacer: {
-    flex: 1,
-  },
-  filterBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-  filterBtnLabel: {
-    ...neuText.link,
-  },
-  filterBadge: {
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.accent,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-  },
-  filterBadgeLabel: {
-    ...neuText.badge,
-    color: "#fff",
   },
   emptyWrap: {
     padding: spacing.xl,

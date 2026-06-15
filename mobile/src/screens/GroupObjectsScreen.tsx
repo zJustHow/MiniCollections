@@ -5,6 +5,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import { useDualModeBrowseList } from "@minicollections/hooks";
 import {
+  deleteGroup,
   getGroupById,
   getGroupObjectOrder,
   getUserObjectsPage,
@@ -15,14 +16,17 @@ import NeuCard from "../components/NeuCard";
 import NeuButton from "../components/NeuButton";
 import AddUserObjectInGroupModal from "../components/AddUserObjectInGroupModal";
 import EditGroupModal from "../components/EditGroupModal";
-import ScreenHeader from "../components/ScreenHeader";
+import GroupObjectsPageHeader from "../components/pageHeaders/GroupObjectsPageHeader";
 import ListSearchField from "../components/ListSearchField";
+import { useHeaderSlot } from "../hooks/useHeaderSlot";
 import SortableInfiniteBrowseSection from "../components/SortableInfiniteBrowseSection";
 import {
-  ListFooterSpinner,
+  ListFooterSkeleton,
   ListStateBoundary,
   listRefreshControl,
 } from "../components/ListStateViews";
+import { NeuCardSkeleton } from "../components/skeleton";
+import { INITIAL_SKELETON_ITEMS, isSkeletonItem } from "../utils/skeletonUtils";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { GroupsStackParamList } from "../navigation/types";
@@ -31,6 +35,7 @@ import { groupObjectsDeepLink } from "../utils/deepLinks";
 import { isAddCardItem, withAddCardSlot } from "../utils/listPageUtils";
 import { shareModelLink } from "../utils/shareModel";
 import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { LIST_SEARCH_CONTROL_HEIGHT } from "../theme/listSearchStyle";
 import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<GroupsStackParamList, "GroupObjects">;
@@ -112,6 +117,14 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
     displayItems as UserObjectItem[],
     !searchActive,
   );
+  const showInitialSkeleton = activeList.loading && objects.length === 0;
+  const listData = useMemo(
+    () =>
+      showInitialSkeleton
+        ? (INITIAL_SKELETON_ITEMS as UserObjectItem[])
+        : objects,
+    [showInitialSkeleton, objects],
+  );
 
   const runSearch = useCallback(() => {
     setSearchKeyword(draftQuery.trim());
@@ -139,57 +152,44 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
   const listHeader = useMemo(
     () => (
       <View>
-        <ScreenHeader
-          title={displayName}
-          showBack
-          rightSlot={
-            <View style={styles.headerActions}>
-              {!searchActive && browseList.sortEnabled ? (
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t("sortOrder")}
-                  onPress={toggleReorderMode}
-                  style={({ pressed }) => [
-                    styles.headerBtn,
-                    neuControlStyle({
-                      variant: reorderMode ? "primary" : "default",
-                      pressed,
-                    }),
-                  ]}
-                >
-                  <Ionicons
-                    name="reorder-three"
-                    size={22}
-                    color={reorderMode ? "#fff" : colors.accent}
-                  />
-                </Pressable>
-              ) : null}
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("share")}
-                onPress={() => void shareGroup()}
-                style={({ pressed }) => [styles.shareBtn, neuControlStyle({ pressed })]}
-              >
-                <Ionicons name="share-outline" size={22} color={colors.accent} />
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("editGroup")}
-                onPress={() => setEditVisible(true)}
-                style={({ pressed }) => [styles.editBtn, neuControlStyle({ pressed })]}
-              >
-                <Ionicons name="create-outline" size={22} color={colors.accent} />
-              </Pressable>
-            </View>
-          }
-        />
-        <ListSearchField
-          value={draftQuery}
-          onChangeText={setDraftQuery}
-          onSubmit={runSearch}
-          onClear={searchActive || draftQuery ? clearSearch : undefined}
-          placeholder={t("searchModels")}
-        />
+        <View style={styles.searchRow}>
+          <ListSearchField
+            embedded
+            value={draftQuery}
+            onChangeText={setDraftQuery}
+            onSubmit={runSearch}
+            onClear={searchActive || draftQuery ? clearSearch : undefined}
+            placeholder={t("searchModels")}
+          />
+          {!searchActive && browseList.sortEnabled ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("sortOrder")}
+              onPress={toggleReorderMode}
+              style={({ pressed }) => [
+                styles.toolbarBtn,
+                neuControlStyle({
+                  variant: reorderMode ? "primary" : "default",
+                  pressed,
+                }),
+              ]}
+            >
+              <Ionicons
+                name="reorder-three"
+                size={22}
+                color={reorderMode ? "#fff" : colors.accent}
+              />
+            </Pressable>
+          ) : null}
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("share")}
+            onPress={() => void shareGroup()}
+            style={({ pressed }) => [styles.toolbarBtn, neuControlStyle({ pressed })]}
+          >
+            <Ionicons name="share-outline" size={22} color={colors.accent} />
+          </Pressable>
+        </View>
         {reorderMode ? (
           <Text style={styles.reorderHint}>{t("sortOrder")}</Text>
         ) : null}
@@ -198,7 +198,6 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
     [
       browseList.sortEnabled,
       clearSearch,
-      displayName,
       draftQuery,
       reorderMode,
       runSearch,
@@ -207,6 +206,25 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
       t,
       toggleReorderMode,
     ],
+  );
+
+  const handleDeleteGroup = useCallback(async () => {
+    try {
+      await deleteGroup(groupId);
+      navigation.navigate("GroupsList");
+    } catch (err) {
+      Alert.alert(err instanceof Error ? err.message : t("failedToDeleteGroup"));
+    }
+  }, [groupId, navigation, t]);
+
+  useHeaderSlot(
+    <GroupObjectsPageHeader
+      title={displayName}
+      onBack={() => navigation.goBack()}
+      onEdit={() => setEditVisible(true)}
+      onDelete={handleDeleteGroup}
+    />,
+    [displayName, handleDeleteGroup, navigation],
   );
 
   const listEmpty = useMemo(
@@ -220,14 +238,13 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
   );
 
   const listFooter = useMemo(
-    () => <ListFooterSpinner visible={activeList.loadingMore} />,
+    () => <ListFooterSkeleton visible={activeList.loadingMore} variant="object" />,
     [activeList.loadingMore],
   );
 
   if (!authed) {
     return (
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
-        <ScreenHeader title={displayName} showBack />
+      <SafeAreaView style={styles.safe} edges={["left", "right", "bottom"]}>
         <View style={styles.guestBody}>
           <Text style={styles.guestText}>{t("signIn")}</Text>
           <NeuButton
@@ -241,23 +258,26 @@ export default function GroupObjectsScreen({ route, navigation }: Props) {
 
   return (
     <ListStateBoundary
-      loading={activeList.loading && objects.length === 0}
+      loading={showInitialSkeleton}
+      inlineSkeleton
       errorMessage={
         loadErrorMessage(activeList.loadError, objects.length, t("failedToLoadGroupModels"))
       }
       retryLabel={t("retry")}
       onRetry={() => void activeList.retry()}
     >
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
         <SortableInfiniteBrowseSection
-          data={objects}
+          data={listData}
           reorderMode={reorderMode}
           sortEnabled={browseList.sortEnabled}
           reordering={browseList.reordering}
           onMoveItem={browseList.handleDragEnd}
           moveFailedLabel={t("failedToReorder")}
           renderCard={(item) =>
-            isAddCardItem(item) ? (
+            isSkeletonItem(item) ? (
+              <NeuCardSkeleton variant="object" />
+            ) : isAddCardItem(item) ? (
               <NeuCard
                 add
                 name={t("addModel")}
@@ -348,26 +368,15 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: "center",
   },
-  headerActions: {
+  searchRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.xs,
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
   },
-  headerBtn: {
-    width: 36,
-    height: 36,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  shareBtn: {
-    width: 40,
-    height: 40,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  editBtn: {
-    width: 40,
-    height: 40,
+  toolbarBtn: {
+    width: LIST_SEARCH_CONTROL_HEIGHT,
+    height: LIST_SEARCH_CONTROL_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
   },

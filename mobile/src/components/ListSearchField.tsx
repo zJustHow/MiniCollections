@@ -5,6 +5,8 @@ import {
   Text,
   TextInput,
   View,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -14,6 +16,10 @@ import {
   spacing,
 } from "@minicollections/theme";
 import { neuText } from "../theme/neuText";
+import {
+  LIST_SEARCH_CONTROL_GAP,
+  LIST_SEARCH_CONTROL_HEIGHT,
+} from "../theme/listSearchStyle";
 
 type ListSearchFieldProps = {
   value: string;
@@ -21,6 +27,9 @@ type ListSearchFieldProps = {
   onSubmit: () => void;
   onClear?: () => void;
   placeholder: string;
+  /** When true, horizontal padding is omitted (parent row supplies inset). */
+  embedded?: boolean;
+  style?: StyleProp<ViewStyle>;
 };
 
 export default function ListSearchField({
@@ -29,11 +38,19 @@ export default function ListSearchField({
   onSubmit,
   onClear,
   placeholder,
+  embedded = false,
+  style,
 }: ListSearchFieldProps) {
   const [focused, setFocused] = useState(false);
 
   return (
-    <View style={styles.wrap}>
+    <View
+      style={[
+        styles.wrap,
+        embedded ? styles.wrapEmbedded : styles.wrapStandalone,
+        style,
+      ]}
+    >
       <TextInput
         value={value}
         onChangeText={onChangeText}
@@ -58,13 +75,11 @@ export default function ListSearchField({
       ) : null}
       <Pressable
         accessibilityRole="button"
+        accessibilityLabel="search"
         onPress={onSubmit}
-        style={({ pressed }) => [
-          styles.submitBtn,
-          neuControlStyle({ variant: "primary", pressed }),
-        ]}
+        style={({ pressed }) => [styles.submitBtn, neuControlStyle({ pressed })]}
       >
-        <Ionicons name="search" size={20} color="#fff" />
+        <Ionicons name="search" size={14} color={colors.text} />
       </Pressable>
     </View>
   );
@@ -73,31 +88,40 @@ export default function ListSearchField({
 const styles = StyleSheet.create({
   wrap: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
+    alignItems: "stretch",
+    gap: LIST_SEARCH_CONTROL_GAP,
+  },
+  wrapStandalone: {
     paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+  },
+  wrapEmbedded: {
+    flex: 1,
+    minWidth: 0,
     paddingBottom: spacing.sm,
   },
   input: {
     ...neuText.formInput,
     flex: 1,
-    minHeight: 40,
+    minWidth: 0,
+    height: LIST_SEARCH_CONTROL_HEIGHT,
     paddingHorizontal: spacing.md,
+    paddingVertical: 0,
   },
   clearBtn: {
-    width: 36,
-    height: 40,
+    width: LIST_SEARCH_CONTROL_HEIGHT,
+    height: LIST_SEARCH_CONTROL_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
   },
   clearLabel: {
     ...neuText.screenHeaderBack,
     color: colors.textSecondary,
-    lineHeight: 28,
+    lineHeight: 24,
   },
   submitBtn: {
-    width: 40,
-    height: 40,
+    width: LIST_SEARCH_CONTROL_HEIGHT,
+    height: LIST_SEARCH_CONTROL_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -9,15 +9,18 @@ import {
   getAdminSubmissionsPage,
 } from "@minicollections/api";
 import { useInfiniteList } from "@minicollections/hooks";
-import ScreenHeader from "../components/ScreenHeader";
+import ObjectDetailBackHeader from "../components/pageHeaders/ObjectDetailBackHeader";
 import AdminSubmissionDetailSheet, {
   type AdminSubmissionItem,
 } from "../components/AdminSubmissionDetailSheet";
+import { useHeaderSlot } from "../hooks/useHeaderSlot";
 import {
-  ListFooterSpinner,
+  ListFooterSkeleton,
   ListStateBoundary,
   listRefreshControl,
 } from "../components/ListStateViews";
+import { FeedbackCardSkeleton } from "../components/skeleton";
+import { FEEDBACK_SKELETON_ITEMS, isSkeletonItem } from "../utils/skeletonUtils";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { ProfileStackParamList } from "../navigation/types";
@@ -99,6 +102,14 @@ export default function AdminSubmissionsScreen({ navigation }: Props) {
   });
 
   const submissions = items as AdminSubmissionItem[];
+  const showInitialSkeleton = loading && submissions.length === 0;
+  const listData = useMemo(
+    () =>
+      showInitialSkeleton
+        ? (FEEDBACK_SKELETON_ITEMS as AdminSubmissionItem[])
+        : submissions,
+    [showInitialSkeleton, submissions],
+  );
 
   const onRefreshAll = useCallback(async () => {
     await Promise.all([refresh(), loadCounts()]);
@@ -136,20 +147,19 @@ export default function AdminSubmissionsScreen({ navigation }: Props) {
     [activeStatus, counts, t],
   );
 
-  const listHeader = useMemo(
-    () => (
-      <View>
-        <ScreenHeader title={t("adminSubmissions")} showBack onBack={() => navigation.goBack()} />
-        {statusBar}
-      </View>
-    ),
-    [navigation, statusBar, t],
+  const listHeader = useMemo(() => <View>{statusBar}</View>, [statusBar]);
+
+  useHeaderSlot(
+    <ObjectDetailBackHeader
+      title={t("adminSubmissions")}
+      onBack={() => navigation.goBack()}
+    />,
+    [navigation, t],
   );
 
   if (!isAdmin) {
     return (
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-        <ScreenHeader title={t("adminPanel")} showBack onBack={() => navigation.goBack()} />
+      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
         <View style={styles.denied}>
           <Text style={styles.deniedText}>{t("error.no_permission")}</Text>
         </View>
@@ -160,16 +170,17 @@ export default function AdminSubmissionsScreen({ navigation }: Props) {
   return (
     <>
       <ListStateBoundary
-        loading={loading && submissions.length === 0}
+        loading={showInitialSkeleton}
+        inlineSkeleton
         errorMessage={
           loadError && submissions.length === 0 ? t("failedToLoadSubmissions") : null
         }
         retryLabel={t("retry")}
         onRetry={() => void retry()}
       >
-        <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+        <SafeAreaView style={styles.safe} edges={["left", "right"]}>
           <FlashList
-            data={submissions}
+            data={listData}
             keyExtractor={(item) => String(item.id)}
             ListHeaderComponent={listHeader}
             ListEmptyComponent={
@@ -179,34 +190,38 @@ export default function AdminSubmissionsScreen({ navigation }: Props) {
                 </View>
               ) : null
             }
-            renderItem={({ item }) => (
-              <Pressable
-                style={styles.rowCard}
-                onPress={() => setSelectedItem(item)}
-              >
-                <View style={styles.rowTop}>
-                  <Text style={styles.id}>#{item.id}</Text>
-                  <Text style={styles.typePill}>
-                    {feedbackTypeLabel(item.submission_type, t)}
+            renderItem={({ item }) =>
+              isSkeletonItem(item) ? (
+                <FeedbackCardSkeleton />
+              ) : (
+                <Pressable
+                  style={styles.rowCard}
+                  onPress={() => setSelectedItem(item)}
+                >
+                  <View style={styles.rowTop}>
+                    <Text style={styles.id}>#{item.id}</Text>
+                    <Text style={styles.typePill}>
+                      {feedbackTypeLabel(item.submission_type, t)}
+                    </Text>
+                    <Text
+                      style={[styles.statusPill, { color: feedbackStatusColor(item.status) }]}
+                    >
+                      {feedbackStatusLabel(item.status, t)}
+                    </Text>
+                  </View>
+                  <Text style={styles.rowTitle} numberOfLines={2}>
+                    {item.name_en || item.name_zh || item.notes?.slice(0, 60) || "—"}
                   </Text>
-                  <Text
-                    style={[styles.statusPill, { color: feedbackStatusColor(item.status) }]}
-                  >
-                    {feedbackStatusLabel(item.status, t)}
+                  <Text style={styles.rowMeta} numberOfLines={1}>
+                    {item.submitter_name ?? "—"}
+                    {item.brand_name || item.custom_brand_name
+                      ? ` · ${item.brand_name ?? item.custom_brand_name}`
+                      : ""}
                   </Text>
-                </View>
-                <Text style={styles.rowTitle} numberOfLines={2}>
-                  {item.name_en || item.name_zh || item.notes?.slice(0, 60) || "—"}
-                </Text>
-                <Text style={styles.rowMeta} numberOfLines={1}>
-                  {item.submitter_name ?? "—"}
-                  {item.brand_name || item.custom_brand_name
-                    ? ` · ${item.brand_name ?? item.custom_brand_name}`
-                    : ""}
-                </Text>
-                <Text style={styles.date}>{formatDate(item.submitted_at)}</Text>
-              </Pressable>
-            )}
+                  <Text style={styles.date}>{formatDate(item.submitted_at)}</Text>
+                </Pressable>
+              )
+            }
             onEndReached={() => {
               if (hasMore && !loadingMore) void loadMore();
             }}
@@ -214,7 +229,9 @@ export default function AdminSubmissionsScreen({ navigation }: Props) {
             refreshControl={listRefreshControl(loading && submissions.length > 0, () =>
               void onRefreshAll(),
             )}
-            ListFooterComponent={<ListFooterSpinner visible={loadingMore} />}
+            ListFooterComponent={
+              <ListFooterSkeleton visible={loadingMore} variant="feedback" />
+            }
           />
         </SafeAreaView>
       </ListStateBoundary>

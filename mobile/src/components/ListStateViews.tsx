@@ -9,9 +9,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, spacing } from "@minicollections/theme";
 import NeuButton from "./NeuButton";
+import { InfiniteScrollSkeletonCards, FeedbackListSkeleton } from "./skeleton";
+import type { SkeletonVariant } from "../utils/skeletonUtils";
 
 type ListStateProps = {
   loading?: boolean;
+  /** Keep children mounted and render skeleton placeholders inline (web-aligned). */
+  inlineSkeleton?: boolean;
   errorMessage?: string | null;
   retryLabel: string;
   onRetry?: () => void;
@@ -45,12 +49,13 @@ export function ListErrorState({
 
 export function ListStateBoundary({
   loading,
+  inlineSkeleton = false,
   errorMessage,
   retryLabel,
   onRetry,
   children,
 }: ListStateProps) {
-  if (loading) return <ListLoadingState />;
+  if (loading && !inlineSkeleton) return <ListLoadingState />;
   if (errorMessage) {
     return (
       <ListErrorState
@@ -80,6 +85,24 @@ export function ListFooterSpinner({ visible }: { visible: boolean }) {
   if (!visible) return null;
   return (
     <ActivityIndicator style={styles.footer} color={colors.accent} />
+  );
+}
+
+export function ListFooterSkeleton({
+  visible,
+  variant = "catalog",
+  numColumns = 2,
+}: {
+  visible: boolean;
+  variant?: SkeletonVariant | "brand" | "feedback";
+  numColumns?: number;
+}) {
+  if (!visible) return null;
+  if (variant === "feedback") {
+    return <FeedbackListSkeleton count={2} />;
+  }
+  return (
+    <InfiniteScrollSkeletonCards variant={variant} numColumns={numColumns} />
   );
 }
 

@@ -1,9 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { Ionicons } from "@expo/vector-icons";
 import { useInfiniteList } from "@minicollections/hooks";
 import {
   getBrandsPage,
@@ -12,22 +11,34 @@ import {
 } from "@minicollections/api";
 import NeuCard from "../components/NeuCard";
 import BrandModal from "../components/BrandModal";
-import ScreenHeader from "../components/ScreenHeader";
+import SearchSectionDivider from "../components/SearchSectionDivider";
 import ListSearchField from "../components/ListSearchField";
+import ListSearchFilterBar from "../components/ListSearchFilterBar";
+import ListSearchSummary from "../components/ListSearchSummary";
 import ObjectSearchFilterPanel, { type SearchFacets } from "../components/ObjectSearchFilterPanel";
 import {
-  ListFooterSpinner,
+  ListFooterSkeleton,
   ListStateBoundary,
   listRefreshControl,
 } from "../components/ListStateViews";
+import { NeuCardSkeleton } from "../components/skeleton";
+import { INITIAL_SKELETON_ITEMS, isSkeletonItem } from "../utils/skeletonUtils";
 import { useObjectFilters } from "../hooks/useObjectFilters";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { BrandsStackParamList } from "../navigation/types";
 import { pickBrandName } from "../utils/displayLocale";
-import { isAddCardItem, listBrowseContentStyle, listBrowseHeaderStyle, withAddCardSlot } from "../utils/listPageUtils";
-import { colors, neuControlStyle, spacing } from "@minicollections/theme";
-import { neuText } from "../theme/neuText";
+import { resolveFilterColumnState } from "../utils/objectFilterUtils";
+import {
+  isAddCardItem,
+  isSearchSectionDivider,
+  listBrowseContentStyle,
+  listBrowseHeaderStyle,
+  type SearchSectionDividerItem,
+  withAddCardSlot,
+  withBrandObjectSearchDivider,
+} from "../utils/listPageUtils";
+import { colors, spacing } from "@minicollections/theme";
 
 type Props = NativeStackScreenProps<BrandsStackParamList, "BrandsList">;
 
@@ -50,7 +61,7 @@ type SearchObjectItem = {
   __rowKind: "object";
 };
 
-type BrandsListItem = BrandItem | SearchObjectItem;
+type BrandsListItem = BrandItem | SearchObjectItem | SearchSectionDividerItem;
 
 function isSearchObject(item: BrandsListItem): item is SearchObjectItem {
   return item.__rowKind === "object";
@@ -142,6 +153,13 @@ export default function BrandsScreen({ navigation }: Props) {
     items as BrandsListItem[],
     isAdmin && !searchActive,
   );
+  const showInitialSkeleton = loading && rows.length === 0;
+  const listData = useMemo(() => {
+    if (showInitialSkeleton) {
+      return INITIAL_SKELETON_ITEMS as BrandsListItem[];
+    }
+    return withBrandObjectSearchDivider(rows, searchActive);
+  }, [rows, searchActive, showInitialSkeleton]);
 
   useEffect(() => {
     if (!searchActive) {
@@ -186,10 +204,25 @@ export default function BrandsScreen({ navigation }: Props) {
     clearFilters();
   }, [clearFilters]);
 
+  const { showFilterColumn } = resolveFilterColumnState({
+    searchActive,
+    searchKeyword,
+    searchFacets: facets,
+    facetsLoading,
+    includeBrands: true,
+  });
+
+  const searchSummary =
+    searchActive && !(loading && rows.length === 0)
+      ? t("searchResultsSummary", {
+          count: totalElements,
+          query: searchKeyword,
+        })
+      : null;
+
   const listHeader = useMemo(
     () => (
       <View>
-        <ScreenHeader title={t("brands")} />
         <ListSearchField
           value={draftQuery}
           onChangeText={setDraftQuery}
@@ -197,32 +230,16 @@ export default function BrandsScreen({ navigation }: Props) {
           onClear={searchActive || draftQuery ? clearSearch : undefined}
           placeholder={t("searchBrandsAndObjects")}
         />
-        {searchActive ? (
-          <View style={styles.searchMetaRow}>
-            {!(loading && rows.length === 0) ? (
-              <Text style={styles.searchHint}>
-                {t("searchResultsSummary", {
-                  count: totalElements,
-                  query: searchKeyword,
-                })}
-              </Text>
-            ) : (
-              <View style={styles.searchHintSpacer} />
-            )}
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setFiltersVisible(true)}
-              style={({ pressed }) => [styles.filterBtn, neuControlStyle({ pressed })]}
-            >
-              <Ionicons name="options-outline" size={18} color={colors.accent} />
-              <Text style={styles.filterBtnLabel}>{t("searchFilters")}</Text>
-              {activeCount > 0 ? (
-                <View style={styles.filterBadge}>
-                  <Text style={styles.filterBadgeLabel}>{activeCount}</Text>
-                </View>
-              ) : null}
-            </Pressable>
-          </View>
+        {searchActive && showFilterColumn ? (
+          <ListSearchFilterBar
+            summary={searchSummary}
+            summaryLoading={loading && rows.length === 0}
+            filterLabel={t("searchFilters")}
+            activeFilterCount={activeCount}
+            onOpenFilters={() => setFiltersVisible(true)}
+          />
+        ) : searchSummary ? (
+          <ListSearchSummary summary={searchSummary} />
         ) : null}
       </View>
     ),
@@ -234,26 +251,39 @@ export default function BrandsScreen({ navigation }: Props) {
       rows.length,
       runSearch,
       searchActive,
-      searchKeyword,
+      searchSummary,
+      showFilterColumn,
       t,
-      totalElements,
     ],
   );
 
   return (
     <>
       <ListStateBoundary
-        loading={loading && rows.length === 0}
+        loading={showInitialSkeleton}
+        inlineSkeleton
         errorMessage={loadError && rows.length === 0 ? t("failedToLoadBrands") : null}
         retryLabel={t("retry")}
         onRetry={() => void retry()}
       >
-        <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+        <SafeAreaView style={styles.safe} edges={["left", "right"]}>
           <FlashList
-            data={rows}
+            data={listData}
             numColumns={2}
+            getItemType={(item) =>
+              isSearchSectionDivider(item) ? "divider" : "card"
+            }
+            overrideItemLayout={(layout, item, _index, maxColumns) => {
+              if (isSearchSectionDivider(item)) {
+                layout.span = maxColumns;
+              }
+            }}
             keyExtractor={(item) =>
-              `${isSearchObject(item) ? "object" : "brand"}:${String(item.id)}`
+              isSkeletonItem(item)
+                ? String(item.id)
+                : isSearchSectionDivider(item)
+                  ? item.id
+                  : `${isSearchObject(item) ? "object" : "brand"}:${String(item.id)}`
             }
             contentContainerStyle={listBrowseContentStyle}
             ListHeaderComponent={listHeader}
@@ -265,9 +295,20 @@ export default function BrandsScreen({ navigation }: Props) {
                 </View>
               ) : null
             }
-            renderItem={({ item }) => (
+            renderItem={({ item }) => {
+              if (isSearchSectionDivider(item)) {
+                return (
+                  <View style={styles.dividerCell}>
+                    <SearchSectionDivider />
+                  </View>
+                );
+              }
+
+              return (
               <View style={styles.cell}>
-                {isAddCardItem(item) ? (
+                {isSkeletonItem(item) ? (
+                  <NeuCardSkeleton variant={searchActive ? "object" : "catalog"} />
+                ) : isAddCardItem(item) ? (
                   <NeuCard
                     add
                     name={t("addBrand")}
@@ -303,7 +344,8 @@ export default function BrandsScreen({ navigation }: Props) {
                   />
                 )}
               </View>
-            )}
+              );
+            }}
             onEndReached={() => {
               if (hasMore && !loadingMore) void loadMore();
             }}
@@ -311,7 +353,9 @@ export default function BrandsScreen({ navigation }: Props) {
             refreshControl={listRefreshControl(loading && rows.length > 0, () =>
               void refresh(),
             )}
-            ListFooterComponent={<ListFooterSpinner visible={loadingMore} />}
+            ListFooterComponent={
+              <ListFooterSkeleton visible={loadingMore} variant="catalog" />
+            }
           />
         </SafeAreaView>
       </ListStateBoundary>
@@ -329,13 +373,12 @@ export default function BrandsScreen({ navigation }: Props) {
         onToggleBrand={toggleBrand}
         onToggleScale={toggleScale}
         onToggleSeries={toggleSeries}
-        onClearFilters={clearFilters}
       />
 
       <BrandModal
         visible={brandModalVisible}
         onClose={() => setBrandModalVisible(false)}
-        onCreated={() => void refresh()}
+        onSuccess={() => void refresh()}
       />
     </>
   );
@@ -346,46 +389,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg,
   },
-  searchMetaRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  searchHint: {
-    flex: 1,
-    color: colors.textSecondary,
-    fontSize: 13,
-  },
-  searchHintSpacer: {
-    flex: 1,
-  },
-  filterBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-  },
-  filterBtnLabel: {
-    ...neuText.link,
-  },
-  filterBadge: {
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.accent,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-  },
-  filterBadgeLabel: {
-    ...neuText.badge,
-    color: "#fff",
-  },
   cell: {
     flex: 1,
+  },
+  dividerCell: {
+    width: "100%",
   },
   emptyWrap: {
     padding: spacing.xl,

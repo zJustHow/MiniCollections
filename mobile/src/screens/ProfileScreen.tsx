@@ -18,7 +18,6 @@ import {
   updateProfile,
   uploadAvatar,
 } from "@minicollections/api";
-import ScreenHeader from "../components/ScreenHeader";
 import NeuButton from "../components/NeuButton";
 import GroovedImage from "../components/GroovedImage";
 import NeuInput from "../components/NeuFormControl/NeuInput";
@@ -32,6 +31,8 @@ import { useLocale } from "../providers/LocaleProvider";
 import type { ProfileStackParamList } from "../navigation/types";
 import { API_BASE_URL, APP_VERSION, IS_DEV_BUILD } from "../config";
 import { WEB_BASE_URL } from "../utils/appLinks";
+import ProfileRouteHeader from "../components/pageHeaders/ProfileRouteHeader";
+import { useHeaderSlot } from "../hooks/useHeaderSlot";
 import { openLogin } from "../navigation/openLogin";
 import { colors, neuRaised, spacing } from "@minicollections/theme";
 import { neuText } from "../theme/neuText";
@@ -133,9 +134,23 @@ export default function ProfileScreen() {
     await logout();
   };
 
+  useHeaderSlot(
+    authed ? (
+      <ProfileRouteHeader
+        title={t("profileTitle")}
+        onBack={() => {
+          navigation.getParent()?.navigate("BrandsTab", { screen: "BrandsList" });
+        }}
+        onLogout={logout}
+        logoutLabel={t("logout")}
+        confirmLogoutLabel={t("confirmLogout")}
+      />
+    ) : null,
+    [authed, logout, navigation, t],
+  );
+
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
-      <ScreenHeader title={t("profile")} />
+    <SafeAreaView style={styles.safe} edges={["left", "right", "bottom"]}>
       <ScrollView contentContainerStyle={styles.content}>
         {authed && profile ? (
           <>
@@ -254,12 +269,6 @@ export default function ProfileScreen() {
 
         {authed ? (
           <>
-            <NeuButton
-              title={t("logout")}
-              variant="ghost"
-              onPress={() => void logout()}
-              style={styles.action}
-            />
             <NeuButton
               title={t("deleteAccount")}
               variant="danger"

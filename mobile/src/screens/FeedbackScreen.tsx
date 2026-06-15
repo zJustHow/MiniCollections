@@ -6,15 +6,16 @@ import { useNavigation, useRoute, type RouteProp } from "@react-navigation/nativ
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { FEEDBACK_PAGE_SIZE, getMySubmissionsPage } from "@minicollections/api";
 import { useInfiniteList } from "@minicollections/hooks";
-import ScreenHeader from "../components/ScreenHeader";
 import NeuButton from "../components/NeuButton";
 import SubmitObjectModal from "../components/SubmitObjectModal";
 import SubmissionDrawer, { type FeedbackItem } from "../components/SubmissionDrawer";
 import {
-  ListFooterSpinner,
+  ListFooterSkeleton,
   ListStateBoundary,
   listRefreshControl,
 } from "../components/ListStateViews";
+import { FeedbackCardSkeleton } from "../components/skeleton";
+import { FEEDBACK_SKELETON_ITEMS, isSkeletonItem } from "../utils/skeletonUtils";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { FeedbackStackParamList } from "../navigation/types";
@@ -127,31 +128,34 @@ export default function FeedbackScreen() {
   });
 
   const submissions = items as FeedbackItem[];
+  const showInitialSkeleton = loading && submissions.length === 0;
+  const listData = useMemo(
+    () =>
+      showInitialSkeleton
+        ? (FEEDBACK_SKELETON_ITEMS as FeedbackItem[])
+        : submissions,
+    [showInitialSkeleton, submissions],
+  );
 
   const listHeader = useMemo(
-    () => (
-      <ScreenHeader
-        title={t("feedback")}
-        rightSlot={
-          authed ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setSubmitVisible(true)}
-              style={({ pressed }) => [styles.addBtn, neuControlStyle({ pressed })]}
-            >
-              <Text style={styles.addLabel}>+</Text>
-            </Pressable>
-          ) : null
-        }
-      />
-    ),
-    [authed, t],
+    () =>
+      authed ? (
+        <View style={styles.toolbar}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setSubmitVisible(true)}
+            style={({ pressed }) => [styles.addBtn, neuControlStyle({ pressed })]}
+          >
+            <Text style={styles.addLabel}>+</Text>
+          </Pressable>
+        </View>
+      ) : null,
+    [authed],
   );
 
   if (!authed) {
     return (
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-        <ScreenHeader title={t("feedback")} />
+      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
         <View style={styles.guestBody}>
           <Text style={styles.guestText}>{t("signIn")}</Text>
           <NeuButton
@@ -166,16 +170,17 @@ export default function FeedbackScreen() {
   return (
     <>
       <ListStateBoundary
-        loading={loading && submissions.length === 0}
+        loading={showInitialSkeleton}
+        inlineSkeleton
         errorMessage={
           loadError && submissions.length === 0 ? t("failedToLoadMySubmissions") : null
         }
         retryLabel={t("retry")}
         onRetry={() => void retry()}
       >
-        <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+        <SafeAreaView style={styles.safe} edges={["left", "right"]}>
           <FlashList
-            data={submissions}
+            data={listData}
             keyExtractor={(item) => String(item.id)}
             ListHeaderComponent={listHeader}
             ListEmptyComponent={
@@ -185,9 +190,13 @@ export default function FeedbackScreen() {
                 </View>
               ) : null
             }
-            renderItem={({ item }) => (
-              <SubmissionRow item={item} onPress={() => setSelectedItem(item)} />
-            )}
+            renderItem={({ item }) =>
+              isSkeletonItem(item) ? (
+                <FeedbackCardSkeleton />
+              ) : (
+                <SubmissionRow item={item} onPress={() => setSelectedItem(item)} />
+              )
+            }
             onEndReached={() => {
               if (hasMore && !loadingMore) void loadMore();
             }}
@@ -195,7 +204,9 @@ export default function FeedbackScreen() {
             refreshControl={listRefreshControl(loading && submissions.length > 0, () =>
               void refresh(),
             )}
-            ListFooterComponent={<ListFooterSpinner visible={loadingMore} />}
+            ListFooterComponent={
+              <ListFooterSkeleton visible={loadingMore} variant="feedback" />
+            }
           />
         </SafeAreaView>
       </ListStateBoundary>
@@ -245,6 +256,11 @@ const styles = StyleSheet.create({
   guestText: {
     color: colors.textSecondary,
     textAlign: "center",
+  },
+  toolbar: {
+    alignItems: "flex-end",
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
   },
   addBtn: {
     width: 36,

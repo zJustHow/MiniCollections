@@ -1,17 +1,10 @@
 import React from "react";
-import {
-  ActivityIndicator,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import NeuButton from "./NeuButton";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import NeuFormDrawer from "./NeuFormDrawer";
+import { FilterGroup, FilterOption } from "./NeuRadio";
+import { FilterPanelSkeleton } from "./skeleton";
 import { useLocale } from "../providers/LocaleProvider";
-import { colors, neuControlStyle, radius, spacing } from "@minicollections/theme";
-import { neuText } from "../theme/neuText";
+import { colors, neuFontSize, spacing } from "@minicollections/theme";
 
 export type FacetItem = {
   id: number;
@@ -40,7 +33,6 @@ type ObjectSearchFilterPanelProps = {
   onToggleBrand: (id: number) => void;
   onToggleScale: (id: number) => void;
   onToggleSeries: (id: number) => void;
-  onClearFilters: () => void;
   showBrands?: boolean;
 };
 
@@ -50,38 +42,6 @@ function formatFacetCount(count?: number) {
   if (n >= 10000) return `${Math.round(n / 1000)}k`;
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
   return String(n);
-}
-
-function FilterChip({
-  label,
-  count,
-  selected,
-  onPress,
-}: {
-  label: string;
-  count?: number;
-  selected: boolean;
-  onPress: () => void;
-}) {
-  const countLabel = formatFacetCount(count);
-  return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.chip,
-        neuControlStyle({
-          variant: selected ? "primary" : "default",
-          pressed,
-        }),
-      ]}
-    >
-      <Text style={[styles.chipLabel, selected && styles.chipLabelActive]} numberOfLines={2}>
-        {label}
-        {countLabel ? ` (${countLabel})` : ""}
-      </Text>
-    </Pressable>
-  );
 }
 
 function FilterSection({
@@ -95,8 +55,99 @@ function FilterSection({
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.chipRow}>{children}</View>
+      <FilterGroup>{children}</FilterGroup>
     </View>
+  );
+}
+
+function FilterContent({
+  facets,
+  categoryIds,
+  brandIds,
+  scaleIds,
+  seriesIds,
+  onToggleCategory,
+  onToggleBrand,
+  onToggleScale,
+  onToggleSeries,
+  showBrands,
+}: {
+  facets: SearchFacets;
+  categoryIds: number[];
+  brandIds: number[];
+  scaleIds: number[];
+  seriesIds: number[];
+  onToggleCategory: (id: number) => void;
+  onToggleBrand: (id: number) => void;
+  onToggleScale: (id: number) => void;
+  onToggleSeries: (id: number) => void;
+  showBrands: boolean;
+}) {
+  const { t } = useLocale();
+
+  const hasCategories = (facets.categories?.length ?? 0) > 0;
+  const hasBrands = showBrands && (facets.brands?.length ?? 0) > 0;
+  const hasScales = (facets.scales?.length ?? 0) > 0;
+  const hasSeries = (facets.series?.length ?? 0) > 0;
+
+  return (
+    <>
+      {hasCategories ? (
+        <FilterSection title={t("category")}>
+          {facets.categories?.map((item) => (
+            <FilterOption
+              key={`cat-${item.id}`}
+              label={item.name ?? String(item.id)}
+              count={formatFacetCount(item.count)}
+              selected={categoryIds.includes(item.id)}
+              onPress={() => onToggleCategory(item.id)}
+            />
+          ))}
+        </FilterSection>
+      ) : null}
+
+      {hasBrands ? (
+        <FilterSection title={t("brands")}>
+          {facets.brands?.map((item) => (
+            <FilterOption
+              key={`brand-${item.id}`}
+              label={item.name ?? String(item.id)}
+              count={formatFacetCount(item.count)}
+              selected={brandIds.includes(item.id)}
+              onPress={() => onToggleBrand(item.id)}
+            />
+          ))}
+        </FilterSection>
+      ) : null}
+
+      {hasSeries ? (
+        <FilterSection title={t("series")}>
+          {facets.series?.map((item) => (
+            <FilterOption
+              key={`series-${item.id}`}
+              label={item.name ?? String(item.id)}
+              count={formatFacetCount(item.count)}
+              selected={seriesIds.includes(item.id)}
+              onPress={() => onToggleSeries(item.id)}
+            />
+          ))}
+        </FilterSection>
+      ) : null}
+
+      {hasScales ? (
+        <FilterSection title={t("scale")}>
+          {facets.scales?.map((item) => (
+            <FilterOption
+              key={`scale-${item.id}`}
+              label={item.code ?? item.name ?? String(item.id)}
+              count={formatFacetCount(item.count)}
+              selected={scaleIds.includes(item.id)}
+              onPress={() => onToggleScale(item.id)}
+            />
+          ))}
+        </FilterSection>
+      ) : null}
+    </>
   );
 }
 
@@ -113,156 +164,65 @@ export default function ObjectSearchFilterPanel({
   onToggleBrand,
   onToggleScale,
   onToggleSeries,
-  onClearFilters,
   showBrands = true,
 }: ObjectSearchFilterPanelProps) {
   const { t } = useLocale();
 
-  const hasCategories = (facets?.categories?.length ?? 0) > 0;
-  const hasBrands = showBrands && (facets?.brands?.length ?? 0) > 0;
-  const hasScales = (facets?.scales?.length ?? 0) > 0;
-  const hasSeries = (facets?.series?.length ?? 0) > 0;
-  const hasFacets = hasCategories || hasBrands || hasScales || hasSeries;
+  const hasFacets =
+    facets &&
+    ((facets.categories?.length ?? 0) > 0 ||
+      (showBrands && (facets.brands?.length ?? 0) > 0) ||
+      (facets.scales?.length ?? 0) > 0 ||
+      (facets.series?.length ?? 0) > 0);
+
+  if (!visible) return null;
+  if (!hasFacets && !loading) return null;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.backdrop}>
-        <Pressable style={styles.dismissArea} onPress={onClose} />
-        <View style={styles.sheet}>
-          <Text style={styles.title}>{t("searchFilters")}</Text>
-          {loading ? (
-            <View style={styles.loadingWrap}>
-              <ActivityIndicator size="large" color={colors.accent} />
-            </View>
-          ) : !hasFacets ? (
-            <Text style={styles.empty}>{t("noSearchResults")}</Text>
-          ) : (
-            <ScrollView contentContainerStyle={styles.content}>
-              {hasCategories ? (
-                <FilterSection title={t("category")}>
-                  {facets?.categories?.map((item) => (
-                    <FilterChip
-                      key={`cat-${item.id}`}
-                      label={item.name ?? String(item.id)}
-                      count={item.count}
-                      selected={categoryIds.includes(item.id)}
-                      onPress={() => onToggleCategory(item.id)}
-                    />
-                  ))}
-                </FilterSection>
-              ) : null}
-
-              {hasBrands ? (
-                <FilterSection title={t("brands")}>
-                  {facets?.brands?.map((item) => (
-                    <FilterChip
-                      key={`brand-${item.id}`}
-                      label={item.name ?? String(item.id)}
-                      count={item.count}
-                      selected={brandIds.includes(item.id)}
-                      onPress={() => onToggleBrand(item.id)}
-                    />
-                  ))}
-                </FilterSection>
-              ) : null}
-
-              {hasSeries ? (
-                <FilterSection title={t("series")}>
-                  {facets?.series?.map((item) => (
-                    <FilterChip
-                      key={`series-${item.id}`}
-                      label={item.name ?? String(item.id)}
-                      count={item.count}
-                      selected={seriesIds.includes(item.id)}
-                      onPress={() => onToggleSeries(item.id)}
-                    />
-                  ))}
-                </FilterSection>
-              ) : null}
-
-              {hasScales ? (
-                <FilterSection title={t("scale")}>
-                  {facets?.scales?.map((item) => (
-                    <FilterChip
-                      key={`scale-${item.id}`}
-                      label={item.code ?? item.name ?? String(item.id)}
-                      count={item.count}
-                      selected={scaleIds.includes(item.id)}
-                      onPress={() => onToggleScale(item.id)}
-                    />
-                  ))}
-                </FilterSection>
-              ) : null}
-            </ScrollView>
-          )}
-          <NeuButton title={t("filterAll")} variant="ghost" onPress={onClearFilters} />
-          <NeuButton title={t("cancel")} variant="ghost" onPress={onClose} />
-        </View>
-      </View>
-    </Modal>
+    <NeuFormDrawer visible={visible} title={t("searchFilters")} onClose={onClose}>
+      {loading && !hasFacets ? (
+        <FilterPanelSkeleton />
+      ) : facets && hasFacets ? (
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
+        >
+          <FilterContent
+            facets={facets}
+            categoryIds={categoryIds}
+            brandIds={brandIds}
+            scaleIds={scaleIds}
+            seriesIds={seriesIds}
+            onToggleCategory={onToggleCategory}
+            onToggleBrand={onToggleBrand}
+            onToggleScale={onToggleScale}
+            onToggleSeries={onToggleSeries}
+            showBrands={showBrands}
+          />
+        </ScrollView>
+      ) : null}
+    </NeuFormDrawer>
   );
 }
 
 const styles = StyleSheet.create({
-  backdrop: {
+  scroll: {
     flex: 1,
-    justifyContent: "flex-end",
-    backgroundColor: "rgba(0,0,0,0.35)",
-  },
-  dismissArea: { flex: 1 },
-  sheet: {
-    maxHeight: "85%",
-    backgroundColor: colors.bg,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: spacing.lg,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl,
-    gap: spacing.sm,
-  },
-  title: {
-    ...neuText.modalTitle,
   },
   content: {
     gap: spacing.md,
     paddingBottom: spacing.md,
   },
-  loadingWrap: {
-    paddingVertical: spacing.xl,
-    alignItems: "center",
-  },
-  empty: {
-    color: colors.textSecondary,
-    textAlign: "center",
-    paddingVertical: spacing.lg,
-  },
   section: {
-    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   sectionTitle: {
-    ...neuText.body,
-    fontWeight: neuText.body.fontWeight,
+    fontSize: neuFontSize.fs11,
+    fontWeight: "400",
     color: colors.textSecondary,
     textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  chipRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.xs,
-  },
-  chip: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.card,
-    maxWidth: "100%",
-  },
-  chipLabel: {
-    ...neuText.bodySecondary,
-    fontWeight: "600",
-  },
-  chipLabelActive: {
-    color: "#fff",
-    fontWeight: neuText.body.fontWeight,
+    letterSpacing: neuFontSize.fs11 * 0.06,
+    marginBottom: spacing.sm,
   },
 });

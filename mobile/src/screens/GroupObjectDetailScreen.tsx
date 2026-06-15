@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   ScrollView,
@@ -18,12 +17,21 @@ import {
   resolveMediaUrl,
 } from "@minicollections/api";
 import { displayPurchasePriceFromObject } from "@minicollections/core";
-import ScreenHeader from "../components/ScreenHeader";
+import { Ionicons } from "@expo/vector-icons";
+import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
+import HeaderActionButton from "../components/HeaderActionButton";
+import ObjectDetailBackHeader from "../components/pageHeaders/ObjectDetailBackHeader";
 import NeuButton from "../components/NeuButton";
+import { HEADER_BAR_ICON_SIZE } from "../theme/headerBarStyle";
+import { useHeaderSlot } from "../hooks/useHeaderSlot";
 import NeuCard from "../components/NeuCard";
 import DetailImage from "../components/DetailImage";
 import EditUserObjectModal from "../components/EditUserObjectModal";
 import ImageViewerModal from "../components/ImageViewerModal";
+import {
+  ObjectDetailPageSkeleton,
+  RelatedModelCardSkeleton,
+} from "../components/skeleton";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { GroupsStackParamList } from "../navigation/types";
@@ -146,17 +154,6 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
     );
   };
 
-  const confirmDelete = () => {
-    Alert.alert(t("deleteModelTitle"), t("deleteModelContent"), [
-      { text: t("cancel"), style: "cancel" },
-      {
-        text: t("delete"),
-        style: "destructive",
-        onPress: () => void handleDelete(),
-      },
-    ]);
-  };
-
   const handleDelete = async () => {
     if (detail?.id == null) return;
     setDeleting(true);
@@ -173,10 +170,35 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
     }
   };
 
+  useHeaderSlot(
+    <ObjectDetailBackHeader
+      title={title}
+      onBack={() => navigation.goBack()}
+      rightActions={
+        detail ? (
+          <>
+            <HeaderActionButton
+              accessibilityLabel={t("editModel")}
+              onPress={() => setEditVisible(true)}
+              icon={
+                <Ionicons
+                  name="create-outline"
+                  size={HEADER_BAR_ICON_SIZE}
+                  color={colors.accent}
+                />
+              }
+            />
+            <ConfirmDeleteButton variant="header" onConfirm={handleDelete} />
+          </>
+        ) : null
+      }
+    />,
+    [detail, handleDelete, navigation, t, title],
+  );
+
   if (!authed) {
     return (
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
-        <ScreenHeader title={objectName ?? t("groups")} showBack />
+      <SafeAreaView style={styles.safe} edges={["left", "right", "bottom"]}>
         <View style={styles.centered}>
           <Text style={styles.guestText}>{t("signIn")}</Text>
           <NeuButton
@@ -189,26 +211,9 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
-      <ScreenHeader
-        title={title}
-        showBack
-        rightSlot={
-          detail ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setEditVisible(true)}
-              style={({ pressed }) => [styles.editBtn, neuControlStyle({ pressed })]}
-            >
-              <Text style={styles.editLabel}>{t("editModel")}</Text>
-            </Pressable>
-          ) : null
-        }
-      />
+    <SafeAreaView style={styles.safe} edges={["left", "right", "bottom"]}>
       {loading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.accent} />
-        </View>
+        <ObjectDetailPageSkeleton showRelatedModel />
       ) : error ? (
         <View style={styles.centered}>
           <Text style={styles.error}>{error}</Text>
@@ -238,7 +243,7 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
             <View style={styles.relatedBlock}>
               <Text style={styles.relatedLabel}>{t("brandModelLabel")}</Text>
               {loadingBrand ? (
-                <ActivityIndicator color={colors.accent} />
+                <RelatedModelCardSkeleton />
               ) : brandObject ? (
                 <Pressable onPress={openCatalogObject}>
                   <NeuCard
@@ -260,14 +265,6 @@ export default function GroupObjectDetailScreen({ route, navigation }: Props) {
             variant="ghost"
             onPress={() => void shareObject()}
             style={styles.shareBtn}
-          />
-
-          <NeuButton
-            title={t("delete")}
-            variant="danger"
-            loading={deleting}
-            onPress={confirmDelete}
-            style={styles.deleteBtn}
           />
         </ScrollView>
       )}

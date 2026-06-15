@@ -41,6 +41,26 @@ export const neuText = {
     fontWeight: neuFontWeight.regular,
     color: colors.textSecondary,
   },
+  headerLogo: {
+    fontFamily: neuFontFamily.regular,
+    fontSize: neuFontSize.fs20,
+    fontWeight: neuFontWeight.regular,
+    lineHeight: neuFontSize.fs20,
+  },
+  headerBarLabel: {
+    fontFamily: neuFontFamily.regular,
+    fontSize: neuFontSize.fs16,
+    fontWeight: neuFontWeight.regular,
+    lineHeight: neuFontSize.fs16,
+  },
+  headerSlotTitle: {
+    fontFamily: neuFontFamily.regular,
+    fontSize: neuFontSize.fs16,
+    fontWeight: neuFontWeight.regular,
+    lineHeight: neuFontSize.fs16,
+    color: colors.text,
+    textAlign: "center",
+  },
   screenHeaderTitle: {
     fontFamily: neuFontFamily.regular,
     fontSize: neuFontSize.fs16,

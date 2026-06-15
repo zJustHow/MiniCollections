@@ -10,6 +10,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import {
   adminCreateBrandObject,
+  adminUpdateBrandObject,
   getCategories,
   getScales,
   getSeriesByBrandId,
@@ -25,11 +26,26 @@ import { pickLocalizedField } from "../utils/displayLocale";
 import { colors, spacing } from "@minicollections/theme";
 import { neuText } from "../theme/neuText";
 
+type BrandObjectRecord = Record<string, unknown> & {
+  id: number | string;
+  name_en?: string | null;
+  name_zh?: string | null;
+  scale_id?: number | string | null;
+  category_id?: number | string | null;
+  series_id?: number | string | null;
+  release_date?: string | null;
+  release_price_cny?: number | string | null;
+  release_price_usd?: number | string | null;
+  image_url?: string | null;
+  image_source?: string | null;
+};
+
 type BrandObjectModalProps = {
   visible: boolean;
   brandId: string;
+  object?: BrandObjectRecord | null;
   onClose: () => void;
-  onCreated: () => void;
+  onSuccess: () => void;
 };
 
 type PickedImage = {
@@ -50,10 +66,12 @@ function pickSeriesName(row: SeriesRow, locale: string) {
 export default function BrandObjectModal({
   visible,
   brandId,
+  object = null,
   onClose,
-  onCreated,
+  onSuccess,
 }: BrandObjectModalProps) {
   const { t, locale } = useLocale();
+  const isEdit = object != null;
   const [nameEn, setNameEn] = useState("");
   const [nameZh, setNameZh] = useState("");
   const [scaleId, setScaleId] = useState<string | null>(null);
@@ -73,17 +91,33 @@ export default function BrandObjectModal({
 
   useEffect(() => {
     if (!visible) return;
-    setNameEn("");
-    setNameZh("");
-    setScaleId(null);
-    setCategoryId(null);
-    setSeriesId(null);
-    setReleaseDate("");
-    setReleasePriceCny("");
-    setReleasePriceUsd("");
-    setImageSource("");
+    setNameEn(
+      typeof object?.name_en === "string"
+        ? object.name_en
+        : typeof object?.name === "string"
+          ? object.name
+          : "",
+    );
+    setNameZh(typeof object?.name_zh === "string" ? object.name_zh : "");
+    setScaleId(object?.scale_id != null ? String(object.scale_id) : null);
+    setCategoryId(object?.category_id != null ? String(object.category_id) : null);
+    setSeriesId(object?.series_id != null ? String(object.series_id) : null);
+    setReleaseDate(
+      typeof object?.release_date === "string" ? object.release_date : "",
+    );
+    setReleasePriceCny(
+      object?.release_price_cny != null ? String(object.release_price_cny) : "",
+    );
+    setReleasePriceUsd(
+      object?.release_price_usd != null ? String(object.release_price_usd) : "",
+    );
+    setImageSource(
+      typeof object?.image_source === "string" ? object.image_source : "",
+    );
+    setUploadedUrl(
+      typeof object?.image_url === "string" ? object.image_url : null,
+    );
     setPickedImage(null);
-    setUploadedUrl(null);
     setError(null);
 
     void Promise.all([getScales(), getCategories(), getSeriesByBrandId(brandId)])
@@ -114,7 +148,7 @@ export default function BrandObjectModal({
         setCategoryOptions([]);
         setSeriesOptions([]);
       });
-  }, [brandId, locale, visible]);
+  }, [brandId, locale, object, visible]);
 
   const handleClose = () => {
     onClose();
@@ -148,7 +182,7 @@ export default function BrandObjectModal({
     [pickedImage, uploadedUrl],
   );
 
-  const handleCreate = async () => {
+  const handleSubmit = async () => {
     const trimmedEn = nameEn.trim();
     if (!trimmedEn) {
       setError(t("nameRequired"));
@@ -164,7 +198,7 @@ export default function BrandObjectModal({
         setUploadedUrl(imageUrl);
       }
 
-      await adminCreateBrandObject(brandId, {
+      const payload = {
         name_en: trimmedEn,
         name_zh: nameZh.trim() || null,
         image_url: imageUrl ?? null,
@@ -175,12 +209,24 @@ export default function BrandObjectModal({
         release_date: releaseDate.trim() || null,
         release_price_cny: releasePriceCny.trim() ? Number(releasePriceCny) : null,
         release_price_usd: releasePriceUsd.trim() ? Number(releasePriceUsd) : null,
-      });
+      };
 
-      onCreated();
+      if (isEdit && object?.id != null) {
+        await adminUpdateBrandObject(object.id, payload);
+      } else {
+        await adminCreateBrandObject(brandId, payload);
+      }
+
+      onSuccess();
       handleClose();
     } catch (err) {
-      setError(err instanceof Error ? err.message : t("failedToCreateBrandObject"));
+      setError(
+        err instanceof Error
+          ? err.message
+          : isEdit
+            ? t("failedToUpdateBrandObject")
+            : t("failedToCreateBrandObject"),
+      );
     } finally {
       setSubmitting(false);
     }
@@ -191,7 +237,9 @@ export default function BrandObjectModal({
       <View style={styles.backdrop}>
         <Pressable style={styles.dismissArea} onPress={handleClose} />
         <View style={styles.sheet}>
-          <Text style={styles.title}>{t("addBrandObject")}</Text>
+          <Text style={styles.title}>
+            {isEdit ? t("editModel") : t("addBrandObject")}
+          </Text>
           <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
             <NeuInput label={t("nameEn")} value={nameEn} onChangeText={setNameEn} />
             <NeuInput label={t("nameZh")} value={nameZh} onChangeText={setNameZh} />
@@ -248,9 +296,9 @@ export default function BrandObjectModal({
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
             <NeuButton
-              title={t("addBrandObject")}
+              title={isEdit ? t("edit") : t("addBrandObject")}
               loading={submitting}
-              onPress={() => void handleCreate()}
+              onPress={() => void handleSubmit()}
               style={styles.submit}
             />
             <NeuButton title={t("cancel")} variant="ghost" onPress={handleClose} />

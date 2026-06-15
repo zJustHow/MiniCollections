@@ -57,7 +57,10 @@ export default function NeuCard({
         {subtitle ?? ""}
       </Text>
       <Text
-        style={[styles.name, isObject && styles.objectName]}
+        style={[
+          styles.name,
+          { minHeight: neuText.nameplateTitle.lineHeight * (isObject ? 2 : 1) },
+        ]}
         numberOfLines={isObject ? 2 : 1}
       >
         {displayName}
@@ -83,10 +86,5 @@ const styles = StyleSheet.create({
   },
   name: {
     ...neuText.nameplateTitle,
-    minHeight: neuText.nameplateTitle.lineHeight,
-  },
-  objectName: {
-    ...neuText.cardRowName,
-    minHeight: 32,
   },
 });

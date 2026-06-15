@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Pressable,
   ScrollView,
@@ -11,13 +10,20 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { CommonActions } from "@react-navigation/native";
-import { getBrandObjectById, recordModelView, resolveMediaUrl } from "@minicollections/api";
+import { adminDeleteBrandObject, getBrandObjectById, recordModelView, resolveMediaUrl } from "@minicollections/api";
 import { formatReleasePrice, formatViewCount } from "@minicollections/core";
-import ScreenHeader from "../components/ScreenHeader";
+import { Ionicons } from "@expo/vector-icons";
+import BrandObjectModal from "../components/BrandObjectModal";
+import ConfirmDeleteButton from "../components/ConfirmDeleteButton";
+import HeaderActionButton from "../components/HeaderActionButton";
+import ObjectDetailBackHeader from "../components/pageHeaders/ObjectDetailBackHeader";
 import NeuButton from "../components/NeuButton";
+import { HEADER_BAR_ICON_SIZE } from "../theme/headerBarStyle";
+import { useHeaderSlot } from "../hooks/useHeaderSlot";
 import DetailImage from "../components/DetailImage";
 import AddToGroupModal from "../components/AddToGroupModal";
 import ImageViewerModal from "../components/ImageViewerModal";
+import { ObjectDetailPageSkeleton } from "../components/skeleton";
 import { useLocale } from "../providers/LocaleProvider";
 import { useAuth } from "../providers/AuthProvider";
 import type { BrandsStackParamList } from "../navigation/types";
@@ -76,6 +82,7 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [addSheetVisible, setAddSheetVisible] = useState(false);
   const [imageViewerVisible, setImageViewerVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -157,13 +164,48 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
     }
   }, [brandId, objectId, title]);
 
+  const handleAdminDelete = useCallback(async () => {
+    if (detail?.id == null) return;
+    try {
+      await adminDeleteBrandObject(detail.id);
+      navigation.goBack();
+    } catch (err) {
+      Alert.alert(
+        err instanceof Error ? err.message : t("failedToDeleteBrandObject"),
+      );
+    }
+  }, [detail?.id, navigation, t]);
+
+  useHeaderSlot(
+    <ObjectDetailBackHeader
+      title={title}
+      onBack={() => navigation.goBack()}
+      rightActions={
+        isAdmin && detail ? (
+          <>
+            <HeaderActionButton
+              accessibilityLabel={t("editModel")}
+              onPress={() => setEditModalVisible(true)}
+              icon={
+                <Ionicons
+                  name="create-outline"
+                  size={HEADER_BAR_ICON_SIZE}
+                  color={colors.accent}
+                />
+              }
+            />
+            <ConfirmDeleteButton variant="header" onConfirm={handleAdminDelete} />
+          </>
+        ) : null
+      }
+    />,
+    [detail, handleAdminDelete, isAdmin, navigation, t, title],
+  );
+
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right", "bottom"]}>
-      <ScreenHeader title={title} showBack />
+    <SafeAreaView style={styles.safe} edges={["left", "right", "bottom"]}>
       {loading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={colors.accent} />
-        </View>
+        <ObjectDetailPageSkeleton showFollowOn />
       ) : error ? (
         <View style={styles.centered}>
           <Text style={styles.error}>{error}</Text>
@@ -253,6 +295,16 @@ export default function BrandObjectDetailScreen({ route, navigation }: Props) {
         imageUri={imageUri}
         onClose={() => setImageViewerVisible(false)}
       />
+
+      {isAdmin && detail ? (
+        <BrandObjectModal
+          visible={editModalVisible}
+          brandId={brandId}
+          object={detail as Record<string, unknown> & { id: number | string }}
+          onClose={() => setEditModalVisible(false)}
+          onSuccess={() => void load()}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

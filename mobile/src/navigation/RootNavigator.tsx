@@ -1,5 +1,5 @@
 import React from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../providers/AuthProvider";
@@ -10,6 +10,7 @@ import MainTabNavigator from "./MainTabNavigator";
 import type { RootStackParamList } from "./types";
 import { linking } from "./linking";
 import { colors } from "@minicollections/theme";
+import { SplashLoaderSkeleton } from "../components/skeleton";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -19,7 +20,7 @@ export default function RootNavigator() {
   if (loading) {
     return (
       <View style={styles.boot}>
-        <ActivityIndicator size="large" color={colors.accent} />
+        <SplashLoaderSkeleton />
       </View>
     );
   }

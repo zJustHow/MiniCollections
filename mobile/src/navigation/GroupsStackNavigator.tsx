@@ -4,18 +4,15 @@ import GroupsScreen from "../screens/GroupsScreen";
 import GroupObjectsScreen from "../screens/GroupObjectsScreen";
 import GroupObjectDetailScreen from "../screens/GroupObjectDetailScreen";
 import type { GroupsStackParamList } from "./types";
-import { colors } from "@minicollections/theme";
+import { useTabStackScreenOptions } from "./useTabStackScreenOptions";
 
 const Stack = createNativeStackNavigator<GroupsStackParamList>();
 
 export default function GroupsStackNavigator() {
+  const screenOptions = useTabStackScreenOptions();
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: colors.bg },
-      }}
-    >
+    <Stack.Navigator screenOptions={screenOptions}>
       <Stack.Screen name="GroupsList" component={GroupsScreen} />
       <Stack.Screen name="GroupObjects" component={GroupObjectsScreen} />
       <Stack.Screen name="GroupObjectDetail" component={GroupObjectDetailScreen} />

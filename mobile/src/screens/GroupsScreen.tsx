@@ -12,22 +12,25 @@ import {
 } from "@minicollections/api";
 import NeuCard from "../components/NeuCard";
 import NeuButton from "../components/NeuButton";
-import ScreenHeader from "../components/ScreenHeader";
 import ListSearchField from "../components/ListSearchField";
+import ListSearchSummary from "../components/ListSearchSummary";
 import SortableInfiniteBrowseSection from "../components/SortableInfiniteBrowseSection";
 import CreateGroupModal from "../components/CreateGroupModal";
 import EditGroupModal from "../components/EditGroupModal";
 import {
-  ListFooterSpinner,
+  ListFooterSkeleton,
   ListStateBoundary,
   listRefreshControl,
 } from "../components/ListStateViews";
+import { NeuCardSkeleton } from "../components/skeleton";
+import { INITIAL_SKELETON_ITEMS, isSkeletonItem } from "../utils/skeletonUtils";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import type { GroupsStackParamList } from "../navigation/types";
 import { openLogin } from "../navigation/openLogin";
 import { isAddCardItem, withAddCardSlot } from "../utils/listPageUtils";
 import { colors, neuControlStyle, spacing } from "@minicollections/theme";
+import { LIST_SEARCH_CONTROL_HEIGHT } from "../theme/listSearchStyle";
 import { neuText } from "../theme/neuText";
 
 type Props = NativeStackScreenProps<GroupsStackParamList, "GroupsList">;
@@ -110,6 +113,14 @@ export default function GroupsScreen({ navigation }: Props) {
     displayItems as GroupsListItem[],
     !searchActive,
   );
+  const showInitialSkeleton = activeList.loading && groups.length === 0;
+  const listData = useMemo(
+    () =>
+      showInitialSkeleton
+        ? (INITIAL_SKELETON_ITEMS as GroupsListItem[])
+        : groups,
+    [showInitialSkeleton, groups],
+  );
 
   const runSearch = useCallback(() => {
     setSearchKeyword(draftQuery.trim());
@@ -139,49 +150,47 @@ export default function GroupsScreen({ navigation }: Props) {
   const listHeader = useMemo(
     () => (
       <View>
-        <ScreenHeader
-          title={t("groups")}
-          rightSlot={
-            !searchActive && browseList.sortEnabled ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t("sortOrder")}
-                onPress={toggleReorderMode}
-                style={({ pressed }) => [
-                  styles.headerBtn,
-                  neuControlStyle({
-                    variant: reorderMode ? "primary" : "default",
-                    pressed,
-                  }),
-                ]}
-              >
-                <Ionicons
-                  name="reorder-three"
-                  size={22}
-                  color={reorderMode ? "#fff" : colors.accent}
-                />
-              </Pressable>
-            ) : null
-          }
-        />
-        <ListSearchField
-          value={draftQuery}
-          onChangeText={setDraftQuery}
-          onSubmit={runSearch}
-          onClear={searchActive || draftQuery ? clearSearch : undefined}
-          placeholder={t("searchGroups")}
-        />
+        <View style={styles.searchRow}>
+          <ListSearchField
+            embedded
+            value={draftQuery}
+            onChangeText={setDraftQuery}
+            onSubmit={runSearch}
+            onClear={searchActive || draftQuery ? clearSearch : undefined}
+            placeholder={t("searchGroups")}
+          />
+          {!searchActive && browseList.sortEnabled ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("sortOrder")}
+              onPress={toggleReorderMode}
+              style={({ pressed }) => [
+                styles.headerBtn,
+                neuControlStyle({
+                  variant: reorderMode ? "primary" : "default",
+                  pressed,
+                }),
+              ]}
+            >
+              <Ionicons
+                name="reorder-three"
+                size={22}
+                color={reorderMode ? "#fff" : colors.accent}
+              />
+            </Pressable>
+          ) : null}
+        </View>
         {reorderMode ? (
           <Text style={styles.reorderHint}>{t("sortOrder")}</Text>
         ) : null}
         {searchActive ? (
           !(activeList.loading && groups.length === 0) ? (
-            <Text style={styles.searchHint}>
-              {t("searchResultsSummary", {
+            <ListSearchSummary
+              summary={t("searchResultsSummary", {
                 count: activeList.totalElements,
                 query: searchKeyword,
               })}
-            </Text>
+            />
           ) : null
         ) : null}
       </View>
@@ -213,14 +222,13 @@ export default function GroupsScreen({ navigation }: Props) {
   );
 
   const listFooter = useMemo(
-    () => <ListFooterSpinner visible={activeList.loadingMore} />,
+    () => <ListFooterSkeleton visible={activeList.loadingMore} variant="catalog" />,
     [activeList.loadingMore],
   );
 
   if (!authed) {
     return (
-      <SafeAreaView style={styles.guest} edges={["top", "left", "right"]}>
-        <ScreenHeader title={t("groups")} />
+      <SafeAreaView style={styles.guest} edges={["left", "right"]}>
         <View style={styles.guestBody}>
           <Text style={styles.guestText}>{t("signIn")}</Text>
           <NeuButton
@@ -235,7 +243,8 @@ export default function GroupsScreen({ navigation }: Props) {
   return (
     <>
       <ListStateBoundary
-        loading={activeList.loading && groups.length === 0}
+        loading={showInitialSkeleton}
+        inlineSkeleton
         errorMessage={
           activeList.loadError && groups.length === 0
             ? t("failedToLoadGroups")
@@ -244,16 +253,18 @@ export default function GroupsScreen({ navigation }: Props) {
         retryLabel={t("retry")}
         onRetry={() => void activeList.retry()}
       >
-        <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+        <SafeAreaView style={styles.safe} edges={["left", "right"]}>
           <SortableInfiniteBrowseSection
-            data={groups}
+            data={listData}
             reorderMode={reorderMode}
             sortEnabled={browseList.sortEnabled}
             reordering={browseList.reordering}
             onMoveItem={browseList.handleDragEnd}
             moveFailedLabel={t("failedToReorder")}
             renderCard={(item) =>
-              isAddCardItem(item) ? (
+              isSkeletonItem(item) ? (
+                <NeuCardSkeleton variant={searchActive ? "object" : "catalog"} />
+              ) : isAddCardItem(item) ? (
                 <NeuCard
                   add
                   name={t("addGroup")}
@@ -351,19 +362,19 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: "center",
   },
+  searchRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
   headerBtn: {
-    width: 36,
-    height: 36,
+    width: LIST_SEARCH_CONTROL_HEIGHT,
+    height: LIST_SEARCH_CONTROL_HEIGHT,
     alignItems: "center",
     justifyContent: "center",
   },
   reorderHint: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    paddingHorizontal: spacing.md,
-    paddingBottom: spacing.sm,
-  },
-  searchHint: {
     color: colors.textSecondary,
     fontSize: 13,
     paddingHorizontal: spacing.md,

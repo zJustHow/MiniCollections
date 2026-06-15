@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,9 +8,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { getCollectionStats } from "@minicollections/api";
-import ScreenHeader from "../components/ScreenHeader";
 import StatsBarChart from "../components/StatsBarChart";
 import NeuButton from "../components/NeuButton";
+import { StatsPageSkeleton } from "../components/skeleton";
 import { useAuth } from "../providers/AuthProvider";
 import { useLocale } from "../providers/LocaleProvider";
 import { openLogin } from "../navigation/openLogin";
@@ -99,8 +98,7 @@ export default function StatsScreen() {
 
   if (!authed) {
     return (
-      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-        <ScreenHeader title={t("stats")} />
+      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
         <View style={styles.centered}>
           <Text style={styles.guest}>{t("signIn")}</Text>
           <NeuButton
@@ -114,8 +112,8 @@ export default function StatsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.accent} />
+      <SafeAreaView style={styles.safe} edges={["left", "right"]}>
+        <StatsPageSkeleton />
       </SafeAreaView>
     );
   }
@@ -130,9 +128,8 @@ export default function StatsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
+    <SafeAreaView style={styles.safe} edges={["left", "right"]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <ScreenHeader title={t("collectionStats")} />
         <Text style={styles.summary}>
           {t("statsTotalObjects")}: {totalObjects}
         </Text>
