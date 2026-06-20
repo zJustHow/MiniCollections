@@ -28,8 +28,6 @@ scripts/
 .env
 .env.*
 !.env.example
-deploy/aws/rds.env
-deploy/aws/app-secrets.json
 
 # Python virtual environments
 .venv/
@@ -93,7 +91,3 @@ backend/src/main/resources/public/
 
 # Claude Code
 .claude/
-
-# AWS CDK
-deploy/cdk/cdk.out/
-deploy/cdk/target/

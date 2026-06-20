@@ -31,7 +31,7 @@ class BrandElasticsearchQueryServiceTest {
     void setUp() {
         queryService = new BrandElasticsearchQueryService(
                 elasticsearchOperations,
-                new SearchQuerySupport(false));
+                new SearchQuerySupport());
     }
 
     @Test

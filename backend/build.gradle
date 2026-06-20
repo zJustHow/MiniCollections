@@ -47,7 +47,6 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.testcontainers:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    implementation 'org.opensearch.client:spring-data-opensearch-starter:1.8.2'
 }
 
 tasks.named('test') {

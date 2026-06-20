@@ -142,11 +142,6 @@ twilio:
     from-number: ${TWILIO_FROM_NUMBER:}
 
 app:
-  bootstrap:
-    admin-email: ${ADMIN_EMAIL:}
-    admin-password: ${ADMIN_PASSWORD:}
-    admin-name: ${ADMIN_NAME:Admin}
-    admin-locale: ${ADMIN_LOCALE:en-US}
   limits:
     max-groups-per-user: ${MAX_GROUPS_PER_USER:100}
     max-objects-per-group: ${MAX_OBJECTS_PER_GROUP:5000}
@@ -207,52 +202,3 @@ logging:
     org.apache.coyote.http11.Http11InputBuffer: TRACE
     org.springframework.jdbc.datasource.init: DEBUG
     org.springframework.jdbc.core: DEBUG
----
-
----
-
-# Non-prod: keep Elasticsearch 8 client for local Docker; disable OpenSearch auto-config.
-spring:
-  config:
-    activate:
-      on-profile: "!prod"
-  autoconfigure:
-    exclude:
-      - org.opensearch.spring.boot.autoconfigure.OpenSearchClientAutoConfiguration
-      - org.opensearch.spring.boot.autoconfigure.OpenSearchRestClientAutoConfiguration
-      - org.opensearch.spring.boot.autoconfigure.OpenSearchRestHighLevelClientAutoConfiguration
-      - org.opensearch.spring.boot.autoconfigure.ReactiveOpenSearchClientAutoConfiguration
-      - org.opensearch.spring.boot.autoconfigure.data.OpenSearchDataAutoConfiguration
-      - org.opensearch.spring.boot.autoconfigure.data.ReactiveOpenSearchRepositoriesAutoConfiguration
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: prod
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
-      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchClientAutoConfiguration
-      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
-  sql:
-    init:
-      mode: never
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    locations: classpath:db/migration
-opensearch:
-  uris: ${ELASTICSEARCH_URIS}
-  username: ${ELASTICSEARCH_USERNAME:}
-  password: ${ELASTICSEARCH_PASSWORD:}
-app:
-  s3:
-    # In production, set S3_PUBLIC_BASE_URL to your CDN or public MinIO URL (required — no localhost default).
-    public-base-url: ${S3_PUBLIC_BASE_URL}
-logging:
-  level:
-    root: INFO
-    org.springframework: WARN
-    org.hibernate: WARN

@@ -1,5 +1,6 @@
 package com.zjusthow.minicollections.elasticsearch;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import com.zjusthow.minicollections.model.BrandObjectSearchFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,18 +91,6 @@ public class BrandObjectElasticsearchQueryService {
         }
     }
 
-    /** @deprecated use {@link #searchFacets(String, BrandObjectSearchFilter)} */
-    public EsCategoryFacetsResult categoryFacets(String keyword, Long brandId) {
-        BrandObjectSearchFilter filter = brandId == null
-                ? BrandObjectSearchFilter.global(null, null, null, null)
-                : BrandObjectSearchFilter.withinBrand(brandId, null, null, null);
-        EsSearchFacetsResult result = searchFacets(keyword, filter);
-        List<EsCategoryFacetBucket> categories = result.categories().stream()
-                .map(b -> new EsCategoryFacetBucket(b.id(), b.count()))
-                .toList();
-        return new EsCategoryFacetsResult(result.total(), categories);
-    }
-
     private long countTotal(String q, BrandObjectSearchFilter filter) {
         var query = searchQuerySupport.countQuery(buildSearchQuery(q, filter), MAX_RESULT_WINDOW);
         SearchHits<BrandObjectDocument> hits =
@@ -160,11 +149,13 @@ public class BrandObjectElasticsearchQueryService {
     private static final List<String> BRAND_OBJECT_SCOPED_SEARCH_FIELDS = List.of(
             "name_en^2", "name_zh^2", "series_en", "series_zh", "category_en", "category_zh", "scale");
 
-    private Object buildSearchQuery(String q, BrandObjectSearchFilter filter) {
+    private Query buildSearchQuery(
+            String q,
+            BrandObjectSearchFilter filter) {
         if (!filter.hasUserFilters() && filter.scopeBrandId() == null) {
-            return searchQuerySupport.multiMatchWithCompactFallback(q, BRAND_OBJECT_SEARCH_FIELDS);
+            return ElasticsearchSearchQueries.multiMatchWithCompactFallback(q, BRAND_OBJECT_SEARCH_FIELDS);
         }
-        return searchQuerySupport.boolMustWithBrandObjectFilters(q, mustFields(filter), filter);
+        return searchQuerySupport.boolMustWithFilters(q, mustFields(filter), filter);
     }
 
     private List<String> mustFields(BrandObjectSearchFilter filter) {

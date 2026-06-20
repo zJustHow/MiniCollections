@@ -32,7 +32,7 @@ class BrandObjectElasticsearchQueryServiceTest {
     void setUp() {
         queryService = new BrandObjectElasticsearchQueryService(
                 elasticsearchOperations,
-                new SearchQuerySupport(false));
+                new SearchQuerySupport());
     }
 
     private static final BrandObjectSearchFilter NO_FILTER =

@@ -1,5 +1,0 @@
-cdk.out/
-target/
-*.iml
-.idea/
-cdk.local.json

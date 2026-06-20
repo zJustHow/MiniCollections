@@ -1,5 +1,6 @@
 package com.zjusthow.minicollections.elasticsearch;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -63,8 +64,8 @@ public class BrandElasticsearchQueryService {
     private static final List<String> BRAND_SEARCH_FIELDS = List.of(
             "name_en^2", "name_zh^2", "abbreviation^3");
 
-    private Object buildSearchQuery(String q) {
-        return searchQuerySupport.multiMatchWithCompactFallback(q, BRAND_SEARCH_FIELDS);
+    private Query buildSearchQuery(String q) {
+        return ElasticsearchSearchQueries.multiMatchWithCompactFallback(q, BRAND_SEARCH_FIELDS);
     }
 
     private EsSearchPageResult countOnly(String q) {

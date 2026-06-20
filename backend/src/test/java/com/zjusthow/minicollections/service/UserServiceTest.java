@@ -161,42 +161,6 @@ class UserServiceTest {
     }
 
     @Test
-    void tryBootstrapAdmin_isIdempotentWhenAdminExists() {
-        when(jdbc.queryForObject(
-                "SELECT COUNT(*) > 0 FROM authorities WHERE authority = 'ROLE_ADMIN'",
-                Boolean.class)).thenReturn(true);
-
-        assertFalse(userService.tryBootstrapAdmin("admin@example.com", "pw", "Admin", "en-US"));
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void tryBootstrapAdmin_signsUpAndGrantsAdminWhenMissing() {
-        when(jdbc.queryForObject(
-                "SELECT COUNT(*) > 0 FROM authorities WHERE authority = 'ROLE_ADMIN'",
-                Boolean.class)).thenReturn(false);
-        when(identifierRepository.findByTypeAndIdentifier("email", "admin@example.com"))
-                .thenReturn(Optional.empty());
-        when(identifierRepository.existsByTypeAndIdentifier("email", "admin@example.com"))
-                .thenReturn(false);
-        when(passwordEncoder.encode("secret")).thenReturn("hash");
-        when(userRepository.save(any())).thenAnswer(invocation -> {
-            UserEntity saved = invocation.getArgument(0);
-            return new UserEntity(9L, saved.displayName(), saved.password(), saved.enabled(),
-                    saved.preferredLocale(), saved.avatarUrl());
-        });
-        when(userRepository.findById(9L)).thenReturn(Optional.of(
-                new UserEntity(9L, "Admin", "hash", true, "en-US", null)));
-
-        assertTrue(userService.tryBootstrapAdmin("admin@example.com", "secret", "Admin", "en-US"));
-
-        verify(jdbc).update(
-                eq("INSERT INTO authorities (user_id, authority) VALUES (?, ?) ON CONFLICT DO NOTHING"),
-                eq(9L),
-                eq("ROLE_ADMIN"));
-    }
-
-    @Test
     void revokeAdminRole_blocksLastAdminRemoval() {
         UserEntity admin = new UserEntity(1L, "Admin", "hash", true, "en-US", null);
         when(userRepository.findById(1L)).thenReturn(Optional.of(admin));

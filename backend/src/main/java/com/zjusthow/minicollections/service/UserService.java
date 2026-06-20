@@ -274,37 +274,6 @@ public class UserService {
         return getProfile(userId);
     }
 
-    /**
-     * Creates or promotes the bootstrap admin when none exists. Idempotent once any admin is present.
-     *
-     * @return true if an admin account was ensured
-     */
-    @Transactional
-    public boolean tryBootstrapAdmin(String email, String password, String name, String preferredLocale) {
-        if (hasAnyAdmin()) {
-            return false;
-        }
-        if (email == null || email.isBlank()) {
-            return false;
-        }
-
-        final String normalizedEmail = email.toLowerCase().strip();
-        Long userId = identifierRepository.findByTypeAndIdentifier("email", normalizedEmail)
-                .map(UserIdentifierEntity::userId)
-                .orElse(null);
-
-        if (userId == null) {
-            if (password == null || password.isBlank()) {
-                return false;
-            }
-            String displayName = (name != null && !name.isBlank()) ? name.strip() : "Admin";
-            userId = signUp(normalizedEmail, null, password, displayName, preferredLocale);
-        }
-
-        grantAdminRole(userId);
-        return true;
-    }
-
     @Transactional
     @CacheEvict(value = "userDetails", key = "#userId")
     public void grantAdminRole(Long userId) {
